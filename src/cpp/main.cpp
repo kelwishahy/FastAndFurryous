@@ -6,6 +6,9 @@
 #include <chrono>
 #include <iostream>
 
+//internal
+#include "hpp/world_system.hpp"
+
 using Clock = std::chrono::high_resolution_clock;
 
 // Triangle NDC
@@ -19,6 +22,7 @@ int main() {
 	std::cout << "Starting The Fast and the Furryous" << std::endl;
 	// TO-DO:
 	// Global systems
+	WorldSystem world;
 
 	// Initialize game systems
 	RenderSystem renderer = RenderSystem::RenderSystem();
