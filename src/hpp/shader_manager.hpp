@@ -1,9 +1,12 @@
 #pragma once
 
-#include <hpp/common.hpp>
+#include <../ext/project_path.hpp>
+#include <hpp/components.hpp>
 
 #include <string>
 #include <array>
+
+#include "glad/glad.h"
 
 
 class ShaderManager {

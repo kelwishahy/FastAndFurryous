@@ -1,6 +1,11 @@
+#include <iostream>
+
 #include <hpp/render_system.hpp>
 #include <hpp/shader_manager.hpp>
 #include <hpp/texture_manager.hpp>
+
+#include <hpp/common.hpp>
+#include <hpp/components.hpp>
 
 using namespace glm;
 
@@ -94,18 +99,18 @@ void RenderSystem::initRenderData() {
 	texturedVertices[1].position = { +1.f / 2, +1.f / 2, 0.f };
 	texturedVertices[2].position = { +1.f / 2, -1.f / 2, 0.f };
 	texturedVertices[3].position = { -1.f / 2, -1.f / 2, 0.f };
-	texturedVertices[0].texcoord = { 0.f, 1.f };
-	texturedVertices[1].texcoord = { 1.f, 1.f };
-	texturedVertices[2].texcoord = { 1.f, 0.f };
-	texturedVertices[3].texcoord = { 0.f, 0.f };
+	texturedVertices[0].texCoord= { 0.f, 1.f };
+	texturedVertices[1].texCoord = { 1.f, 1.f };
+	texturedVertices[2].texCoord = { 1.f, 0.f };
+	texturedVertices[3].texCoord = { 0.f, 0.f };
 
 	const std::vector<uint16_t> texturedIndices = { 0, 3, 1, 1, 3, 2 };
-	bindVBOandIBO(OBJECT_BUFFER_IDS::CAT, texturedVertices, texturedIndices);
+	bindVBOandIBO(GEOMETRY_BUFFER_IDS::CAT, texturedVertices, texturedIndices);
 
 }
 
 template <class T>
-void RenderSystem::bindVBOandIBO(OBJECT_BUFFER_IDS oid, std::vector<T> vertices, std::vector<uint16_t> indices) {
+void RenderSystem::bindVBOandIBO(GEOMETRY_BUFFER_IDS oid, std::vector<T> vertices, std::vector<uint16_t> indices) {
 	// Vertex buffer
 	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffers[(uint)oid]);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices[0]) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
