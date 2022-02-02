@@ -33,7 +33,11 @@ void PhysicsSystem::step(float elapsed_ms)
 	auto& motion_registry = registry.motions;
 	for(uint i = 0; i< motion_registry.size(); i++)
 	{
-		//TODO do stuff with the motion componenets
+		//from A1
+		Motion & motion = motion_registry.components[i];
+		Entity entity = motion_registry.entities[i];
+		float step_seconds = elapsed_ms / 1000.f;
+		motion.position = motion.position += motion.velocity * step_seconds;
 	}
 
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
