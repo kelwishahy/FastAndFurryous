@@ -30,16 +30,20 @@ public:
 	// Releases all associated resources
 	~WorldSystem();
 
+	void init();
+
 	// Steps the game ahead by ms milliseconds
 	bool step(float elapsed_ms);
 
 	// Should the game be over ?
 	bool is_over()const;
-private:
+
 	// Input callback functions
 	void on_key(int key, int, int action, int mod);
 	void on_mouse_move(vec2 pos);
 
+	Entity player_cat;
+private:
 	// restart level it was in the private 
 	void restart_game();
 
@@ -48,6 +52,4 @@ private:
 
 	// OpenGL window handle
 	//GLFWwindow* window;
-
-	Entity player_cat;
 };
