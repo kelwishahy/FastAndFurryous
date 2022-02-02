@@ -2,6 +2,8 @@
 #include "../hpp/physics_system.hpp"
 #include "../hpp/world_init.hpp"
 
+using namespace glm;
+
 // Returns the local bounding coordinates scaled by the current size of the entity
 vec2 get_bounding_box(const Motion& motion)
 {

@@ -1,7 +1,13 @@
 #include "hpp/texture_manager.hpp"
+#include <hpp/components.hpp>
+
 #include "../ext/stb_image/stb_image.h"
+#include "glad/glad.h"
 
 #include <string>
+
+#include <hpp/common.hpp>
+
 
 void TextureManager::loadTextures(
 	const std::array<std::string, textureCount>& texturePaths,

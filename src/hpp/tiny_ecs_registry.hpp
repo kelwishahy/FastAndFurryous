@@ -15,7 +15,7 @@ public:
 	ComponentContainer<Motion> motions;
 	ComponentContainer<Collision> collisions;
 	ComponentContainer<Mesh*> meshPtrs;
-	ComponentContainer<vec3> colors;
+	ComponentContainer<glm::vec3> colors;
 	ComponentContainer<DebugComponent> debugComponents;
 	ComponentContainer<RenderRequest> renderRequests;
 	ComponentContainer<SolidTerrain> terrains;
