@@ -1,9 +1,6 @@
 #include "../hpp/components.hpp"
 #include "../hpp/render_system.hpp" // for gl_has_errors
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "../ext/stb_image/stb_image.h"
-
 // stlib
 #include <iostream>
 #include <sstream>
@@ -13,7 +10,7 @@ float death_timer_counter_ms = 3000;
 
 // Very, VERY simple OBJ loader from https://github.com/opengl-tutorials/ogl tutorial 7
 // (modified to also read vertex color and omit uv and normals)
-bool Mesh::loadFromOBJFile(std::string obj_path, std::vector<ColoredVertex>& out_vertices, std::vector<uint16_t>& out_vertex_indices, vec2& out_size)
+bool Mesh::loadFromOBJFile(std::string obj_path, std::vector<ColoredVertex>& out_vertices, std::vector<uint16_t>& out_vertex_indices, glm::vec2& out_size)
 {
 	// disable warnings about fscanf and fopen on Windows
 #ifdef _MSC_VER
@@ -100,8 +97,8 @@ bool Mesh::loadFromOBJFile(std::string obj_path, std::vector<ColoredVertex>& out
 	fclose(file);
 
 	// Compute bounds of the mesh
-	vec3 max_position = { -99999,-99999,-99999 };
-	vec3 min_position = { 99999,99999,99999 };
+	glm::vec3 max_position = { -99999,-99999,-99999 };
+	glm::vec3 min_position = { 99999,99999,99999 };
 	for (ColoredVertex& pos : out_vertices)
 	{
 		max_position = glm::max(max_position, pos.position);
@@ -110,12 +107,12 @@ bool Mesh::loadFromOBJFile(std::string obj_path, std::vector<ColoredVertex>& out
 	if(abs(max_position.z - min_position.z)<0.001)
 		max_position.z = min_position.z+1; // don't scale z direction when everythin is on one plane
 
-	vec3 size3d = max_position - min_position;
+	glm::vec3 size3d = max_position - min_position;
 	out_size = size3d;
 
 	// Normalize mesh to range -0.5 ... 0.5
 	for (ColoredVertex& pos : out_vertices)
-		pos.position = ((pos.position - min_position) / size3d) - vec3(0.5f, 0.5f, 0.5f);
+		pos.position = ((pos.position - min_position) / size3d) - glm::vec3(0.5f, 0.5f, 0.5f);
 
 	return true;
 }

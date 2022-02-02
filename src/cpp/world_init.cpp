@@ -1,6 +1,8 @@
 #include "..\hpp\world_init.hpp"
 #include "..\hpp\tiny_ecs_registry.hpp"
 
+using namespace glm;
+
 Entity createCat(RenderSystem* renderer, vec2 pos)
 {
 	auto entity = Entity();
