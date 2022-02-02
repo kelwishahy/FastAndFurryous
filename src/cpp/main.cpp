@@ -1,6 +1,7 @@
 // Game Systems
 #include <hpp/render_system.hpp>
 #include <hpp/shader_manager.hpp>
+#include <hpp/physics_system.hpp>
 
 // stlib
 #include <chrono>
@@ -23,6 +24,7 @@ int main() {
 	// TO-DO:
 	// Global systems
 	WorldSystem world;
+	PhysicsSystem physics;
 
 	// Initialize game systems
 	RenderSystem renderer = RenderSystem::RenderSystem();
@@ -47,6 +49,7 @@ int main() {
 		time = now;
 
 		renderer.draw(SHADER_PROGRAM_IDS::TRIANGLE);
+		physics.step(elapsed_ms);
 
 		glfwSwapBuffers(window);
 	}

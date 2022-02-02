@@ -14,6 +14,26 @@ struct Player
 
 };
 
+// Stucture to store collision information
+struct Collision
+{
+	// Note, the first object is stored in the ECS container.entities
+	Entity other; // the second object involved in the collision
+	Collision(Entity& other) { this->other = other; };
+};
+
+// Data structure for toggling debug mode
+struct Debug {
+	bool in_debug_mode = 0;
+	bool in_freeze_mode = 0;
+};
+extern Debug debugging;
+
+// A struct to refer to debugging graphics in the ECS
+struct DebugComponent
+{
+	// Note, an empty struct has size 1
+};
 
 // All data relevant to the shape and motion of entities
 struct Motion {
