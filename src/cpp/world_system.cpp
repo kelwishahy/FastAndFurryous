@@ -26,12 +26,12 @@ namespace {
 }
 
 
-//void WorldSystem::init(RenderSystem* renderer_arg) {
-//	this->renderer = renderer_arg;
-//
-//	// Set all states to default
-//	restart_game();
-//}
+void WorldSystem::init() {
+	//this->renderer = renderer_arg;
+
+	// Set all states to default
+	restart_game();
+}
 
 // Update our game world
 bool WorldSystem::step(float elapsed_ms_since_last_update) {
@@ -85,47 +85,48 @@ bool WorldSystem::is_over() const {
 
 // On key callback
 void WorldSystem::on_key(int key, int, int action, int mod) {
+	Motion& catMotion = registry.motions.get(player_cat);
 	// Left
 	if (key == GLFW_KEY_LEFT) {
-		Motion& catMotion = registry.motions.get(player_cat);
 		if (action == GLFW_RELEASE) {
 			catMotion.velocity.x = 0;
 		}
 		else {
 			catMotion.velocity.x = -200;
-			std::cout << "Pressed left!!!" << std::endl;
+			printf("Pressed left!!!\n");;
 		}
 	}
 	// Right
 	if (key == GLFW_KEY_RIGHT) {
-		Motion& catMotion = registry.motions.get(player_cat);
 		if (action == GLFW_RELEASE) {
 			catMotion.velocity.x = 0;
 		}
 		else if (action == GLFW_PRESS) {
 			catMotion.velocity.x = 200;
+			printf("Pressed right!!!\n");
 		}
 	}
 	// Up
 	if (key == GLFW_KEY_UP) {
-		Motion& catMotion = registry.motions.get(player_cat);
 		if (action == GLFW_RELEASE) {
 			catMotion.velocity.y = 0;
 		}
 		else {
 			catMotion.velocity.y = -200;
+			printf("Pressed up!!!\n");
 		}
 	}
 	// Down
 	if (key == GLFW_KEY_DOWN) {
-		Motion& catMotion = registry.motions.get(player_cat);
 		if (action == GLFW_RELEASE) {
 			catMotion.velocity.y = 0;
 		}
 		else {
 			catMotion.velocity.y = 200;
+			printf("Pressed down!!!\n");
 		}
 	}
+	printf("Cat.x: %f, Cat.y: %f", catMotion.position.x, catMotion.position.y);
 
 	// Resetting game
 	if (action == GLFW_RELEASE && key == GLFW_KEY_R) {
