@@ -13,8 +13,11 @@ public:
 	// Manually created list of all components this game has
 	ComponentContainer<Player> players;
 	ComponentContainer<Motion> motions;
+	ComponentContainer<Collision> collisions;
 	ComponentContainer<Mesh*> meshPtrs;
 	ComponentContainer<vec3> colors;
+	ComponentContainer<DebugComponent> debugComponents;
+	ComponentContainer<RenderRequest> renderRequests;
 
 	// constructor that adds all containers for looping over them
 	ECSRegistry() {
@@ -22,6 +25,9 @@ public:
 		registry_list.push_back(&motions);
 		registry_list.push_back(&meshPtrs);
 		registry_list.push_back(&colors);
+		registry_list.push_back(&collisions);
+		registry_list.push_back(&debugComponents);
+		registry_list.push_back(&renderRequests);
 	}
 
 	void clear_all_components() {
