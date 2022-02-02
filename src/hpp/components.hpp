@@ -14,6 +14,10 @@ struct Player
 
 };
 
+struct SolidTerrain {
+
+};
+
 // Stucture to store collision information
 struct Collision
 {

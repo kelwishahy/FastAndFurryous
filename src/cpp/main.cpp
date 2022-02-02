@@ -34,7 +34,7 @@ int main() {
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
 	auto time = Clock::now();
-	world.init();
+	world.init(&renderer);
 
 	// Game loop
 	while (!glfwWindowShouldClose(window)) { // TO-DO: Make this loop condition depend on the world state, like in assignment template
@@ -57,6 +57,7 @@ int main() {
 		world.step(elapsed_ms);
 		renderer.draw(SHADER_PROGRAM_IDS::TRIANGLE);
 		physics.step(elapsed_ms);
+		world.handle_collisions();
 
 		glfwSwapBuffers(window);
 	}

@@ -27,3 +27,21 @@ Entity createCat(RenderSystem* renderer, vec2 pos)
 
 	return entity;
 }
+
+Entity createWall(RenderSystem* renderer, vec2 pos, int width, int height) {
+	auto entity = Entity();
+
+
+	// Setting initial motion values
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = pos;
+	motion.angle = 0.f;
+	motion.velocity = { 0.f, 0.f };
+	motion.scale = {width, height}; // point front to the right
+
+
+
+	registry.players.emplace(entity);
+	registry.terrains.emplace(entity);
+	return entity;
+}
