@@ -36,24 +36,35 @@ class RenderSystem {
 	std::array<GLuint, geometryCount> vertexBuffers;
 	std::array<GLuint, geometryCount> indexBuffers;
 
+	// Meshes
+	const std::vector < std::pair<GEOMETRY_BUFFER_IDS, std::string>> meshPaths = {
+		// specify meshes of all assets here
+	};
+
+	std::array<Mesh, geometryCount> meshes;
+
 
 public:
 	RenderSystem ();
 	~RenderSystem ();
 
+	// Initialize GLFW window and context
+	bool init();
+
 	// Return the GLFW window associated with this renderer
 	GLFWwindow* getWindow() { return window; };
 
 	// Draw to the screen using shaderProgram
-	void draw(const SHADER_PROGRAM_IDS shaderProgram);
+	void draw();
+
+	Mesh& getMesh(GEOMETRY_BUFFER_IDS id) { return meshes[(int)id]; };
 
 private:
 	GLFWwindow* window;
-	GLuint frameBufferId;
+	GLuint frameBuffer;
 	GLuint vaoId;
 
-	// Initialize GLFW window and context
-	bool init();
+	static glm::mat3 createProjectionMatrix();
 
 	// Load vertex data into the vertex buffers
 	void initRenderData();
@@ -61,5 +72,7 @@ private:
 	// Bind the given vertex and index buffer objects
 	template <class T>
 	void bindVBOandIBO(GEOMETRY_BUFFER_IDS oid, std::vector<T> vertices, std::vector<uint16_t> indices);
+
+	void loadMeshes();
 };
 

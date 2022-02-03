@@ -26,9 +26,10 @@ int main() {
 	// Global systems
 	WorldSystem world;
 	PhysicsSystem physics;
+	RenderSystem renderer;
 
 	// Initialize game systems
-	RenderSystem renderer = RenderSystem::RenderSystem();
+	renderer.init();
 	GLFWwindow* window = renderer.getWindow(); // Window is part of the renderer context
 
 	// Copy triangle vertex data into the vertex buffer
@@ -56,7 +57,7 @@ int main() {
 		time = now;
 
 		world.step(elapsed_ms);
-		renderer.draw(SHADER_PROGRAM_IDS::TRIANGLE);
+		renderer.draw();
 		physics.step(elapsed_ms);
 		world.handle_collisions();
 

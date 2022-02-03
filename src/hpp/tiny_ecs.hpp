@@ -84,6 +84,11 @@ class ComponentContainer : public ContainerInterface {
 		return components[map_entity_componentID[e]];
 	}
 
+	// Retrieve the component stored in components[i]
+	Component& get(unsigned int i) {
+		return components[i];
+	}
+
 	// Check if entity has a component of type 'Component'
 	bool has(Entity entity) {
 		return map_entity_componentID.count(entity) > 0;
