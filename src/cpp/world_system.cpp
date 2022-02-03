@@ -33,7 +33,6 @@ void WorldSystem::init(RenderSystem* renderer) {
 
 	//creates a wall on the left side of the screen
 	printf("window height is: %i px, window width is: %i px", window_height_px, window_width_px);
-	createWall(renderer, { 0, window_height_px / 2 }, 10, window_height_px*2);
 
 	restart_game();
 }
@@ -78,8 +77,10 @@ void WorldSystem::restart_game() {
 
 	// Create a new cat
 	player_cat = createCat(renderer, { window_width_px / 2, window_height_px - 200 });
+	Entity wall = createWall(renderer, { 0, 0 }, 10, window_height_px);
 	printf("starting cat.x is: %i px, starting cat.y is: %i px", window_width_px / 2, window_height_px - 200);
 	registry.colors.insert(player_cat, { 1, 0.8f, 0.8f });
+	registry.list_all_components_of(player_cat);
 
 }
 
@@ -95,7 +96,6 @@ void WorldSystem::handle_collisions() {
 		if (registry.players.has(entity)) {
 
 			//Player& player = registry.players.get(entity);
-
 			// Checking Player - Solid Wall collisions
 			if (registry.terrains.has(entity_other)) {
 				Motion& catMotion = registry.motions.get(entity);
