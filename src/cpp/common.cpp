@@ -3,6 +3,8 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "../ext/stb_image/stb_image.h"
 
+#include "glad/glad.h"
+
 bool glHasError() {
 	GLenum error = glGetError();
 

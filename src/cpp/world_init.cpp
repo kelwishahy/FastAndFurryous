@@ -1,6 +1,8 @@
 #include "..\hpp\world_init.hpp"
 #include "..\hpp\tiny_ecs_registry.hpp"
 
+using namespace glm;
+
 Entity createCat(RenderSystem* renderer, vec2 pos)
 {
 	auto entity = Entity();
@@ -25,5 +27,20 @@ Entity createCat(RenderSystem* renderer, vec2 pos)
 	//		EFFECT_ASSET_ID::PLAYER,
 	//		GEOMETRY_BUFFER_ID::PLAYER });
 
+	return entity;
+}
+
+Entity createWall(RenderSystem* renderer, vec2 pos, int width, int height) {
+	
+	auto entity = Entity();
+
+	// Setting initial motion values
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = pos;
+	motion.angle = 0.f;
+	motion.velocity = { 0.f, 0.f };
+	motion.scale = {width, height}; 
+
+	registry.terrains.emplace(entity);
 	return entity;
 }

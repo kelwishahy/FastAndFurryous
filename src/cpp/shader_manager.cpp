@@ -1,9 +1,12 @@
 #include <hpp/shader_manager.hpp>
+#include <hpp/components.hpp>
 
-#include <iostream>
 #include <fstream>
 #include <sstream> 
 #include <cassert>
+#include <vector>
+
+#include <hpp/common.hpp>
 
 void ShaderManager::loadShaders(
 	const std::array<std::string, shaderProgramCount>& shaderPaths,

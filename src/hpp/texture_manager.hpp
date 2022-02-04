@@ -1,9 +1,19 @@
 #pragma once
 
-#include <hpp/common.hpp>
+#include <../ext/project_path.hpp>
+#include <hpp/components.hpp>
+
+#include <glad/glad.h>
 #include <glm/ext/vector_int2.hpp>
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
+
+#include <array>
+#include <string>
+
+
+
+
 
 class TextureManager {
 public:

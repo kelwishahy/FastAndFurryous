@@ -1,74 +1,101 @@
 #pragma once
-#include "common.hpp"
+#include <hpp/tiny_ecs.hpp>
 #include <vector>
 #include <unordered_map>
-#include "../ext/stb_image/stb_image.h"
 
-using namespace glm;
+#include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
 
-#include <glm/vec2.hpp>				// vec2
+////////////////////////////////////////////////////////////////////////////////
+// Component IDs
+////////////////////////////////////////////////////////////////////////////////
 
-// Player component
-struct Player
-{
+enum class SHADER_PROGRAM_IDS {
+	CAT,
+	TRIANGLE,
+	TOTAL
+}; constexpr int shaderProgramCount = (int)SHADER_PROGRAM_IDS::TOTAL;
+
+enum class TEXTURE_IDS {
+	CAT,
+	TRIANGLE,
+	TOTAL
+}; constexpr int textureCount = (int)TEXTURE_IDS::TOTAL;
+
+enum class GEOMETRY_BUFFER_IDS {
+	CAT,
+	TRIANGLE,
+	TOTAL
+}; constexpr int geometryCount = (int)GEOMETRY_BUFFER_IDS::TOTAL;
+
+////////////////////////////////////////////////////////////////////////////////
+// Component Types
+////////////////////////////////////////////////////////////////////////////////
+
+// Game components ------------------------------------------------------------
+
+struct Player {
 
 };
 
+struct SolidTerrain {
 
-// All data relevant to the shape and motion of entities
+};
+
 struct Motion {
-	vec2 position = { 0, 0 };
+	glm::vec2 position = { 0, 0 };
 	float angle = 0;
-	vec2 velocity = { 0, 0 };
-	vec2 scale = { 10, 10 };
+	glm::vec2 velocity = { 0, 0 };
+	glm::vec2 scale = { 10, 10 };
 };
 
-// Single Vertex Buffer element for non-textured meshes (coloured.vs.glsl & chicken.vs.glsl)
-struct ColoredVertex
-{
-	vec3 position;
-	vec3 color;
+// Stucture to store collision information
+struct Collision {
+	// Note, the first object is stored in the ECS container.entities
+	Entity other; // the second object involved in the collision
+	Collision(Entity& other) { this->other = other; };
 };
 
-// Mesh datastructure for storing vertex and index buffers
-struct Mesh
-{
-	static bool loadFromOBJFile(std::string obj_path, std::vector<ColoredVertex>& out_vertices, std::vector<uint16_t>& out_vertex_indices, vec2& out_size);
-	vec2 original_size = { 1,1 };
+// Render components ----------------------------------------------------------
+
+// Single vertex vuffer element for textured sprites
+struct TexturedVertex {
+	glm::vec3 position;
+	glm::vec2 texCoord;
+};
+
+// Single vertex buffer element for non-textured meshes
+struct ColoredVertex {
+	glm::vec3 position;
+	glm::vec3 color;
+};
+
+// Index and vertex buffers
+struct Mesh {
+	static bool loadFromOBJFile(std::string obj_path, std::vector<ColoredVertex>& out_vertices, std::vector<uint16_t>& out_vertex_indices, glm::vec2& out_size);
+	glm::vec2 originalSize = { 1,1 };
 	std::vector<ColoredVertex> vertices;
 	std::vector<uint16_t> vertex_indices;
 };
 
-/**
- * The following enumerators represent global identifiers refering to graphic
- * assets. For example TEXTURE_ASSET_ID are the identifiers of each texture
- * currently supported by the system.
- *
- * So, instead of referring to a game asset directly, the game logic just
- * uses these enumerators and the RenderRequest struct to inform the renderer
- * how to structure the next draw command.
- *
- * There are 2 reasons for this:
- *
- * First, game assets such as textures and meshes are large and should not be
- * copied around as this wastes memory and runtime. Thus separating the data
- * from its representation makes the system faster.
- *
- * Second, it is good practice to decouple the game logic from the render logic.
- * Imagine, for example, changing from OpenGL to Vulkan, if the game logic
- * depends on OpenGL semantics it will be much harder to do the switch than if
- * the renderer encapsulates all asset data and the game logic is agnostic to it.
- *
- * The final value in each enumeration is both a way to keep track of how many
- * enums there are, and as a default value to represent uninitialized fields.
- */
-
-enum class GEOMETRY_BUFFER_ID {
-	CAT = 0
-};
-const int geometry_count = (int)GEOMETRY_BUFFER_ID::CAT;
-
+// The texture, shader, and geometry to be rendered
+// Any entity that will be rendered must have one of these components
 struct RenderRequest {
-	GEOMETRY_BUFFER_ID used_geometry = GEOMETRY_BUFFER_ID::CAT;
+	TEXTURE_IDS texture = TEXTURE_IDS::TOTAL;
+	SHADER_PROGRAM_IDS shader = SHADER_PROGRAM_IDS::TOTAL;
+	GEOMETRY_BUFFER_IDS geometry = GEOMETRY_BUFFER_IDS::TOTAL;
 };
 
+// Debug components ------------------------------------------------------------
+
+// Data structure for toggling debug mode
+struct Debug {
+	bool in_debug_mode = 0;
+	bool in_freeze_mode = 0;
+};
+extern Debug debugging;
+
+// A struct to refer to debugging graphics in the ECS
+struct DebugComponent {
+	// Note, an empty struct has size 1
+};

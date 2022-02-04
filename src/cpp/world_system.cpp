@@ -26,12 +26,17 @@ namespace {
 }
 
 
-//void WorldSystem::init(RenderSystem* renderer_arg) {
-//	this->renderer = renderer_arg;
-//
-//	// Set all states to default
-//	restart_game();
-//}
+void WorldSystem::init(RenderSystem* renderer) {
+	this->renderer = renderer;
+
+	// Set all states to default
+
+	//creates a wall on the left side of the screen
+	printf("window height is: %i px, window width is: %i px", window_height_px, window_width_px);
+	createWall(renderer, { 0, window_height_px / 2 }, 10, window_height_px*2);
+
+	restart_game();
+}
 
 // Update our game world
 bool WorldSystem::step(float elapsed_ms_since_last_update) {
@@ -73,8 +78,35 @@ void WorldSystem::restart_game() {
 
 	// Create a new cat
 	player_cat = createCat(renderer, { window_width_px / 2, window_height_px - 200 });
+	printf("starting cat.x is: %i px, starting cat.y is: %i px", window_width_px / 2, window_height_px - 200);
 	registry.colors.insert(player_cat, { 1, 0.8f, 0.8f });
 
+}
+
+void WorldSystem::handle_collisions() {
+	// Loop over all collisions detected by the physics system
+	auto& collisionsRegistry = registry.collisions; // TODO: @Tim, is the reference here needed?
+	for (uint i = 0; i < collisionsRegistry.components.size(); i++) {
+		// The entity and its collider
+		Entity entity = collisionsRegistry.entities[i];
+		Entity entity_other = collisionsRegistry.components[i].other;
+
+		// For now, we are only interested in collisions that involve the chicken
+		if (registry.players.has(entity)) {
+
+			//Player& player = registry.players.get(entity);
+
+			// Checking Player - Solid Wall collisions
+			if (registry.terrains.has(entity_other)) {
+				Motion& catMotion = registry.motions.get(entity);
+				//Do something with the catMotion
+				printf("hitting a wall, ouch");
+			}
+		}
+	}
+
+	// Remove all collisions from this simulation step
+	registry.collisions.clear();
 }
 
 // Should the game be over ?
@@ -85,47 +117,48 @@ bool WorldSystem::is_over() const {
 
 // On key callback
 void WorldSystem::on_key(int key, int, int action, int mod) {
+	Motion& catMotion = registry.motions.get(player_cat);
 	// Left
 	if (key == GLFW_KEY_LEFT) {
-		Motion& catMotion = registry.motions.get(player_cat);
 		if (action == GLFW_RELEASE) {
 			catMotion.velocity.x = 0;
 		}
 		else {
-			catMotion.velocity.x = -200;
-			std::cout << "Pressed left!!!" << std::endl;
+			catMotion.velocity.x = -50;
+			printf("Pressed left!!!\n");;
 		}
 	}
 	// Right
 	if (key == GLFW_KEY_RIGHT) {
-		Motion& catMotion = registry.motions.get(player_cat);
 		if (action == GLFW_RELEASE) {
 			catMotion.velocity.x = 0;
 		}
 		else if (action == GLFW_PRESS) {
 			catMotion.velocity.x = 200;
+			printf("Pressed right!!!\n");
 		}
 	}
 	// Up
 	if (key == GLFW_KEY_UP) {
-		Motion& catMotion = registry.motions.get(player_cat);
 		if (action == GLFW_RELEASE) {
 			catMotion.velocity.y = 0;
 		}
 		else {
 			catMotion.velocity.y = -200;
+			printf("Pressed up!!!\n");
 		}
 	}
 	// Down
 	if (key == GLFW_KEY_DOWN) {
-		Motion& catMotion = registry.motions.get(player_cat);
 		if (action == GLFW_RELEASE) {
 			catMotion.velocity.y = 0;
 		}
 		else {
 			catMotion.velocity.y = 200;
+			printf("Pressed down!!!\n");
 		}
 	}
+	printf("Cat.x: %f, Cat.y: %f", catMotion.position.x, catMotion.position.y);
 
 	// Resetting game
 	if (action == GLFW_RELEASE && key == GLFW_KEY_R) {
