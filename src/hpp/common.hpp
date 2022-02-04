@@ -12,13 +12,10 @@ const int window_height_px = 800;
 // Check for OpenGL errors
 bool glHasError();
 
-// More informative OpenGL error reporting
+// Verbose OpenGL error reporting
 void APIENTRY glDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum severity,
     GLsizei length, const char* message, const void* userParam);
 
 struct Transform {
-	glm::mat3 mat = glm::mat3(1.0); // 3x3 Identity matrix
-	void scale(glm::vec2 scale);
-	void rotate(float radians);
-	void translate(glm::vec2 offset);
+	glm::mat4 mat = glm::mat4(1.0); // 4x4 Identity matrix
 };

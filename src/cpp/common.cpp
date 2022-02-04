@@ -84,24 +84,3 @@ void APIENTRY glDebugOutput(GLenum source,
     } std::cout << "\n---------------" << std::endl;
     std::cout << std::endl;
 }
-
-// Transformation Operations
-void Transform::scale(glm::vec2 scale)
-{
-	glm::mat3 S = { { scale.x, 0.f, 0.f },{ 0.f, scale.y, 0.f },{ 0.f, 0.f, 1.f } };
-    mat = mat * S;
-}
-
-//void Transform::rotate(float radians)
-//{
-//    float c = cosf(radians);
-//    float s = sinf(radians);
-//    glm::mat3 R = { { c, s, 0.f },{ -s, c, 0.f },{ 0.f, 0.f, 1.f } };
-//    mat = mat * R;
-//}
-
-void Transform::translate(glm::vec2 offset)
-{
-	glm::mat3 T = { { 1.f, 0.f, 0.f },{ 0.f, 1.f, 0.f },{ offset.x, offset.y, 1.f } };
-    mat = mat * T;
-}

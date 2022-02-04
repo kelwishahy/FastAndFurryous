@@ -22,7 +22,7 @@ void TextureManager::loadTextures(
 		const std::string& path = getTexturePath(texturePaths[i]);
 		glm::ivec2& dimensions = textureDimensions[i];
 
-		stbi_set_flip_vertically_on_load(1);
+		//stbi_set_flip_vertically_on_load(1);
 		stbi_uc* data;
 		data = stbi_load(path.c_str(), &dimensions.x, &dimensions.y, NULL, 4);
 

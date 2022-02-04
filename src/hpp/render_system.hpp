@@ -22,7 +22,7 @@ class RenderSystem {
 		"triangle"
 	};
 
-	std::array<GLuint, shaderProgramCount> shaders;
+	std::array<GLuint, shaderProgramCount> shaders; // OpenGL shader names
 
 	// Textures
 	const std::array<std::string, textureCount> texturePaths = {
@@ -30,7 +30,7 @@ class RenderSystem {
 		"wall.jpg"
 	};
 
-	std::array<GLuint, textureCount> textures;
+	std::array<GLuint, textureCount> textures; // OpenGL texture names
 	std::array<glm::ivec2, textureCount> textureDimensions;
 
 	// Vertex and index buffers
@@ -80,7 +80,9 @@ private:
 
 	void loadMeshes();
 
-	static glm::mat3 createProjectionMatrix();
+	// Generate a 4x4 orthographic projection matrix
+	// that scales with window size
+	static glm::mat4 createProjectionMatrix();
 
 };
 

@@ -1,7 +1,5 @@
 // Game Systems
 #include <hpp/render_system.hpp>
-#include <hpp/shader_manager.hpp>
-#include <hpp/components.hpp>
 #include <hpp/physics_system.hpp>
 #include <hpp/world_system.hpp>
 
@@ -54,8 +52,6 @@ int main() {
 		renderer.draw();
 		glfwSwapBuffers(window);
 	}
-
-
 
 	return EXIT_SUCCESS;
 }

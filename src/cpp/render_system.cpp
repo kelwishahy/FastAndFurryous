@@ -18,8 +18,7 @@ RenderSystem::~RenderSystem() {
 }
 
 void RenderSystem::draw() {
-	glm::mat4 projection = glm::ortho(-2.f, 2.f, -1.5f, 1.5f, -1.0f, 1.0f);
-	//glm::mat3 projection = createProjectionMatrix();
+	glm::mat4 projection = createProjectionMatrix();
 	for (Entity entity : registry.renderRequests.entities) {
 		if (!registry.renderRequests.has(entity))
 			continue;
@@ -73,17 +72,17 @@ void RenderSystem::draw() {
 			const GLsizei numIndices = size / sizeof(uint16_t);
 
 			/* MATRIX TRANSFORMATIONS */
-			//Motion& motion = registry.motions.get(entity);
-			//Transform transform;
-			//transform.translate(motion.position);
-			//transform.scale(motion.scale);
+			Motion& motion = registry.motions.get(entity);
+			Transform transform;
+			transform.mat = translate(transform.mat, vec3(motion.position, 0.0f));
+			transform.mat = scale(transform.mat, vec3(200.f, 200.f, 0.f));
 
 			GLint currProgram;
 			glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
 
 			// Setting uniform values to the currently bound program
-			//GLuint transform_loc = glGetUniformLocation(currProgram, "transform");
-			//glUniformMatrix4fv(transform_loc, 1, GL_FALSE, (float*)&transform.mat);
+			GLuint transform_loc = glGetUniformLocation(currProgram, "transform");
+			glUniformMatrix4fv(transform_loc, 1, GL_FALSE, (float*)&transform.mat);
 			GLuint projection_loc = glGetUniformLocation(currProgram, "projection");
 			glUniformMatrix4fv(projection_loc, 1, GL_FALSE, (float*)&projection);
 			glHasError();
@@ -91,153 +90,8 @@ void RenderSystem::draw() {
 			glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_SHORT, nullptr);
 			glHasError();
 		}
-		
 	}
 }
-
-
-//void RenderSystem::draw() {
-//	mat3 projectionMatrix = createProjectionMatrix();
-//	for (unsigned int i = 0; i < registry.renderRequests.size(); i++) {
-//
-//		RenderRequest& renderRequest = registry.renderRequests.get(i);
-//
-//		// Get window size
-//		int width, height;
-//		glfwGetFramebufferSize(window, &width, &height);
-//
-//		// Render to the custom frame buffer first
-//		glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
-//		glHasError();
-//
-//		// Clear the back buffer
-//		glViewport(0, 0, width, height); //specifies the affine transformation of x and y from NDCs to window coordinates
-//		glDepthRange(0.00001, 10); //specify mapping of depth values from NDCs to window coordinates
-//		glClearColor(0.0, 0.0, 0.0, 0.0); //specify clear values for the color buffers (black)
-//		glClearDepth(10.f); //specify the clear value for the depth buffer
-//
-//		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear colour and depth buffers to preset values
-//		glEnable(GL_BLEND); // enable blending of computed fragment colors with the values in the color buffers
-//
-//		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); // specify how the colors are blended together
-//		glDisable(GL_DEPTH_TEST); // disable depth testing, render order needs to be set manually when alpha blending is enabled
-//		glHasError();
-//
-//		// Draw the textured mesh
-//
-//		/* Transformations happen here */
-//
-//		// Set the shader that is being used
-//		const GLuint shaderProgram = (GLuint)shaders[(GLuint)renderRequest.shader];
-//		glUseProgram(shaderProgram);
-//		glHasError();
-//
-//		// Get the vertex and index buffer objects of this render request
-//		const GLuint vbo = vertexBuffers[(GLuint)renderRequest.geometry];
-//		const GLuint ibo = indexBuffers[(GLuint)renderRequest.geometry];
-//
-//		// Bind the vertex and index buffers
-//		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-//		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-//		glHasError();
-//
-//		// Pass uniforms to cat.vs.glsl and cat.fs.glsl
-//
-//		// Find where the uniform values should be stored
-//		GLint in_position_loc = glGetAttribLocation(shaderProgram, "in_position");
-//		GLint in_texcoord_loc = glGetAttribLocation(shaderProgram, "in_texcoord");
-//		glHasError();
-//
-//		// Enable the per-vertex attributes and pass in values
-//		glEnableVertexAttribArray(in_position_loc);
-//		glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex), (void*)0);
-//
-//		glEnableVertexAttribArray(in_texcoord_loc);
-//		glVertexAttribPointer(in_texcoord_loc, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex), (void*)sizeof(vec3)); // note the stride to skip the preceeding vertex position
-//		glHasError();
-//
-//		// Activate texture slot 0
-//		glActiveTexture(GL_TEXTURE0);
-//		glHasError();
-//
-//		// Get the texture to be rendered
-//		GLuint texture = textures[(GLuint)renderRequest.texture];
-//
-//		// Bind the texture to slot 0
-//		glBindTexture(GL_TEXTURE_2D, texture);
-//		glHasError();
-//
-//		// Getting the fcolor uniform location
-//		GLint color_uloc = glGetUniformLocation(shaderProgram, "fcolor");
-//		const vec3 color =  vec3(1);
-//
-//		// Pass in the fcolor uniform
-//		glUniform3fv(color_uloc, 1, (float*)&color);
-//		glHasError();
-//
-//		// Get number of indices from index buffer
-//		GLint size = 0;
-//		glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
-//		glHasError();
-//		GLsizei num_indices = size / sizeof(uint16_t);
-//
-//
-//		// Get the location of the current shader program being used
-//		GLint currProgram;
-//		glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
-//
-//		// Set uniform values to the currently bound shader program
-//
-//		/* Pass in updated transform matrix here */
-//
-//		// Pass in projection matrix
-//		GLuint projection_loc = glGetUniformLocation(currProgram, "projection");
-//		glUniformMatrix3fv(projection_loc, 1, GL_FALSE, (float*)&projectionMatrix);
-//
-//		glHasError();
-//
-//		// Draw the num_indices/3 triangles specified in the index buffer
-//		glDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, nullptr);
-//		glHasError();
-//
-//		//---------------------------------------------------------------------
-//		// Render to the screen
-//
-//		// Get window size
-//		glfwGetFramebufferSize(window, &width, &height);
-//
-//		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-//		glViewport(0, 0, width, height);
-//		glDepthRange(0, 10);
-//		glClearColor(1.f, 0, 0, 1.0);
-//		glClearDepth(1.f);
-//		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//		glHasError();
-//
-//		// Enabling alpha channel for textures
-//		glDisable(GL_BLEND);
-//
-//		// glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-//		glDisable(GL_DEPTH_TEST);
-//
-//		// Draw the screen texture on the quad geometry
-//		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffers[(GLuint)GEOMETRY_BUFFER_IDS::SCREEN_TRIANGLE]);
-//		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffers[(GLuint)GEOMETRY_BUFFER_IDS::SCREEN_TRIANGLE]);
-//
-//		// Bind our texture in Texture Unit 0
-//		glActiveTexture(GL_TEXTURE0);
-//
-//		glBindTexture(GL_TEXTURE_2D, renderBufferColour);
-//
-//		glHasError();
-//		// Draw
-//		glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_SHORT,nullptr); // one triangle = 3 vertices; nullptr indicates that there is no offset from the bound index buffer
-//		glHasError();
-//
-//		//glfwSwapBuffers(window);
-//		//glHasError();
-//	}
-//}
 
 bool RenderSystem::init() {
 	// Create window & context
@@ -346,7 +200,7 @@ void RenderSystem::initRenderData() {
 
 	// set vertex data
 
-	// Cat
+	// Cat sprite
 	std::vector<TexturedVertex> texturedVertices(4);
 	texturedVertices[0].position = { 0.5f,  0.5f, 0.0f }; // top right
 	texturedVertices[1].position = { 0.5f, -0.5f, 0.0f }; // bottom right
@@ -394,18 +248,26 @@ void RenderSystem::loadMeshes() {
 	}
 }
 
-mat3 RenderSystem::createProjectionMatrix() {
-	// Fake projection matrix, scales with respect to window coordinates
-	float left = 0.f;
-	float top = 0.f;
-
-	glHasError();
+mat4 RenderSystem::createProjectionMatrix() {
+	constexpr float left = 0.f;
+	constexpr float top = 0.f;
 	float right = (float)window_width_px;
 	float bottom = (float)window_height_px;
+	constexpr float far = 1.f;
+	constexpr float near = -1.f;
 
-	float sx = 2.f / (right - left);
-	float sy = 2.f / (top - bottom);
-	float tx = -(right + left) / (right - left);
-	float ty = -(top + bottom) / (top - bottom);
-	return { {sx, 0.f, 0.f}, {0.f, sy, 0.f}, {tx, ty, 1.f} };
+	const float sx = 2.f / (right - left);
+	const float sy = 2.f / (top - bottom);
+	const float tx = -(right + left) / (right - left);
+	const float ty = -(top + bottom) / (top - bottom);
+	const float zNear = -2.f / (far - near);
+	const float zFar = -(far + near) / (far - near);
+
+	mat4 projectionMatrix = {
+		{sx, 0.f, 0.f, tx},
+		{0.f, sy, 0.f, ty},
+		{0.f, 0.f, zNear, zFar},
+		{0.f, 0.f, 0.f, 1.f}};
+
+	return transpose(projectionMatrix);
 }
