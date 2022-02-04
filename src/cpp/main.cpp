@@ -13,16 +13,9 @@
 
 using Clock = std::chrono::high_resolution_clock;
 
-// Triangle NDC
-float vertices[] = {
-	-0.5f, -0.5f, 0.0f,
-	 0.5f, -0.5f, 0.0f,
-	 0.0f,  0.5f, 0.0f
-};
-
 int main() {
 	std::cout << "Starting The Fast and the Furryous" << std::endl;
-	// TO-DO:
+
 	// Global systems
 	WorldSystem world;
 	PhysicsSystem physics;
@@ -32,11 +25,9 @@ int main() {
 	renderer.init();
 	GLFWwindow* window = renderer.getWindow(); // Window is part of the renderer context
 
-	// Copy triangle vertex data into the vertex buffer
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	world.init(&renderer);
 
 	auto time = Clock::now();
-	world.init(&renderer);
 
 	// Game loop
 	while (!glfwWindowShouldClose(window)) { // TO-DO: Make this loop condition depend on the world state, like in assignment template
@@ -57,10 +48,10 @@ int main() {
 		time = now;
 
 		world.step(elapsed_ms);
-		renderer.draw();
 		physics.step(elapsed_ms);
 		world.handle_collisions();
 
+		renderer.draw();
 		glfwSwapBuffers(window);
 	}
 

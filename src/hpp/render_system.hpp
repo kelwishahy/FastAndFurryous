@@ -27,6 +27,7 @@ class RenderSystem {
 	// Textures
 	const std::array<std::string, textureCount> texturePaths = {
 		"cat.png",
+		"wall.jpg"
 	};
 
 	std::array<GLuint, textureCount> textures;
@@ -48,23 +49,27 @@ public:
 	RenderSystem ();
 	~RenderSystem ();
 
+	// Draw to the screen using shaderProgram
+	void draw();
+
 	// Initialize GLFW window and context
 	bool init();
 
 	// Return the GLFW window associated with this renderer
 	GLFWwindow* getWindow() { return window; };
 
-	// Draw to the screen using shaderProgram
-	void draw();
-
 	Mesh& getMesh(GEOMETRY_BUFFER_IDS id) { return meshes[(int)id]; };
 
 private:
 	GLFWwindow* window;
+	GLuint vao;
 	GLuint frameBuffer;
-	GLuint vaoId;
+	GLuint renderBufferColour;
+	GLuint renderBufferDepth;
 
-	static glm::mat3 createProjectionMatrix();
+	// Initialize the off screen render buffer
+	// which is used as an intermediate render target
+	bool initRenderBuffer();
 
 	// Load vertex data into the vertex buffers
 	void initRenderData();
@@ -74,5 +79,8 @@ private:
 	void bindVBOandIBO(GEOMETRY_BUFFER_IDS oid, std::vector<T> vertices, std::vector<uint16_t> indices);
 
 	void loadMeshes();
+
+	static glm::mat3 createProjectionMatrix();
+
 };
 
