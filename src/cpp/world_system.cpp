@@ -124,7 +124,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 			catMotion.velocity.x = 0;
 		}
 		else {
-			catMotion.velocity.x = -50;
+			catMotion.velocity.x = -200;
 			printf("Pressed left!!!\n");;
 		}
 	}

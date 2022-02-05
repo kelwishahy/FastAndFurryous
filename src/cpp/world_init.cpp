@@ -8,8 +8,8 @@ Entity createCat(RenderSystem* renderer, vec2 pos)
 	auto entity = Entity();
 
 	// Store a reference to the potentially re-used mesh object
-	//Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::CAT);
-	//registry.meshPtrs.emplace(entity, &mesh);
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_IDS::CAT);
+	registry.meshPtrs.emplace(entity, &mesh);
 
 	// Setting initial motion values
 	Motion& motion = registry.motions.emplace(entity);
@@ -21,11 +21,11 @@ Entity createCat(RenderSystem* renderer, vec2 pos)
 
 	// Create and (empty) Chicken component to be able to refer to all eagles
 	registry.players.emplace(entity);
-	//registry.renderRequests.insert(
-	//	entity,
-	//	{ TEXTURE_ASSET_ID::TEXTURE_COUNT, // TEXTURE_COUNT indicates that no txture is needed
-	//		EFFECT_ASSET_ID::PLAYER,
-	//		GEOMETRY_BUFFER_ID::PLAYER });
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_IDS::CAT, // textureCount indicates that no txture is needed
+			SHADER_PROGRAM_IDS::CAT,
+			GEOMETRY_BUFFER_IDS::CAT });
 
 	return entity;
 }

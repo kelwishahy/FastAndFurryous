@@ -72,10 +72,10 @@ struct ColoredVertex {
 
 // Index and vertex buffers
 struct Mesh {
-	static bool loadFromOBJFile(std::string obj_path, std::vector<ColoredVertex>& out_vertices, std::vector<uint16_t>& out_vertex_indices, glm::vec2& out_size);
+	static bool loadMeshFromObj(std::string obj_path, std::vector<ColoredVertex>& out_vertices, std::vector<uint16_t>& out_vertex_indices, glm::vec2& out_size);
 	glm::vec2 originalSize = { 1,1 };
 	std::vector<ColoredVertex> vertices;
-	std::vector<uint16_t> vertex_indices;
+	std::vector<uint16_t> vertexIndices;
 };
 
 // The texture, shader, and geometry to be rendered
