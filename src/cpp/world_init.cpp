@@ -59,15 +59,14 @@ Entity createAI(RenderSystem* renderer, vec2 pos)
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
 	//motion.scale = mesh.original_size * 300.f;
-	motion.scale.y *= -1; // point front to the right
 
 	// Create and (empty) Chicken component to be able to refer to all eagles
 	registry.ais.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
-		{ TEXTURE_IDS::CAT, // textureCount indicates that no txture is needed
-			SHADER_PROGRAM_IDS::CAT,
-			GEOMETRY_BUFFER_IDS::CAT });
+		{ TEXTURE_IDS::TOTAL, // textureCount indicates that no txture is needed
+			SHADER_PROGRAM_IDS::TOTAL,
+			GEOMETRY_BUFFER_IDS::TOTAL });
 
 	return entity;
 }

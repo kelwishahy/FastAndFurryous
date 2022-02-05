@@ -2,6 +2,7 @@
 #include <hpp/render_system.hpp>
 #include <hpp/physics_system.hpp>
 #include <hpp/world_system.hpp>
+#include <hpp/ai_system.hpp>
 
 // stlib
 #include <chrono>
@@ -18,6 +19,7 @@ int main() {
 	WorldSystem world;
 	PhysicsSystem physics;
 	RenderSystem renderer;
+	AISystem ai;
 
 	// Initialize game systems
 	renderer.init();
@@ -46,6 +48,7 @@ int main() {
 		time = now;
 
 		world.step(elapsed_ms);
+		ai.step(elapsed_ms);
 		physics.step(elapsed_ms);
 		world.handle_collisions();
 
