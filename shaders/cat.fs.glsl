@@ -6,8 +6,10 @@ in vec2 TexCoord;
 uniform sampler2D ourTexture;
 
 void main() {
-    vec4 texColor = texture(ourTexture, TexCoord);
-    if (texColor.a < 0.1)
+    FragColor = texture(ourTexture, TexCoord);
+
+    // discard any fragments with an alpha of 0
+    if (FragColor.a == 0.0) {
         discard;
-    FragColor = texColor;
+    }
 }

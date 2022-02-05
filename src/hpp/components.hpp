@@ -54,6 +54,16 @@ struct Motion {
 	glm::vec2 scale = { 10, 10 };
 };
 
+struct Rigidbody {
+	bool isStatic = false;
+	float mass = 1;
+	float acceleration = 0;
+};
+
+struct RayCast {
+	int max_depth = 1;
+};
+
 // Stucture to store collision information
 struct Collision {
 	// Note, the first object is stored in the ECS container.entities

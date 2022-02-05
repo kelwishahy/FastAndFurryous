@@ -4,6 +4,24 @@
 
 using namespace glm;
 
+//Creates a ray entity and returns the ray
+//Not sure what the best way to handle the ray is...
+Entity castRay(vec2 origin, float direction, float distance, float max_depth) {
+
+	Entity ray = Entity();
+
+	Motion& ray_motion = registry.motions.emplace(ray);
+	ray_motion.position = origin;
+	ray_motion.angle = direction;
+	ray_motion.scale.x = distance;
+
+	RayCast& cast = registry.rayCasts.emplace(ray);
+	cast.max_depth = max_depth;
+
+	return ray;
+
+}
+
 // Returns the local bounding coordinates scaled by the current size of the entity
 vec2 get_bounding_box(const Motion& motion)
 {
