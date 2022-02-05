@@ -76,6 +76,10 @@ void WorldSystem::restart_game() {
 	// Debugging for memory/component leaks
 	registry.list_all_components();
 
+	ai_cat = createAI(renderer, { window_width_px / 2, window_width_px - window_height_px - 100 });
+	printf("starting ai.x is: %i px, starting ai.y is: %i px", window_width_px / 2, window_height_px - 100);
+	registry.colors.insert(ai_cat, { 1, 0.8f, 0.8f });
+
 	// Create a new cat
 	player_cat = createCat(renderer, { window_width_px / 2, window_height_px - 200 });
 	printf("starting cat.x is: %i px, starting cat.y is: %i px", window_width_px / 2, window_height_px - 200);

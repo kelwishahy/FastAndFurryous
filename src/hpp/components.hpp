@@ -10,6 +10,7 @@
 // Component IDs
 ////////////////////////////////////////////////////////////////////////////////
 
+//TODO add AI to the list of IDs
 enum class SHADER_PROGRAM_IDS {
 	CAT,
 	TRIANGLE,
@@ -35,6 +36,10 @@ enum class GEOMETRY_BUFFER_IDS {
 // Game components ------------------------------------------------------------
 
 struct Player {
+
+};
+
+struct AI {
 
 };
 

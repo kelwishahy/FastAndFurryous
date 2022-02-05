@@ -44,3 +44,30 @@ Entity createWall(RenderSystem* renderer, vec2 pos, int width, int height) {
 	registry.terrains.emplace(entity);
 	return entity;
 }
+
+Entity createAI(RenderSystem* renderer, vec2 pos)
+{
+	auto entity = Entity();
+
+	// Store a reference to the potentially re-used mesh object
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_IDS::CAT);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	// Setting initial motion values
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = pos;
+	motion.angle = 0.f;
+	motion.velocity = { 0.f, 0.f };
+	//motion.scale = mesh.original_size * 300.f;
+	motion.scale.y *= -1; // point front to the right
+
+	// Create and (empty) Chicken component to be able to refer to all eagles
+	registry.ais.emplace(entity);
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_IDS::CAT, // textureCount indicates that no txture is needed
+			SHADER_PROGRAM_IDS::CAT,
+			GEOMETRY_BUFFER_IDS::CAT });
+
+	return entity;
+}
