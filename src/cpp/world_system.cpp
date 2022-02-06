@@ -82,7 +82,8 @@ void WorldSystem::restart_game() {
 
 	// Create a new cat
 	player_cat = createCat(renderer, { window_width_px / 2, window_height_px - 300 });
-	Entity wall = createWall(renderer, { window_width_px / 2, window_height_px }, window_width_px, 50);
+	createWall(renderer, { window_width_px / 2, window_height_px }, window_width_px, 50);
+	createWall(renderer, { 0, window_height_px / 2 }, 50, window_height_px - 200);
 	printf("starting cat.x is: %i px, starting cat.y is: %i px", window_width_px / 2, window_height_px - 200);
 	registry.colors.insert(player_cat, { 1, 0.8f, 0.8f });
 	registry.list_all_components_of(player_cat);
