@@ -11,12 +11,15 @@ Entity createCat(RenderSystem* renderer, vec2 pos)
 	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_IDS::CAT);
 	registry.meshPtrs.emplace(entity, &mesh);
 
+	//Make player a rigidbody
+	registry.rigidBodies.emplace(entity);
+
 	// Setting initial motion values
 	Motion& motion = registry.motions.emplace(entity);
 	motion.position = pos;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	motion.scale = { 50.f, 50.f };
+	motion.scale = { 100.f, 100.f };
 
 
 	// Create and (empty) Chicken component to be able to refer to all eagles
@@ -42,6 +45,9 @@ Entity createWall(RenderSystem* renderer, vec2 pos, int width, int height) {
 	motion.scale = {width, height}; 
 
 	registry.terrains.emplace(entity);
+	Rigidbody& rb = registry.rigidBodies.emplace(entity);
+	rb.type = STATIC;
+
 	return entity;
 }
 

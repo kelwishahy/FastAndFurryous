@@ -33,6 +33,12 @@ enum class GEOMETRY_BUFFER_IDS {
 // Component Types
 ////////////////////////////////////////////////////////////////////////////////
 
+enum RB_TYPES {
+	NORMAL = 0,
+	KINEMATIC = 1,
+	STATIC = 2
+};
+
 // Game components ------------------------------------------------------------
 
 struct Player {
@@ -55,9 +61,8 @@ struct Motion {
 };
 
 struct Rigidbody {
-	bool isStatic = false;
+	enum RB_TYPES type = NORMAL;
 	float mass = 1;
-	float acceleration = 0;
 };
 
 struct RayCast {
@@ -69,6 +74,8 @@ struct Collision {
 	// Note, the first object is stored in the ECS container.entities
 	Entity other; // the second object involved in the collision
 	Collision(Entity& other) { this->other = other; };
+	float depth = 0;
+	glm::vec2 normal = glm::vec2{ 0,0 };
 };
 
 // Render components ----------------------------------------------------------

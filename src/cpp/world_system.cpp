@@ -98,14 +98,15 @@ void WorldSystem::handle_collisions() {
 
 		// For now, we are only interested in collisions that involve the chicken
 		if (registry.players.has(entity)) {
-
-			//Player& player = registry.players.get(entity);
-			// Checking Player - Solid Wall collisions
-			if (registry.terrains.has(entity_other)) {
-				Motion& catMotion = registry.motions.get(entity);
-				//Do something with the catMotion
-				printf("hitting a wall, ouch");
+			if (registry.rigidBodies.has(entity_other)) {
+				printf("colliding with something");
+				Collision collision = registry.collisions.get(entity);
+				Motion& motion = registry.motions.get(entity);
+				motion.position += collision.normal; // * collision.depth;
 			}
+
+			//Not going to handle rigid body collisions here, we need to handle that collision
+			//before the entity hits the wall
 		}
 	}
 
@@ -162,8 +163,6 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 			printf("Pressed down!!!\n");
 		}
 	}
-	printf("Cat.x: %f, Cat.y: %f", catMotion.position.x, catMotion.position.y);
-
 	// Resetting game
 	if (action == GLFW_RELEASE && key == GLFW_KEY_R) {
 		restart_game();

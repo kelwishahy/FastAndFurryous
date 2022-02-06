@@ -29,6 +29,20 @@ vec2 get_bounding_box(const Motion& motion)
 	return { abs(motion.scale.x), abs(motion.scale.y) };
 }
 
+bool circle_collision(const Motion& motion, const Motion& motion2) {
+	
+	float dist = distance(motion.position, motion2.position);
+	float radii = sqrt(dot(motion.scale, motion.scale)) + sqrt(dot(motion2.scale, motion2.scale));
+
+	if (dist >= radii) {
+		return false;
+	}
+	else {
+		return true;
+	}
+
+}
+
 // This is a SUPER APPROXIMATE check that puts a circle around the bounding boxes and sees
 // if the center point of either object is inside the other's bounding-box-circle. You can
 // surely implement a more accurate detection
@@ -46,46 +60,72 @@ bool collides(const Motion& motion1, const Motion& motion2)
 	return false;
 }
 
-void PhysicsSystem::step(float elapsed_ms)
-{
-	// Move bug based on how much time has passed, this is to (partially) avoid
-	// having entities move at different speed based on the machine.
-	auto& motion_registry = registry.motions;
-	for(uint i = 0; i< motion_registry.size(); i++)
-	{
-		//from A1
-		Motion & motion = motion_registry.components[i];
-		Entity entity = motion_registry.entities[i];
-		float step_seconds = elapsed_ms / 1000.f;
-		motion.position = motion.position += motion.velocity * step_seconds;
-	}
-
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// TODO A3: HANDLE EGG UPDATES HERE
-	// DON'T WORRY ABOUT THIS UNTIL ASSIGNMENT 3
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-	// Check for collisions between all moving entities
-    ComponentContainer<Motion> &motion_container = registry.motions;
-	for(uint i = 0; i<motion_container.components.size(); i++)
+void checkForCollisions() {
+	ComponentContainer<Motion>& motion_container = registry.motions;
+	for (uint i = 0; i < motion_container.components.size(); i++)
 	{
 		Motion& motion_i = motion_container.components[i];
 		Entity entity_i = motion_container.entities[i];
-		
+
 		// note starting j at i+1 to compare all (i,j) pairs only once (and to not compare with itself)
-		for(uint j = i+1; j<motion_container.components.size(); j++)
+		for (uint j = i + 1; j < motion_container.components.size(); j++)
 		{
 			Motion& motion_j = motion_container.components[j];
-			if (collides(motion_i, motion_j))
+			if (circle_collision(motion_i, motion_j))
 			{
 				Entity entity_j = motion_container.entities[j];
 				// Create a collisions event
 				// We are abusing the ECS system a bit in that we potentially insert muliple collisions for the same entity
-				registry.collisions.emplace_with_duplicates(entity_i, entity_j);
-				registry.collisions.emplace_with_duplicates(entity_j, entity_i);
+				// Calculate the normal and intersection depth of CIRCLE collisions
+				float dist = distance(motion_i.position, motion_j.position);
+				float radii = sqrt(dot(motion_i.scale, motion_i.scale)) + sqrt(dot(motion_j.scale, motion_j.scale));
+				float depth = radii - dist;
+				vec2 normal = normalize(motion_j.position - motion_i.position);
+
+				Collision& collision1 = registry.collisions.emplace_with_duplicates(entity_i, entity_j);
+				collision1.depth = depth;
+				collision1.normal = normal;
+
+				Collision& collision2 = registry.collisions.emplace_with_duplicates(entity_j, entity_i);
+				collision2.depth = depth;
+				collision2.normal = -normal;
 			}
 		}
 	}
+}
+
+void PhysicsSystem :: applyMotions(float elapsed_ms) {
+	auto& motion_registry = registry.motions;
+	for (uint i = 0; i < motion_registry.size(); i++)
+	{
+		Motion& motion = motion_registry.components[i];
+		Entity entity = motion_registry.entities[i];
+		float step_seconds = elapsed_ms / 1000.f;
+		if (registry.rigidBodies.has(entity)) {
+			Rigidbody& rb = registry.rigidBodies.get(entity);
+			if (rb.type == KINEMATIC) {
+				//Do something not implemented
+			} 
+			if (rb.type == STATIC) {
+				motion.velocity = vec2{ 0,0 };
+			}
+			if (rb.type == NORMAL) {
+				motion.velocity += vec2{ 0, GRAVITY_CONST };
+			}
+		}
+		//Apply motion at the end regardlesss of if Rigidbody or not
+		motion.position += motion.velocity * step_seconds;
+	}
+}
+
+void PhysicsSystem::step(float elapsed_ms)
+{
+	// Check for collisions between all moving entities
+	checkForCollisions();
+
+	// Move bug based on how much time has passed, this is to (partially) avoid
+	// having entities move at different speed based on the machine.
+	applyMotions(elapsed_ms);
 
 	// you may need the following quantities to compute wall positions
 	(float)window_width_px; (float)window_height_px;
