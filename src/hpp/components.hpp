@@ -63,7 +63,9 @@ struct Collider {
 };
 
 struct Boxcollider : Collider {
-
+	std::vector<glm::vec2> verticies;
+	std::vector<int> triangles;
+	bool transformed_required = true;
 };
 
 struct Circlecollider : Collider {

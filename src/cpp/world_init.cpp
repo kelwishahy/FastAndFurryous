@@ -44,8 +44,32 @@ Entity createWall(RenderSystem* renderer, vec2 pos, int width, int height) {
 	motion.velocity = { 0.f, 0.f };
 	motion.scale = {width, height}; 
 
+	//Adding terrain component
 	registry.terrains.emplace(entity);
+
+	//Adding rigidbody component
 	Rigidbody& rb = registry.rigidBodies.emplace(entity);
+
+	//Adding a box shaped collider
+	Boxcollider& bc = registry.boxColliders.emplace(entity);
+	float left = -width / 2;
+	float right = width / 2;
+	float up = -height / 2;
+	float down = height / 2;
+
+	bc.verticies.push_back(pos + vec2{left, up}); //topleft
+	bc.verticies.push_back(pos + vec2{right, up}); //topright
+	bc.verticies.push_back(pos + vec2{right, down}); //downright
+	bc.verticies.push_back(pos + vec2{left, down}); //downleft
+
+	bc.triangles.push_back(0); //topleft
+	bc.triangles.push_back(1); //topright
+	bc.triangles.push_back(2); //bottomright
+	bc.triangles.push_back(0); //topleft
+	bc.triangles.push_back(2); //bottomright
+	bc.triangles.push_back(3); //bottomleft
+
+
 	rb.type = STATIC;
 
 	return entity;

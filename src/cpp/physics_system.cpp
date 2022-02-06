@@ -2,6 +2,17 @@
 #include "../hpp/physics_system.hpp"
 #include "../hpp/world_init.hpp"
 
+//TODO Get rid of useless ones
+#include <hpp/render_system.hpp>
+#include <hpp/shader_manager.hpp>
+#include <hpp/texture_manager.hpp>
+
+#include <hpp/common.hpp>
+#include <hpp/components.hpp>
+#include <hpp/tiny_ecs_registry.hpp>
+#include "glm/ext.hpp"
+#include <iostream>
+
 using namespace glm;
 
 //Creates a ray entity and returns the ray
@@ -41,6 +52,10 @@ bool circle_collision(const Motion& motion, const Motion& motion2) {
 		return true;
 	}
 
+}
+
+bool box_collision(const Motion& motion, const Motion& motion2, const Boxcollider collider, const Boxcollider collider2) {
+	return false;
 }
 
 // This is a SUPER APPROXIMATE check that puts a circle around the bounding boxes and sees
@@ -94,6 +109,24 @@ void checkForCollisions() {
 	}
 }
 
+void transformBoxColliders() {
+	ComponentContainer<Boxcollider>& collider_container = registry.boxColliders;
+	for (uint i = 0; i < collider_container.components.size(); i++) {
+
+		Boxcollider& collider = collider_container.components[i];
+		Entity entity = collider_container.entities[i];
+		if (collider.transformed_required) {
+			Motion motion = registry.motions.get(entity);
+			float angle = motion.angle;
+			mat4 transform = mat4(1.0);
+			transform = translate(transform, vec3(motion.position, 0.0f));
+
+			vec2 pos = registry.motions.get(entity).position;
+		}
+
+	}
+}
+
 void PhysicsSystem :: applyMotions(float elapsed_ms) {
 	auto& motion_registry = registry.motions;
 	for (uint i = 0; i < motion_registry.size(); i++)
@@ -126,6 +159,7 @@ void PhysicsSystem::step(float elapsed_ms)
 	// having entities move at different speed based on the machine.
 	applyMotions(elapsed_ms);
 
+	transformBoxColliders();
 	// Check for collisions between all moving entities
 	checkForCollisions();
 
