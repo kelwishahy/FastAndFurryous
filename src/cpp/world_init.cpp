@@ -3,6 +3,25 @@
 
 using namespace glm;
 
+void calculateBoxVerteciesAndSetTriangles(vec2 pos, vec2 scale, Boxcollider& box) {
+	float left = -scale.x / 2;
+	float right = scale.x / 2;
+	float up = -scale.y / 2;
+	float down = scale.y / 2;
+
+	box.vertices.push_back(pos + vec2{ left, up }); //topleft
+	box.vertices.push_back(pos + vec2{ right, up }); //topright
+	box.vertices.push_back(pos + vec2{ right, down }); //downright
+	box.vertices.push_back(pos + vec2{ left, down }); //downleft
+
+	box.triangles.push_back(0); //topleft
+	box.triangles.push_back(1); //topright
+	box.triangles.push_back(2); //bottomright
+	box.triangles.push_back(0); //topleft
+	box.triangles.push_back(2); //bottomright
+	box.triangles.push_back(3); //bottomleft
+}
+
 Entity createCat(RenderSystem* renderer, vec2 pos)
 {
 	auto entity = Entity();
@@ -21,6 +40,9 @@ Entity createCat(RenderSystem* renderer, vec2 pos)
 	motion.velocity = { 0.f, 0.f };
 	motion.scale = { 100.f, 100.f };
 
+	Boxcollider& bc = registry.boxColliders.emplace(entity);
+	calculateBoxVerteciesAndSetTriangles(motion.position, motion.scale, bc);
+	bc.transformed_required = true;
 
 	// Create and (empty) Chicken component to be able to refer to all eagles
 	registry.players.emplace(entity);
@@ -52,22 +74,8 @@ Entity createWall(RenderSystem* renderer, vec2 pos, int width, int height) {
 
 	//Adding a box shaped collider
 	Boxcollider& bc = registry.boxColliders.emplace(entity);
-	float left = -width / 2;
-	float right = width / 2;
-	float up = -height / 2;
-	float down = height / 2;
-
-	bc.verticies.push_back(pos + vec2{left, up}); //topleft
-	bc.verticies.push_back(pos + vec2{right, up}); //topright
-	bc.verticies.push_back(pos + vec2{right, down}); //downright
-	bc.verticies.push_back(pos + vec2{left, down}); //downleft
-
-	bc.triangles.push_back(0); //topleft
-	bc.triangles.push_back(1); //topright
-	bc.triangles.push_back(2); //bottomright
-	bc.triangles.push_back(0); //topleft
-	bc.triangles.push_back(2); //bottomright
-	bc.triangles.push_back(3); //bottomleft
+	calculateBoxVerteciesAndSetTriangles(motion.position, motion.scale, bc);
+	bc.transformed_required = true;
 
 
 	rb.type = STATIC;

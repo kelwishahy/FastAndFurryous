@@ -63,9 +63,10 @@ struct Collider {
 };
 
 struct Boxcollider : Collider {
-	std::vector<glm::vec2> verticies;
+	std::vector<glm::vec2> vertices;
 	std::vector<int> triangles;
 	bool transformed_required = true;
+	glm::vec2 deltaPos = glm::vec2{ 0,0 };
 };
 
 struct Circlecollider : Collider {
@@ -82,6 +83,8 @@ struct Motion {
 struct Rigidbody {
 	enum RB_TYPES type = NORMAL;
 	float mass = 1;
+	float collisionDepth = 0;
+	glm::vec2 collisionNomal;
 };
 
 struct RayCast {
@@ -93,8 +96,6 @@ struct Collision {
 	// Note, the first object is stored in the ECS container.entities
 	Entity other; // the second object involved in the collision
 	Collision(Entity& other) { this->other = other; };
-	float depth = 0;
-	glm::vec2 normal = glm::vec2{ 0,0 };
 };
 
 // Render components ----------------------------------------------------------

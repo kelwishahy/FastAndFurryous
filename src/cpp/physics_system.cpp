@@ -13,6 +13,8 @@
 #include "glm/ext.hpp"
 #include <iostream>
 
+#define OUT //for clarity
+
 using namespace glm;
 
 //Creates a ray entity and returns the ray
@@ -54,61 +56,144 @@ bool circle_collision(const Motion& motion, const Motion& motion2) {
 
 }
 
-bool box_collision(const Motion& motion, const Motion& motion2, const Boxcollider collider, const Boxcollider collider2) {
-	return false;
+void project_verticies(std::vector<vec2> box_vertices, vec2 axis, OUT float& min, OUT float& max) {
+
+	min = 99999999;
+	max = -99999999;
+
+	for (uint i = 0; i < box_vertices.size(); i++) {
+
+		vec2 v = box_vertices[i];
+		float proj = dot(v, axis);
+
+		if (proj < min) {
+			min = proj;
+		}
+		if (proj > max) {
+			max = proj;
+		}
+	}
+
 }
 
-// This is a SUPER APPROXIMATE check that puts a circle around the bounding boxes and sees
-// if the center point of either object is inside the other's bounding-box-circle. You can
-// surely implement a more accurate detection
-bool collides(const Motion& motion1, const Motion& motion2)
-{
-	vec2 dp = motion1.position - motion2.position;
-	float dist_squared = dot(dp,dp);
-	const vec2 other_bonding_box = get_bounding_box(motion1) / 2.f;
-	const float other_r_squared = dot(other_bonding_box, other_bonding_box);
-	const vec2 my_bonding_box = get_bounding_box(motion2) / 2.f;
-	const float my_r_squared = dot(my_bonding_box, my_bonding_box);
-	const float r_squared = max(other_r_squared, my_r_squared);
-	if (dist_squared < r_squared)
-		return true;
-	return false;
+//Used to correctly orient the normals on a given edge of a box
+vec2 find_arithmetic_mean(std::vector<vec2> vertices) {
+	
+	float sumX = 0.0f;
+	float sumY = 0.0f;
+
+	for (uint i = 0; i < vertices.size(); i++) {
+		vec2 vertex = vertices[i];
+		sumX += vertex.x;
+		sumY += vertex.y;
+	}
+
+	return vec2(sumX / vertices.size(), sumY / vertices.size());
+}
+
+//Detects polygons via the Seperating axis theorm
+//Only box colliders as params right now but this should work for any polygon that is in any orientation
+bool box_collision(const Boxcollider collider, const Boxcollider collider2, OUT vec2& normal, OUT float& depth) {
+	std::vector<vec2> box1 = collider.vertices;
+	std::vector<vec2> box2 = collider2.vertices;
+
+	for (uint i = 0; i < box1.size(); i++) {
+		vec2 va = box1[i];
+		vec2 vb = box1[(i + 1) % box1.size()];
+
+		vec2 edge = vb - va;
+		vec2 axis = vec2{ -edge.y, edge.x };
+
+		float min1 = 0;
+		float max1 = 0;
+		float min2 = 0;
+		float max2 = 0;
+		project_verticies(box1, axis, min1, max1);
+		project_verticies(box2, axis, min2, max2);
+
+		if (min1 >= max2 || min2 >= max1) {
+			return false;
+		}
+
+		float axisdepth = min(max2 - min1, max1 - min2);
+		if (axisdepth < depth) {
+			depth = axisdepth;
+			normal = axis;
+		}
+	}
+
+	for (uint i = 0; i < box2.size(); i++) {
+		vec2 va = box2[i];
+		vec2 vb = box2[(i + 1) % box2.size()];
+
+		vec2 edge = vb - va;
+		vec2 axis = vec2{ -edge.y, edge.x };
+
+		float min1 = 0;
+		float max1 = 0;
+		float min2 = 0;
+		float max2 = 0;
+		project_verticies(box1, axis, min1, max1);
+		project_verticies(box2, axis, min2, max2);
+
+		if (min1 >= max2 || min2 >= max1) {
+			return false;
+		}
+
+		float axisdepth = min(max2 - min1, max1 - min2);
+		if (axisdepth < depth) {
+			depth = axisdepth;
+			normal = axis;
+		}
+
+	}
+	depth /= length(normal);
+	normal = normalize(normal);
+
+	vec2 center1 = find_arithmetic_mean(box1);
+	vec2 center2 = find_arithmetic_mean(box2);
+
+	if (dot(center1 - center2, normal) < 0.0f) {
+		normal = -normal;
+	}
+
+	return true;
 }
 
 void checkForCollisions() {
-	ComponentContainer<Motion>& motion_container = registry.motions;
-	for (uint i = 0; i < motion_container.components.size(); i++)
+	ComponentContainer<Boxcollider>& box_collider_container = registry.boxColliders;
+	for (uint i = 0; i < box_collider_container.components.size(); i++)
 	{
-		Motion& motion_i = motion_container.components[i];
-		Entity entity_i = motion_container.entities[i];
+		Boxcollider& collider_i = box_collider_container.components[i];
+		Entity entity_i = box_collider_container.entities[i];
+		Motion motion = registry.motions.get(entity_i);
 
 		// note starting j at i+1 to compare all (i,j) pairs only once (and to not compare with itself)
-		for (uint j = i + 1; j < motion_container.components.size(); j++)
+		for (uint j = i + 1; j < box_collider_container.components.size(); j++)
 		{
-			Motion& motion_j = motion_container.components[j];
-			if (circle_collision(motion_i, motion_j))
+			Boxcollider& collider_j = box_collider_container.components[j];
+			vec2 normal;
+			float depth = 9999999;
+			if (box_collision(collider_i, collider_j, normal, depth))
 			{
-				Entity entity_j = motion_container.entities[j];
+				Rigidbody& rb = registry.rigidBodies.get(entity_i);
+				rb.collisionDepth = depth;
+				rb.collisionNomal = normal;
+				printf("COLLISION!!!");
+				Entity entity_j = box_collider_container.entities[j];
 				// Create a collisions event
 				// We are abusing the ECS system a bit in that we potentially insert muliple collisions for the same entity
 				// Calculate the normal and intersection depth of CIRCLE collisions
-				float dist = distance(motion_i.position, motion_j.position);
-				float radii = sqrt(dot(motion_i.scale, motion_i.scale)) + sqrt(dot(motion_j.scale, motion_j.scale));
-				float depth = radii - dist;
-				vec2 normal = normalize(motion_j.position - motion_i.position);
 
 				Collision& collision1 = registry.collisions.emplace_with_duplicates(entity_i, entity_j);
-				collision1.depth = depth;
-				collision1.normal = normal;
 
 				Collision& collision2 = registry.collisions.emplace_with_duplicates(entity_j, entity_i);
-				collision2.depth = depth;
-				collision2.normal = -normal;
 			}
 		}
 	}
 }
 
+//If an entity gets transformed and they have a boxcollider, we need to recalculate the verticies
 void transformBoxColliders() {
 	ComponentContainer<Boxcollider>& collider_container = registry.boxColliders;
 	for (uint i = 0; i < collider_container.components.size(); i++) {
@@ -119,9 +204,15 @@ void transformBoxColliders() {
 			Motion motion = registry.motions.get(entity);
 			float angle = motion.angle;
 			mat4 transform = mat4(1.0);
-			transform = translate(transform, vec3(motion.position, 0.0f));
-
-			vec2 pos = registry.motions.get(entity).position;
+			//TODO do rotations
+			//transform = rotate();
+			transform = translate(transform, vec3(collider.deltaPos, 0.0f));
+			//transform = scale(transform, vec3(motion.scale, 0.0f));
+			for (uint i = 0; i < collider.vertices.size(); i++) {
+				vec4 coord = transform * vec4(collider.vertices[i], 0.0f, 1.0f);
+				collider.vertices[i] = vec2{ coord.x, coord.y };
+			}
+			collider.transformed_required = false;
 		}
 
 	}
@@ -137,24 +228,29 @@ void PhysicsSystem :: applyMotions(float elapsed_ms) {
 		if (registry.rigidBodies.has(entity)) {
 			Rigidbody& rb = registry.rigidBodies.get(entity);
 			if (rb.type == KINEMATIC) {
-				//Do something not implemented
+				//TODO
 			} 
 			if (rb.type == STATIC) {
 				motion.velocity = vec2{ 0,0 };
 			}
 			if (rb.type == NORMAL) {
 				//Disabling gravity for now
-				//motion.velocity += vec2{ 0, GRAVITY_CONST };
+				motion.velocity += vec2{ 0, GRAVITY_CONST };
 			}
 		}
-		//Apply motion at the end regardlesss of if Rigidbody or not
+		//transform(entity, motion, motion.velocity * step_seconds, .0f);
+
+		Boxcollider& collider = registry.boxColliders.get(entity);
+		vec2 oldpos = motion.position;
 		motion.position += motion.velocity * step_seconds;
+		collider.deltaPos = motion.position - oldpos;
+		collider.transformed_required = true;
 	}
 }
 
 void PhysicsSystem::step(float elapsed_ms)
 {
-
+	transformBoxColliders();
 	// Move bug based on how much time has passed, this is to (partially) avoid
 	// having entities move at different speed based on the machine.
 	applyMotions(elapsed_ms);

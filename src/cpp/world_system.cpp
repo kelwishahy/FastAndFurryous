@@ -7,6 +7,7 @@
 #include <sstream>
 
 #include "..\hpp\tiny_ecs_registry.hpp"
+#include <hpp/physics_system.hpp>
 
 // Create the bug world
 WorldSystem::WorldSystem() {
@@ -80,8 +81,8 @@ void WorldSystem::restart_game() {
 	registry.colors.insert(ai_cat, { 1, 0.8f, 0.8f });*/
 
 	// Create a new cat
-	player_cat = createCat(renderer, { window_width_px / 2, window_height_px - 200 });
-	Entity wall = createWall(renderer, { 0, window_height_px }, window_width_px, 10);
+	player_cat = createCat(renderer, { window_width_px / 2, window_height_px - 300 });
+	Entity wall = createWall(renderer, { window_width_px / 2, window_height_px }, window_width_px, 50);
 	printf("starting cat.x is: %i px, starting cat.y is: %i px", window_width_px / 2, window_height_px - 200);
 	registry.colors.insert(player_cat, { 1, 0.8f, 0.8f });
 	registry.list_all_components_of(player_cat);
@@ -95,14 +96,21 @@ void WorldSystem::handle_collisions() {
 		// The entity and its collider
 		Entity entity = collisionsRegistry.entities[i];
 		Entity entity_other = collisionsRegistry.components[i].other;
+		PhysicsSystem sys;
 
 		// For now, we are only interested in collisions that involve the chicken
+		// Player has rigidbody
 		if (registry.players.has(entity)) {
 			if (registry.rigidBodies.has(entity_other)) {
-				printf("colliding with something");
-				//Collision collision = registry.collisions.get(entity);
-				//Motion& motion = registry.motions.get(entity);
-				//motion.position += collision.normal; // * collision.depth;
+				Rigidbody& rb = registry.rigidBodies.get(entity);
+				Motion& motion = registry.motions.get(entity);
+				
+				//TODO this needs to be refactored
+				Boxcollider& collider = registry.boxColliders.get(entity);
+				vec2 oldpos = motion.position;
+				motion.position += rb.collisionNomal * rb.collisionDepth;
+				collider.deltaPos = motion.position - oldpos;
+				collider.transformed_required = true;
 			}
 
 			//Not going to handle rigid body collisions here, we need to handle that collision
@@ -123,7 +131,8 @@ bool WorldSystem::is_over() const {
 // On key callback
 void WorldSystem::on_key(int key, int, int action, int mod) {
 	Motion& catMotion = registry.motions.get(player_cat);
-	// Left
+	
+	current_speed = fmax(150.0f, current_speed);
 	if (action == GLFW_PRESS && key == GLFW_KEY_UP) {
 		catMotion.velocity.y = -current_speed;
 	}
@@ -139,7 +148,6 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	if (action == GLFW_PRESS && key == GLFW_KEY_LEFT) {
 		catMotion.velocity.x = -current_speed;
 	}
-	current_speed = fmax(100.0f, current_speed);
 
 
 	if (action == GLFW_RELEASE) {
@@ -151,14 +159,14 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 		}
 	}
 
-	if (action == GLFW_RELEASE) {
+	/*if (action == GLFW_RELEASE) {
 		if (key == GLFW_KEY_UP && catMotion.velocity.y < 0) {
 			catMotion.velocity.y = 0.0f;
 		}
 		if (key == GLFW_KEY_DOWN && catMotion.velocity.y > 0) {
 			catMotion.velocity.y = 0.0f;
 		}
-	}
+	}*/
 	// Resetting game
 	if (action == GLFW_RELEASE && key == GLFW_KEY_R) {
 		restart_game();
