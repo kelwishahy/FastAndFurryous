@@ -53,6 +53,23 @@ struct SolidTerrain {
 
 };
 
+//struct Transform {
+//	glm::vec2 position = { 0,0 };
+//	float rotation = 0.0f;
+//	glm::vec2 scale = { 10, 10 };
+//};
+
+struct Collider {
+};
+
+struct Boxcollider : Collider {
+
+};
+
+struct Circlecollider : Collider {
+	float radius = 0.0f;
+};
+
 struct Motion {
 	glm::vec2 position = { 0, 0 };
 	float angle = 0;

@@ -110,7 +110,8 @@ void PhysicsSystem :: applyMotions(float elapsed_ms) {
 				motion.velocity = vec2{ 0,0 };
 			}
 			if (rb.type == NORMAL) {
-				motion.velocity += vec2{ 0, GRAVITY_CONST };
+				//Disabling gravity for now
+				//motion.velocity += vec2{ 0, GRAVITY_CONST };
 			}
 		}
 		//Apply motion at the end regardlesss of if Rigidbody or not
@@ -120,12 +121,13 @@ void PhysicsSystem :: applyMotions(float elapsed_ms) {
 
 void PhysicsSystem::step(float elapsed_ms)
 {
-	// Check for collisions between all moving entities
-	checkForCollisions();
 
 	// Move bug based on how much time has passed, this is to (partially) avoid
 	// having entities move at different speed based on the machine.
 	applyMotions(elapsed_ms);
+
+	// Check for collisions between all moving entities
+	checkForCollisions();
 
 	// you may need the following quantities to compute wall positions
 	(float)window_width_px; (float)window_height_px;
