@@ -53,6 +53,12 @@ private:
 	Entity player_cat;
 	float current_speed;
 
+	//AI stuff
+	std::uniform_real_distribution<float> uniform_dist; // number between 0..1
+	std::default_random_engine rng;
+	float next_ai_spawn;
+	Entity ai_cat;
+
 	// OpenGL window handle
 	//GLFWwindow* window;
 };

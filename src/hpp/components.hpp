@@ -10,6 +10,7 @@
 // Component IDs
 ////////////////////////////////////////////////////////////////////////////////
 
+//TODO add AI to the list of IDs
 enum class SHADER_PROGRAM_IDS {
 	CAT,
 	TRIANGLE,
@@ -32,14 +33,44 @@ enum class GEOMETRY_BUFFER_IDS {
 // Component Types
 ////////////////////////////////////////////////////////////////////////////////
 
+enum RB_TYPES {
+	NORMAL = 0,
+	KINEMATIC = 1,
+	STATIC = 2
+};
+
 // Game components ------------------------------------------------------------
 
 struct Player {
 
 };
 
+struct AI {
+
+};
+
 struct SolidTerrain {
 
+};
+
+//struct Transform {
+//	glm::vec2 position = { 0,0 };
+//	float rotation = 0.0f;
+//	glm::vec2 scale = { 10, 10 };
+//};
+
+struct Collider {
+};
+
+struct Boxcollider : Collider {
+	std::vector<glm::vec2> vertices;
+	std::vector<int> triangles;
+	bool transformed_required = true;
+	glm::vec2 deltaPos = glm::vec2{ 0,0 };
+};
+
+struct Circlecollider : Collider {
+	float radius = 0.0f;
 };
 
 struct Motion {
@@ -50,9 +81,10 @@ struct Motion {
 };
 
 struct Rigidbody {
-	bool isStatic = false;
+	enum RB_TYPES type = NORMAL;
 	float mass = 1;
-	float acceleration = 0;
+	float collisionDepth = 0;
+	glm::vec2 collisionNomal;
 };
 
 struct RayCast {

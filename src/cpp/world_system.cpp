@@ -7,6 +7,7 @@
 #include <sstream>
 
 #include "..\hpp\tiny_ecs_registry.hpp"
+#include <hpp/physics_system.hpp>
 
 // Create the bug world
 WorldSystem::WorldSystem() {
@@ -75,9 +76,14 @@ void WorldSystem::restart_game() {
 	// Debugging for memory/component leaks
 	registry.list_all_components();
 
+	/*ai_cat = createAI(renderer, { window_width_px / 2, window_width_px - window_height_px - 100 });
+	printf("starting ai.x is: %i px, starting ai.y is: %i px", window_width_px / 2, window_height_px - 100);
+	registry.colors.insert(ai_cat, { 1, 0.8f, 0.8f });*/
+
 	// Create a new cat
-	player_cat = createCat(renderer, { window_width_px / 2, window_height_px - 200 });
-	Entity wall = createWall(renderer, { 0, 0 }, 10, window_height_px);
+	player_cat = createCat(renderer, { window_width_px / 2, window_height_px - 300 });
+	createWall(renderer, { window_width_px / 2, window_height_px }, window_width_px, 50);
+	createWall(renderer, { 0, window_height_px / 2 }, 50, window_height_px - 200);
 	printf("starting cat.x is: %i px, starting cat.y is: %i px", window_width_px / 2, window_height_px - 200);
 	registry.colors.insert(player_cat, { 1, 0.8f, 0.8f });
 	registry.list_all_components_of(player_cat);
@@ -91,17 +97,25 @@ void WorldSystem::handle_collisions() {
 		// The entity and its collider
 		Entity entity = collisionsRegistry.entities[i];
 		Entity entity_other = collisionsRegistry.components[i].other;
+		PhysicsSystem sys;
 
 		// For now, we are only interested in collisions that involve the chicken
+		// Player has rigidbody
 		if (registry.players.has(entity)) {
-
-			//Player& player = registry.players.get(entity);
-			// Checking Player - Solid Wall collisions
-			if (registry.terrains.has(entity_other)) {
-				Motion& catMotion = registry.motions.get(entity);
-				//Do something with the catMotion
-				printf("hitting a wall, ouch");
+			if (registry.rigidBodies.has(entity_other)) {
+				Rigidbody& rb = registry.rigidBodies.get(entity);
+				Motion& motion = registry.motions.get(entity);
+				
+				//TODO this needs to be refactored
+				Boxcollider& collider = registry.boxColliders.get(entity);
+				vec2 oldpos = motion.position;
+				motion.position += rb.collisionNomal * rb.collisionDepth;
+				collider.deltaPos = motion.position - oldpos;
+				collider.transformed_required = true;
 			}
+
+			//Not going to handle rigid body collisions here, we need to handle that collision
+			//before the entity hits the wall
 		}
 	}
 
@@ -118,48 +132,42 @@ bool WorldSystem::is_over() const {
 // On key callback
 void WorldSystem::on_key(int key, int, int action, int mod) {
 	Motion& catMotion = registry.motions.get(player_cat);
-	// Left
-	if (key == GLFW_KEY_LEFT) {
-		if (action == GLFW_RELEASE) {
-			catMotion.velocity.x = 0;
-		}
-		else {
-			catMotion.velocity.x = -200;
-			printf("Pressed left!!!\n");;
-		}
+	
+	current_speed = fmax(150.0f, current_speed);
+	if (action == GLFW_PRESS && key == GLFW_KEY_UP) {
+		catMotion.velocity.y = -current_speed;
 	}
-	// Right
-	if (key == GLFW_KEY_RIGHT) {
-		if (action == GLFW_RELEASE) {
-			catMotion.velocity.x = 0;
-		}
-		else if (action == GLFW_PRESS) {
-			catMotion.velocity.x = 200;
-			printf("Pressed right!!!\n");
-		}
-	}
-	// Up
-	if (key == GLFW_KEY_UP) {
-		if (action == GLFW_RELEASE) {
-			catMotion.velocity.y = 0;
-		}
-		else {
-			catMotion.velocity.y = -200;
-			printf("Pressed up!!!\n");
-		}
-	}
-	// Down
-	if (key == GLFW_KEY_DOWN) {
-		if (action == GLFW_RELEASE) {
-			catMotion.velocity.y = 0;
-		}
-		else {
-			catMotion.velocity.y = 200;
-			printf("Pressed down!!!\n");
-		}
-	}
-	printf("Cat.x: %f, Cat.y: %f", catMotion.position.x, catMotion.position.y);
 
+	if (action == GLFW_PRESS && key == GLFW_KEY_DOWN) {
+		catMotion.velocity.y = current_speed;
+	}
+
+	if (action == GLFW_PRESS && key == GLFW_KEY_RIGHT) {
+		catMotion.velocity.x = current_speed;
+	}
+
+	if (action == GLFW_PRESS && key == GLFW_KEY_LEFT) {
+		catMotion.velocity.x = -current_speed;
+	}
+
+
+	if (action == GLFW_RELEASE) {
+		if (key == GLFW_KEY_LEFT && catMotion.velocity.x < 0) {
+			catMotion.velocity.x = 0.0f;
+		}
+		if (key == GLFW_KEY_RIGHT && catMotion.velocity.x > 0) {
+			catMotion.velocity.x = 0.0f;
+		}
+	}
+
+	/*if (action == GLFW_RELEASE) {
+		if (key == GLFW_KEY_UP && catMotion.velocity.y < 0) {
+			catMotion.velocity.y = 0.0f;
+		}
+		if (key == GLFW_KEY_DOWN && catMotion.velocity.y > 0) {
+			catMotion.velocity.y = 0.0f;
+		}
+	}*/
 	// Resetting game
 	if (action == GLFW_RELEASE && key == GLFW_KEY_R) {
 		restart_game();

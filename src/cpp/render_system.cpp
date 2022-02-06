@@ -75,7 +75,7 @@ void RenderSystem::draw() {
 			Motion& motion = registry.motions.get(entity);
 			Transform transform;
 			transform.mat = translate(transform.mat, vec3(motion.position, 0.0f));
-			transform.mat = scale(transform.mat, vec3(200.f, 200.f, 0.f));
+			transform.mat = scale(transform.mat, vec3(motion.scale, 0.f));
 
 			GLint currProgram;
 			glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
