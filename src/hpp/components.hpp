@@ -14,6 +14,8 @@
 enum class SHADER_PROGRAM_IDS {
 	CAT,
 	TRIANGLE,
+	WALL,
+	AI,
 	TOTAL
 }; constexpr int shaderProgramCount = (int)SHADER_PROGRAM_IDS::TOTAL;
 
@@ -26,6 +28,8 @@ enum class TEXTURE_IDS {
 enum class GEOMETRY_BUFFER_IDS {
 	CAT,
 	TRIANGLE,
+	WALL,
+	AI,
 	TOTAL
 }; constexpr int geometryCount = (int)GEOMETRY_BUFFER_IDS::TOTAL;
 
@@ -83,8 +87,8 @@ struct Motion {
 struct Rigidbody {
 	enum RB_TYPES type = NORMAL;
 	float mass = 1;
-	float collisionDepth = 0;
-	glm::vec2 collisionNomal;
+	std::vector<float> collisionDepths;
+	std::vector<glm::vec2> collisionNormals;
 };
 
 struct RayCast {

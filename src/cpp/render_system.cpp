@@ -19,27 +19,31 @@ RenderSystem::~RenderSystem() {
 
 void RenderSystem::draw() {
 	glm::mat4 projection = createProjectionMatrix();
+	glViewport(0, 0, window_width_px, window_height_px);
+
+	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	for (Entity entity : registry.renderRequests.entities) {
 		if (!registry.renderRequests.has(entity))
 			continue;
 
 		RenderRequest request = registry.renderRequests.get(entity);
 
-		// Draw a basic triangle to the screen
+		//// Draw a basic triangle to the screen
 		if (request.geometry == GEOMETRY_BUFFER_IDS::CAT) {
 
 			const GLuint vbo = vertexBuffers[(GLuint)request.geometry];
 			const GLuint ibo = indexBuffers[(GLuint)request.geometry];
 
+			/*glViewport(0, 0, window_width_px, window_height_px);
+
+			glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+			glClear(GL_COLOR_BUFFER_BIT);*/
+
 			// Bind buffers
 			glBindBuffer(GL_ARRAY_BUFFER, vbo);
 			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
 			glHasError();
-
-			glViewport(0, 0, window_width_px, window_height_px);
-
-			glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-			glClear(GL_COLOR_BUFFER_BIT);
 
 			// set shaders
 			const GLuint shaderProgram = shaders[(GLuint)request.shader];
@@ -90,6 +94,53 @@ void RenderSystem::draw() {
 			glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_SHORT, nullptr);
 			glHasError();
 		}
+		if (request.geometry == GEOMETRY_BUFFER_IDS::WALL || request.geometry == GEOMETRY_BUFFER_IDS::AI) {
+			const GLuint vbo = vertexBuffers[(GLuint)request.geometry];
+			const GLuint ibo = indexBuffers[(GLuint)request.geometry];
+
+			// Bind buffers
+			glBindBuffer(GL_ARRAY_BUFFER, vbo);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+			glHasError();
+
+			// set shaders
+			const GLuint shaderProgram = shaders[(GLuint)request.shader];
+			glUseProgram(shaderProgram);
+			glHasError();
+
+			// Pass in vertex attributes
+			GLint in_position_loc = glGetAttribLocation(shaderProgram, "aPos");
+			glHasError();
+
+			glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex), (void*)0);
+			glEnableVertexAttribArray(in_position_loc);
+			glHasError();
+
+			GLint size = 0;
+			glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
+			glHasError();
+			const GLsizei numIndices = size / sizeof(uint16_t);
+
+			/* MATRIX TRANSFORMATIONS */
+			Motion& motion = registry.motions.get(entity);
+			Transform transform;
+			transform.mat = translate(transform.mat, vec3(motion.position, 0.0f));
+			transform.mat = scale(transform.mat, vec3(motion.scale, 0.f));
+
+			GLint currProgram;
+			glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
+
+			// Setting uniform values to the currently bound program
+			GLuint transform_loc = glGetUniformLocation(currProgram, "transform");
+			glUniformMatrix4fv(transform_loc, 1, GL_FALSE, (float*)&transform.mat);
+			GLuint projection_loc = glGetUniformLocation(currProgram, "projection");
+			glUniformMatrix4fv(projection_loc, 1, GL_FALSE, (float*)&projection);
+			glHasError();
+
+			glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_SHORT, nullptr);
+			glHasError();
+		}
+
 	}
 }
 
@@ -211,8 +262,23 @@ void RenderSystem::initRenderData() {
 	texturedVertices[2].texCoord = { 0.0f, 0.0f };
 	texturedVertices[3].texCoord = { 0.0f, 1.0f };
 
+	// Wall
+	std::vector<TexturedVertex> wallVertices(4);
+	wallVertices[0].position = { 0.5f,  0.5f, 0.0f }; // top right
+	wallVertices[1].position = { 0.5f, -0.5f, 0.0f }; // bottom right
+	wallVertices[2].position = { -0.5f, -0.5f, 0.0f }; // bottom left
+	wallVertices[3].position = { -0.5f,  0.5f, 0.0f }; // top left
+
+	std::vector<TexturedVertex> aiVertices(4);
+	aiVertices[0].position = { 0.5f,  0.5f, 0.0f }; // top right
+	aiVertices[1].position = { 0.5f, -0.5f, 0.0f }; // bottom right
+	aiVertices[2].position = { -0.5f, -0.5f, 0.0f }; // bottom left
+	aiVertices[3].position = { -0.5f,  0.5f, 0.0f }; // top left
+
 	const std::vector<uint16_t> texturedIndices = { 2, 0, 3, 2, 1, 0 };
 	bindVBOandIBO(GEOMETRY_BUFFER_IDS::CAT, texturedVertices, texturedIndices);
+	bindVBOandIBO(GEOMETRY_BUFFER_IDS::WALL, wallVertices, texturedIndices);
+	bindVBOandIBO(GEOMETRY_BUFFER_IDS::AI, aiVertices, texturedIndices);
 }
 
 template <class T>

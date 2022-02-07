@@ -160,41 +160,8 @@ bool box_collision(const Boxcollider collider, const Boxcollider collider2, OUT 
 	return true;
 }
 
-void checkForCollisions() {
-	ComponentContainer<Boxcollider>& box_collider_container = registry.boxColliders;
-	for (uint i = 0; i < box_collider_container.components.size(); i++)
-	{
-		Boxcollider& collider_i = box_collider_container.components[i];
-		Entity entity_i = box_collider_container.entities[i];
-		Motion motion = registry.motions.get(entity_i);
-
-		// note starting j at i+1 to compare all (i,j) pairs only once (and to not compare with itself)
-		for (uint j = i + 1; j < box_collider_container.components.size(); j++)
-		{
-			Boxcollider& collider_j = box_collider_container.components[j];
-			vec2 normal;
-			float depth = 9999999;
-			if (box_collision(collider_i, collider_j, normal, depth))
-			{
-				Rigidbody& rb = registry.rigidBodies.get(entity_i);
-				rb.collisionDepth = depth;
-				rb.collisionNomal = normal;
-				printf("COLLISION!!!");
-				Entity entity_j = box_collider_container.entities[j];
-				// Create a collisions event
-				// We are abusing the ECS system a bit in that we potentially insert muliple collisions for the same entity
-				// Calculate the normal and intersection depth of CIRCLE collisions
-
-				Collision& collision1 = registry.collisions.emplace_with_duplicates(entity_i, entity_j);
-
-				Collision& collision2 = registry.collisions.emplace_with_duplicates(entity_j, entity_i);
-			}
-		}
-	}
-}
-
 //If an entity gets transformed and they have a boxcollider, we need to recalculate the verticies
-void transformBoxColliders() {
+void PhysicsSystem::transformBoxColliders() {
 	ComponentContainer<Boxcollider>& collider_container = registry.boxColliders;
 	for (uint i = 0; i < collider_container.components.size(); i++) {
 
@@ -218,6 +185,45 @@ void transformBoxColliders() {
 	}
 }
 
+void PhysicsSystem::checkForCollisions() {
+	ComponentContainer<Boxcollider>& box_collider_container = registry.boxColliders;
+	for (uint i = 0; i < box_collider_container.components.size(); i++)
+	{
+		Boxcollider& collider_i = box_collider_container.components[i];
+		Entity entity_i = box_collider_container.entities[i];
+		Motion& motion = registry.motions.get(entity_i);
+
+		// note starting j at i+1 to compare all (i,j) pairs only once (and to not compare with itself)
+		for (uint j = i + 1; j < box_collider_container.components.size(); j++)
+		{
+			Boxcollider& collider_j = box_collider_container.components[j];
+			Entity entity_j = box_collider_container.entities[j];
+			vec2 normal;
+			float depth = 9999999;
+			if (box_collision(collider_i, collider_j, normal, depth))
+			{
+				//If its a rigid body collision resolve right away
+				if (registry.rigidBodies.has(entity_i) && registry.rigidBodies.has(entity_j)) {
+					vec2 oldpos = motion.position;
+					if (registry.players.has(entity_i)) {
+						motion.position += normal * depth;
+					}
+					collider_i.deltaPos = motion.position - oldpos;
+					collider_i.transformed_required = true;
+					transformBoxColliders();
+				}
+				// Create a collisions event
+				// We are abusing the ECS system a bit in that we potentially insert muliple collisions for the same entity
+				// Calculate the normal and intersection depth of CIRCLE collisions
+
+				Collision& collision1 = registry.collisions.emplace_with_duplicates(entity_i, entity_j);
+
+				Collision& collision2 = registry.collisions.emplace_with_duplicates(entity_j, entity_i);
+			}
+		}
+	}
+}
+
 void PhysicsSystem :: applyMotions(float elapsed_ms) {
 	auto& motion_registry = registry.motions;
 	for (uint i = 0; i < motion_registry.size(); i++)
@@ -234,7 +240,6 @@ void PhysicsSystem :: applyMotions(float elapsed_ms) {
 				motion.velocity = vec2{ 0,0 };
 			}
 			if (rb.type == NORMAL) {
-				//Disabling gravity for now
 				motion.velocity += vec2{ 0, GRAVITY_CONST };
 			}
 		}

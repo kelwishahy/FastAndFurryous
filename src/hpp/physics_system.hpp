@@ -18,6 +18,10 @@ public:
 	}
 
 private:
+	void checkForCollisions();
+
+	void transformBoxColliders();
+
 	void applyMotions(float elapsed_ms);
 
 	const float GRAVITY_CONST = 0.5f;
