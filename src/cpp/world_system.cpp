@@ -76,14 +76,22 @@ void WorldSystem::restart_game() {
 	// Debugging for memory/component leaks
 	registry.list_all_components();
 
-	/*ai_cat = createAI(renderer, { window_width_px / 2, window_width_px - window_height_px - 100 });
-	printf("starting ai.x is: %i px, starting ai.y is: %i px", window_width_px / 2, window_height_px - 100);
-	registry.colors.insert(ai_cat, { 1, 0.8f, 0.8f });*/
-
 	// Create a new cat
-	player_cat = createCat(renderer, { window_width_px / 2, window_height_px - 300 });
+	player_cat = createCat(renderer, { window_width_px / 2 - 200, window_height_px - 400 });
+	createAI(renderer, { (window_width_px / 2) , window_height_px - 250 });
+	//createAI(renderer, { (window_width_px / 2) , window_height_px - 250 });
+
+	//Floor
 	createWall(renderer, { window_width_px / 2, window_height_px }, window_width_px, 50);
-	createWall(renderer, { 0, window_height_px / 2 }, 50, window_height_px - 200);
+
+	//Left Wall
+	createWall(renderer, { 0, window_height_px / 2 }, 50, window_height_px - 10);
+
+	//Right Wall
+	createWall(renderer, { window_width_px, window_height_px / 2 }, 50, window_height_px);
+
+	//Ceiling
+	createWall(renderer, { window_width_px / 2, 0 }, window_width_px, 50);
 	printf("starting cat.x is: %i px, starting cat.y is: %i px", window_width_px / 2, window_height_px - 200);
 	registry.colors.insert(player_cat, { 1, 0.8f, 0.8f });
 	registry.list_all_components_of(player_cat);
@@ -97,25 +105,11 @@ void WorldSystem::handle_collisions() {
 		// The entity and its collider
 		Entity entity = collisionsRegistry.entities[i];
 		Entity entity_other = collisionsRegistry.components[i].other;
-		PhysicsSystem sys;
 
-		// For now, we are only interested in collisions that involve the chicken
-		// Player has rigidbody
+		// Not resolving rigidbody here
 		if (registry.players.has(entity)) {
 			if (registry.rigidBodies.has(entity_other)) {
-				Rigidbody& rb = registry.rigidBodies.get(entity);
-				Motion& motion = registry.motions.get(entity);
-				
-				//TODO this needs to be refactored
-				Boxcollider& collider = registry.boxColliders.get(entity);
-				vec2 oldpos = motion.position;
-				motion.position += rb.collisionNomal * rb.collisionDepth;
-				collider.deltaPos = motion.position - oldpos;
-				collider.transformed_required = true;
 			}
-
-			//Not going to handle rigid body collisions here, we need to handle that collision
-			//before the entity hits the wall
 		}
 	}
 

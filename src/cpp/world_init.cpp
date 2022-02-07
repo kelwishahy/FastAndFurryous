@@ -31,7 +31,8 @@ Entity createCat(RenderSystem* renderer, vec2 pos)
 	registry.meshPtrs.emplace(entity, &mesh);
 
 	//Make player a rigidbody
-	registry.rigidBodies.emplace(entity);
+	Rigidbody& rb = registry.rigidBodies.emplace(entity);
+	//rb.type = STATIC;
 
 	// Setting initial motion values
 	Motion& motion = registry.motions.emplace(entity);
@@ -71,6 +72,7 @@ Entity createWall(RenderSystem* renderer, vec2 pos, int width, int height) {
 
 	//Adding rigidbody component
 	Rigidbody& rb = registry.rigidBodies.emplace(entity);
+	rb.type = STATIC;
 
 	//Adding a box shaped collider
 	Boxcollider& bc = registry.boxColliders.emplace(entity);
@@ -78,7 +80,11 @@ Entity createWall(RenderSystem* renderer, vec2 pos, int width, int height) {
 	bc.transformed_required = true;
 
 
-	rb.type = STATIC;
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_IDS::TOTAL, // textureCount indicates that no txture is needed
+			SHADER_PROGRAM_IDS::WALL,
+			GEOMETRY_BUFFER_IDS::WALL });
 
 	return entity;
 }
@@ -87,24 +93,28 @@ Entity createAI(RenderSystem* renderer, vec2 pos)
 {
 	auto entity = Entity();
 
-	// Store a reference to the potentially re-used mesh object
-	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_IDS::CAT);
-	registry.meshPtrs.emplace(entity, &mesh);
+	//Make player a rigidbody
+	Rigidbody& rb = registry.rigidBodies.emplace(entity);
 
 	// Setting initial motion values
 	Motion& motion = registry.motions.emplace(entity);
 	motion.position = pos;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	//motion.scale = mesh.original_size * 300.f;
+	motion.scale = { 60.f, 60.f };
+
+	Boxcollider& bc = registry.boxColliders.emplace(entity);
+	calculateBoxVerteciesAndSetTriangles(motion.position, motion.scale, bc);
+	bc.transformed_required = true;
 
 	// Create and (empty) Chicken component to be able to refer to all eagles
+	registry.players.emplace(entity);
 	registry.ais.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
-		{ TEXTURE_IDS::TOTAL, // textureCount indicates that no txture is needed
-			SHADER_PROGRAM_IDS::TOTAL,
-			GEOMETRY_BUFFER_IDS::TOTAL });
+		{ TEXTURE_IDS::CAT, // textureCount indicates that no txture is needed
+			SHADER_PROGRAM_IDS::CAT,
+			GEOMETRY_BUFFER_IDS::AI });
 
 	return entity;
 }

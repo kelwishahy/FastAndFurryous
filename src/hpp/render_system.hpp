@@ -19,7 +19,9 @@ class RenderSystem {
 	// Shaders
 	const std::array<std::string, shaderProgramCount> shaderPaths = {
 		"cat",
-		"triangle"
+		"triangle",
+		"wall",
+		"ai"
 	};
 
 	std::array<GLuint, shaderProgramCount> shaders; // OpenGL shader names
