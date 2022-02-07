@@ -29,16 +29,11 @@ void RenderSystem::draw() {
 
 		RenderRequest request = registry.renderRequests.get(entity);
 
-		//// Draw a basic triangle to the screen
+		// Draw cat sprite to the screen
 		if (request.geometry == GEOMETRY_BUFFER_IDS::CAT) {
 
 			const GLuint vbo = vertexBuffers[(GLuint)request.geometry];
 			const GLuint ibo = indexBuffers[(GLuint)request.geometry];
-
-			/*glViewport(0, 0, window_width_px, window_height_px);
-
-			glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-			glClear(GL_COLOR_BUFFER_BIT);*/
 
 			// Bind buffers
 			glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -94,6 +89,7 @@ void RenderSystem::draw() {
 			glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_SHORT, nullptr);
 			glHasError();
 		}
+
 		if (request.geometry == GEOMETRY_BUFFER_IDS::WALL || request.geometry == GEOMETRY_BUFFER_IDS::AI) {
 			const GLuint vbo = vertexBuffers[(GLuint)request.geometry];
 			const GLuint ibo = indexBuffers[(GLuint)request.geometry];
