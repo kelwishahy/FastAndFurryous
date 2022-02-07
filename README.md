@@ -2,6 +2,9 @@
 
 ## Milestone 1: Skeletal Game
 
+### Demo
+https://drive.google.com/uc?export=view&id=1vNFM6YWkKFrvqDjGO7FZI0pdRcVGa95t
+
 ### Rendering
 
   - Initialization of the sprite geometry (square shape):
