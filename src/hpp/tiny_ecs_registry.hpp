@@ -19,6 +19,11 @@ public:
 	ComponentContainer<DebugComponent> debugComponents;
 	ComponentContainer<RenderRequest> renderRequests;
 	ComponentContainer<SolidTerrain> terrains;
+	ComponentContainer<Rigidbody> rigidBodies;
+	ComponentContainer<RayCast> rayCasts;
+	ComponentContainer<AI> ais;
+	ComponentContainer<Boxcollider> boxColliders;
+	ComponentContainer<Circlecollider> circleColliders;
 
 	// constructor that adds all containers for looping over them
 	ECSRegistry() {
@@ -30,6 +35,11 @@ public:
 		registry_list.push_back(&debugComponents);
 		registry_list.push_back(&renderRequests);
 		registry_list.push_back(&terrains);
+		registry_list.push_back(&rigidBodies);
+		registry_list.push_back(&rayCasts);
+		registry_list.push_back(&ais);
+		registry_list.push_back(&boxColliders);
+		registry_list.push_back(&circleColliders);
 	}
 
 	void clear_all_components() {

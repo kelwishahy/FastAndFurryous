@@ -1,11 +1,15 @@
 #version 330 core
-in vec2 TexCoords;
-out vec4 color;
+out vec4 FragColor;
+  
+in vec2 TexCoord;
 
-uniform sampler2D image;
-uniform vec3 spriteColor;
+uniform sampler2D ourTexture;
 
-void main()
-{    
-    color = vec4(spriteColor, 1.0) * texture(image, TexCoords);
-}  
+void main() {
+    FragColor = texture(ourTexture, TexCoord);
+
+    // discard any fragments with an alpha of 0
+    if (FragColor.a == 0.0) {
+        discard;
+    }
+}

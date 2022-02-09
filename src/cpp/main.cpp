@@ -1,9 +1,8 @@
 // Game Systems
 #include <hpp/render_system.hpp>
-#include <hpp/shader_manager.hpp>
-#include <hpp/components.hpp>
 #include <hpp/physics_system.hpp>
 #include <hpp/world_system.hpp>
+#include <hpp/ai_system.hpp>
 
 // stlib
 #include <chrono>
@@ -13,29 +12,23 @@
 
 using Clock = std::chrono::high_resolution_clock;
 
-// Triangle NDC
-float vertices[] = {
-	-0.5f, -0.5f, 0.0f,
-	 0.5f, -0.5f, 0.0f,
-	 0.0f,  0.5f, 0.0f
-};
-
 int main() {
 	std::cout << "Starting The Fast and the Furryous" << std::endl;
-	// TO-DO:
+
 	// Global systems
 	WorldSystem world;
 	PhysicsSystem physics;
+	RenderSystem renderer;
+	AISystem ai;
 
 	// Initialize game systems
-	RenderSystem renderer = RenderSystem::RenderSystem();
+	renderer.init();
+	ai.init();
 	GLFWwindow* window = renderer.getWindow(); // Window is part of the renderer context
 
-	// Copy triangle vertex data into the vertex buffer
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	world.init(&renderer);
 
 	auto time = Clock::now();
-	world.init(&renderer);
 
 	// Game loop
 	while (!glfwWindowShouldClose(window)) { // TO-DO: Make this loop condition depend on the world state, like in assignment template
@@ -56,14 +49,13 @@ int main() {
 		time = now;
 
 		world.step(elapsed_ms);
-		renderer.draw(SHADER_PROGRAM_IDS::TRIANGLE);
+		ai.step(elapsed_ms);
 		physics.step(elapsed_ms);
 		world.handle_collisions();
 
+		renderer.draw();
 		glfwSwapBuffers(window);
 	}
-
-
 
 	return EXIT_SUCCESS;
 }
