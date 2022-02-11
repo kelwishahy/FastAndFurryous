@@ -9,6 +9,8 @@
 #include "..\hpp\tiny_ecs_registry.hpp"
 #include <hpp/physics_system.hpp>
 
+//#include <hpp/game_controller.hpp>
+
 // Create the bug world
 WorldSystem::WorldSystem() {
 	// seeding rng with random device
@@ -62,40 +64,44 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 // Reset the world state to its initial state
 void WorldSystem::restart_game() {
 	// Debugging for memory/component leaks
-	registry.list_all_components();
-	printf("Restarting\n");
+	//registry.list_all_components();
+	//printf("Restarting\n");
 
-	// Reset the game speed
-	current_speed = 1.f;
+	//// Reset the game speed
+	//current_speed = 1.f;
 
-	// Remove all entities that we created
-	// All that have a motion, we could also iterate over all bug, eagles, ... but that would be more cumbersome
-	while (registry.motions.entities.size() > 0)
-		registry.remove_all_components_of(registry.motions.entities.back());
+	//// Remove all entities that we created
+	//// All that have a motion, we could also iterate over all bug, eagles, ... but that would be more cumbersome
+	//while (registry.motions.entities.size() > 0)
+	//	registry.remove_all_components_of(registry.motions.entities.back());
 
-	// Debugging for memory/component leaks
-	registry.list_all_components();
+	//// Debugging for memory/component leaks
+	//registry.list_all_components();
 
-	// Create a new cat
-	player_cat = createCat(renderer, { window_width_px / 2 - 200, window_height_px - 400 });
-	createAI(renderer, { (window_width_px / 2) , window_height_px - 250 });
+	//// Create a new cat
+	//player_cat = createCat(renderer, { window_width_px / 2 - 200, window_height_px - 400 });
 	//createAI(renderer, { (window_width_px / 2) , window_height_px - 250 });
+	////createAI(renderer, { (window_width_px / 2) , window_height_px - 250 });
 
-	//Floor
-	createWall(renderer, { window_width_px / 2, window_height_px }, window_width_px, 50);
+	////Floor
+	//createWall(renderer, { window_width_px / 2, window_height_px }, window_width_px, 50);
 
-	//Left Wall
-	createWall(renderer, { 0, window_height_px / 2 }, 50, window_height_px - 10);
+	////Left Wall
+	//createWall(renderer, { 0, window_height_px / 2 }, 50, window_height_px - 10);
 
-	//Right Wall
-	createWall(renderer, { window_width_px, window_height_px / 2 }, 50, window_height_px);
+	////Right Wall
+	//createWall(renderer, { window_width_px, window_height_px / 2 }, 50, window_height_px);
 
-	//Ceiling
-	createWall(renderer, { window_width_px / 2, 0 }, window_width_px, 50);
-	printf("starting cat.x is: %i px, starting cat.y is: %i px", window_width_px / 2, window_height_px - 200);
-	registry.colors.insert(player_cat, { 1, 0.8f, 0.8f });
-	registry.list_all_components_of(player_cat);
+	////Ceiling
+	//createWall(renderer, { window_width_px / 2, 0 }, window_width_px, 50);
+	//printf("starting cat.x is: %i px, starting cat.y is: %i px", window_width_px / 2, window_height_px - 200);
+	//registry.colors.insert(player_cat, { 1, 0.8f, 0.8f });
+	//registry.list_all_components_of(player_cat);
 
+	//Load Title screen
+	//Character Select
+
+	printf("%i", current_game.testint);
 }
 
 void WorldSystem::handle_collisions() {

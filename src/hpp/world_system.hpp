@@ -13,6 +13,7 @@
 #include <SDL_mixer.h>
 
 #include "render_system.hpp"
+#include "game_controller.hpp"
 
 using namespace glm;
 
@@ -58,6 +59,9 @@ private:
 	std::default_random_engine rng;
 	float next_ai_spawn;
 	Entity ai_cat;
+
+	//Game Controller
+	GameController current_game;
 
 	// OpenGL window handle
 	//GLFWwindow* window;
