@@ -81,6 +81,8 @@ void move_back_entity(Motion& motion, Rigidbody& rb, Boxcollider& collider, vec2
 	motion.position += normal * depth;
 	collider.deltaPos = motion.position - oldpos;
 	collider.transformed_required = true;
+	rb.collision_depth = depth;
+	rb.collision_normal = normal;
 }
 
 //Used to correctly orient the normals on a given edge of a box
