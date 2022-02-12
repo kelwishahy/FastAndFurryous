@@ -76,6 +76,13 @@ void project_verticies(std::vector<vec2> box_vertices, vec2 axis, OUT float& min
 
 }
 
+void move_back_entity(Motion& motion, Rigidbody& rb, Boxcollider& collider, vec2 normal, float depth) {
+	vec2 oldpos = motion.position;
+	motion.position += normal * depth;
+	collider.deltaPos = motion.position - oldpos;
+	collider.transformed_required = true;
+}
+
 //Used to correctly orient the normals on a given edge of a box
 vec2 find_arithmetic_mean(std::vector<vec2> vertices) {
 	
@@ -191,25 +198,32 @@ void PhysicsSystem::checkForCollisions() {
 	{
 		Boxcollider& collider_i = box_collider_container.components[i];
 		Entity entity_i = box_collider_container.entities[i];
-		Motion& motion = registry.motions.get(entity_i);
+		Motion& motion_i = registry.motions.get(entity_i);
 
 		// note starting j at i+1 to compare all (i,j) pairs only once (and to not compare with itself)
 		for (uint j = i + 1; j < box_collider_container.components.size(); j++)
 		{
 			Boxcollider& collider_j = box_collider_container.components[j];
 			Entity entity_j = box_collider_container.entities[j];
+			Motion& motion_j = registry.motions.get(entity_j);
 			vec2 normal;
 			float depth = 9999999;
 			if (box_collision(collider_i, collider_j, normal, depth))
 			{
 				//If its a rigid body collision resolve right away
 				if (registry.rigidBodies.has(entity_i) && registry.rigidBodies.has(entity_j)) {
-					vec2 oldpos = motion.position;
-					if (registry.players.has(entity_i)) {
-						motion.position += normal * depth;
+					Rigidbody& entity_i_rb = registry.rigidBodies.get(entity_i);
+					Rigidbody& entity_j_rb = registry.rigidBodies.get(entity_j);
+					if (entity_i_rb.type == NORMAL && entity_j_rb.type == STATIC) {
+						move_back_entity(motion_i, entity_i_rb, collider_i, normal, depth);
 					}
-					collider_i.deltaPos = motion.position - oldpos;
-					collider_i.transformed_required = true;
+					else if (entity_i_rb.type == NORMAL && entity_j_rb.type == NORMAL) {
+						move_back_entity(motion_i, entity_i_rb, collider_i, normal, depth/2);
+						move_back_entity(motion_j, entity_j_rb, collider_j, -normal, depth/2);
+					}
+					else if (entity_i_rb.type == STATIC && entity_j_rb.type == NORMAL) {
+						move_back_entity(motion_j, entity_j_rb, collider_j, -normal, depth);
+					}
 					transformBoxColliders();
 				}
 				// Create a collisions event

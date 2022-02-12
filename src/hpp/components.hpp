@@ -87,8 +87,8 @@ struct Motion {
 struct Rigidbody {
 	enum RB_TYPES type = NORMAL;
 	float mass = 1;
-	std::vector<float> collisionDepths;
-	std::vector<glm::vec2> collisionNormals;
+	float collision_depth;
+	glm::vec2 collision_normal;
 };
 
 struct RayCast {
