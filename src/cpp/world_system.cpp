@@ -79,7 +79,7 @@ void WorldSystem::restart_game() {
 	// Create a new cat
 	player_cat = createCat(renderer, { window_width_px / 2 - 200, window_height_px - 400 });
 	createAI(renderer, { (window_width_px / 2) , window_height_px - 250 });
-	//createAI(renderer, { (window_width_px / 2) , window_height_px - 250 });
+	//createAI(renderer, { (window_width_px / 2) - 100 , window_height_px - 250 });
 
 	//Floor
 	createWall(renderer, { window_width_px / 2, window_height_px }, window_width_px, 50);
@@ -109,6 +109,15 @@ void WorldSystem::handle_collisions() {
 		// Not resolving rigidbody here
 		if (registry.players.has(entity)) {
 			if (registry.rigidBodies.has(entity_other)) {
+			}
+		}
+		
+		if (registry.ais.has(entity)) {
+			// collision involving ais
+			if (registry.boxColliders.has(entity_other)) {
+				Motion& motion = registry.motions.get(entity);
+				
+				motion.velocity.y = -100.f;
 			}
 		}
 	}

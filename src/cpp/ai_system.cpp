@@ -17,6 +17,7 @@ void AISystem::step(float elapsed_ms)
 	Motion& player_motion = registry.motions.get(player);
 	vec2 player_pos = player_motion.position;
 
+
 	for (uint i = 0; i < ai_container.components.size(); i++) {
 		
 		// AI& ai = ai_container.components[i];
@@ -33,20 +34,22 @@ void AISystem::step(float elapsed_ms)
 			}
 			else {
 				motion.velocity.x = 0;
+				//motion.velocity.x = 100 * cos(motion.angle);
 			}
 
 			timer = VELOCITY_CHANGE_DELAY;
 		}
-		if (jumpdelay <= 0) {
+		/*if (jumpdelay <= 0) {
 			motion.velocity.y = -100.f;
 			jumpdelay = uniform_dist(rng) * 100000;
-		}
+		}*/
 		timer -= elapsed_ms;
-		jumpdelay -= elapsed_ms;
+		//jumpdelay -= elapsed_ms;
 
 	}
 	
 }
+
 
 //initialize stuff here
 void AISystem::init() {
