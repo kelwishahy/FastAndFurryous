@@ -19,7 +19,7 @@ RenderSystem::~RenderSystem() {
 
 void RenderSystem::draw() {
 	glm::mat4 projection = createProjectionMatrix();
-	glViewport(0, 0, window_width_px, window_height_px);
+	glViewport(0, 0, this->screenWidth, this->screenHeight);
 
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -149,8 +149,15 @@ bool RenderSystem::init() {
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true); // Request GLFW debug context
+	glfwWindowHint(GLFW_RESIZABLE, GL_FALSE); // Window is not resizable
+	glfwWindowHint(GLFW_MAXIMIZED, GL_TRUE); // Make the window full screen
 
-	this->window = glfwCreateWindow(window_width_px, window_height_px, "The Fast and the Furryous", NULL, NULL);
+	// NOTE: The width & height here are unimportant as the window will be maximized on creation
+	this->window = glfwCreateWindow(1000, 800, "The Fast and the Furryous", NULL, NULL);
+	glfwSetWindowAspectRatio(window, 16, 9);
+	glfwGetWindowSize(window, &this->screenWidth, &this->screenHeight);
+
+	printf("Screen size: %d, %d\n", this->screenWidth, this->screenHeight);
 
 	if (window == NULL) {
 		std::cout << "Failed to create GLFW window" << std::endl;
@@ -313,8 +320,8 @@ void RenderSystem::loadMeshes() {
 mat4 RenderSystem::createProjectionMatrix() {
 	constexpr float left = 0.f;
 	constexpr float top = 0.f;
-	float right = (float)window_width_px;
-	float bottom = (float)window_height_px;
+	float right = (float)this->screenWidth;
+	float bottom = (float)this->screenHeight;
 	constexpr float far = 1.f;
 	constexpr float near = -1.f;
 

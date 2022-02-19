@@ -17,6 +17,10 @@
 
 using namespace glm;
 
+void PhysicsSystem::init(RenderSystem* renderer) {
+	this->renderer = renderer;
+}
+
 //Creates a ray entity and returns the ray
 //Not sure what the best way to handle the ray is...
 Entity castRay(vec2 origin, float direction, float distance, float max_depth) {
@@ -281,7 +285,7 @@ void PhysicsSystem::step(float elapsed_ms)
 	checkForCollisions();
 
 	// you may need the following quantities to compute wall positions
-	(float)window_width_px; (float)window_height_px;
+	(float)renderer->getScreenWidth(); (float)renderer->getScreenHeight();
 
 
 	// debugging of bounding boxes

@@ -33,7 +33,7 @@ void WorldSystem::init(RenderSystem* renderer) {
 	// Set all states to default
 
 	//creates a wall on the left side of the screen
-	printf("window height is: %i px, window width is: %i px", window_height_px, window_width_px);
+	printf("window height is: %i px, window width is: %i px", renderer->getScreenHeight(), renderer->getScreenWidth());
 
 	restart_game();
 }
@@ -76,23 +76,27 @@ void WorldSystem::restart_game() {
 	// Debugging for memory/component leaks
 	registry.list_all_components();
 
+	const int width = renderer->getScreenWidth();
+	const int height = renderer->getScreenHeight();
+
 	// Create a new cat
-	player_cat = createCat(renderer, { window_width_px / 2 - 200, window_height_px - 400 });
-	createAI(renderer, { (window_width_px / 2) , window_height_px - 250 });
+	player_cat = createCat(renderer, { width / 2 - 200, height - 400 });
+	createAI(renderer, { (width / 2) , height - 250 });
 	//createAI(renderer, { (window_width_px / 2) , window_height_px - 250 });
 
 	//Floor
-	createWall(renderer, { window_width_px / 2, window_height_px }, window_width_px, 50);
+	createWall(renderer, { width / 2, height }, width, 50);
 
 	//Left Wall
-	createWall(renderer, { 0, window_height_px / 2 }, 50, window_height_px - 10);
+	createWall(renderer, { 0, height / 2 }, 50, height);
 
 	//Right Wall
-	createWall(renderer, { window_width_px, window_height_px / 2 }, 50, window_height_px);
+	createWall(renderer, { width, height / 2 }, 50, height);
 
 	//Ceiling
-	createWall(renderer, { window_width_px / 2, 0 }, window_width_px, 50);
-	printf("starting cat.x is: %i px, starting cat.y is: %i px", window_width_px / 2, window_height_px - 200);
+	createWall(renderer, { width / 2, 0 }, width, 50);
+
+	printf("starting cat.x is: %i px, starting cat.y is: %i px", width / 2, height - 200);
 	registry.colors.insert(player_cat, { 1, 0.8f, 0.8f });
 	registry.list_all_components_of(player_cat);
 
