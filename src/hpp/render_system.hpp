@@ -58,12 +58,17 @@ public:
 	bool init();
 
 	// Return the GLFW window associated with this renderer
-	GLFWwindow* getWindow() { return window; };
+	GLFWwindow* getWindow() { return window; }
 
-	Mesh& getMesh(GEOMETRY_BUFFER_IDS id) { return meshes[(int)id]; };
+	Mesh& getMesh(GEOMETRY_BUFFER_IDS id) { return meshes[(int)id]; }
+
+	int getScreenWidth() { return this->screenWidth; }
+	int getScreenHeight() { return this->screenHeight; }
 
 private:
 	GLFWwindow* window;
+	int screenWidth;
+	int screenHeight;
 	GLuint vao;
 	GLuint frameBuffer;
 	GLuint renderBufferColour;
@@ -84,7 +89,7 @@ private:
 
 	// Generate a 4x4 orthographic projection matrix
 	// that scales with window size
-	static glm::mat4 createProjectionMatrix();
+	glm::mat4 createProjectionMatrix();
 
 };
 

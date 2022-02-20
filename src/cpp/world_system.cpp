@@ -35,7 +35,7 @@ void WorldSystem::init(RenderSystem* renderer) {
 	// Set all states to default
 
 	//creates a wall on the left side of the screen
-	printf("window height is: %i px, window width is: %i px", window_height_px, window_width_px);
+	printf("window height is: %i px, window width is: %i px", renderer->getScreenHeight(), renderer->getScreenWidth());
 
 	restart_game();
 }
@@ -78,8 +78,12 @@ void WorldSystem::restart_game() {
 	//// Debugging for memory/component leaks
 	//registry.list_all_components();
 
-	//// Create a new cat
-	//player_cat = createCat(renderer, { window_width_px / 2 - 200, window_height_px - 400 });
+	const int width = renderer->getScreenWidth();
+	const int height = renderer->getScreenHeight();
+
+	// Create a new cat
+	player_cat = createCat(renderer, { width / 2 - 200, height - 400 });
+	createAI(renderer, { (width / 2) , height - 250 });
 	//createAI(renderer, { (window_width_px / 2) , window_height_px - 250 });
 	////createAI(renderer, { (window_width_px / 2) , window_height_px - 250 });
 
