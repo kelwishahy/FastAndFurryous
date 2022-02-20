@@ -24,9 +24,9 @@ int main() {
 	// Initialize game systems
 	renderer.init();
 	ai.init();
-	GLFWwindow* window = renderer.getWindow(); // Window is part of the renderer context
-
+	physics.init(&renderer);
 	world.init(&renderer);
+	GLFWwindow* window = renderer.getWindow(); // Window is part of the renderer context
 
 	auto time = Clock::now();
 
