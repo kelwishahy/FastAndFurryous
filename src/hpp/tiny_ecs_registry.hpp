@@ -10,36 +10,37 @@ class ECSRegistry
 	std::vector<ContainerInterface*> registry_list;
 
 public:
-	// Manually created list of all components this game has
-	ComponentContainer<Player> players;
-	ComponentContainer<Motion> motions;
-	ComponentContainer<Collision> collisions;
-	ComponentContainer<Mesh*> meshPtrs;
-	ComponentContainer<glm::vec3> colors;
-	ComponentContainer<DebugComponent> debugComponents;
-	ComponentContainer<RenderRequest> renderRequests;
-	ComponentContainer<SolidTerrain> terrains;
-	ComponentContainer<Rigidbody> rigidBodies;
-	ComponentContainer<RayCast> rayCasts;
+	// All game components in alphabetical order
 	ComponentContainer<AI> ais;
 	ComponentContainer<Boxcollider> boxColliders;
 	ComponentContainer<Circlecollider> circleColliders;
+	ComponentContainer<Collision> collisions;
+	ComponentContainer<glm::vec3> colors;
+	ComponentContainer<DebugComponent> debugComponents;
+	ComponentContainer<Health> health;
+	ComponentContainer<Player> players;
+	ComponentContainer<Mesh*> meshPtrs;
+	ComponentContainer<Motion> motions;
+	ComponentContainer<RayCast> rayCasts;
+	ComponentContainer<RenderRequest> renderRequests;
+	ComponentContainer<Rigidbody> rigidBodies;
+	ComponentContainer<SolidTerrain> terrains;
 
-	// constructor that adds all containers for looping over them
 	ECSRegistry() {
-		registry_list.push_back(&players);
-		registry_list.push_back(&motions);
-		registry_list.push_back(&meshPtrs);
-		registry_list.push_back(&colors);
-		registry_list.push_back(&collisions);
-		registry_list.push_back(&debugComponents);
-		registry_list.push_back(&renderRequests);
-		registry_list.push_back(&terrains);
-		registry_list.push_back(&rigidBodies);
-		registry_list.push_back(&rayCasts);
 		registry_list.push_back(&ais);
 		registry_list.push_back(&boxColliders);
 		registry_list.push_back(&circleColliders);
+		registry_list.push_back(&collisions);
+		registry_list.push_back(&colors);
+		registry_list.push_back(&debugComponents);
+		registry_list.push_back(&health);
+		registry_list.push_back(&players);
+		registry_list.push_back(&meshPtrs);
+		registry_list.push_back(&motions);
+		registry_list.push_back(&rayCasts);
+		registry_list.push_back(&renderRequests);
+		registry_list.push_back(&rigidBodies);
+		registry_list.push_back(&terrains);
 	}
 
 	void clear_all_components() {

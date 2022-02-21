@@ -4,7 +4,7 @@
 #include "render_system.hpp"
 #include <glm/vec2.hpp>				// vec2
 
-// the player
+// Player entities
 Entity createCat(RenderSystem* renderer, glm::vec2 pos);
 
 // solid terrain
