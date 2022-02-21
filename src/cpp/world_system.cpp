@@ -41,6 +41,9 @@ void WorldSystem::init(RenderSystem* renderer) {
 // Update our game world
 bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
+	// Check if the player is still alive
+	if (registry.health.get(player_cat).hp == 0) restart_game();
+
 	// Removing out of screen entities
 	auto& motions_registry = registry.motions;
 
@@ -132,28 +135,28 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	Motion& catMotion = registry.motions.get(player_cat);
 	
 	current_speed = fmax(150.0f, current_speed);
-	if (action == GLFW_PRESS && key == GLFW_KEY_UP) {
+	if (action == GLFW_PRESS && key == GLFW_KEY_W) {
 		catMotion.velocity.y = -current_speed;
 	}
 
-	if (action == GLFW_PRESS && key == GLFW_KEY_DOWN) {
+	if (action == GLFW_PRESS && key == GLFW_KEY_S) {
 		catMotion.velocity.y = current_speed;
 	}
 
-	if (action == GLFW_PRESS && key == GLFW_KEY_RIGHT) {
+	if (action == GLFW_PRESS && key == GLFW_KEY_D) {
 		catMotion.velocity.x = current_speed;
 	}
 
-	if (action == GLFW_PRESS && key == GLFW_KEY_LEFT) {
+	if (action == GLFW_PRESS && key == GLFW_KEY_A) {
 		catMotion.velocity.x = -current_speed;
 	}
 
 
 	if (action == GLFW_RELEASE) {
-		if (key == GLFW_KEY_LEFT && catMotion.velocity.x < 0) {
+		if (key == GLFW_KEY_A && catMotion.velocity.x < 0) {
 			catMotion.velocity.x = 0.0f;
 		}
-		if (key == GLFW_KEY_RIGHT && catMotion.velocity.x > 0) {
+		if (key == GLFW_KEY_D && catMotion.velocity.x > 0) {
 			catMotion.velocity.x = 0.0f;
 		}
 	}
