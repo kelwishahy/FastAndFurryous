@@ -26,6 +26,9 @@ Entity createCat(RenderSystem* renderer, vec2 pos)
 {
 	auto entity = Entity();
 
+	// Add health component
+	Health& health = registry.health.emplace(entity);
+
 	// Store a reference to the potentially re-used mesh object
 	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_IDS::CAT);
 	registry.meshPtrs.emplace(entity, &mesh);
@@ -92,6 +95,9 @@ Entity createWall(RenderSystem* renderer, vec2 pos, int width, int height) {
 Entity createAI(RenderSystem* renderer, vec2 pos)
 {
 	auto entity = Entity();
+
+	// Add health component
+	Health& health = registry.health.emplace(entity);
 
 	//Make player a rigidbody
 	Rigidbody& rb = registry.rigidBodies.emplace(entity);
