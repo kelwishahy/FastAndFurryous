@@ -19,7 +19,7 @@ class RenderSystem {
 	// Shaders
 	const std::array<std::string, shaderProgramCount> shaderPaths = {
 		"cat",
-		"triangle",
+		"texture",
 		"wall",
 		"ai"
 	};
@@ -31,7 +31,8 @@ class RenderSystem {
 		"cat-idle.png",
 		"cat-walk.png",
 		"cat-jump.png",
-		"wall.jpg"
+		"cat.png"
+
 	};
 
 	std::array<GLuint, textureCount> textures; // OpenGL texture names
@@ -71,6 +72,11 @@ public:
 	// Draw to the screen using shaderProgram
 	void draw(float elapsed_ms);
 
+	// Draw a quad with an optional texture
+	void drawQuad(RenderRequest& request, std::string shaderInputs[], int numInputs);
+
+	void animateSprite(Entity& entity, float elapsed_ms);
+
 	// Initialize GLFW window and context
 	bool init();
 
@@ -90,6 +96,11 @@ private:
 	GLuint frameBuffer;
 	GLuint renderBufferColour;
 	GLuint renderBufferDepth;
+
+	// Reusable quad (square) geometry
+	std::vector<TexturedVertex> texturedQuad;
+	std::vector<glm::vec3> quad;
+	const std::vector<uint16_t> quadIndices = { 2, 0, 3, 2, 1, 0 };
 
 	// Initialize the off screen render buffer
 	// which is used as an intermediate render target

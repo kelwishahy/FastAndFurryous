@@ -12,7 +12,6 @@
 
 //#include <hpp/game_controller.hpp>
 
-// Create the bug world
 WorldSystem::WorldSystem() {
 	// seeding rng with random device
 }

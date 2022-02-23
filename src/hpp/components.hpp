@@ -40,10 +40,8 @@ enum class TEXTURE_IDS {
 }; constexpr int textureCount = (int)TEXTURE_IDS::TOTAL;
 
 enum class GEOMETRY_BUFFER_IDS {
-	CAT_IDLE,
-	CAT_WALK,
-	CAT_JUMP,
-	TRIANGLE,
+	QUAD,
+	TEXTURED_QUAD,
 	WALL,
 	AI,
 	TOTAL

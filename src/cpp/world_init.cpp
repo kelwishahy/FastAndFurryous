@@ -51,9 +51,9 @@ Entity createCat(RenderSystem* renderer, vec2 pos)
 	registry.players.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
-		{ TEXTURE_IDS::CAT_IDLE, // textureCount indicates that no txture is needed
+		{ TEXTURE_IDS::CAT_IDLE,
 			SHADER_PROGRAM_IDS::CAT,
-			GEOMETRY_BUFFER_IDS::CAT_IDLE });
+			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
 
 	registry.weapons.insert(entity, Rifle());
 
@@ -83,12 +83,11 @@ Entity createWall(RenderSystem* renderer, vec2 pos, int width, int height) {
 	calculateBoxVerteciesAndSetTriangles(motion.position, motion.scale, bc);
 	bc.transformed_required = true;
 
-
-	registry.renderRequests.insert(
-		entity,
-		{ TEXTURE_IDS::TOTAL, // textureCount indicates that no txture is needed
-			SHADER_PROGRAM_IDS::WALL,
-			GEOMETRY_BUFFER_IDS::WALL });
+	// registry.renderRequests.insert(
+	// 	entity,
+	// 	{ TEXTURE_IDS::TOTAL, // textureCount indicates that no texture is needed
+	// 		SHADER_PROGRAM_IDS::WALL,
+	// 		GEOMETRY_BUFFER_IDS::WALL });
 
 	return entity;
 }
@@ -114,16 +113,13 @@ Entity createAI(RenderSystem* renderer, vec2 pos)
 	calculateBoxVerteciesAndSetTriangles(motion.position, motion.scale, bc);
 	bc.transformed_required = true;
 
-	// Create and (empty) Chicken component to be able to refer to all eagles
-	// this is entity 4 remove this - or change the if case in render system.
-	// still doesn't work so i'll comment this out for now to see why animation don't work.
 	registry.players.emplace(entity);
 	registry.ais.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
-		{ TEXTURE_IDS::CAT_IDLE, // textureCount indicates that no txture is needed
+		{ TEXTURE_IDS::CAT_IDLE,
 			SHADER_PROGRAM_IDS::CAT,
-			GEOMETRY_BUFFER_IDS::AI });
+			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
 
 	return entity;
 }

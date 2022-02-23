@@ -85,24 +85,27 @@ void GameController::step(float elapsed_ms)
 
 void GameController::build_map() {
 	//TEMPORARY UNTIL WE FIGURE OUT A SYSTEM FOR MAP BUILDING
-	////Floor
+
 	const int width = renderer->getScreenWidth();
 	const int height = renderer->getScreenHeight();
-	createWall(renderer, { width / 2, height }, width, 50);
 
-	////Left Wall
-	createWall(renderer, { 0, height / 2 }, 50, height - 10);
+	// Move the walls off screen and don't render them
 
-	////Right Wall
-	createWall(renderer, { width, height / 2 }, 50, height);
+	//Floor
+	createWall(renderer, { width / 2, height + 10 }, width, 10);
 
-	////Ceiling
-	createWall(renderer, { width / 2, 0 }, width, 50);
+	//Left Wall
+	createWall(renderer, { -10, height / 2 }, 10, height - 10);
+
+	//Right Wall
+	createWall(renderer, { width + 10, height / 2 }, 10, height);
+
+	//Ceiling
+	createWall(renderer, { width / 2, -10 }, width, 10);
 
 }
 
 void GameController::init_player_teams() {
-	//TEMPORARY UNTIL WE FIGURE OUT A SYSTEM FOR MAP BUILDING
 	std::vector<int> dummyvector;
 	dummyvector.push_back(1);
 	const int width = renderer->getScreenWidth();
@@ -112,7 +115,9 @@ void GameController::init_player_teams() {
 		for (int dummyval : dummyvector) {
 			//TEMPORARY UNTIL WE HAVE A MAP INIT SYSTEM
 			Entity player_cat = createCat(this->renderer, { width / 2 - 200, height - 400 });
+			// Entity ai_cat = createAI(this->renderer, { width / 2 - 300, height - 400 });
 			player1_team.push_back(player_cat);
+			// player1_team.push_back(ai_cat);
 			curr_selected_char = player_cat;
 		}
 	}
