@@ -31,7 +31,7 @@ public:
 	// Releases all associated resources
 	~WorldSystem();
 
-	void init(RenderSystem* renderer);
+	void init(RenderSystem* renderer, GLFWwindow* window);
 
 	// Steps the game ahead by ms milliseconds
 	bool step(float elapsed_ms);
@@ -64,5 +64,5 @@ private:
 	GameController current_game;
 
 	// OpenGL window handle
-	//GLFWwindow* window;
+	GLFWwindow* window;
 };
