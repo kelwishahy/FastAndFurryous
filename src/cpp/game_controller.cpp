@@ -149,25 +149,8 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 			}
 		}
 
-		/*if (action == GLFW_RELEASE) {
-			if (key == GLFW_KEY_UP && catMotion.velocity.y < 0) {
-				catMotion.velocity.y = 0.0f;
-			}
-			if (key == GLFW_KEY_DOWN && catMotion.velocity.y > 0) {
-				catMotion.velocity.y = 0.0f;
-			}
-		}*/
-
-		// Control the current speed with `<` `>`
-		if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_COMMA) {
-			current_speed -= 0.1f;
-			printf("Current speed = %f\n", current_speed);
+		if (action == GLFW_PRESS && key == GLFW_KEY_T) {
 		}
-		if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_PERIOD) {
-			current_speed += 0.1f;
-			printf("Current speed = %f\n", current_speed);
-		}
-		current_speed = fmax(0.f, current_speed);
 	}
 
 	if (action == GLFW_PRESS && key == GLFW_KEY_N) {
