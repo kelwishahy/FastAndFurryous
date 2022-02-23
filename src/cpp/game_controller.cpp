@@ -3,7 +3,6 @@
 
 GameController::GameController() {
 	inAGame = false;
-
 }
 
 GameController::~GameController() {
@@ -124,19 +123,19 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 		Motion& catMotion = registry.motions.get(player1_team[0]);
 
 		float current_speed = 150.0f;
-		if (action == GLFW_PRESS && key == GLFW_KEY_UP) {
+		if (action == GLFW_PRESS && key == GLFW_KEY_W) {
 			catMotion.velocity.y = -current_speed;
 		}
 
-		if (action == GLFW_PRESS && key == GLFW_KEY_DOWN) {
+		if (action == GLFW_PRESS && key == GLFW_KEY_S) {
 			catMotion.velocity.y = current_speed;
 		}
 
-		if (action == GLFW_PRESS && key == GLFW_KEY_RIGHT) {
+		if (action == GLFW_PRESS && key == GLFW_KEY_D) {
 			catMotion.velocity.x = current_speed;
 		}
 
-		if (action == GLFW_PRESS && key == GLFW_KEY_LEFT) {
+		if (action == GLFW_PRESS && key == GLFW_KEY_A) {
 			catMotion.velocity.x = -current_speed;
 		}
 
