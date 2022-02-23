@@ -3,6 +3,7 @@
 
 GameController::GameController() {
 	inAGame = false;
+
 }
 
 GameController::~GameController() {
@@ -93,17 +94,23 @@ void GameController::init_player_teams() {
 
 		}
 	}*/
+
+	//This needs to be in order
+	teams.push_back(player1_team);
+	teams.push_back(player2_team);
+	teams.push_back(ai_team);
+	teams.push_back(npcai_team);
 }
 
 void GameController::next_turn() {
 	//Turn order will ALWAYS be PLAYER1 -> PLAYER2 -> ENEMY_AI -> (not implemented) AI
 	//IF THERE IS NO ONE ON A TEAM, THE GAME CONTROLLER WILL MOVE ON TO THE NEXT TURN
 
+	game_state.turn_possesion += 1;
 	if (game_state.turn_possesion == TURN_CODE::END) {
-		game_state.turn_possesion == TURN_CODE::PLAYER1;
-	}
-	else {
-		game_state.turn_possesion += 1;
+		game_state.turn_possesion = TURN_CODE::PLAYER1;
+	} else if (teams[game_state.turn_possesion].empty()) {
+		next_turn();
 	}
 }
 

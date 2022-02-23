@@ -44,9 +44,6 @@ void WorldSystem::init(RenderSystem* renderer, GLFWwindow* window) {
 // Update our game world
 bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
-	// Check if the player is still alive
-	if (registry.health.get(player_cat).hp == 0) restart_game();
-
 	// Removing out of screen entities
 	auto& motions_registry = registry.motions;
 

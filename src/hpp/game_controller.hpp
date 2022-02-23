@@ -54,6 +54,7 @@ private:
 	std::vector<Entity> player2_team;
 	std::vector<Entity> ai_team;
 	std::vector<Entity> npcai_team;
+	std::vector<std::vector<Entity>> teams;
 
 	//Turn System stuff
 	enum TURN_CODE {
