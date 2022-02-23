@@ -107,9 +107,11 @@ void GameController::next_turn() {
 	//IF THERE IS NO ONE ON A TEAM, THE GAME CONTROLLER WILL MOVE ON TO THE NEXT TURN
 
 	game_state.turn_possesion += 1;
+	game_state.turn_number += 1;
 	if (game_state.turn_possesion == TURN_CODE::END) {
 		game_state.turn_possesion = TURN_CODE::PLAYER1;
 	} else if (teams[game_state.turn_possesion].empty()) {
+		game_state.turn_number -= 1;
 		next_turn();
 	}
 }
