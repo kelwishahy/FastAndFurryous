@@ -28,7 +28,7 @@ class RenderSystem {
 
 	// Textures
 	const std::array<std::string, textureCount> texturePaths = {
-		"cat-idle.png",
+		"cat-walk.png",
 		"wall.jpg"
 	};
 
@@ -48,7 +48,7 @@ class RenderSystem {
 
 	const int CAT_IDLE_FRAMES = 9;
 	const GLfloat CAT_IDLE_FRAME_WIDTH = 1/9;
-	float CAT_IDLE_FRAME_TIME = 200; // try different values
+	float CAT_IDLE_FRAME_TIME = 1000; // try different values
 
 
 public:

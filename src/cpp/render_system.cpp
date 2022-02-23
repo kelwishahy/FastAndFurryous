@@ -77,9 +77,11 @@ void RenderSystem::draw(float elapsed_ms) {
 					}
 					// Reset frame timer
 					*counter = timePerFrame;
+					std::cout << "COUNTER (" << *counter << "): \n" << *counter << std::endl;
 				}
 				else {
 					curr_frame = *frame;
+					std::cout << "CURR_FRAME FOR CAT (" << curr_frame << "): \n" << curr_frame << std::endl;
 				}
 			}
 
@@ -130,9 +132,9 @@ void RenderSystem::draw(float elapsed_ms) {
 			GLint currProgram;
 			glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
 
-			// added these values to use the current frame and width
-			GLint frame_uloc = glGetUniformLocation(currProgram, "frame");
-			GLfloat frame_width_uloc = glGetUniformLocation(currProgram, "frameWidth");
+			// pass the frame values to the shader as uniform
+			GLint frame_uloc = glGetUniformLocation(shaderProgram, "curr_frame");
+			GLfloat frame_width_uloc = glGetUniformLocation(shaderProgram, "frame_width");
 			glUniform1i(frame_uloc, curr_frame);
 			glUniform1f(frame_width_uloc, frame_width);
 
