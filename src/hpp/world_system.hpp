@@ -13,6 +13,7 @@
 #include <SDL_mixer.h>
 
 #include "render_system.hpp"
+#include "game_controller.hpp"
 
 using namespace glm;
 
@@ -30,7 +31,7 @@ public:
 	// Releases all associated resources
 	~WorldSystem();
 
-	void init(RenderSystem* renderer);
+	void init(RenderSystem* renderer, GLFWwindow* window);
 
 	// Steps the game ahead by ms milliseconds
 	bool step(float elapsed_ms);
@@ -59,6 +60,9 @@ private:
 	float next_ai_spawn;
 	Entity ai_cat;
 
+	//Game Controller
+	GameController current_game;
+
 	// OpenGL window handle
-	//GLFWwindow* window;
+	GLFWwindow* window;
 };
