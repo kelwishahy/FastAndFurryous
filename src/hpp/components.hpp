@@ -10,6 +10,16 @@
 // Component IDs
 ////////////////////////////////////////////////////////////////////////////////
 
+enum CharacterType {
+	CAT = 1,
+	DOG = 2,
+};
+
+enum AnimationType {
+	IDLE = 1,
+	WALKING = 2
+};
+
 //TODO add AI to the list of IDs
 enum class SHADER_PROGRAM_IDS {
 	CAT,
@@ -45,8 +55,12 @@ enum RB_TYPES {
 
 // Game components ------------------------------------------------------------
 
+// we should change the name to Cat 
 struct Player {
-
+	int character = 1;
+	int frame = 0;
+	int animation_type = IDLE;
+	float frame_counter_ms = 100;
 };
 
 struct Health {

@@ -17,7 +17,7 @@ RenderSystem::~RenderSystem() {
 	glfwTerminate();
 }
 
-void RenderSystem::draw() {
+void RenderSystem::draw(float elapsed_ms) {
 	glm::mat4 projection = createProjectionMatrix();
 	glViewport(0, 0, this->screenWidth, this->screenHeight);
 
@@ -31,6 +31,57 @@ void RenderSystem::draw() {
 
 		// Draw cat sprite to the screen
 		if (request.geometry == GEOMETRY_BUFFER_IDS::CAT) {
+
+			// Frames for animation
+			GLint curr_frame = 0;
+			GLfloat frame_width = 0;
+			int numFrames = 0;
+			int timePerFrame = 0;
+
+			if (registry.players.has(entity)) {
+				// Decrement the frame counter
+				float* counter = &registry.players.get(entity).frame_counter_ms;
+
+				*counter -= elapsed_ms;
+
+				// Get the type of animation (IDLE, WALKING)
+				int animationType = registry.players.get(entity).animation_type;
+
+				// Get frame
+				int* frame = &registry.players.get(entity).frame;
+
+				frame_width = CAT_IDLE_FRAME_WIDTH;
+				switch (animationType) {
+				case IDLE: {
+					if (request.geometry != GEOMETRY_BUFFER_IDS::CAT) {
+						request.geometry = GEOMETRY_BUFFER_IDS::CAT;
+						*frame = 0;
+					}
+					numFrames = CAT_IDLE_FRAMES;
+					frame_width = CAT_IDLE_FRAME_WIDTH;
+					timePerFrame = CAT_IDLE_FRAME_TIME;
+					break;
+				}
+				default: break;
+				}
+
+				if (*counter <= 0) {
+					if (registry.players.has(entity)) {
+						curr_frame = *frame;
+						curr_frame += 1;
+						// curr_frame changes between 1 and 9 which is expected
+						std::cout << "CURR_FRAME FOR CAT (" << curr_frame << "): \n" << curr_frame << std::endl;
+						*frame = curr_frame % numFrames;
+						// * frame is also changing between 1 and 9
+						std::cout << "FRAME FOR CAT (" << *frame << "): \n" << *frame << std::endl;
+					}
+					// Reset frame timer
+					*counter = timePerFrame;
+				}
+				else {
+					curr_frame = *frame;
+				}
+			}
 
 			const GLuint vbo = vertexBuffers[(GLuint)request.geometry];
 			const GLuint ibo = indexBuffers[(GLuint)request.geometry];
@@ -78,6 +129,12 @@ void RenderSystem::draw() {
 
 			GLint currProgram;
 			glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
+
+			// added these values to use the current frame and width
+			GLint frame_uloc = glGetUniformLocation(currProgram, "frame");
+			GLfloat frame_width_uloc = glGetUniformLocation(currProgram, "frameWidth");
+			glUniform1i(frame_uloc, curr_frame);
+			glUniform1f(frame_width_uloc, frame_width);
 
 			// Setting uniform values to the currently bound program
 			GLuint transform_loc = glGetUniformLocation(currProgram, "transform");
@@ -260,10 +317,10 @@ void RenderSystem::initRenderData() {
 	texturedVertices[1].position = { 0.5f, -0.5f, 0.0f }; // bottom right
 	texturedVertices[2].position = { -0.5f, -0.5f, 0.0f }; // bottom left
 	texturedVertices[3].position = { -0.5f,  0.5f, 0.0f }; // top left
-	texturedVertices[0].texCoord= { 1.0f, 1.0f };
-	texturedVertices[1].texCoord = { 1.0f, 0.0f };
-	texturedVertices[2].texCoord = { 0.0f, 0.0f };
-	texturedVertices[3].texCoord = { 0.0f, 1.0f };
+	texturedVertices[0].texCoord= { 0.111f, 1.0f }; // bottom right
+	texturedVertices[1].texCoord = { 0.111f, 0.0f }; // top right
+	texturedVertices[2].texCoord = { 0.0f, 0.0f }; // top left 
+	texturedVertices[3].texCoord = { 0.0f, 1.0f }; // bottom left 
 
 	// Wall
 	std::vector<TexturedVertex> wallVertices(4);

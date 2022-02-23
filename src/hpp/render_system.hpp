@@ -28,7 +28,7 @@ class RenderSystem {
 
 	// Textures
 	const std::array<std::string, textureCount> texturePaths = {
-		"cat.png",
+		"cat-idle.png",
 		"wall.jpg"
 	};
 
@@ -46,13 +46,17 @@ class RenderSystem {
 
 	std::array<Mesh, geometryCount> meshes;
 
+	const int CAT_IDLE_FRAMES = 9;
+	const GLfloat CAT_IDLE_FRAME_WIDTH = 1/9;
+	float CAT_IDLE_FRAME_TIME = 200; // try different values
+
 
 public:
 	RenderSystem ();
 	~RenderSystem ();
 
 	// Draw to the screen using shaderProgram
-	void draw();
+	void draw(float elapsed_ms);
 
 	// Initialize GLFW window and context
 	bool init();
