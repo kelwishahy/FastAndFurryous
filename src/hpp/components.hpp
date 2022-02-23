@@ -49,6 +49,10 @@ struct Player {
 
 };
 
+struct Health {
+	int hp = 100;
+};
+
 struct AI {
 
 };
@@ -56,12 +60,6 @@ struct AI {
 struct SolidTerrain {
 
 };
-
-//struct Transform {
-//	glm::vec2 position = { 0,0 };
-//	float rotation = 0.0f;
-//	glm::vec2 scale = { 10, 10 };
-//};
 
 struct Collider {
 };
