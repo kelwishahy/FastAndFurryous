@@ -7,7 +7,7 @@
 #include <hpp/tiny_ecs_registry.hpp>
 #include "glm/ext.hpp"
 
-#include <hpp/health_system.hpp>
+#include <hpp/Game_Mechanics/health_system.hpp>
 
 #define OUT //for clarity
 

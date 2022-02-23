@@ -150,6 +150,7 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 		}
 
 		if (action == GLFW_PRESS && key == GLFW_KEY_T) {
+
 		}
 	}
 

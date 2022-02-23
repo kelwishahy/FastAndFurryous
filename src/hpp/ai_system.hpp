@@ -7,7 +7,6 @@
 #include "tiny_ecs.hpp"
 #include "components.hpp"
 #include "tiny_ecs_registry.hpp"
-
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 // DON'T WORRY ABOUT THIS CLASS UNTIL ASSIGNMENT 3
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
