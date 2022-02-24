@@ -13,6 +13,7 @@ public:
 
 	unsigned int getMapWidth() { return this->mapWidth; }
 	unsigned int getMapHeight() { return this->mapHeight; }
+	float getTileScale() { return this->tileScale; }
 
 private:
 	/*
@@ -25,4 +26,5 @@ private:
 	// Dimensions of this game map
 	unsigned int mapHeight;
 	unsigned int mapWidth;
+	float tileScale;
 };

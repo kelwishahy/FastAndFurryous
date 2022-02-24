@@ -78,7 +78,7 @@ public:
 	void animateSprite(Entity& entity, float elapsed_ms);
 
 	// Draw a tilemap
-	void drawTiles();
+	void drawTiles(const glm::mat4& projectionMatrix);
 
 	// Initialize GLFW window and context
 	bool init();

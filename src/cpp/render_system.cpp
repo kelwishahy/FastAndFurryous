@@ -26,7 +26,7 @@ void RenderSystem::draw(float elapsed_ms) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// Draw the map
-	drawTiles();
+	drawTiles(projection);
 
 	for (Entity entity : registry.renderRequests.entities) {
 
@@ -276,11 +276,12 @@ void animateSprite(Entity& entity, float elapsed_ms) {
 	}
 }
 
-void RenderSystem::drawTiles() {
-	glm::mat4 projection = createProjectionMatrix();
+void RenderSystem::drawTiles(const glm::mat4& projectionMatrix) {
+	const mat4& projection = projectionMatrix;
 	const auto& tileMap = gameMap.getTileMap();
-	const int mapWidth = gameMap.getMapWidth();
-	const int mapHeight = gameMap.getMapHeight();
+	const int& mapWidth = gameMap.getMapWidth();
+	const int& mapHeight = gameMap.getMapHeight();
+	const float& scaleFactor = gameMap.getTileScale();
 
 	// Updating the texture coordinates for use with the Stone texture atlas
 	texturedQuad[0].texCoord = { 0.333, 0.333 }; // top right
@@ -290,7 +291,7 @@ void RenderSystem::drawTiles() {
 	bindVBOandIBO(GEOMETRY_BUFFER_IDS::TEXTURED_QUAD, texturedQuad, quadIndices);
 
 	// Only draw the bottom 5 rows of tiles
-	for (int i = mapHeight -1 ; i >= 15; i--) {
+	for (int i = mapHeight - 1 ; i >= mapHeight - 5; i--) {
 		for (int j = mapWidth - 1; j >= 0; j--) {
 			if (tileMap[i][j] == 1) {
 
@@ -337,7 +338,6 @@ void RenderSystem::drawTiles() {
 
 				/* MATRIX TRANSFORMATIONS */
 				Transform transform;
-				float scaleFactor = 64.f;
 				transform.mat = translate(transform.mat, vec3((0.5 + j) * scaleFactor, (0.5 + i) * scaleFactor, 0.0f));
 				transform.mat = scale(transform.mat, vec3(scaleFactor, scaleFactor, 0.f));
 

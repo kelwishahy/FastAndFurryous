@@ -191,6 +191,16 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 	if (game_state.turn_possesion == PLAYER1) {
 		Motion& catMotion = registry.motions.get(player1_team[0]);
 
+		/*
+		 * DEBUGGING FOR MAP SYSTEM -----------------------------------------------------
+		 */
+		auto& position = catMotion.position;
+		printf("Cat position is %f, %f\n", position.x, position.y);
+		vec2 closestTile = {position.x / gameMap.getTileScale(), position.y / gameMap.getTileScale()};
+		printf("Closest tile is %f, %f\n", closestTile.x, closestTile.y);
+
+		//-------------------------------------------------------------------------------
+
 		float current_speed = 150.0f;
 		if (player_mode == PLAYER_MODE::MOVING) {
 			if (action == GLFW_PRESS && key == GLFW_KEY_W) {

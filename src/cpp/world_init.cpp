@@ -92,6 +92,15 @@ Entity createWall(RenderSystem* renderer, vec2 pos, int width, int height) {
 	return entity;
 }
 
+Entity createTile() {
+	// TODO:
+	// Each tile entity should only have the components required
+	// for collision handling. This includes Rigidbody and boxcollider.
+	// The position of a tile can be inferred from the tilemap dimensions and tileScale.
+	auto ent = Entity();
+	return ent;
+}
+
 Entity createAI(RenderSystem* renderer, vec2 pos)
 {
 	auto entity = Entity();
