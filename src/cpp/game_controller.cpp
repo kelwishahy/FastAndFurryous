@@ -76,6 +76,9 @@ void GameController::init_player_teams() {
 		printf("CRITICAL ERROR: NO PLAYER1 TEAM INITIALIZED");
 	}
 
+
+	Entity ai = createAI(this->renderer, { width / 2, height - 400 });
+	ai_team.push_back(ai);
 	/*if (!player2_team.empty()) {
 		for (Entity e : player2_team) {
 
