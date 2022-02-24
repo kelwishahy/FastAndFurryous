@@ -25,7 +25,7 @@ enum AnimationType {
 //TODO add AI to the list of IDs
 enum class SHADER_PROGRAM_IDS {
 	CAT,
-	TRIANGLE,
+	TEXTURE,
 	WALL,
 	AI,
 	TOTAL
@@ -35,7 +35,7 @@ enum class TEXTURE_IDS {
 	CAT_IDLE,
 	CAT_WALK,
 	CAT_JUMP,
-	TRIANGLE,
+	STONE,
 	TOTAL
 }; constexpr int textureCount = (int)TEXTURE_IDS::TOTAL;
 

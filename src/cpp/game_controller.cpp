@@ -91,17 +91,31 @@ void GameController::build_map() {
 
 	// Move the walls off screen and don't render them
 
-	//Floor
+	// //Floor
 	createWall(renderer, { width / 2, height + 10 }, width, 10);
+	
+	// //Left Wall
+	// createWall(renderer, { -10, height / 2 }, 10, height - 10);
+	//
+	// //Right Wall
+	// createWall(renderer, { width + 10, height / 2 }, 10, height);
+	//
+	// //Ceiling
+	// createWall(renderer, { width / 2, -10 }, width, 10);
 
-	//Left Wall
-	createWall(renderer, { -10, height / 2 }, 10, height - 10);
-
-	//Right Wall
-	createWall(renderer, { width + 10, height / 2 }, 10, height);
-
-	//Ceiling
-	createWall(renderer, { width / 2, -10 }, width, 10);
+	// 10 x 10 tilemap, where each tile is 32x32 pixels
+	// int tilemap[10][10] = {
+	// 	{1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+	// 	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	// 	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	// 	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	// 	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	// 	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	// 	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	// 	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	// 	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	// 	{1, 0, 0, 0, 0, 0, 0, 0, 0, 1}
+	// };
 
 }
 

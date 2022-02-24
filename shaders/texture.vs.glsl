@@ -1,11 +1,10 @@
 #version 330 core
 in vec3 position;
 in vec2 texCoord;
-
-out vec2 texCoordFS;
-
 uniform mat4 projection;
 uniform mat4 transform;
+
+out vec2 texCoordFS;
 
 void main() {
     

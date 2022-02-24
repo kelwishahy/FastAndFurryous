@@ -31,8 +31,7 @@ class RenderSystem {
 		"cat-idle.png",
 		"cat-walk.png",
 		"cat-jump.png",
-		"cat.png"
-
+		"stone.png"
 	};
 
 	std::array<GLuint, textureCount> textures; // OpenGL texture names
@@ -76,6 +75,9 @@ public:
 	void drawQuad(RenderRequest& request, std::string shaderInputs[], int numInputs);
 
 	void animateSprite(Entity& entity, float elapsed_ms);
+
+	// Draw a tilemap
+	void drawTiles();
 
 	// Initialize GLFW window and context
 	bool init();
