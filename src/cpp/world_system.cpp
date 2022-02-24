@@ -9,6 +9,8 @@
 #include "..\hpp\tiny_ecs_registry.hpp"
 #include <hpp/physics_system.hpp>
 
+//#include <hpp/game_controller.hpp>
+
 // Create the bug world
 WorldSystem::WorldSystem() {
 	// seeding rng with random device
@@ -27,13 +29,14 @@ namespace {
 }
 
 
-void WorldSystem::init(RenderSystem* renderer) {
+void WorldSystem::init(RenderSystem* renderer, GLFWwindow* window) {
 	this->renderer = renderer;
+	this->window = window;
 
 	// Set all states to default
 
 	//creates a wall on the left side of the screen
-	printf("window height is: %i px, window width is: %i px", window_height_px, window_width_px);
+	printf("window height is: %i px, window width is: %i px", renderer->getScreenHeight(), renderer->getScreenWidth());
 
 	restart_game();
 }
@@ -54,6 +57,10 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 				registry.remove_all_components_of(motions_registry.entities[i]);
 		}
 	}
+	//
+	if (current_game.inAGame) {
+		current_game.step(elapsed_ms_since_last_update);
+	}
 
 
 	return true;
@@ -62,44 +69,39 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 // Reset the world state to its initial state
 void WorldSystem::restart_game() {
 	// Debugging for memory/component leaks
-	registry.list_all_components();
-	printf("Restarting\n");
+	//registry.list_all_components();
+	//printf("Restarting\n");
 
-	// Reset the game speed
-	current_speed = 1.f;
+	//// Reset the game speed
+	//current_speed = 1.f;
 
-	// Remove all entities that we created
-	// All that have a motion, we could also iterate over all bug, eagles, ... but that would be more cumbersome
+	//// Remove all entities that we created
+	//// All that have a motion, we could also iterate over all bug, eagles, ... but that would be more cumbersome
 	while (registry.motions.entities.size() > 0)
 		registry.remove_all_components_of(registry.motions.entities.back());
 
-	// Debugging for memory/component leaks
-	registry.list_all_components();
+	//// Debugging for memory/component leaks
+	//registry.list_all_components();
 
 	// Create a new cat
-	player_cat = createCat(renderer, { window_width_px / 2 - 200, window_height_px - 400 });
-	createAI(renderer, { (window_width_px / 2) , window_height_px - 250 });
-	//createAI(renderer, { (window_width_px / 2) - 100 , window_height_px - 250 });
+	//createAI(renderer, { (width / 2) , height - 250 });
+	//createAI(renderer, { (window_width_px / 2) , window_height_px - 250 });
+	////createAI(renderer, { (window_width_px / 2) , window_height_px - 250 });
 
-	//Floor
-	createWall(renderer, { window_width_px / 2, window_height_px }, window_width_px, 50);
+	//printf("starting cat.x is: %i px, starting cat.y is: %i px", window_width_px / 2, window_height_px - 200);
+	//registry.colors.insert(player_cat, { 1, 0.8f, 0.8f });
+	//registry.list_all_components_of(player_cat);
 
-	//Left Wall
-	createWall(renderer, { 0, window_height_px / 2 }, 50, window_height_px - 10);
+	//Load Title screen
+	//Character Select
 
-	//Right Wall
-	createWall(renderer, { window_width_px, window_height_px / 2 }, 50, window_height_px);
-
-	//Ceiling
-	createWall(renderer, { window_width_px / 2, 0 }, window_width_px, 50);
-	printf("starting cat.x is: %i px, starting cat.y is: %i px", window_width_px / 2, window_height_px - 200);
-	registry.colors.insert(player_cat, { 1, 0.8f, 0.8f });
-	registry.list_all_components_of(player_cat);
-
+	//INITIALIZE Current game
+	current_game.init(renderer, window);
 }
 
 void WorldSystem::handle_collisions() {
 	// Loop over all collisions detected by the physics system
+
 	auto& collisionsRegistry = registry.collisions; // TODO: @Tim, is the reference here needed?
 	for (uint i = 0; i < collisionsRegistry.components.size(); i++) {
 		// The entity and its collider
@@ -134,58 +136,10 @@ bool WorldSystem::is_over() const {
 
 // On key callback
 void WorldSystem::on_key(int key, int, int action, int mod) {
-	Motion& catMotion = registry.motions.get(player_cat);
-	
-	current_speed = fmax(150.0f, current_speed);
-	if (action == GLFW_PRESS && key == GLFW_KEY_UP) {
-		catMotion.velocity.y = -current_speed;
-	}
-
-	if (action == GLFW_PRESS && key == GLFW_KEY_DOWN) {
-		catMotion.velocity.y = current_speed;
-	}
-
-	if (action == GLFW_PRESS && key == GLFW_KEY_RIGHT) {
-		catMotion.velocity.x = current_speed;
-	}
-
-	if (action == GLFW_PRESS && key == GLFW_KEY_LEFT) {
-		catMotion.velocity.x = -current_speed;
-	}
+	//ALL PLAYER MOVE FUNCTIONALITY IS MOVED TO game_controller
+	//THIS AREA SHOULD BE FOR CONTROLS THAT ARE FOR NAVIGATING THE MAIN MENU etc...
 
 
-	if (action == GLFW_RELEASE) {
-		if (key == GLFW_KEY_LEFT && catMotion.velocity.x < 0) {
-			catMotion.velocity.x = 0.0f;
-		}
-		if (key == GLFW_KEY_RIGHT && catMotion.velocity.x > 0) {
-			catMotion.velocity.x = 0.0f;
-		}
-	}
-
-	/*if (action == GLFW_RELEASE) {
-		if (key == GLFW_KEY_UP && catMotion.velocity.y < 0) {
-			catMotion.velocity.y = 0.0f;
-		}
-		if (key == GLFW_KEY_DOWN && catMotion.velocity.y > 0) {
-			catMotion.velocity.y = 0.0f;
-		}
-	}*/
-	// Resetting game
-	if (action == GLFW_RELEASE && key == GLFW_KEY_R) {
-		restart_game();
-	}
-
-	// Control the current speed with `<` `>`
-	if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_COMMA) {
-		current_speed -= 0.1f;
-		printf("Current speed = %f\n", current_speed);
-	}
-	if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_PERIOD) {
-		current_speed += 0.1f;
-		printf("Current speed = %f\n", current_speed);
-	}
-	current_speed = fmax(0.f, current_speed);
 }
 
 void WorldSystem::on_mouse_move(vec2 mouse_position) {

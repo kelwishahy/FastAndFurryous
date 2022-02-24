@@ -2,20 +2,20 @@
 #include "../hpp/physics_system.hpp"
 #include "../hpp/world_init.hpp"
 
-//TODO Get rid of useless ones
 #include <hpp/render_system.hpp>
-#include <hpp/shader_manager.hpp>
-#include <hpp/texture_manager.hpp>
-
-#include <hpp/common.hpp>
 #include <hpp/components.hpp>
 #include <hpp/tiny_ecs_registry.hpp>
 #include "glm/ext.hpp"
-#include <iostream>
+
+#include <hpp/health_system.hpp>
 
 #define OUT //for clarity
 
 using namespace glm;
+
+void PhysicsSystem::init(RenderSystem* renderer) {
+	this->renderer = renderer;
+}
 
 //Creates a ray entity and returns the ray
 //Not sure what the best way to handle the ray is...
@@ -56,7 +56,7 @@ bool circle_collision(const Motion& motion, const Motion& motion2) {
 
 }
 
-void project_verticies(std::vector<vec2> box_vertices, vec2 axis, OUT float& min, OUT float& max) {
+void project_vertices(std::vector<vec2> box_vertices, vec2 axis, OUT float& min, OUT float& max) {
 
 	min = 99999999;
 	max = -99999999;
@@ -117,8 +117,8 @@ bool box_collision(const Boxcollider collider, const Boxcollider collider2, OUT 
 		float max1 = 0;
 		float min2 = 0;
 		float max2 = 0;
-		project_verticies(box1, axis, min1, max1);
-		project_verticies(box2, axis, min2, max2);
+		project_vertices(box1, axis, min1, max1);
+		project_vertices(box2, axis, min2, max2);
 
 		if (min1 >= max2 || min2 >= max1) {
 			return false;
@@ -142,8 +142,8 @@ bool box_collision(const Boxcollider collider, const Boxcollider collider2, OUT 
 		float max1 = 0;
 		float min2 = 0;
 		float max2 = 0;
-		project_verticies(box1, axis, min1, max1);
-		project_verticies(box2, axis, min2, max2);
+		project_vertices(box1, axis, min1, max1);
+		project_vertices(box2, axis, min2, max2);
 
 		if (min1 >= max2 || min2 >= max1) {
 			return false;
@@ -169,7 +169,7 @@ bool box_collision(const Boxcollider collider, const Boxcollider collider2, OUT 
 	return true;
 }
 
-//If an entity gets transformed and they have a boxcollider, we need to recalculate the verticies
+//If an entity gets transformed and they have a boxcollider, we need to recalculate the vertices
 void PhysicsSystem::transformBoxColliders() {
 	ComponentContainer<Boxcollider>& collider_container = registry.boxColliders;
 	for (uint i = 0; i < collider_container.components.size(); i++) {
@@ -235,6 +235,11 @@ void PhysicsSystem::checkForCollisions() {
 				Collision& collision1 = registry.collisions.emplace_with_duplicates(entity_i, entity_j);
 
 				Collision& collision2 = registry.collisions.emplace_with_duplicates(entity_j, entity_i);
+
+				// Decrease the player's health if they touch an enemy
+				if (registry.health.has(entity_i) && registry.health.has(entity_j)) {
+					decreaseHealth(entity_i, 1);
+				}
 			}
 		}
 	}
@@ -281,7 +286,7 @@ void PhysicsSystem::step(float elapsed_ms)
 	checkForCollisions();
 
 	// you may need the following quantities to compute wall positions
-	(float)window_width_px; (float)window_height_px;
+	(float)renderer->getScreenWidth(); (float)renderer->getScreenHeight();
 
 
 	// debugging of bounding boxes
@@ -311,9 +316,4 @@ void PhysicsSystem::step(float elapsed_ms)
 	//		// !!! TODO A2: implement debug bounding boxes instead of crosses
 	//	}
 	//}
-
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// TODO A3: HANDLE EGG collisions HERE
-	// DON'T WORRY ABOUT THIS UNTIL ASSIGNMENT 3
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 }

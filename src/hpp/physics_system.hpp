@@ -3,6 +3,7 @@
 #include "common.hpp"
 #include "tiny_ecs.hpp"
 #include "components.hpp"
+#include "render_system.hpp"
 #include "tiny_ecs_registry.hpp"
 
 // A simple physics system that moves rigid bodies and checks for collision
@@ -17,6 +18,8 @@ public:
 	{
 	}
 
+	void init(RenderSystem* renderer);
+
 private:
 	void checkForCollisions();
 
@@ -25,4 +28,5 @@ private:
 	void applyMotions(float elapsed_ms);
 
 	const float GRAVITY_CONST = 0.5f;
+	RenderSystem* renderer;
 };
