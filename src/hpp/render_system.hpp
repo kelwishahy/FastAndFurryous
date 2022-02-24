@@ -13,6 +13,7 @@
 #include <glm/mat3x3.hpp>           // mat3
 
 #include "components.hpp"
+#include "map.hpp"
 
 class RenderSystem {
 
@@ -90,6 +91,8 @@ public:
 	int getScreenWidth() { return this->screenWidth; }
 	int getScreenHeight() { return this->screenHeight; }
 
+	void setTileMap(const Map& gameMap) { this->gameMap = gameMap; }
+
 private:
 	GLFWwindow* window;
 	int screenWidth;
@@ -98,6 +101,7 @@ private:
 	GLuint frameBuffer;
 	GLuint renderBufferColour;
 	GLuint renderBufferDepth;
+	Map gameMap;
 
 	// Reusable quad (square) geometry
 	std::vector<TexturedVertex> texturedQuad;

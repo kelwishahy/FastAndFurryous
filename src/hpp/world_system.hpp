@@ -46,6 +46,8 @@ public:
 	void on_key(int key, int, int action, int mod);
 	void on_mouse_move(vec2 pos);
 
+	GameController getCurrentGame() { return this->current_game; }
+
 private:
 	// restart level it was in the private 
 	void restart_game();

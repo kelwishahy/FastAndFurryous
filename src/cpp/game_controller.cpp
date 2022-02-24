@@ -84,14 +84,11 @@ void GameController::step(float elapsed_ms)
 }
 
 void GameController::build_map() {
-	//TEMPORARY UNTIL WE FIGURE OUT A SYSTEM FOR MAP BUILDING
-
 	const int width = renderer->getScreenWidth();
 	const int height = renderer->getScreenHeight();
 
 	// Move the walls off screen and don't render them
-
-	// //Floor
+	// Floor
 	createWall(renderer, { width / 2, height + 10 }, width, 10);
 	
 	// //Left Wall
@@ -103,20 +100,8 @@ void GameController::build_map() {
 	// //Ceiling
 	// createWall(renderer, { width / 2, -10 }, width, 10);
 
-	// 10 x 10 tilemap, where each tile is 32x32 pixels
-	// int tilemap[10][10] = {
-	// 	{1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-	// 	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	// 	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	// 	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	// 	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	// 	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	// 	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	// 	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	// 	{0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	// 	{1, 0, 0, 0, 0, 0, 0, 0, 0, 1}
-	// };
-
+	this->gameMap = Map();
+	renderer->setTileMap(gameMap);
 }
 
 void GameController::init_player_teams() {

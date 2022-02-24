@@ -19,11 +19,13 @@ RenderSystem::~RenderSystem() {
 }
 
 void RenderSystem::draw(float elapsed_ms) {
-	glm::mat4 projection = createProjectionMatrix();
+	mat4 projection = createProjectionMatrix();
+
 	glViewport(0, 0, this->screenWidth, this->screenHeight);
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	// Draw the map
 	drawTiles();
 
 	for (Entity entity : registry.renderRequests.entities) {
@@ -55,6 +57,7 @@ void RenderSystem::draw(float elapsed_ms) {
 
 		default:
 			continue;
+
 		}
 
 		GLint size = 0;
@@ -275,17 +278,9 @@ void animateSprite(Entity& entity, float elapsed_ms) {
 
 void RenderSystem::drawTiles() {
 	glm::mat4 projection = createProjectionMatrix();
-	const int mapWidth = 30;
-	const int mapHeight = 20;
-
-	// This map should be stored on disk and passed in
-	// instead of being regenerated every time
-	std::array<std::array<int, mapWidth>, mapHeight> tilemap;
-	for (int x = 0; x < mapHeight; x++) {
-		for (int y = 0; y < mapWidth; y++) {
-			tilemap[x][y] = 1;
-		}
-	}
+	const auto& tileMap = gameMap.getTileMap();
+	const int mapWidth = gameMap.getMapWidth();
+	const int mapHeight = gameMap.getMapHeight();
 
 	// Updating the texture coordinates for use with the Stone texture atlas
 	texturedQuad[0].texCoord = { 0.333, 0.333 }; // top right
@@ -297,7 +292,7 @@ void RenderSystem::drawTiles() {
 	// Only draw the bottom 5 rows of tiles
 	for (int i = mapHeight -1 ; i >= 15; i--) {
 		for (int j = mapWidth - 1; j >= 0; j--) {
-			if (tilemap[i][j] == 1) {
+			if (tileMap[i][j] == 1) {
 
 				const GLuint vbo = vertexBuffers[(GLuint)GEOMETRY_BUFFER_IDS::TEXTURED_QUAD];
 				const GLuint ibo = indexBuffers[(GLuint)GEOMETRY_BUFFER_IDS::TEXTURED_QUAD];
