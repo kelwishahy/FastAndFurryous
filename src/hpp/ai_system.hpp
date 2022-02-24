@@ -16,53 +16,38 @@ public:
 		virtual bool run() = 0;
 	};
 
-	class CompositeNode : public Node {  //  This type of Node follows the Composite Pattern, containing a list of other Nodes.
+	class CompositeNode : public Node {  //  Composite Node in a Behavior Tree
 	private:
-		std::vector<Node*> children;
+		std::vector<Node*> children; 
 	public:
 		const std::vector<Node*>& getChildren() const { return children; }
 		void addChild(Node* child) { children.emplace_back(child); }
-		void addChildren(std::initializer_list<Node*>&& newChildren) { for (Node* child : newChildren) addChild(child); }
-		template <typename CONTAINER>
-		void addChildren(const CONTAINER& newChildren) { for (Node* child : newChildren) addChild(child); }
-	protected:
-		std::vector<Node*> childrenShuffled() const { std::vector<Node*> temp = children;  std::random_shuffle(temp.begin(), temp.end());  return temp; }
+		void clear() { children.clear(); }
 	};
 
 	class Selector : public CompositeNode {
 	public:
 		virtual bool run() override {
-			for (Node* child : getChildren()) {  // The generic Selector implementation
-				if (child->run())  // If one child succeeds, the entire operation run() succeeds.  Failure only results if all children fail.
+			for (Node* child : getChildren()) {  // Selector Node. One of the children needs to succeed.
+				if (child->run())  
 					return true;
 			}
-			return false;  // All children failed so the entire run() operation fails.
-		}
-	};
-
-	class RandomSelector : public CompositeNode {  // RandomSelector operates as a Selector, but in a random order instead of from first child to last child.
-	public:
-		virtual bool run() override {
-			for (Node* child : childrenShuffled()) {  // The order is shuffled
-				if (child->run())
-					return true;
-			}
-			return false;
+			return false;  // All children failed --> fails
 		}
 	};
 
 	class Sequence : public CompositeNode {
 	public:
 		virtual bool run() override {
-			for (Node* child : getChildren()) {  // The generic Sequence implementation.
-				if (!child->run())  // If one child fails, then enter operation run() fails.  Success only results if all children succeed.
+			for (Node* child : getChildren()) {  // Sequence Node. Runs children in a sequence. Fails if one of them fails.
+				if (!child->run())  
 					return false;
 			}
-			return true;  // All children suceeded, so the entire run() operation succeeds.
+			return true;  // All children succeeds
 		}
 	};
 
-	class Root : public Node {
+	class Root : public Node { // Root node. So far, our decision tree root node is just a sequence node with 2 actions.
 	public:
 		Node* child;
 		friend class BehaviourTree;
@@ -85,12 +70,12 @@ public:
 	void init();
 
 private:
-	float jumpdelay;
-	float timer;
-	BehaviorTree::Sequence sequence[2];
-	int MIN_DISTANCE;
-	std::default_random_engine rng;
-	std::uniform_real_distribution<float> uniform_dist; // number between 0..1
+	//float jumpdelay;
+	//float timer;
+	BehaviorTree::Sequence sequence[2]; // Sequence of 2 actions. 
+	//int MIN_DISTANCE;
+	//std::default_random_engine rng;
+	//std::uniform_real_distribution<float> uniform_dist; // number between 0..1
 };
 
 class AIMove : public BehaviorTree::Node
