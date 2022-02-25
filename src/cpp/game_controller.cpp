@@ -3,6 +3,7 @@
 
 GameController::GameController() {
 	inAGame = false;
+	//ShootingSystem shooting_system(renderer);
 }
 
 GameController::~GameController() {
@@ -30,12 +31,17 @@ void GameController::init(RenderSystem* renderer, GLFWwindow* window) {
 	glfwSetKeyCallback(this->window, key_redirect);
 
 	inAGame = true;
+	player_mode = PLAYER_MODE::MOVING;
+
+	this->shooting_system.init(renderer);
 }
 
 void GameController::step(float elapsed_ms)
 {
 	//While a game is happening make sure the players are controlling from here
 	glfwSetWindowUserPointer(window, this);
+	shooting_system.step(elapsed_ms);
+	handle_collisions();
 
 }
 
@@ -110,12 +116,33 @@ void GameController::next_turn() {
 
 	game_state.turn_possesion += 1;
 	game_state.turn_number += 1;
+	registry.projectiles.clear();
 	if (game_state.turn_possesion == TURN_CODE::END) {
 		game_state.turn_possesion = TURN_CODE::PLAYER1;
 	} else if (teams[game_state.turn_possesion].empty()) {
 		game_state.turn_number -= 1;
 		next_turn();
 	}
+}
+
+void GameController::handle_collisions() {
+	// Loop over all collisions detected by the physics system
+
+	auto& collisionsRegistry = registry.collisions; // TODO: @Tim, is the reference here needed?
+	for (uint i = 0; i < collisionsRegistry.components.size(); i++) {
+		// The entity and its collider
+		Entity entity = collisionsRegistry.entities[i];
+		Entity entity_other = collisionsRegistry.components[i].other;
+
+		//If a projectile hits any terrain, get rid of the projectile
+		if (registry.projectiles.has(entity) && registry.terrains.has(entity_other)) {
+			registry.remove_all_components_of(entity);
+		}
+
+	}
+
+	// Remove all collisions from this simulation step
+	registry.collisions.clear();
 }
 
 // On key callback
@@ -126,51 +153,61 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 		Motion& catMotion = registry.motions.get(player1_team[0]);
 
 		float current_speed = 150.0f;
-		if (action == GLFW_PRESS && key == GLFW_KEY_W) {
-			catMotion.velocity.y = -current_speed;
-		}
-
-		if (action == GLFW_PRESS && key == GLFW_KEY_S) {
-			catMotion.velocity.y = current_speed;
-		}
-
-		if (action == GLFW_PRESS && key == GLFW_KEY_D) {
-			catMotion.velocity.x = current_speed;
-		}
-
-		if (action == GLFW_PRESS && key == GLFW_KEY_A) {
-			catMotion.velocity.x = -current_speed;
-		}
-
-
-		if (action == GLFW_RELEASE) {
-			if (key == GLFW_KEY_LEFT && catMotion.velocity.x < 0) {
-				catMotion.velocity.x = 0.0f;
+		if (player_mode == PLAYER_MODE::MOVING) {
+			if (action == GLFW_PRESS && key == GLFW_KEY_W) {
+				catMotion.velocity.y = -current_speed;
 			}
-			if (key == GLFW_KEY_RIGHT && catMotion.velocity.x > 0) {
-				catMotion.velocity.x = 0.0f;
+
+			if (action == GLFW_PRESS && key == GLFW_KEY_S) {
+				catMotion.velocity.y = current_speed;
+			}
+
+			if (action == GLFW_PRESS && key == GLFW_KEY_D) {
+				catMotion.velocity.x = current_speed;
+			}
+
+			if (action == GLFW_PRESS && key == GLFW_KEY_A) {
+				catMotion.velocity.x = -current_speed;
+			}
+
+
+			if (action == GLFW_RELEASE) {
+				if (key == GLFW_KEY_A && catMotion.velocity.x < 0) {
+					catMotion.velocity.x = 0.0f;
+				}
+				if (key == GLFW_KEY_D && catMotion.velocity.x > 0) {
+					catMotion.velocity.x = 0.0f;
+				}
+			}
+		}
+		else {
+			if (action == GLFW_PRESS && key == GLFW_KEY_W) {
+				shooting_system.aimUp(curr_selected_char);
+				shooting_system.setAimLoc(curr_selected_char);
+			}
+
+			if (action == GLFW_PRESS && key == GLFW_KEY_S) {
+				shooting_system.aimDown(curr_selected_char);
+				shooting_system.setAimLoc(curr_selected_char);
+			}
+
+			if (action == GLFW_PRESS && key == GLFW_KEY_T) {
+				shooting_system.shoot(curr_selected_char);
 			}
 		}
 
-		/*if (action == GLFW_RELEASE) {
-			if (key == GLFW_KEY_UP && catMotion.velocity.y < 0) {
-				catMotion.velocity.y = 0.0f;
+		//switch between shooting and firing for curr_selected_char
+		if (action == GLFW_PRESS && key == GLFW_KEY_M) {
+			if (player_mode == PLAYER_MODE::SHOOTING) {
+				player_mode = PLAYER_MODE::MOVING;
 			}
-			if (key == GLFW_KEY_DOWN && catMotion.velocity.y > 0) {
-				catMotion.velocity.y = 0.0f;
+			else {
+				player_mode = PLAYER_MODE::SHOOTING;
+				shooting_system.setAimLoc(curr_selected_char);
 			}
-		}*/
+			printf("Current mode is: %s", (player_mode == PLAYER_MODE::SHOOTING) ? "SHOOTING" : "MOVING");
+		}
 
-		// Control the current speed with `<` `>`
-		if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_COMMA) {
-			current_speed -= 0.1f;
-			printf("Current speed = %f\n", current_speed);
-		}
-		if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_PERIOD) {
-			current_speed += 0.1f;
-			printf("Current speed = %f\n", current_speed);
-		}
-		current_speed = fmax(0.f, current_speed);
 	}
 
 	if (action == GLFW_PRESS && key == GLFW_KEY_N) {

@@ -25,6 +25,8 @@ public:
 	ComponentContainer<RenderRequest> renderRequests;
 	ComponentContainer<Rigidbody> rigidBodies;
 	ComponentContainer<SolidTerrain> terrains;
+	ComponentContainer<WeaponBase> weapons;
+	ComponentContainer<Projectile> projectiles;
 
 	ECSRegistry() {
 		registry_list.push_back(&ais);
@@ -41,6 +43,8 @@ public:
 		registry_list.push_back(&renderRequests);
 		registry_list.push_back(&rigidBodies);
 		registry_list.push_back(&terrains);
+		registry_list.push_back(&weapons);
+		registry_list.push_back(&projectiles);
 	}
 
 	void clear_all_components() {

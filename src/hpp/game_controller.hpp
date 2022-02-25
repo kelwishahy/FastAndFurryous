@@ -14,6 +14,7 @@ using namespace glm;
 
 #include <glm/vec2.hpp>	
 #include <hpp/tiny_ecs_registry.hpp>
+#include <hpp/Game_Mechanics/shooting_system.hpp>
 
 class GameController
 {
@@ -50,6 +51,8 @@ private:
 
 	void next_turn();
 
+	void handle_collisions();
+
 	std::vector<Entity> player1_team;
 	std::vector<Entity> player2_team;
 	std::vector<Entity> ai_team;
@@ -64,6 +67,13 @@ private:
 		NPCAI,
 		END
 	};
+
+	enum class PLAYER_MODE {
+		MOVING,
+		SHOOTING
+	};
+	PLAYER_MODE player_mode;
+
 	struct GameState {
 		float timer = 0;
 		uint turn_number = 0;
@@ -72,6 +82,8 @@ private:
 	GameState game_state;
 
 	Entity curr_selected_char;
+
+	ShootingSystem shooting_system;
 
 	// OpenGL window handle
 	//GLFWwindow* window;
