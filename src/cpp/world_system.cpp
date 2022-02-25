@@ -63,44 +63,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 		current_game.step(elapsed_ms_since_last_update);
 	}
 
-	// change the animation type depending on the velocity
-	Motion& catMotion = registry.motions.get(player_cat);
-	Player& catPlayer = registry.players.get(player_cat);
-	if (catMotion.velocity.x == 0 ) {
-		catPlayer.animation_type = IDLE;
-	}
-	if (catMotion.velocity.x != 0) {
-		catPlayer.animation_type = WALKING;
-	}
-	if (catMotion.velocity.y < 0) {
-		catPlayer.animation_type = JUMPING;
-	}
-	if (catMotion.velocity.x < 0) {
-		catPlayer.facingLeft = 1;
-	}
-	if (catMotion.velocity.x > 0) {
-		catPlayer.facingLeft = 0;
-	}
-
-	// FOR AI Animation
-	Motion& aiMotion = registry.motions.get(ai_cat);
-	Player& aiCat = registry.players.get(ai_cat);
-	if (aiMotion.velocity.x == 0) {
-		aiCat.animation_type = IDLE;
-	}
-	if (aiMotion.velocity.x != 0) {
-		aiCat.animation_type = WALKING;
-	}
-	if (aiMotion.velocity.y < 0) {
-		aiCat.animation_type = JUMPING;
-	}
-	if (aiMotion.velocity.x < 0) {
-		aiCat.facingLeft = 1;
-	}
-	if (aiMotion.velocity.x > 0) {
-		aiCat.facingLeft = 0;
-	}
-
 	return true;
 }
 

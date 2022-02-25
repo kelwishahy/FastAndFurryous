@@ -43,6 +43,44 @@ void GameController::step(float elapsed_ms)
 	shooting_system.step(elapsed_ms);
 	handle_collisions();
 
+	// change the animation type depending on the velocity
+	Motion& catMotion = registry.motions.get(player1_team.front());
+	Player& catPlayer = registry.players.get(player1_team.front());
+	if (catMotion.velocity.x == 0) {
+		catPlayer.animation_type = IDLE;
+	}
+	if (catMotion.velocity.x != 0) {
+		catPlayer.animation_type = WALKING;
+	}
+	if (catMotion.velocity.y < 0) {
+		catPlayer.animation_type = JUMPING;
+	}
+	if (catMotion.velocity.x < 0) {
+		catPlayer.facingLeft = 1;
+	}
+	if (catMotion.velocity.x > 0) {
+		catPlayer.facingLeft = 0;
+	}
+
+	// // FOR AI Animation
+	// Motion& aiMotion = registry.motions.get(ai_cat);
+	// Player& aiCat = registry.players.get(ai_cat);
+	// if (aiMotion.velocity.x == 0) {
+	// 	aiCat.animation_type = IDLE;
+	// }
+	// if (aiMotion.velocity.x != 0) {
+	// 	aiCat.animation_type = WALKING;
+	// }
+	// if (aiMotion.velocity.y < 0) {
+	// 	aiCat.animation_type = JUMPING;
+	// }
+	// if (aiMotion.velocity.x < 0) {
+	// 	aiCat.facingLeft = 1;
+	// }
+	// if (aiMotion.velocity.x > 0) {
+	// 	aiCat.facingLeft = 0;
+	// }
+
 }
 
 void GameController::build_map() {
@@ -166,7 +204,6 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 			if (action == GLFW_PRESS && key == GLFW_KEY_A) {
 				catMotion.velocity.x = -current_speed;
 			}
-
 
 			if (action == GLFW_RELEASE) {
 				if (key == GLFW_KEY_A && catMotion.velocity.x < 0) {

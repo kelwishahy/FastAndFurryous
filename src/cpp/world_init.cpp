@@ -42,7 +42,7 @@ Entity createCat(RenderSystem* renderer, vec2 pos)
 	motion.position = pos;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	motion.scale = { -100.f, 100.f };
+	motion.scale = { 100.f, 100.f };
 
 	Boxcollider& bc = registry.boxColliders.emplace(entity);
 	calculateBoxVerteciesAndSetTriangles(motion.position, motion.scale, bc);

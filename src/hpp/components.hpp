@@ -67,7 +67,11 @@ enum WEAPON_TYPES {
 // Game components ------------------------------------------------------------
 
 struct Player {
-
+	int character = 1;
+	int frame = 0;
+	int animation_type = IDLE;
+	float frame_counter_ms = 100;
+	float facingLeft = 0;
 };
 
 struct Health {
