@@ -231,12 +231,10 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 		else {
 			if (action == GLFW_PRESS && key == GLFW_KEY_W) {
 				shooting_system.aimUp(curr_selected_char);
-				shooting_system.setAimLoc(curr_selected_char);
 			}
 
 			if (action == GLFW_PRESS && key == GLFW_KEY_S) {
 				shooting_system.aimDown(curr_selected_char);
-				shooting_system.setAimLoc(curr_selected_char);
 			}
 
 			if (action == GLFW_PRESS && key == GLFW_KEY_T) {

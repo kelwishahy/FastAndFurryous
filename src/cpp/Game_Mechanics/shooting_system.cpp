@@ -47,7 +47,7 @@ void ShootingSystem::aimUp(Entity e) {
 		weapon.aim_angle = (weapon.aim_angle + 0.1 >= weapon.MAX_ANGLE) ? weapon.MAX_ANGLE : weapon.aim_angle + 0.1;
 	}
 	printf("weapons aim angle: %f \n", weapon.aim_angle);
-
+	setAimLoc(e);
 }
 
 void ShootingSystem::aimDown(Entity e) {
@@ -63,7 +63,7 @@ void ShootingSystem::aimDown(Entity e) {
 		weapon.aim_angle = (weapon.aim_angle - 0.1 <= weapon.MIN_ANGLE) ? weapon.MIN_ANGLE : weapon.aim_angle - 0.1;
 	}
 	printf("weapons aim angle: %f \n", weapon.aim_angle);
-
+	setAimLoc(e);
 }
 
 void ShootingSystem::setAimLoc(Entity e) {
