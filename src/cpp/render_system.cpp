@@ -17,7 +17,7 @@ RenderSystem::~RenderSystem() {
 	glfwTerminate();
 }
 
-void RenderSystem::draw() {
+void RenderSystem::draw(float elapsed_ms) {
 	glm::mat4 projection = createProjectionMatrix();
 	glViewport(0, 0, this->screenWidth, this->screenHeight);
 
@@ -27,10 +27,92 @@ void RenderSystem::draw() {
 		if (!registry.renderRequests.has(entity))
 			continue;
 
-		RenderRequest request = registry.renderRequests.get(entity);
+		// Frames for animation
+		GLint curr_frame = 0;
+		GLfloat frame_width = 0;
+		int numFrames = 0;
+		int timePerFrame = 0;
 
 		// Draw cat sprite to the screen
-		if (request.geometry == GEOMETRY_BUFFER_IDS::CAT) {
+		if (registry.players.has(entity)) {
+
+			// Decrement the frame counter
+			float* counter = &registry.players.get(entity).frame_counter_ms;
+
+			*counter -= elapsed_ms;
+
+			// Get the type of animation (IDLE, WALKING)
+			int animationType = registry.players.get(entity).animation_type;
+
+			// Get the type of character (CAT, DOG)
+			int characterType = registry.players.get(entity).character;
+
+			// Get if character is facing left or not
+			int facingLeft = registry.players.get(entity).facingLeft;
+
+			// Get frame
+			int* frame = &registry.players.get(entity).frame;
+
+			// Get the current texture to alter
+			TEXTURE_IDS& curr_texture = registry.renderRequests.get(entity).texture;
+			// Get the current geometry to alter
+			GEOMETRY_BUFFER_IDS& curr_geometry = registry.renderRequests.get(entity).geometry;
+
+			switch (characterType) {
+				case CAT: {
+					switch (animationType) {
+						case IDLE: {
+							if (curr_geometry != GEOMETRY_BUFFER_IDS::CAT_IDLE) {
+								curr_geometry = GEOMETRY_BUFFER_IDS::CAT_IDLE;
+								*frame = 0;
+							}
+							curr_texture = TEXTURE_IDS::CAT_IDLE;
+							numFrames = CAT_IDLE_FRAMES;
+							frame_width = CAT_IDLE_FRAME_WIDTH;
+							timePerFrame = CAT_IDLE_FRAME_TIME;
+							break;
+						}
+						case WALKING: {
+							if(curr_geometry != GEOMETRY_BUFFER_IDS::CAT_WALK) {
+								curr_geometry = GEOMETRY_BUFFER_IDS::CAT_WALK;
+								*frame = 0;
+							}
+							curr_texture = TEXTURE_IDS::CAT_WALK;
+							numFrames = CAT_WALK_FRAMES;
+							frame_width = CAT_WALK_FRAME_WIDTH;
+							timePerFrame = CAT_WALK_FRAME_TIME;
+							break;
+						}
+						case JUMPING: {
+							if (curr_geometry != GEOMETRY_BUFFER_IDS::CAT_JUMP) {
+								curr_geometry = GEOMETRY_BUFFER_IDS::CAT_JUMP;
+								*frame = 0;
+							}
+							curr_texture = TEXTURE_IDS::CAT_JUMP;
+							numFrames = CAT_JUMP_FRAMES;
+							frame_width = CAT_JUMP_FRAME_WIDTH;
+							timePerFrame = CAT_JUMP_FRAME_TIME;
+							break;
+						}
+						default: break;
+					}
+				}
+			}
+
+			if (*counter <= 0) {
+				if (registry.players.has(entity)) {
+					curr_frame = *frame;
+					curr_frame += 1;
+					*frame = curr_frame % numFrames;
+				}
+				// Reset frame timer
+				*counter = timePerFrame;
+			}
+			else {
+				curr_frame = *frame;
+			}
+			
+			RenderRequest request = registry.renderRequests.get(entity);
 
 			const GLuint vbo = vertexBuffers[(GLuint)request.geometry];
 			const GLuint ibo = indexBuffers[(GLuint)request.geometry];
@@ -79,6 +161,14 @@ void RenderSystem::draw() {
 			GLint currProgram;
 			glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
 
+			// pass the frame values to the shader as uniform
+			GLint frame_uloc = glGetUniformLocation(shaderProgram, "curr_frame");
+			GLfloat frame_width_uloc = glGetUniformLocation(shaderProgram, "frame_width");
+			GLint facing_left_uloc = glGetUniformLocation(shaderProgram, "facingLeft");
+			glUniform1i(frame_uloc, curr_frame);
+			glUniform1f(frame_width_uloc, frame_width);
+			glUniform1i(facing_left_uloc, facingLeft);
+
 			// Setting uniform values to the currently bound program
 			GLuint transform_loc = glGetUniformLocation(currProgram, "transform");
 			glUniformMatrix4fv(transform_loc, 1, GL_FALSE, (float*)&transform.mat);
@@ -89,6 +179,7 @@ void RenderSystem::draw() {
 			glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_SHORT, nullptr);
 			glHasError();
 		}
+		RenderRequest request = registry.renderRequests.get(entity);
 
 		if (request.geometry == GEOMETRY_BUFFER_IDS::WALL || request.geometry == GEOMETRY_BUFFER_IDS::AI) {
 			const GLuint vbo = vertexBuffers[(GLuint)request.geometry];
@@ -254,16 +345,27 @@ void RenderSystem::initRenderData() {
 
 	// set vertex data
 
-	// Cat sprite
+	// Cat sprite for walk and idle
 	std::vector<TexturedVertex> texturedVertices(4);
 	texturedVertices[0].position = { 0.5f,  0.5f, 0.0f }; // top right
 	texturedVertices[1].position = { 0.5f, -0.5f, 0.0f }; // bottom right
 	texturedVertices[2].position = { -0.5f, -0.5f, 0.0f }; // bottom left
 	texturedVertices[3].position = { -0.5f,  0.5f, 0.0f }; // top left
-	texturedVertices[0].texCoord= { 1.0f, 1.0f };
-	texturedVertices[1].texCoord = { 1.0f, 0.0f };
-	texturedVertices[2].texCoord = { 0.0f, 0.0f };
-	texturedVertices[3].texCoord = { 0.0f, 1.0f };
+	texturedVertices[0].texCoord= { 0.111f, 1.0f }; // bottom right
+	texturedVertices[1].texCoord = { 0.111f, 0.0f }; // top right
+	texturedVertices[2].texCoord = { 0.0f, 0.0f }; // top left 
+	texturedVertices[3].texCoord = { 0.0f, 1.0f }; // bottom left 
+
+	// Cat sprite for jump
+	std::vector<TexturedVertex> texturedJumpVertices(4);
+	texturedJumpVertices[0].position = { 0.5f,  0.5f, 0.0f }; // top right
+	texturedJumpVertices[1].position = { 0.5f, -0.5f, 0.0f }; // bottom right
+	texturedJumpVertices[2].position = { -0.5f, -0.5f, 0.0f }; // bottom left
+	texturedJumpVertices[3].position = { -0.5f,  0.5f, 0.0f }; // top left
+	texturedJumpVertices[0].texCoord = { 0.125f, 1.0f }; // bottom right
+	texturedJumpVertices[1].texCoord = { 0.125f, 0.0f }; // top right
+	texturedJumpVertices[2].texCoord = { 0.0f, 0.0f }; // top left 
+	texturedJumpVertices[3].texCoord = { 0.0f, 1.0f }; // bottom left 
 
 	// Wall
 	std::vector<TexturedVertex> wallVertices(4);
@@ -279,7 +381,9 @@ void RenderSystem::initRenderData() {
 	aiVertices[3].position = { -0.5f,  0.5f, 0.0f }; // top left
 
 	const std::vector<uint16_t> texturedIndices = { 2, 0, 3, 2, 1, 0 };
-	bindVBOandIBO(GEOMETRY_BUFFER_IDS::CAT, texturedVertices, texturedIndices);
+	bindVBOandIBO(GEOMETRY_BUFFER_IDS::CAT_IDLE, texturedVertices, texturedIndices);
+	bindVBOandIBO(GEOMETRY_BUFFER_IDS::CAT_WALK, texturedVertices, texturedIndices);
+	bindVBOandIBO(GEOMETRY_BUFFER_IDS::CAT_JUMP, texturedJumpVertices, texturedIndices);
 	bindVBOandIBO(GEOMETRY_BUFFER_IDS::WALL, wallVertices, texturedIndices);
 	bindVBOandIBO(GEOMETRY_BUFFER_IDS::AI, aiVertices, texturedIndices);
 }

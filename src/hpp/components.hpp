@@ -11,6 +11,17 @@
 // Component IDs
 ////////////////////////////////////////////////////////////////////////////////
 
+enum CharacterType {
+	CAT = 1,
+	DOG = 2,
+};
+
+enum AnimationType {
+	IDLE = 1,
+	WALKING = 2,
+	JUMPING = 3
+};
+
 //TODO add AI to the list of IDs
 enum class SHADER_PROGRAM_IDS {
 	CAT,
@@ -21,13 +32,17 @@ enum class SHADER_PROGRAM_IDS {
 }; constexpr int shaderProgramCount = (int)SHADER_PROGRAM_IDS::TOTAL;
 
 enum class TEXTURE_IDS {
-	CAT,
+	CAT_IDLE,
+	CAT_WALK,
+	CAT_JUMP,
 	TRIANGLE,
 	TOTAL
 }; constexpr int textureCount = (int)TEXTURE_IDS::TOTAL;
 
 enum class GEOMETRY_BUFFER_IDS {
-	CAT,
+	CAT_IDLE,
+	CAT_WALK,
+	CAT_JUMP,
 	TRIANGLE,
 	WALL,
 	AI,
