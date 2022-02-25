@@ -42,7 +42,7 @@ Entity createCat(RenderSystem* renderer, vec2 pos)
 	motion.position = pos;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	motion.scale = { 100.f, 100.f };
+	motion.scale = { -100.f, 100.f };
 
 	Boxcollider& bc = registry.boxColliders.emplace(entity);
 	calculateBoxVerteciesAndSetTriangles(motion.position, motion.scale, bc);
@@ -54,6 +54,8 @@ Entity createCat(RenderSystem* renderer, vec2 pos)
 		{ TEXTURE_IDS::CAT_IDLE, // textureCount indicates that no txture is needed
 			SHADER_PROGRAM_IDS::CAT,
 			GEOMETRY_BUFFER_IDS::CAT_IDLE });
+
+	registry.weapons.insert(entity, Rifle());
 
 	return entity;
 }
@@ -122,6 +124,35 @@ Entity createAI(RenderSystem* renderer, vec2 pos)
 		{ TEXTURE_IDS::CAT_IDLE, // textureCount indicates that no txture is needed
 			SHADER_PROGRAM_IDS::CAT,
 			GEOMETRY_BUFFER_IDS::AI });
+
+	return entity;
+}
+
+Entity createProjectile(RenderSystem* renderer, glm::vec2 pos, glm::vec4 coefficientsX, glm::vec4 coefficientsY) {
+
+	auto entity = Entity();
+
+	// Setting initial motion values
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = pos;
+	motion.angle = 0.f;
+	motion.velocity = { 0.f, 0.f };
+	motion.scale = { 5.0f, 5.0f };
+
+	Boxcollider& bc = registry.boxColliders.emplace(entity);
+	calculateBoxVerteciesAndSetTriangles(motion.position, motion.scale, bc);
+	bc.transformed_required = true;
+
+	//Using wall textures for now
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_IDS::TOTAL, 
+			SHADER_PROGRAM_IDS::WALL,
+			GEOMETRY_BUFFER_IDS::WALL });
+
+	Projectile& projectile = registry.projectiles.emplace(entity);
+	projectile.trajectoryAx = coefficientsX;
+	projectile.trajectoryAy = coefficientsY;
 
 	return entity;
 }

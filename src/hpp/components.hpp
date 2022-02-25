@@ -5,6 +5,7 @@
 
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
+#include <glm/vec4.hpp>
 
 ////////////////////////////////////////////////////////////////////////////////
 // Component IDs
@@ -58,15 +59,15 @@ enum RB_TYPES {
 	STATIC = 2
 };
 
+enum WEAPON_TYPES {
+	RIFLE = 0,
+	SHOTGUN = 1
+};
+
 // Game components ------------------------------------------------------------
 
-// we should change the name to Cat 
 struct Player {
-	int character = 1;
-	int frame = 0;
-	int animation_type = IDLE;
-	float frame_counter_ms = 100;
-	float facingLeft = 0;
+
 };
 
 struct Health {
@@ -82,6 +83,7 @@ struct SolidTerrain {
 };
 
 struct Collider {
+
 };
 
 struct Boxcollider : Collider {
@@ -111,6 +113,45 @@ struct Rigidbody {
 
 struct RayCast {
 	int max_depth = 1;
+};
+
+struct WeaponBase {
+	float MAX_ANGLE;
+	float MIN_ANGLE;
+	float aim_angle;
+	float distance;
+	float area;
+	float aim_loc_x;
+	float damage;
+	WEAPON_TYPES type;
+};
+
+struct Rifle : WeaponBase {
+	Rifle() { 
+		// pi/2
+		MAX_ANGLE = 1.5708;
+		//0
+		MIN_ANGLE = 0;
+		// pi/4
+		aim_angle = 0.7854;
+		//distance the gun can shoot
+		distance = 200.0f;
+		//"radius" around distance
+		area = 200.0f;
+		damage = 10;
+		type = RIFLE;
+	}
+};
+
+struct Shotgun : WeaponBase {
+
+};
+
+struct Projectile {
+	glm::vec4 trajectoryAx;
+	glm::vec4 trajectoryAy;
+	float delta_time = 0;
+	float hit_radius;
 };
 
 // Stucture to store collision information
