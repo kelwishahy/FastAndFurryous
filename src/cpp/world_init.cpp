@@ -30,7 +30,7 @@ Entity createCat(RenderSystem* renderer, vec2 pos)
 	Health& health = registry.health.emplace(entity);
 
 	// Store a reference to the potentially re-used mesh object
-	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_IDS::CAT);
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_IDS::CAT_IDLE);
 	registry.meshPtrs.emplace(entity, &mesh);
 
 	//Make player a rigidbody
@@ -48,13 +48,12 @@ Entity createCat(RenderSystem* renderer, vec2 pos)
 	calculateBoxVerteciesAndSetTriangles(motion.position, motion.scale, bc);
 	bc.transformed_required = true;
 
-	// Create and (empty) Chicken component to be able to refer to all eagles
 	registry.players.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
-		{ TEXTURE_IDS::CAT, // textureCount indicates that no txture is needed
+		{ TEXTURE_IDS::CAT_IDLE, // textureCount indicates that no txture is needed
 			SHADER_PROGRAM_IDS::CAT,
-			GEOMETRY_BUFFER_IDS::CAT });
+			GEOMETRY_BUFFER_IDS::CAT_IDLE });
 
 	return entity;
 }
@@ -114,11 +113,13 @@ Entity createAI(RenderSystem* renderer, vec2 pos)
 	bc.transformed_required = true;
 
 	// Create and (empty) Chicken component to be able to refer to all eagles
+	// this is entity 4 remove this - or change the if case in render system.
+	// still doesn't work so i'll comment this out for now to see why animation don't work.
 	registry.players.emplace(entity);
 	registry.ais.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
-		{ TEXTURE_IDS::CAT, // textureCount indicates that no txture is needed
+		{ TEXTURE_IDS::CAT_IDLE, // textureCount indicates that no txture is needed
 			SHADER_PROGRAM_IDS::CAT,
 			GEOMETRY_BUFFER_IDS::AI });
 

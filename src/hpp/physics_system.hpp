@@ -27,6 +27,6 @@ private:
 
 	void applyMotions(float elapsed_ms);
 
-	const float GRAVITY_CONST = 0.5f;
+	const float GRAVITY_CONST = 2.5f;
 	RenderSystem* renderer;
 };

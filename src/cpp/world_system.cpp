@@ -5,6 +5,7 @@
 // stlib
 #include <cassert>
 #include <sstream>
+#include <iostream>
 
 #include "..\hpp\tiny_ecs_registry.hpp"
 #include <hpp/physics_system.hpp>
@@ -58,6 +59,43 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 		}
 	}
 
+	// change the animation type depending on the velocity
+	Motion& catMotion = registry.motions.get(player_cat);
+	Player& catPlayer = registry.players.get(player_cat);
+	if (catMotion.velocity.x == 0 ) {
+		catPlayer.animation_type = IDLE;
+	}
+	if (catMotion.velocity.x != 0) {
+		catPlayer.animation_type = WALKING;
+	}
+	if (catMotion.velocity.y < 0) {
+		catPlayer.animation_type = JUMPING;
+	}
+	if (catMotion.velocity.x < 0) {
+		catPlayer.facingLeft = 1;
+	}
+	if (catMotion.velocity.x > 0) {
+		catPlayer.facingLeft = 0;
+	}
+
+	// FOR AI Animation
+	Motion& aiMotion = registry.motions.get(ai_cat);
+	Player& aiCat = registry.players.get(ai_cat);
+	if (aiMotion.velocity.x == 0) {
+		aiCat.animation_type = IDLE;
+	}
+	if (aiMotion.velocity.x != 0) {
+		aiCat.animation_type = WALKING;
+	}
+	if (aiMotion.velocity.y < 0) {
+		aiCat.animation_type = JUMPING;
+	}
+	if (aiMotion.velocity.x < 0) {
+		aiCat.facingLeft = 1;
+	}
+	if (aiMotion.velocity.x > 0) {
+		aiCat.facingLeft = 0;
+	}
 
 	return true;
 }
@@ -84,7 +122,8 @@ void WorldSystem::restart_game() {
 
 	// Create a new cat
 	player_cat = createCat(renderer, { width / 2 - 200, height - 400 });
-	createAI(renderer, { (width / 2) , height - 250 });
+	// Create ai cat
+	ai_cat = createAI(renderer, { (width / 2) , height - 250 });
 	//createAI(renderer, { (window_width_px / 2) , window_height_px - 250 });
 
 	//Floor
@@ -133,10 +172,13 @@ bool WorldSystem::is_over() const {
 // On key callback
 void WorldSystem::on_key(int key, int, int action, int mod) {
 	Motion& catMotion = registry.motions.get(player_cat);
+	vec2 oldVelocity = catMotion.velocity;
 	
-	current_speed = fmax(150.0f, current_speed);
+	current_speed = fmax(100.0f, current_speed);
 	if (action == GLFW_PRESS && key == GLFW_KEY_W) {
-		catMotion.velocity.y = -current_speed;
+		if (catMotion.position.y > renderer->getScreenHeight() - 100) {
+			catMotion.velocity.y = - current_speed;
+		}
 	}
 
 	if (action == GLFW_PRESS && key == GLFW_KEY_S) {

@@ -28,7 +28,9 @@ class RenderSystem {
 
 	// Textures
 	const std::array<std::string, textureCount> texturePaths = {
+		"cat-idle.png",
 		"cat-walk.png",
+		"cat-jump.png",
 		"wall.jpg"
 	};
 
@@ -46,9 +48,20 @@ class RenderSystem {
 
 	std::array<Mesh, geometryCount> meshes;
 
+	// CAT IDLE
 	const int CAT_IDLE_FRAMES = 9;
-	const GLfloat CAT_IDLE_FRAME_WIDTH = 1/9;
-	float CAT_IDLE_FRAME_TIME = 1000; // try different values
+	const GLfloat CAT_IDLE_FRAME_WIDTH = 0.111;
+	float CAT_IDLE_FRAME_TIME = 100; // lowering the value makes the animation faster
+
+	// CAT WALK
+	const int CAT_WALK_FRAMES = 9;
+	const GLfloat CAT_WALK_FRAME_WIDTH = 0.111;
+	float CAT_WALK_FRAME_TIME = 100; 
+
+	// CAT JUMP
+	const int CAT_JUMP_FRAMES = 8;
+	const GLfloat CAT_JUMP_FRAME_WIDTH = 0.125;
+	float CAT_JUMP_FRAME_TIME = 100;
 
 
 public:
