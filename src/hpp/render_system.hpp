@@ -60,8 +60,8 @@ class RenderSystem {
 	float CAT_WALK_FRAME_TIME = 100; 
 
 	// CAT JUMP
-	const int CAT_JUMP_FRAMES = 8;
-	const GLfloat CAT_JUMP_FRAME_WIDTH = 0.125;
+	const int CAT_JUMP_FRAMES = 9;
+	const GLfloat CAT_JUMP_FRAME_WIDTH = 0.111;
 	float CAT_JUMP_FRAME_TIME = 100;
 
 
@@ -120,6 +120,12 @@ private:
 	void bindVBOandIBO(GEOMETRY_BUFFER_IDS oid, std::vector<T> vertices, std::vector<uint16_t> indices);
 
 	void loadMeshes();
+
+	// Apply matrix transformations
+	glm::mat4 transform(Motion& motion, float depth, bool translate, bool scale, bool rotate);
+
+	// The last step of the draw function
+	void renderToScreen(glm::mat4& transformationMatrix, glm::mat4& projectionMatrix);
 
 	// Generate a 4x4 orthographic projection matrix
 	// that scales with window size
