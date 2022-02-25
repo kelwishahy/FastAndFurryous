@@ -7,6 +7,7 @@
 #include "tiny_ecs.hpp"
 #include "components.hpp"
 #include "tiny_ecs_registry.hpp"
+#include <hpp/Game_Mechanics/shooting_system.hpp>
 #include <glm/vec2.hpp>
 
 class BehaviorTree {
@@ -23,6 +24,7 @@ public:
 		const std::vector<Node*>& getChildren() const { return children; }
 		void addChild(Node* child) { children.emplace_back(child); }
 		void clear() { children.clear(); }
+		//void addChildren(const vec& new_children) { for (Node* child : newChildren) addChild(child); }
 	};
 
 	class Selector : public CompositeNode {
@@ -72,7 +74,7 @@ public:
 private:
 	//float jumpdelay;
 	//float timer;
-	BehaviorTree::Sequence sequence[2]; // Sequence of 2 actions. 
+	BehaviorTree::Sequence sequence; // Sequence of 2 actions. 
 	//int MIN_DISTANCE;
 	//std::default_random_engine rng;
 	//std::uniform_real_distribution<float> uniform_dist; // number between 0..1
@@ -84,8 +86,8 @@ private:
 	glm::vec2 player_position;
 	Entity ai;
 public:
-	AIMove(glm::vec2 player_position, Entity ai) : player_position(player_position), ai(ai) {
-	};
+	AIMove(glm::vec2 player_position, Entity ai) : player_position(player_position), ai(ai) {};
+
 	virtual bool run() override {
 		Motion& ai_motion = registry.motions.get(ai);
 
@@ -98,6 +100,64 @@ public:
 			ai_motion.velocity.x = 0;
 		}
 
+		return true;
+	}
+};
+
+class AIRight : public BehaviorTree::Node
+{
+private:
+	glm::vec2 player_position;
+	Entity ai;
+
+public:
+	AIRight(glm::vec2 player_position, Entity ai) : player_position(player_position), ai(ai) {};
+
+
+	virtual bool run() override {
+		Motion& ai_motion = registry.motions.get(ai);
+
+		if (ai_motion.position.x - player_position.x < 0) {
+			ai_motion.velocity.x = 100;
+			return true;
+		}
+
+		return false;
+	}
+};
+
+class AILeft : public BehaviorTree::Node
+{
+private:
+	glm::vec2 player_position;
+	Entity ai;
+
+public:
+	AILeft(glm::vec2 player_position, Entity ai) : player_position(player_position), ai(ai) {};
+
+	virtual bool run() override {
+		Motion& ai_motion = registry.motions.get(ai);
+
+		if (ai_motion.position.x - player_position.x > 0) {
+			ai_motion.velocity.x = -100;
+			return true;
+		}
+
+		return false;
+	}
+};
+
+class AIShoot : public BehaviorTree::Node 
+{
+private: 
+	ShootingSystem shootingSystem;
+	Entity ai;
+public:
+	AIShoot(ShootingSystem shootingSystem, Entity ai) : shootingSystem(shootingSystem), ai(ai) {};
+
+	virtual bool run() override {
+		shootingSystem.setAimLoc(ai);
+		shootingSystem.shoot(ai);
 		return true;
 	}
 };

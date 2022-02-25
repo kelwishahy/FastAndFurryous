@@ -124,6 +124,8 @@ Entity createAI(RenderSystem* renderer, vec2 pos)
 			SHADER_PROGRAM_IDS::CAT,
 			GEOMETRY_BUFFER_IDS::AI });
 
+	registry.weapons.insert(entity, Rifle());
+
 	return entity;
 }
 

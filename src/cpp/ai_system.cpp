@@ -1,7 +1,6 @@
 // internal
 #include "../src/hpp/ai_system.hpp"
 #include <stdio.h>
-#include "../behavior_tree/sequence.hpp"
 #include "glm/ext.hpp"
 
 using namespace glm;
@@ -26,19 +25,27 @@ void AISystem::step(float elapsed_ms)
 	vec2 player_pos = player_motion.position;
 
 	Entity& entity = ai_container.entities[0];
+
+	ShootingSystem shootingSystem;
 	//Sequence* sequence1 = new Sequence;
+	BehaviorTree::Selector selector;
+	AILeft* moveLeft = new AILeft(player_pos, entity);
+	AIRight* moveRight = new AIRight(player_pos, entity);
+	selector.addChild(moveLeft);
+	selector.addChild(moveRight);
 	// adding sequence of actions here -- so far only move
-	AIMove* move = new AIMove(player_pos, entity);
-
-	sequence[0].addChild(move);
-
+	//AIMove* move = new AIMove(player_pos, entity);
+	AIShoot* shoot = new AIShoot(shootingSystem, entity);
+	//sequence[0].addChild(move);
+	sequence.addChild(&selector);
+	//sequence.addChild(shoot);
 	// runs each child in sequence till it fails or runs thru each child
-	while (!sequence->run()) {
+	while (!sequence.run()) {
 		//printf("------------------------------\n");
 	}
 
 	// delete the actions done from the decision tree
-	sequence[0].clear();
+	sequence.clear();
 
 	//for (uint i = 0; i < ai_container.components.size(); i++) {
 
