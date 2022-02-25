@@ -24,7 +24,7 @@ enum AnimationType {
 
 //TODO add AI to the list of IDs
 enum class SHADER_PROGRAM_IDS {
-	CAT,
+	ANIMATION,
 	TEXTURE,
 	WALL,
 	AI,
@@ -69,7 +69,7 @@ struct Player {
 	int frame = 0;
 	int animation_type = IDLE;
 	float frame_counter_ms = 100;
-	float facingLeft = 0;
+	bool facingLeft = false;
 };
 
 struct Health {

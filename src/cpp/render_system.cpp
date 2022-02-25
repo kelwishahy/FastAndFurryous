@@ -36,27 +36,29 @@ void RenderSystem::draw(float elapsed_ms) {
 		RenderRequest request = registry.renderRequests.get(entity);
 
 		switch (request.geometry) {
-
-		case GEOMETRY_BUFFER_IDS::QUAD: {
-			std::string shaderInputs[] = { "position" };
-			drawQuad(request, shaderInputs, 1);
-			break;
-		}
-
-		case GEOMETRY_BUFFER_IDS::TEXTURED_QUAD: {
-
-			if (registry.players.has(entity)) { // Animate player sprites
-				animateSprite(entity, elapsed_ms);
+			case GEOMETRY_BUFFER_IDS::QUAD: {
+				std::string shaderInputs[] = { "position" };
+				drawQuad(request, shaderInputs, 1);
+				break;
 			}
-			else { // Draw a static textured quad
+
+			case GEOMETRY_BUFFER_IDS::TEXTURED_QUAD: {
+
+				// Animate player sprites
+				if (registry.players.has(entity)) {
+					animateSprite(request, entity, elapsed_ms);
+					continue;
+				}
+
+				// Draw a static textured quad
 				std::string shaderInputs[] = { "position", "texCoord" };
 				drawQuad(request, shaderInputs, 2);
-			}
-			break;
-		}
 
-		default:
-			continue;
+				break;
+			}
+
+			default:
+				continue;
 
 		}
 
@@ -125,7 +127,8 @@ void RenderSystem::drawQuad(RenderRequest& request, std::string shaderInputs[], 
 	}
 }
 
-void animateSprite(Entity& entity, float elapsed_ms) {
+void RenderSystem::animateSprite(RenderRequest& request, Entity& entity, float elapsed_ms) {
+	mat4 projection = createProjectionMatrix();
 
 	// Frames for animation
 	GLint curr_frame = 0;
@@ -145,135 +148,152 @@ void animateSprite(Entity& entity, float elapsed_ms) {
 	int characterType = registry.players.get(entity).character;
 
 	// Get if character is facing left or not
-	int facingLeft = registry.players.get(entity).facingLeft;
+	bool facingLeft = registry.players.get(entity).facingLeft;
 
 	// Get frame
-	int* frame = &registry.players.get(entity).frame;
+	int& frame = registry.players.get(entity).frame;
 
-	// Get the current texture to alter
+
 	TEXTURE_IDS& curr_texture = registry.renderRequests.get(entity).texture;
-	// Get the current geometry to alter
-	GEOMETRY_BUFFER_IDS& curr_geometry = registry.renderRequests.get(entity).geometry;
 
 	switch (characterType) {
-	case CAT: {
-		switch (animationType) {
-		case IDLE: {
-			curr_texture = TEXTURE_IDS::CAT_IDLE;
-			numFrames = CAT_IDLE_FRAMES;
-			frame_width = CAT_IDLE_FRAME_WIDTH;
-			timePerFrame = CAT_IDLE_FRAME_TIME;
-			break;
-		}
+		case CAT: {
+			switch (animationType) {
+				case IDLE: {
+					// Updating the texture coordinates for use with the animation sprite sheets
+					texturedQuad[0].texCoord = { 0.111f, 1.0f }; // top right
+					texturedQuad[1].texCoord = { 0.111f, 0.0f }; // bottom right
+					texturedQuad[2].texCoord = { 0.0f, 0.0f }; // bottom left
+					texturedQuad[3].texCoord = { 0.0f, 1.0f }; // top left
+					bindVBOandIBO(GEOMETRY_BUFFER_IDS::TEXTURED_QUAD, texturedQuad, quadIndices);
 
-		case WALKING: {
-			if (curr_geometry != GEOMETRY_BUFFER_IDS::CAT_WALK) {
-				curr_geometry = GEOMETRY_BUFFER_IDS::CAT_WALK;
-				*frame = 0;
+					// *frame = 0;
+					curr_texture = TEXTURE_IDS::CAT_IDLE;
+					numFrames = CAT_IDLE_FRAMES;
+					frame_width = CAT_IDLE_FRAME_WIDTH;
+					timePerFrame = CAT_IDLE_FRAME_TIME;
+					break;
+				}
+
+				case WALKING: {
+					texturedQuad[0].texCoord = { 0.111f, 1.0f }; // top right
+					texturedQuad[1].texCoord = { 0.111f, 0.0f }; // bottom right
+					texturedQuad[2].texCoord = { 0.0f, 0.0f }; // bottom left
+					texturedQuad[3].texCoord = { 0.0f, 1.0f }; // top left
+					bindVBOandIBO(GEOMETRY_BUFFER_IDS::TEXTURED_QUAD, texturedQuad, quadIndices);
+
+					// *frame = 0;
+					curr_texture = TEXTURE_IDS::CAT_WALK;
+					numFrames = CAT_WALK_FRAMES;
+					frame_width = CAT_WALK_FRAME_WIDTH;
+					timePerFrame = CAT_WALK_FRAME_TIME;
+					break;
+				}
+
+				case JUMPING: {
+					texturedQuad[0].texCoord = { 0.125f, 1.0f }; // top right
+					texturedQuad[1].texCoord = { 0.125f, 0.0f }; // bottom right
+					texturedQuad[2].texCoord = { 0.0f, 0.0f }; // bottom left
+					texturedQuad[3].texCoord = { 0.0f, 1.0f }; // top left
+					bindVBOandIBO(GEOMETRY_BUFFER_IDS::TEXTURED_QUAD, texturedQuad, quadIndices);
+
+					// *frame = 0;
+					curr_texture = TEXTURE_IDS::CAT_JUMP;
+					numFrames = CAT_JUMP_FRAMES;
+					frame_width = CAT_JUMP_FRAME_WIDTH;
+					timePerFrame = CAT_JUMP_FRAME_TIME;
+					break;
+				}
+
+				default: break;
 			}
-			curr_texture = TEXTURE_IDS::CAT_WALK;
-			numFrames = CAT_WALK_FRAMES;
-			frame_width = CAT_WALK_FRAME_WIDTH;
-			timePerFrame = CAT_WALK_FRAME_TIME;
-			break;
 		}
-
-		case JUMPING: {
-			if (curr_geometry != GEOMETRY_BUFFER_IDS::CAT_JUMP) {
-				curr_geometry = GEOMETRY_BUFFER_IDS::CAT_JUMP;
-				*frame = 0;
-			}
-			curr_texture = TEXTURE_IDS::CAT_JUMP;
-			numFrames = CAT_JUMP_FRAMES;
-			frame_width = CAT_JUMP_FRAME_WIDTH;
-			timePerFrame = CAT_JUMP_FRAME_TIME;
-			break;
-		}
-
-		default: break;
-		}
-
-		if (*counter <= 0) {
-			if (registry.players.has(entity)) {
-				curr_frame = *frame;
-				curr_frame += 1;
-				*frame = curr_frame % numFrames;
-			}
-			// Reset frame timer
-			*counter = timePerFrame;
-		}
-		else {
-			curr_frame = *frame;
-		}
-
-		RenderRequest request = registry.renderRequests.get(entity);
-
-		const GLuint vbo = vertexBuffers[(GLuint)request.geometry];
-		const GLuint ibo = indexBuffers[(GLuint)request.geometry];
-
-		// Bind buffers
-		glBindBuffer(GL_ARRAY_BUFFER, vbo);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-		glHasError();
-
-		// set shaders
-		const GLuint shaderProgram = shaders[(GLuint)request.shader];
-		glUseProgram(shaderProgram);
-		glHasError();
-
-		// Set texture
-		glActiveTexture(GL_TEXTURE0);
-		const GLuint texture = textures[(GLuint)request.texture];
-		glBindTexture(GL_TEXTURE_2D, texture);
-
-		// Pass in vertex attributes
-		GLint in_position_loc = glGetAttribLocation(shaderProgram, "aPos");
-		glHasError();
-
-		glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex), (void*)0);
-		glEnableVertexAttribArray(in_position_loc);
-		glHasError();
-
-		GLint aTexCoordLoc = glGetAttribLocation(shaderProgram, "aTexCoord");
-		glHasError();
-
-		glVertexAttribPointer(aTexCoordLoc, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex), (void*)sizeof(vec3));
-		glEnableVertexAttribArray(aTexCoordLoc);
-		glHasError();
-
-		GLint size = 0;
-		glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
-		glHasError();
-		const GLsizei numIndices = size / sizeof(uint16_t);
-
-		/* MATRIX TRANSFORMATIONS */
-		Motion& motion = registry.motions.get(entity);
-		Transform transform;
-		transform.mat = translate(transform.mat, vec3(motion.position, 0.0f));
-		transform.mat = scale(transform.mat, vec3(motion.scale, 0.f));
-
-		GLint currProgram;
-		glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
-
-		// pass the frame values to the shader as uniform
-		GLint frame_uloc = glGetUniformLocation(shaderProgram, "curr_frame");
-		GLfloat frame_width_uloc = glGetUniformLocation(shaderProgram, "frame_width");
-		GLint facing_left_uloc = glGetUniformLocation(shaderProgram, "facingLeft");
-		glUniform1i(frame_uloc, curr_frame);
-		glUniform1f(frame_width_uloc, frame_width);
-		glUniform1i(facing_left_uloc, facingLeft);
-
-		// Setting uniform values to the currently bound program
-		GLuint transform_loc = glGetUniformLocation(currProgram, "transform");
-		glUniformMatrix4fv(transform_loc, 1, GL_FALSE, (float*)&transform.mat);
-		GLuint projection_loc = glGetUniformLocation(currProgram, "projection");
-		glUniformMatrix4fv(projection_loc, 1, GL_FALSE, (float*)&projection);
-		glHasError();
-
-		glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_SHORT, nullptr);
-		glHasError();
 	}
+
+	if (*counter <= 0) {
+		curr_frame = frame;
+		curr_frame += 1;
+		frame = curr_frame % numFrames;
+
+		// Reset frame timer
+		*counter = timePerFrame;
+		printf("Current frame: %d of %d\n", curr_frame, numFrames);
+	} else {
+		curr_frame = frame;
 	}
+
+	const GLuint vbo = vertexBuffers[(GLuint)GEOMETRY_BUFFER_IDS::TEXTURED_QUAD];
+	const GLuint ibo = indexBuffers[(GLuint)GEOMETRY_BUFFER_IDS::TEXTURED_QUAD];
+
+	// Bind buffers
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+	glHasError();
+
+	// set shaders
+	const GLuint shaderProgram = shaders[(GLuint)SHADER_PROGRAM_IDS::ANIMATION];
+	glUseProgram(shaderProgram);
+	glHasError();
+
+	// Set texture
+	glActiveTexture(GL_TEXTURE0);
+	const GLuint texture = textures[(GLuint)request.texture];
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	// Pass in vertex attributes
+	GLint in_position_loc = glGetAttribLocation(shaderProgram, "position");
+	glHasError();
+
+	glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex), (void*)0);
+	glEnableVertexAttribArray(in_position_loc);
+	glHasError();
+
+	GLint aTexCoordLoc = glGetAttribLocation(shaderProgram, "texCoord");
+	glHasError();
+
+	glVertexAttribPointer(aTexCoordLoc, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex), (void*)sizeof(vec3));
+	glEnableVertexAttribArray(aTexCoordLoc);
+	glHasError();
+
+	GLint size = 0;
+	glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
+	glHasError();
+	const GLsizei numIndices = size / sizeof(uint16_t);
+
+	/* MATRIX TRANSFORMATIONS */
+	Motion& motion = registry.motions.get(entity);
+	Transform transform;
+	transform.mat = translate(transform.mat, vec3(motion.position, 0.0f));
+	transform.mat = scale(transform.mat, vec3(motion.scale, 0.f));
+
+	GLint currProgram;
+	glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
+
+	// pass the frame values to the shader as uniform
+	GLint frame_uloc = glGetUniformLocation(shaderProgram, "currentFrame");
+	GLfloat frame_width_uloc = glGetUniformLocation(shaderProgram, "frameWidth");
+	GLint facing_left_uloc = glGetUniformLocation(shaderProgram, "facingLeft");
+	glUniform1i(frame_uloc, curr_frame);
+	glUniform1f(frame_width_uloc, frame_width);
+	glUniform1i(facing_left_uloc, facingLeft);
+
+	// Setting uniform values to the currently bound program
+	GLuint transform_loc = glGetUniformLocation(currProgram, "transform");
+	glUniformMatrix4fv(transform_loc, 1, GL_FALSE, (float*)&transform.mat);
+	GLuint projection_loc = glGetUniformLocation(currProgram, "projection");
+	glUniformMatrix4fv(projection_loc, 1, GL_FALSE, (float*)&projection);
+	glHasError();
+
+	glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_SHORT, nullptr);
+	glHasError();
+
+	// Resetting the texture coordinates after use
+	texturedQuad[0].texCoord = { 1.f, 1.f }; // top right
+	texturedQuad[1].texCoord = { 1.f, 0.f }; // bottom right
+	texturedQuad[2].texCoord = { 0.f, 0.f }; // bottom left
+	texturedQuad[3].texCoord = { 0.f, 1.f }; // top left
+	bindVBOandIBO(GEOMETRY_BUFFER_IDS::TEXTURED_QUAD, texturedQuad, quadIndices);
+
 }
 
 void RenderSystem::drawTiles(const glm::mat4& projectionMatrix) {

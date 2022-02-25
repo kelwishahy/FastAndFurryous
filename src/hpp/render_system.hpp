@@ -19,7 +19,7 @@ class RenderSystem {
 
 	// Shaders
 	const std::array<std::string, shaderProgramCount> shaderPaths = {
-		"cat",
+		"animation",
 		"texture",
 		"wall",
 		"ai"
@@ -75,7 +75,7 @@ public:
 	// Draw a quad with an optional texture
 	void drawQuad(RenderRequest& request, std::string shaderInputs[], int numInputs);
 
-	void animateSprite(Entity& entity, float elapsed_ms);
+	void animateSprite(RenderRequest& request, Entity& entity, float elapsed_ms);
 
 	// Draw a tilemap
 	void drawTiles(const glm::mat4& projectionMatrix);

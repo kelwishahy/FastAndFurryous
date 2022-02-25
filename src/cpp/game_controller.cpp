@@ -56,10 +56,10 @@ void GameController::step(float elapsed_ms)
 		catPlayer.animation_type = JUMPING;
 	}
 	if (catMotion.velocity.x < 0) {
-		catPlayer.facingLeft = 1;
+		catPlayer.facingLeft = true;
 	}
 	if (catMotion.velocity.x > 0) {
-		catPlayer.facingLeft = 0;
+		catPlayer.facingLeft = false;
 	}
 
 	// // FOR AI Animation
@@ -194,10 +194,10 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 		/*
 		 * DEBUGGING FOR MAP SYSTEM -----------------------------------------------------
 		 */
-		auto& position = catMotion.position;
-		printf("Cat position is %f, %f\n", position.x, position.y);
-		vec2 closestTile = {position.x / gameMap.getTileScale(), position.y / gameMap.getTileScale()};
-		printf("Closest tile is %f, %f\n", closestTile.x, closestTile.y);
+		// auto& position = catMotion.position;
+		// printf("Cat position is %f, %f\n", position.x, position.y);
+		// vec2 closestTile = {position.x / gameMap.getTileScale(), position.y / gameMap.getTileScale()};
+		// printf("Closest tile is %f, %f\n", closestTile.x, closestTile.y);
 
 		//-------------------------------------------------------------------------------
 

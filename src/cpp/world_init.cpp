@@ -29,10 +29,6 @@ Entity createCat(RenderSystem* renderer, vec2 pos)
 	// Add health component
 	Health& health = registry.health.emplace(entity);
 
-	// Store a reference to the potentially re-used mesh object
-	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_IDS::CAT_IDLE);
-	registry.meshPtrs.emplace(entity, &mesh);
-
 	//Make player a rigidbody
 	Rigidbody& rb = registry.rigidBodies.emplace(entity);
 	//rb.type = STATIC;
@@ -52,7 +48,7 @@ Entity createCat(RenderSystem* renderer, vec2 pos)
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_IDS::CAT_IDLE,
-			SHADER_PROGRAM_IDS::CAT,
+			SHADER_PROGRAM_IDS::ANIMATION,
 			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
 
 	registry.weapons.insert(entity, Rifle());
@@ -127,7 +123,7 @@ Entity createAI(RenderSystem* renderer, vec2 pos)
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_IDS::CAT_IDLE,
-			SHADER_PROGRAM_IDS::CAT,
+			SHADER_PROGRAM_IDS::ANIMATION,
 			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
 
 	return entity;
