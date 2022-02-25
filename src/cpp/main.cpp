@@ -53,7 +53,7 @@ int main() {
 		physics.step(elapsed_ms);
 		world.handle_collisions();
 
-		renderer.draw(elapsed_ms);
+		renderer.draw();
 		glfwSwapBuffers(window);
 	}
 
