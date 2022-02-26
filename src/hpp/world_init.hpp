@@ -17,6 +17,6 @@ Entity createTile();
 Entity createAI(RenderSystem* renderer, glm::vec2 pos);
 
 //Projectile
-Entity createProjectile(RenderSystem* renderer, Entity originE, glm::vec4 coefficientsX, glm::vec4 coefficientsY);
+Entity createProjectile(RenderSystem* renderer, Entity originE, glm::vec4 coefficientsX, glm::vec4 coefficientsY, glm::vec2 endtangent);
 
 

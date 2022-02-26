@@ -28,9 +28,15 @@ void ShootingSystem::step(float elapsed_time) {
 		float step_seconds = elapsed_time / 1000.0f;
 
 		projectile.delta_time = (projectile.delta_time + step_seconds >= 1) ? 1 : projectile.delta_time + step_seconds;
-		vec2 translation = vec2{ calculate_point(projectile.trajectoryAx, projectile.delta_time) , calculate_point(projectile.trajectoryAy, projectile.delta_time) } - motion.position;
-		
-		PhysicsSystem::translatePos(entity, translation);
+		if (projectile.delta_time == 1 && !registry.rigidBodies.has(entity)) {
+			Rigidbody& rb = registry.rigidBodies.emplace(entity);
+			rb.type = NORMAL;
+			motion.velocity = projectile.end_tangent;
+		}
+		if (!registry.rigidBodies.has(entity)) {
+			vec2 translation = vec2{ calculate_point(projectile.trajectoryAx, projectile.delta_time) , calculate_point(projectile.trajectoryAy, projectile.delta_time) } - motion.position;
+			PhysicsSystem::translatePos(entity, translation);
+		}
 	}
 }
 
@@ -88,7 +94,7 @@ void ShootingSystem::setAimLoc(Entity e) {
 
 	float move_step = (x_end - x_begin) * (weapon.aim_angle / (weapon.MAX_ANGLE - weapon.MIN_ANGLE));
 
-	weapon.aim_loc_x = (x_begin + move_step >= x_end) ? x_end : x_begin + move_step;
+	weapon.aim_loc_x = (x_end - move_step <= x_begin) ? x_begin : x_end - move_step;
 	printf("weapons aim loc: %f\n", weapon.aim_loc_x);
 }
 
@@ -103,9 +109,11 @@ void ShootingSystem::shoot(Entity e) {
 		float x1p = cos(weapon.aim_angle) * 2;
 		float x2p = x1p;
 
-		float y1 = registry.motions.get(e).position.y;
+		float plane = registry.motions.get(e).position.y;
+
+		float y1 = plane;
 		//Hard coded value
-		float y2 = 1020.0f;
+		float y2 = plane;
 		//Multiplier is hard coded
 		float y1p = -sin(weapon.aim_angle) * 2000.0f;
 		//Currently the second tangent just mirrors first tangent, we can change this
@@ -113,7 +121,7 @@ void ShootingSystem::shoot(Entity e) {
 		vec4 xt = calculate_A(x1, x2, x1p, x2p);
 		vec4 yt = calculate_A(y1, y2, y1p, y2p);
 		
-		createProjectile(renderer, e, xt, yt);
+		createProjectile(renderer, e, xt, yt, vec2{x2p * 100.0f, y2p});
 	}
 
 

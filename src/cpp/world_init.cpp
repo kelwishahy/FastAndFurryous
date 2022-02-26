@@ -129,7 +129,7 @@ Entity createAI(RenderSystem* renderer, vec2 pos)
 	return entity;
 }
 
-Entity createProjectile(RenderSystem* renderer, Entity originE, glm::vec4 coefficientsX, glm::vec4 coefficientsY) {
+Entity createProjectile(RenderSystem* renderer, Entity originE, vec4 coefficientsX, vec4 coefficientsY, vec2 endtangent) {
 
 	auto entity = Entity();
 
@@ -155,6 +155,7 @@ Entity createProjectile(RenderSystem* renderer, Entity originE, glm::vec4 coeffi
 	projectile.origin = originE;
 	projectile.trajectoryAx = coefficientsX;
 	projectile.trajectoryAy = coefficientsY;
+	projectile.end_tangent = endtangent;
 
 	return entity;
 }
