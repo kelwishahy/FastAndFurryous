@@ -51,7 +51,6 @@ int main() {
 		world.step(elapsed_ms);
 		ai.step(elapsed_ms);
 		physics.step(elapsed_ms);
-		world.handle_collisions();
 
 		renderer.draw(elapsed_ms);
 		glfwSwapBuffers(window);
