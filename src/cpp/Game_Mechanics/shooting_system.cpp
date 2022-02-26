@@ -1,6 +1,7 @@
 #include <hpp/Game_Mechanics/shooting_system.hpp>
 #include <hpp/tiny_ecs_registry.hpp>
 #include <hpp/world_init.hpp>
+#include <hpp/physics_system.hpp>
 
 ShootingSystem::ShootingSystem() {
 	
@@ -27,9 +28,9 @@ void ShootingSystem::step(float elapsed_time) {
 		float step_seconds = elapsed_time / 1000.0f;
 
 		projectile.delta_time = (projectile.delta_time + step_seconds >= 1) ? 1 : projectile.delta_time + step_seconds;
-		motion.position.x = calculate_point(projectile.trajectoryAx, projectile.delta_time);
-		motion.position.y = calculate_point(projectile.trajectoryAy, projectile.delta_time);
-
+		vec2 translation = vec2{ calculate_point(projectile.trajectoryAx, projectile.delta_time) , calculate_point(projectile.trajectoryAy, projectile.delta_time) } - motion.position;
+		
+		PhysicsSystem::translatePos(entity, translation);
 	}
 }
 
@@ -93,6 +94,7 @@ void ShootingSystem::setAimLoc(Entity e) {
 
 void ShootingSystem::shoot(Entity e) {
 
+	assert(registry.weapons.has(e));
 	WeaponBase& weapon = registry.weapons.get(e);
 
 	if (weapon.type == RIFLE) {
@@ -111,7 +113,7 @@ void ShootingSystem::shoot(Entity e) {
 		vec4 xt = calculate_A(x1, x2, x1p, x2p);
 		vec4 yt = calculate_A(y1, y2, y1p, y2p);
 		
-		createProjectile(renderer, registry.motions.get(e).position, xt, yt);
+		createProjectile(renderer, e, xt, yt);
 	}
 
 

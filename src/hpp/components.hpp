@@ -150,6 +150,7 @@ struct Shotgun : WeaponBase {
 };
 
 struct Projectile {
+	Entity origin;
 	glm::vec4 trajectoryAx;
 	glm::vec4 trajectoryAy;
 	float delta_time = 0;

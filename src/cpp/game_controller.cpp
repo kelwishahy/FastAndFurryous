@@ -174,8 +174,11 @@ void GameController::handle_collisions() {
 		Entity entity_other = collisionsRegistry.components[i].other;
 
 		//If a projectile hits any terrain, get rid of the projectile
-		if (registry.projectiles.has(entity) && registry.terrains.has(entity_other)) {
-			registry.remove_all_components_of(entity);
+		if (registry.projectiles.has(entity)) {
+			Projectile& pj = registry.projectiles.get(entity);
+			if (registry.terrains.has(entity_other) && entity_other != pj.origin) {
+				registry.remove_all_components_of(entity);
+			}
 		}
 
 	}
@@ -239,6 +242,8 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 
 			if (action == GLFW_PRESS && key == GLFW_KEY_T) {
 				shooting_system.shoot(curr_selected_char);
+				printf("shooting");
+				printf("Num of projectiles %u\n", (uint)registry.projectiles.components.size());
 			}
 		}
 
