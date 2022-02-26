@@ -17,6 +17,6 @@ Entity createTile(TILE_TYPES type, float tileScale, glm::vec2 tilePosition);
 Entity createAI(RenderSystem* renderer, glm::vec2 pos);
 
 //Projectile
-Entity createProjectile(RenderSystem* renderer, glm::vec2 pos, glm::vec4 coefficientsX, glm::vec4 coefficientsY);
+Entity createProjectile(RenderSystem* renderer, Entity originE, glm::vec4 coefficientsX, glm::vec4 coefficientsY, glm::vec2 endtangent);
 
 

@@ -147,7 +147,7 @@ struct Rifle : WeaponBase {
 		// pi/4
 		aim_angle = 0.7854;
 		//distance the gun can shoot
-		distance = 200.0f;
+		distance = 500.0f;
 		//"radius" around distance
 		area = 200.0f;
 		damage = 10;
@@ -160,10 +160,12 @@ struct Shotgun : WeaponBase {
 };
 
 struct Projectile {
+	Entity origin;
 	glm::vec4 trajectoryAx;
 	glm::vec4 trajectoryAy;
 	float delta_time = 0;
 	float hit_radius;
+	glm::vec2 end_tangent;
 };
 
 // Stucture to store collision information

@@ -250,14 +250,14 @@ void PhysicsSystem::checkForCollisions() {
 					Rigidbody& entity_i_rb = registry.rigidBodies.get(entity_i);
 					Rigidbody& entity_j_rb = registry.rigidBodies.get(entity_j);
 					if (entity_i_rb.type == NORMAL && entity_j_rb.type == STATIC) {
-						move_back_entity(position_i, entity_i_rb, collider_i, normal, depth);
+						moveBackEntity(entity_i, normal, depth);
 					}
 					else if (entity_i_rb.type == NORMAL && entity_j_rb.type == NORMAL) {
-						move_back_entity(position_i, entity_i_rb, collider_i, normal, depth/2);
-						move_back_entity(position_j, entity_j_rb, collider_j, -normal, depth/2);
+						moveBackEntity(entity_i, normal, depth/2);
+						moveBackEntity(entity_j, -normal, depth/2);
 					}
 					else if (entity_i_rb.type == STATIC && entity_j_rb.type == NORMAL) {
-						move_back_entity(position_j, entity_j_rb, collider_j, -normal, depth);
+						moveBackEntity(entity_j, -normal, depth);
 					}
 					transformBoxColliders();
 				}
@@ -289,16 +289,17 @@ void PhysicsSystem :: applyMotions(float elapsed_ms) {
 				motion.velocity = vec2{ 0,0 };
 			}
 			if (rb.type == NORMAL) {
-				motion.velocity += vec2{ 0, GRAVITY_CONST };
+				if (motion.velocity.y >= TERMINAL_VELOCITY && !registry.projectiles.has(entity)) {
+					motion.velocity.y = TERMINAL_VELOCITY;
+				}
+				else {
+					motion.velocity.y += GRAVITY_CONST;
+				}
+				
 			}
 		}
-		//transform(entity, motion, motion.velocity * step_seconds, .0f);
 
-		Boxcollider& collider = registry.boxColliders.get(entity);
-		vec2 oldpos = motion.position;
-		motion.position += motion.velocity * step_seconds;
-		collider.deltaPos = motion.position - oldpos;
-		collider.transformed_required = true;
+		translatePos(entity, motion.velocity * step_seconds);
 	}
 }
 
@@ -313,31 +314,26 @@ void PhysicsSystem::step(float elapsed_ms)
 	// Check for collisions between all moving entities
 	checkForCollisions();
 
-	// debugging of bounding boxes
-	//if (debugging.in_debug_mode)
-	//{
-	//	uint size_before_adding_new = (uint)motion_container.components.size();
-	//	for (uint i = 0; i < size_before_adding_new; i++)
-	//	{
-	//		Motion& motion_i = motion_container.components[i];
-	//		Entity entity_i = motion_container.entities[i];
+	// you may need the following quantities to compute wall positions
+	(float)renderer->getScreenWidth(); (float)renderer->getScreenHeight();
 
-	//		// don't draw debugging visuals around debug lines
-	//		if (registry.debugComponents.has(entity_i))
-	//			continue;
+}
 
-	//		// visualize the radius with two axis-aligned lines
-	//		const vec2 bonding_box = get_bounding_box(motion_i);
-	//		float radius = sqrt(dot(bonding_box/2.f, bonding_box/2.f));
-	//		vec2 line_scale1 = { motion_i.scale.x / 10, 2*radius };
-	//		vec2 line_scale2 = { 2*radius, motion_i.scale.x / 10};
-	//		vec2 position = motion_i.position;
+//translation is the distance to be moved
+void PhysicsSystem::translatePos(Entity e, vec2 translation) {
+	Boxcollider& collider = registry.boxColliders.get(e);
+	Motion& motion = registry.motions.get(e);
 
-	//		//This dosen't work at the moment because we need to setup the geometry for the lines
-	//		//Entity line1 = createLine(motion_i.position, line_scale1);
-	//		//Entity line2 = createLine(motion_i.position, line_scale2);
+	vec2 oldpos = motion.position;
+	motion.position += translation;
+	collider.deltaPos = motion.position - oldpos;
+	collider.transformed_required = true;
+}
 
-	//		// !!! TODO A2: implement debug bounding boxes instead of crosses
-	//	}
-	//}
+void PhysicsSystem::moveBackEntity(Entity e, vec2 normal, float depth) {
+	translatePos(e, normal * depth);
+
+	Rigidbody& rb = registry.rigidBodies.get(e);
+	rb.collision_depth = depth;
+	rb.collision_normal = normal;
 }

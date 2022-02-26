@@ -151,16 +151,16 @@ Entity createAI(RenderSystem* renderer, vec2 pos)
 	return entity;
 }
 
-Entity createProjectile(RenderSystem* renderer, glm::vec2 pos, glm::vec4 coefficientsX, glm::vec4 coefficientsY) {
+Entity createProjectile(RenderSystem* renderer, Entity originE, vec4 coefficientsX, vec4 coefficientsY, vec2 endtangent) {
 
 	auto entity = Entity();
 
 	// Setting initial motion values
 	Motion& motion = registry.motions.emplace(entity);
-	motion.position = pos;
+	motion.position = registry.motions.get(originE).position;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	motion.scale = { 5.0f, 5.0f };
+	motion.scale = { 10.0f, 10.0f };
 
 	Boxcollider& bc = registry.boxColliders.emplace(entity);
 	calculateBoxVerteciesAndSetTriangles(motion.position, motion.scale, bc);
@@ -171,11 +171,13 @@ Entity createProjectile(RenderSystem* renderer, glm::vec2 pos, glm::vec4 coeffic
 		entity,
 		{ TEXTURE_IDS::TOTAL, 
 			SHADER_PROGRAM_IDS::WALL,
-			GEOMETRY_BUFFER_IDS::WALL });
+			GEOMETRY_BUFFER_IDS::QUAD });
 
 	Projectile& projectile = registry.projectiles.emplace(entity);
+	projectile.origin = originE;
 	projectile.trajectoryAx = coefficientsX;
 	projectile.trajectoryAy = coefficientsY;
+	projectile.end_tangent = endtangent;
 
 	return entity;
 }

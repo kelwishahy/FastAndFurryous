@@ -20,6 +20,8 @@ public:
 
 	void init(RenderSystem* renderer);
 
+	void static translatePos(Entity e, glm::vec2 translation);
+
 private:
 	void checkForCollisions();
 
@@ -27,6 +29,10 @@ private:
 
 	void applyMotions(float elapsed_ms);
 
+	void moveBackEntity(Entity e, glm::vec2 normal, float depth);
+
 	const float GRAVITY_CONST = 2.5f;
+	const float TERMINAL_VELOCITY = 500.0f;
+
 	RenderSystem* renderer;
 };
