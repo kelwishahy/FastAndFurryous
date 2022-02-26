@@ -7,6 +7,8 @@ public:
 
 	~Map();
 
+	void init();
+
 	std::vector<std::vector<unsigned int>> getTileMap();
 
 	void updateTileMap();

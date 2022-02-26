@@ -1,5 +1,7 @@
 #include "..\hpp\world_init.hpp"
 #include "..\hpp\tiny_ecs_registry.hpp"
+#include "glm/detail/_noise.hpp"
+#include "glm/detail/_noise.hpp"
 
 using namespace glm;
 
@@ -14,12 +16,12 @@ void calculateBoxVerteciesAndSetTriangles(vec2 pos, vec2 scale, Boxcollider& box
 	box.vertices.push_back(pos + vec2{ right, down }); //downright
 	box.vertices.push_back(pos + vec2{ left, down }); //downleft
 
-	box.triangles.push_back(0); //topleft
-	box.triangles.push_back(1); //topright
-	box.triangles.push_back(2); //bottomright
-	box.triangles.push_back(0); //topleft
-	box.triangles.push_back(2); //bottomright
-	box.triangles.push_back(3); //bottomleft
+	box.triangles.push_back(2); //topleft
+	box.triangles.push_back(0); //topright
+	box.triangles.push_back(3); //bottomright
+	box.triangles.push_back(2); //topleft
+	box.triangles.push_back(1); //bottomright
+	box.triangles.push_back(0); //bottomleft
 }
 
 Entity createCat(RenderSystem* renderer, vec2 pos)
@@ -56,7 +58,7 @@ Entity createCat(RenderSystem* renderer, vec2 pos)
 	return entity;
 }
 
-Entity createWall(RenderSystem* renderer, vec2 pos, int width, int height) {
+Entity createWall(vec2 pos, int width, int height) {
 	
 	auto entity = Entity();
 
@@ -79,22 +81,42 @@ Entity createWall(RenderSystem* renderer, vec2 pos, int width, int height) {
 	calculateBoxVerteciesAndSetTriangles(motion.position, motion.scale, bc);
 	bc.transformed_required = true;
 
-	// registry.renderRequests.insert(
-	// 	entity,
-	// 	{ TEXTURE_IDS::TOTAL, // textureCount indicates that no texture is needed
-	// 		SHADER_PROGRAM_IDS::WALL,
-	// 		GEOMETRY_BUFFER_IDS::WALL });
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_IDS::TOTAL,
+			SHADER_PROGRAM_IDS::WALL,
+			GEOMETRY_BUFFER_IDS::QUAD });
 
 	return entity;
 }
 
-Entity createTile() {
+Entity createTile(TILE_TYPES type, float tileScale, vec2 tilePosition) {
 	// TODO:
 	// Each tile entity should only have the components required
 	// for collision handling. This includes Rigidbody and boxcollider.
 	// The position of a tile can be inferred from the tilemap dimensions and tileScale.
-	auto ent = Entity();
-	return ent;
+
+	// auto entity = Entity();
+
+	// Add tile component
+	// Tile& tile = registry.tiles.emplace(entity);
+	// tile.type = type;
+	vec2 position = { (tilePosition.y * tileScale) + (tileScale/2), tilePosition.x * tileScale};
+	printf("\nTile position is {%f, %f}]\n", position.x, position.y);
+
+
+	// //Adding rigidbody component
+	// Rigidbody& rb = registry.rigidBodies.emplace(entity);
+	// rb.type = STATIC;
+	//
+	// //Adding a box shaped collider
+	// Boxcollider& bc = registry.boxColliders.emplace(entity);
+	// calculateBoxVerteciesAndSetTriangles(tile.position, {tileScale, tileScale} , bc);
+	// bc.transformed_required = true;
+	//
+	// return entity;
+
+	return createWall(position, (int)tileScale, (int)tileScale);
 }
 
 Entity createAI(RenderSystem* renderer, vec2 pos)

@@ -62,6 +62,11 @@ enum WEAPON_TYPES {
 	SHOTGUN = 1
 };
 
+enum TILE_TYPES {
+	NONE,
+	STONE
+};
+
 // Game components ------------------------------------------------------------
 
 struct Player {
@@ -70,6 +75,11 @@ struct Player {
 	int animation_type = IDLE;
 	float frame_counter_ms = 100;
 	bool facingLeft = false;
+};
+
+struct Tile {
+	TILE_TYPES type;
+	glm::vec2 position;
 };
 
 struct Health {

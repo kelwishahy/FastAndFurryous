@@ -25,6 +25,7 @@ public:
 	ComponentContainer<RenderRequest> renderRequests;
 	ComponentContainer<Rigidbody> rigidBodies;
 	ComponentContainer<SolidTerrain> terrains;
+	ComponentContainer<Tile> tiles;
 	ComponentContainer<WeaponBase> weapons;
 	ComponentContainer<Projectile> projectiles;
 
@@ -43,6 +44,7 @@ public:
 		registry_list.push_back(&renderRequests);
 		registry_list.push_back(&rigidBodies);
 		registry_list.push_back(&terrains);
+		registry_list.push_back(&tiles);
 		registry_list.push_back(&weapons);
 		registry_list.push_back(&projectiles);
 	}

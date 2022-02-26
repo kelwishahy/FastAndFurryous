@@ -76,10 +76,10 @@ void project_vertices(std::vector<vec2> box_vertices, vec2 axis, OUT float& min,
 
 }
 
-void move_back_entity(Motion& motion, Rigidbody& rb, Boxcollider& collider, vec2 normal, float depth) {
-	vec2 oldpos = motion.position;
-	motion.position += normal * depth;
-	collider.deltaPos = motion.position - oldpos;
+void move_back_entity(vec2* position, Rigidbody& rb, Boxcollider& collider, vec2 normal, float depth) {
+	vec2 oldpos = *position;
+	*position += normal * depth;
+	collider.deltaPos = *position - oldpos;
 	collider.transformed_required = true;
 	rb.collision_depth = depth;
 	rb.collision_normal = normal;
@@ -172,14 +172,17 @@ bool box_collision(const Boxcollider collider, const Boxcollider collider2, OUT 
 //If an entity gets transformed and they have a boxcollider, we need to recalculate the vertices
 void PhysicsSystem::transformBoxColliders() {
 	ComponentContainer<Boxcollider>& collider_container = registry.boxColliders;
-	for (uint i = 0; i < collider_container.components.size(); i++) {
 
+	// Iterate through all the boxcolliders
+	for (uint i = 0; i < collider_container.components.size(); i++) {
 		Boxcollider& collider = collider_container.components[i];
 		Entity entity = collider_container.entities[i];
+
 		if (collider.transformed_required) {
-			Motion motion = registry.motions.get(entity);
-			float angle = motion.angle;
+			// Motion motion = registry.motions.get(entity);
+			// float angle = motion.angle;
 			mat4 transform = mat4(1.0);
+
 			//TODO do rotations
 			//transform = rotate();
 			transform = translate(transform, vec3(collider.deltaPos, 0.0f));
@@ -199,32 +202,62 @@ void PhysicsSystem::checkForCollisions() {
 	for (uint i = 0; i < box_collider_container.components.size(); i++)
 	{
 		Boxcollider& collider_i = box_collider_container.components[i];
-		Entity entity_i = box_collider_container.entities[i];
-		Motion& motion_i = registry.motions.get(entity_i);
+		Entity& entity_i = box_collider_container.entities[i];
+
+		Motion* motion_i = nullptr;
+		vec2* position_i = nullptr;
+
+		// If entity_i is a tile, it won't have a motion component.
+		// Trying to access a component that doesn't exist will
+		// cause an assertion error.
+		if (registry.tiles.has(entity_i)) {
+			position_i = &registry.tiles.get(entity_i).position;
+		} else { // entity_i is not a tile
+			motion_i = &registry.motions.get(entity_i);
+			position_i = &motion_i->position;
+		}
 
 		// note starting j at i+1 to compare all (i,j) pairs only once (and to not compare with itself)
-		for (uint j = i + 1; j < box_collider_container.components.size(); j++)
-		{
+		for (uint j = 0; j < box_collider_container.components.size(); j++) {
+			Entity& entity_j = box_collider_container.entities[j];
+
+			// If these are the same entity OR this is a tile-tile collision, skip
+			if (& entity_i == &entity_j || registry.terrains.has(entity_i) && registry.terrains.has(entity_j)) continue;
+
 			Boxcollider& collider_j = box_collider_container.components[j];
-			Entity entity_j = box_collider_container.entities[j];
-			Motion& motion_j = registry.motions.get(entity_j);
+
+			// If this is a tile X tile collision, skip
+			Motion* motion_j = nullptr;
+			vec2* position_j = nullptr;
+
+			// If entity_i is a tile, it won't have a motion component.
+			// Trying to access a component that doesn't exist will
+			// cause an assertion error.
+			if (registry.tiles.has(entity_j)) {
+				position_j = &registry.tiles.get(entity_j).position;
+			}
+			else { // entity_i is not a tile
+				motion_j = &registry.motions.get(entity_j);
+				position_j = &motion_j->position;
+			}
+
+			// Motion& motion_j = registry.motions.get(entity_j);
 			vec2 normal;
 			float depth = 9999999;
-			if (box_collision(collider_i, collider_j, normal, depth))
-			{
+			if (box_collision(collider_i, collider_j, normal, depth)) {
 				//If its a rigid body collision resolve right away
 				if (registry.rigidBodies.has(entity_i) && registry.rigidBodies.has(entity_j)) {
 					Rigidbody& entity_i_rb = registry.rigidBodies.get(entity_i);
 					Rigidbody& entity_j_rb = registry.rigidBodies.get(entity_j);
 					if (entity_i_rb.type == NORMAL && entity_j_rb.type == STATIC) {
-						move_back_entity(motion_i, entity_i_rb, collider_i, normal, depth);
+						move_back_entity(position_i, entity_i_rb, collider_i, normal, depth);
 					}
 					else if (entity_i_rb.type == NORMAL && entity_j_rb.type == NORMAL) {
-						move_back_entity(motion_i, entity_i_rb, collider_i, normal, depth/2);
-						move_back_entity(motion_j, entity_j_rb, collider_j, -normal, depth/2);
+						move_back_entity(position_i, entity_i_rb, collider_i, normal, depth/2);
+						move_back_entity(position_j, entity_j_rb, collider_j, -normal, depth/2);
 					}
 					else if (entity_i_rb.type == STATIC && entity_j_rb.type == NORMAL) {
-						move_back_entity(motion_j, entity_j_rb, collider_j, -normal, depth);
+						move_back_entity(position_j, entity_j_rb, collider_j, -normal, depth);
 					}
 					transformBoxColliders();
 				}
@@ -235,11 +268,6 @@ void PhysicsSystem::checkForCollisions() {
 				Collision& collision1 = registry.collisions.emplace_with_duplicates(entity_i, entity_j);
 
 				Collision& collision2 = registry.collisions.emplace_with_duplicates(entity_j, entity_i);
-
-				// Decrease the player's health if they touch an enemy
-				if (registry.health.has(entity_i) && registry.health.has(entity_j)) {
-					decreaseHealth(entity_i, 1);
-				}
 			}
 		}
 	}
@@ -277,17 +305,13 @@ void PhysicsSystem :: applyMotions(float elapsed_ms) {
 void PhysicsSystem::step(float elapsed_ms)
 {
 	transformBoxColliders();
-	// Move bug based on how much time has passed, this is to (partially) avoid
-	// having entities move at different speed based on the machine.
+
 	applyMotions(elapsed_ms);
 
 	transformBoxColliders();
+
 	// Check for collisions between all moving entities
 	checkForCollisions();
-
-	// you may need the following quantities to compute wall positions
-	(float)renderer->getScreenWidth(); (float)renderer->getScreenHeight();
-
 
 	// debugging of bounding boxes
 	//if (debugging.in_debug_mode)

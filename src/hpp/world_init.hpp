@@ -8,10 +8,10 @@
 Entity createCat(RenderSystem* renderer, glm::vec2 pos);
 
 // solid terrain
-Entity createWall(RenderSystem* renderer, glm::vec2 pos, int width, int height);
+Entity createWall(glm::vec2 pos, int width, int height);
 
 // Tile
-Entity createTile();
+Entity createTile(TILE_TYPES type, float tileScale, glm::vec2 tilePosition);
 
 // AI
 Entity createAI(RenderSystem* renderer, glm::vec2 pos);

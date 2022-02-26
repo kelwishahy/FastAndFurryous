@@ -27,7 +27,7 @@ void RenderSystem::draw(float elapsed_ms) {
 	glEnable(GL_DEPTH_TEST);
 
 	// Draw the map
-	drawTiles(projectionMatrix);
+	// drawTiles(projectionMatrix);
 
 	for (Entity entity : registry.renderRequests.entities) {
 
@@ -275,7 +275,7 @@ void RenderSystem::drawTiles(const glm::mat4& projectionMatrix) {
 	bindVBOandIBO(GEOMETRY_BUFFER_IDS::TEXTURED_QUAD, texturedQuad, quadIndices);
 
 	// Only draw the bottom 5 rows of tiles
-	for (int i = mapHeight - 1 ; i >= mapHeight - 5; i--) {
+	for (int i = mapHeight - 1 ; i >= 0; i--) {
 		for (int j = mapWidth - 1; j >= 0; j--) {
 			if (tileMap[i][j] == 1) {
 
