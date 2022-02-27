@@ -12,6 +12,7 @@ class ECSRegistry
 public:
 	// All game components in alphabetical order
 	ComponentContainer<AI> ais;
+	ComponentContainer<Background> backgrounds;
 	ComponentContainer<Boxcollider> boxColliders;
 	ComponentContainer<Circlecollider> circleColliders;
 	ComponentContainer<Collision> collisions;
@@ -31,6 +32,7 @@ public:
 
 	ECSRegistry() {
 		registry_list.push_back(&ais);
+		registry_list.push_back(&backgrounds);
 		registry_list.push_back(&boxColliders);
 		registry_list.push_back(&circleColliders);
 		registry_list.push_back(&collisions);

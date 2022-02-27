@@ -74,11 +74,11 @@ Entity createWall(vec2 pos, int width, int height) {
 	calculateBoxVerticesAndSetTriangles(motion.position, motion.scale, bc);
 	bc.transformed_required = true;
 
-	registry.renderRequests.insert(
-		entity,
-		{ TEXTURE_IDS::TOTAL,
-			SHADER_PROGRAM_IDS::WALL,
-			GEOMETRY_BUFFER_IDS::QUAD });
+	// registry.renderRequests.insert(
+	// 	entity,
+	// 	{ TEXTURE_IDS::TOTAL,
+	// 		SHADER_PROGRAM_IDS::WALL,
+	// 		GEOMETRY_BUFFER_IDS::QUAD });
 
 	return entity;
 }

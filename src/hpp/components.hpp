@@ -36,6 +36,7 @@ enum class TEXTURE_IDS {
 	CAT_WALK,
 	CAT_JUMP,
 	STONE,
+	BACKGROUND,
 	TOTAL
 }; constexpr int textureCount = (int)TEXTURE_IDS::TOTAL;
 
@@ -75,6 +76,10 @@ struct Player {
 	int animation_type = IDLE;
 	float frame_counter_ms = 100;
 	bool facingLeft = false;
+};
+
+struct Background {
+	
 };
 
 struct Tile {

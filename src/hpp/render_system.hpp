@@ -32,7 +32,8 @@ class RenderSystem {
 		"cat-idle.png",
 		"cat-walk.png",
 		"cat-jump.png",
-		"stone.png"
+		"stone.png",
+		"background.png"
 	};
 
 	std::array<GLuint, textureCount> textures; // OpenGL texture names
@@ -79,6 +80,9 @@ public:
 
 	// Draw a tilemap
 	void drawTiles(const glm::mat4& projectionMatrix);
+
+	// Draw the background texture image
+	void drawBackground(RenderRequest& request, glm::mat4& projectionMatrix);
 
 	// Initialize GLFW window and context
 	bool init();

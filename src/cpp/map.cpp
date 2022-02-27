@@ -51,6 +51,23 @@ void Map::init() {
 			// NO - this tile is not occupied
 		}
 	}
+
+
+	// Set the background image
+	auto ent = Entity();
+	registry.backgrounds.emplace(ent);
+	// auto& motion = registry.motions.emplace(ent);
+	// registry.rigidBodies.emplace(ent);
+	// registry.boxColliders.emplace(ent);
+	// motion.position = { 100.f , 100.f };
+	// motion.scale = { 100.f, 100.f };
+	// motion.angle = 0.f;
+	// motion.velocity = { 0.f, 0.f };
+	registry.renderRequests.insert(
+		ent,
+		{ TEXTURE_IDS::BACKGROUND,
+			SHADER_PROGRAM_IDS::TEXTURE,
+			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
 }
 
 void Map::readMapFromFile() {

@@ -8,6 +8,9 @@
 #include "glm/ext.hpp"
 #include <iostream>
 
+#include "hpp/ai_system.hpp"
+#include "hpp/ai_system.hpp"
+
 
 using namespace glm;
 
@@ -35,6 +38,12 @@ void RenderSystem::draw(float elapsed_ms) {
 			continue;
 
 		RenderRequest request = registry.renderRequests.get(entity);
+
+		if (registry.backgrounds.has(entity)) {
+			drawBackground(request, projectionMatrix);
+			continue;
+		}
+
 		mat4 transformationMatrix;
 
 		switch (request.geometry) {
@@ -355,6 +364,17 @@ void RenderSystem::drawTiles(const mat4& projectionMatrix) {
 	bindVBOandIBO(GEOMETRY_BUFFER_IDS::TEXTURED_QUAD, texturedQuad, quadIndices);
 }
 
+void RenderSystem::drawBackground(RenderRequest& request, mat4& projectionMatrix) {
+	Transform transform;
+	transform.mat = translate(transform.mat, vec3(screenWidth/2, screenHeight/2, -0.5));
+	transform.mat = scale(transform.mat, vec3(screenWidth, screenHeight, -0.5));
+
+	std::string shaderInputs[] = { "position", "texCoord" };
+	drawQuad(request, shaderInputs, 2);
+	renderToScreen(transform.mat, projectionMatrix);
+}
+
+
 
 bool RenderSystem::init() {
 	// Create window & context
@@ -369,7 +389,7 @@ bool RenderSystem::init() {
 	glfwWindowHint(GLFW_MAXIMIZED, GL_TRUE); // Make the window full screen
 
 	// NOTE: The width & height here are unimportant as the window will be maximized on creation
-	this->window = glfwCreateWindow(1000, 800, "The Fast and the Furryous", NULL, NULL);
+	this->window = glfwCreateWindow(1000, 800, "Fast and the Furry-ous", NULL, NULL);
 	glfwSetWindowAspectRatio(window, 16, 9);
 	glfwGetWindowSize(window, &this->screenWidth, &this->screenHeight);
 
