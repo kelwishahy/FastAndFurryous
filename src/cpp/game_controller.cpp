@@ -47,20 +47,29 @@ void GameController::step(float elapsed_ms)
 	Motion& catMotion = registry.motions.get(player1_team.front());
 	Player& catPlayer = registry.players.get(player1_team.front());
 	Rigidbody& rb = registry.rigidBodies.get(player1_team.front());
-	if (catMotion.velocity.x == 0) {
-		catPlayer.animation_type = IDLE;
-	}
-	if (catMotion.velocity.x != 0) {
-		catPlayer.animation_type = WALKING;
-	}
-	if (catMotion.velocity.y < 0) {
-		catPlayer.animation_type = JUMPING;
-	}
-	if (catMotion.velocity.x < 0) {
-		catPlayer.facingLeft = true;
-	}
-	if (catMotion.velocity.x > 0) {
-		catPlayer.facingLeft = false;
+
+	for (Entity e : registry.animations.entities) {
+		if (registry.players.has(e)) {
+			Animation& catAnimation = registry.animations.get(e);
+
+			if (catMotion.velocity.x == 0) {
+				catAnimation.animation_type = IDLE;
+			}
+			if (catMotion.velocity.x != 0) {
+				catAnimation.animation_type = WALKING;
+			}
+			if (catMotion.velocity.y < 0) {
+				catAnimation.animation_type = JUMPING;
+			}
+			if (catMotion.velocity.x < 0) {
+				catAnimation.facingLeft = true;
+				shooting_system.setAimLoc(e);
+			}
+			if (catMotion.velocity.x > 0) {
+				catAnimation.facingLeft = false;
+				shooting_system.setAimLoc(e);
+			}
+		}
 	}
 
 	// printf("catmotion: %f\n", catMotion.velocity.y);

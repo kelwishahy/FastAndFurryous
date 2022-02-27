@@ -266,7 +266,7 @@ void PhysicsSystem :: applyMotions(float elapsed_ms) {
 					motion.velocity = vec2{ 0,0 };
 				}
 				if (rb.type == NORMAL) {
-					if (motion.velocity.y >= TERMINAL_VELOCITY) {
+					if (motion.velocity.y >= TERMINAL_VELOCITY && !registry.projectiles.has(entity)) {
 						motion.velocity.y = TERMINAL_VELOCITY;
 					}
 					else {

@@ -48,6 +48,8 @@ Entity createCat(RenderSystem* renderer, vec2 pos)
 
 	registry.weapons.insert(entity, Rifle());
 
+	registry.animations.emplace(entity);
+
 	return entity;
 }
 

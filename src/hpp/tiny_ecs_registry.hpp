@@ -29,6 +29,7 @@ public:
 	ComponentContainer<Tile> tiles;
 	ComponentContainer<WeaponBase> weapons;
 	ComponentContainer<Projectile> projectiles;
+	ComponentContainer<Animation> animations;
 
 	ECSRegistry() {
 		registry_list.push_back(&ais);
@@ -49,6 +50,7 @@ public:
 		registry_list.push_back(&tiles);
 		registry_list.push_back(&weapons);
 		registry_list.push_back(&projectiles);
+		registry_list.push_back(&animations);
 	}
 
 	void clear_all_components() {

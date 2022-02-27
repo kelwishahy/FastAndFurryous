@@ -173,22 +173,23 @@ void RenderSystem::animateSprite(RenderRequest& request, Entity& entity, float e
 	int numFrames = 0;
 	int timePerFrame = 0;
 
+	Animation& animation = registry.animations.get(entity);
 	// Decrement the frame counter
-	float* counter = &registry.players.get(entity).frame_counter_ms;
+	float *counter = &animation.frame_counter_ms;
 
 	*counter -= elapsed_ms;
 
 	// Get the type of animation (IDLE, WALKING)
-	int animationType = registry.players.get(entity).animation_type;
+	int animationType = animation.animation_type;
 
 	// Get the type of character (CAT, DOG)
-	int characterType = registry.players.get(entity).character;
+	int characterType = animation.character;
 
 	// Get if character is facing left or not
-	bool facingLeft = registry.players.get(entity).facingLeft;
+	bool facingLeft = animation.facingLeft;
 
 	// Get frame
-	int& frame = registry.players.get(entity).frame;
+	int& frame = animation.frame;
 
 
 	TEXTURE_IDS& curr_texture = registry.renderRequests.get(entity).texture;
