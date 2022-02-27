@@ -280,22 +280,24 @@ void PhysicsSystem :: applyMotions(float elapsed_ms) {
 	{
 		Motion& motion = motion_registry.components[i];
 		Entity entity = motion_registry.entities[i];
-		Rigidbody& rb = registry.rigidBodies.get(entity);
 		float step_seconds = elapsed_ms / 1000.f;
 		if (registry.rigidBodies.has(entity)) {
 			Rigidbody& rb = registry.rigidBodies.get(entity);
-			if (rb.type == KINEMATIC) {
-				//TODO
-			} 
-			if (rb.type == STATIC) {
-				motion.velocity = vec2{ 0,0 };
-			}
-			if (rb.type == NORMAL) {
-				if (motion.velocity.y >= TERMINAL_VELOCITY) {
-					motion.velocity.y = TERMINAL_VELOCITY;
+			if (registry.rigidBodies.has(entity)) {
+				Rigidbody& rb = registry.rigidBodies.get(entity);
+				if (rb.type == KINEMATIC) {
+					//TODO
 				}
-				else {
-					motion.velocity.y += GRAVITY_CONST;
+				if (rb.type == STATIC) {
+					motion.velocity = vec2{ 0,0 };
+				}
+				if (rb.type == NORMAL) {
+					if (motion.velocity.y >= TERMINAL_VELOCITY) {
+						motion.velocity.y = TERMINAL_VELOCITY;
+					}
+					else {
+						motion.velocity.y += GRAVITY_CONST;
+					}
 				}
 			}
 		}
