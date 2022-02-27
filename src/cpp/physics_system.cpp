@@ -254,6 +254,9 @@ void PhysicsSystem::checkForCollisions() {
 						moveBackEntity(entity_i, normal, depth/2);
 						moveBackEntity(entity_j, -normal, depth/2);
 					}
+					else if (entity_i_rb.type == STATIC && entity_j_rb.type == NORMAL) {
+						moveBackEntity(entity_j, -normal, depth);
+					}
 					transformBoxColliders();
 				}
 				// Create a collisions event
@@ -288,7 +291,12 @@ void PhysicsSystem :: applyMotions(float elapsed_ms) {
 				motion.velocity = vec2{ 0,0 };
 			}
 			if (rb.type == NORMAL) {
-				motion.velocity.y += GRAVITY_CONST;
+				if (motion.velocity.y >= TERMINAL_VELOCITY) {
+					motion.velocity.y = TERMINAL_VELOCITY;
+				}
+				else {
+					motion.velocity.y += GRAVITY_CONST;
+				}
 			}
 		}
 		translatePos(entity, motion.velocity * step_seconds);
