@@ -90,7 +90,7 @@ void GameController::build_map() {
 
 	// Move the walls off screen and don't render them
 	// Floor
-	createWall({ width / 2, height + 10 }, width, 10);
+	// createWall({ width / 2, height + 10 }, width, 10);
 	
 	// //Left Wall
 	// createWall(renderer, { -10, height / 2 }, 10, height - 10);

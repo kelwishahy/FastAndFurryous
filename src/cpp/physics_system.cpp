@@ -7,8 +7,6 @@
 #include <hpp/tiny_ecs_registry.hpp>
 #include "glm/ext.hpp"
 
-#include <hpp/Game_Mechanics/health_system.hpp>
-
 #define OUT //for clarity
 
 using namespace glm;
@@ -176,7 +174,7 @@ void PhysicsSystem::transformBoxColliders() {
 	// Iterate through all the boxcolliders
 	for (uint i = 0; i < collider_container.components.size(); i++) {
 		Boxcollider& collider = collider_container.components[i];
-		Entity entity = collider_container.entities[i];
+		// Entity entity = collider_container.entities[i];
 
 		if (collider.transformed_required) {
 			// Motion motion = registry.motions.get(entity);
@@ -265,6 +263,9 @@ void PhysicsSystem::checkForCollisions() {
 				Collision& collision1 = registry.collisions.emplace_with_duplicates(entity_i, entity_j);
 
 				Collision& collision2 = registry.collisions.emplace_with_duplicates(entity_j, entity_i);
+				
+				// printf("\nCollision Detected: %f %f %f %f\n", collider_i.vertices[0], collider_i.vertices[1], collider_i.vertices[2], collider_i.vertices[3]);
+				// printf("\nCollision Detected: %f %f %f %f\n", collider_j.vertices[0], collider_j.vertices[1], collider_j.vertices[2], collider_j.vertices[3]);
 			}
 		}
 	}
