@@ -63,6 +63,9 @@ void GameController::step(float elapsed_ms)
 		catPlayer.facingLeft = false;
 	}
 
+	printf("catmotion: %f\n", catMotion.velocity.y);
+	//printf("catmotion: %f\n", rb.collision_normal.y);
+	// 
 	// // FOR AI Animation
 	// Motion& aiMotion = registry.motions.get(ai_cat);
 	// Player& aiCat = registry.players.get(ai_cat);
@@ -182,6 +185,16 @@ void GameController::handle_collisions() {
 				registry.remove_all_components_of(entity);
 			}
 		}
+
+		if (registry.motions.has(entity) && registry.rigidBodies.has(entity) && registry.terrains.has(entity_other)) {
+			Rigidbody& rb = registry.rigidBodies.get(entity);
+			Motion& motion = registry.motions.get(entity);
+
+			if (rb.collision_normal.y == -1) {
+				motion.velocity.y = 0;
+			}
+		
+		}
 	}
 
 	// Remove all collisions from this simulation step
@@ -210,9 +223,7 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 		if (player_mode == PLAYER_MODE::MOVING) {
 			if (action == GLFW_PRESS && key == GLFW_KEY_W) {
 				catMotion.velocity.y = -current_speed;
-				rb.grounded = false;
 				rb.collision_normal.y = 0;
-
 			}
 
 			if (action == GLFW_PRESS && key == GLFW_KEY_S) {

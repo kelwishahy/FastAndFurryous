@@ -288,17 +288,7 @@ void PhysicsSystem :: applyMotions(float elapsed_ms) {
 				motion.velocity = vec2{ 0,0 };
 			}
 			if (rb.type == NORMAL) {
-				if (motion.velocity.y >= TERMINAL_VELOCITY && rb.collision_normal.y == -1 && !registry.projectiles.has(entity) ) {
-					rb.grounded = true;
-					motion.velocity.y = 0;
-					//translatePos(entity, vec2{ 0, 1 });
-				}
-				else {
-					if (!rb.grounded) {
-						motion.velocity.y += GRAVITY_CONST;
-					}
-				}
-				
+				motion.velocity.y += GRAVITY_CONST;
 			}
 		}
 		translatePos(entity, motion.velocity * step_seconds);
