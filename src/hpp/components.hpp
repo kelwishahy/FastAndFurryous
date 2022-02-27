@@ -100,7 +100,6 @@ struct Collider {
 
 struct Boxcollider : Collider {
 	std::vector<glm::vec2> vertices;
-	std::vector<int> triangles;
 	bool transformed_required = true;
 	glm::vec2 deltaPos = glm::vec2{ 0,0 };
 };

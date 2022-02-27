@@ -30,6 +30,8 @@ void Map::init() {
 		for (int x = 0; x < mapWidth; x++) {
 			if (y >= 15) {
 				tileMap[y].push_back(1);
+			} else if (y == 11 & (14 <= x && x < 20)) {
+				tileMap[y].push_back(1);
 			}
 			else {
 				tileMap[y].push_back(0);
@@ -37,6 +39,7 @@ void Map::init() {
 		}
 	}
 	int tileCount = 0;
+	int tilesInRow = 0;
 	// std::cout << "{";
 	for (int y = 0; y < mapHeight; y++) {
 		// std::cout << "\n";
@@ -44,14 +47,20 @@ void Map::init() {
 			// std::cout << tileMap[y][x];
 			// std::cout << ", ";
 			if (tileMap[y][x] != 0 && tileMap[y - 1][x] == 0) {
-				tileCount++;
-				createTile(TILE_TYPES::STONE, tileScale, { y, x });
+				if(x < mapWidth - 1 && tileMap[y][x+1] != 0) {
+					tilesInRow++;
+				} else {
+					printf("\nCreating %d tiles in a row\n", tilesInRow);
+					printf("Position being passed is (%d, %d)\n", y, x - tilesInRow);
+					createTile(tileScale, { y, x - tilesInRow}, tilesInRow);
+				}
 			}
 		}
+		tilesInRow = 0;
 	}
 	// std::cout << "}\n" << std::endl;
 
-	printf("Number of tiles created  = %d\n", tileCount);
+	// printf("Number of tiles created  = %d\n", tileCount);
 }
 
 

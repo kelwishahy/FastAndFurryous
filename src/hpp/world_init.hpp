@@ -11,7 +11,7 @@ Entity createCat(RenderSystem* renderer, glm::vec2 pos);
 Entity createWall(glm::vec2 pos, int width, int height);
 
 // Tile
-Entity createTile(TILE_TYPES type, float tileScale, glm::vec2 tilePosition);
+Entity createTile(float tileScale, glm::vec2 tilePosition, int numTilesInARow);
 
 // AI
 Entity createAI(RenderSystem* renderer, glm::vec2 pos);

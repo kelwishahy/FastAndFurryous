@@ -27,7 +27,7 @@ void RenderSystem::draw(float elapsed_ms) {
 	glEnable(GL_DEPTH_TEST);
 
 	// Draw the map
-	// drawTiles(projectionMatrix);
+	drawTiles(projectionMatrix);
 
 	for (Entity entity : registry.renderRequests.entities) {
 
@@ -129,24 +129,30 @@ void RenderSystem::drawQuad(RenderRequest& request, std::string shaderInputs[], 
 		glActiveTexture(GL_TEXTURE0);
 		const GLuint texture = textures[(GLuint)request.texture];
 		glBindTexture(GL_TEXTURE_2D, texture);
+
+		// Pass in shader inputs
+		for (int i = 0; i < numInputs; i++) {
+			const GLint inputPosition = glGetAttribLocation(shaderProgram, shaderInputs[i].c_str());
+			glHasError();
+
+			// input variable names need to be standardized to match the names below
+			if (shaderInputs[i] == "position") {
+				glVertexAttribPointer(inputPosition, 3, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex), (void*)0);
+			}
+			else if (shaderInputs[i] == "texCoord") {
+				glVertexAttribPointer(inputPosition, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex), (void*)sizeof(vec3));
+			}
+
+			glEnableVertexAttribArray(inputPosition);
+			glHasError();
+		}
+
+	} else {
+		const GLint inputPosition = glGetAttribLocation(shaderProgram, "position");
+		glVertexAttribPointer(inputPosition, 3, GL_FLOAT, GL_FALSE, sizeof(vec3), (void*)0);
 	}
 
-	// Pass in shader inputs
-	for (int i = 0; i < numInputs; i++) {
-		const GLint inputPosition = glGetAttribLocation(shaderProgram, shaderInputs[i].c_str());
-		glHasError();
 
-		// input variable names need to be standardized to match the names below
-		if (shaderInputs[i] == "position") {
-			glVertexAttribPointer(inputPosition, 3, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex), (void*)0);
-		}
-		else if (shaderInputs[i] == "texCoord") {
-			glVertexAttribPointer(inputPosition, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex), (void*)sizeof(vec3));
-		}
-
-		glEnableVertexAttribArray(inputPosition);
-		glHasError();
-	}
 }
 
 void RenderSystem::animateSprite(RenderRequest& request, Entity& entity, float elapsed_ms) {

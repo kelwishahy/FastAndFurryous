@@ -5,7 +5,7 @@
 
 using namespace glm;
 
-void calculateBoxVerteciesAndSetTriangles(vec2 pos, vec2 scale, Boxcollider& box) {
+void calculateBoxVerticesAndSetTriangles(vec2 pos, vec2 scale, Boxcollider& box) {
 	float left = -scale.x / 2;
 	float right = scale.x / 2;
 	float up = -scale.y / 2;
@@ -16,12 +16,9 @@ void calculateBoxVerteciesAndSetTriangles(vec2 pos, vec2 scale, Boxcollider& box
 	box.vertices.push_back(pos + vec2{ right, down }); //downright
 	box.vertices.push_back(pos + vec2{ left, down }); //downleft
 
-	box.triangles.push_back(2); //topleft
-	box.triangles.push_back(0); //topright
-	box.triangles.push_back(3); //bottomright
-	box.triangles.push_back(2); //topleft
-	box.triangles.push_back(1); //bottomright
-	box.triangles.push_back(0); //bottomleft
+	// for (vec2 vertex : box.vertices) {
+	// 	printf("\nBox vertex is (%f, %f)\n", vertex.x, vertex.y);
+	// }
 }
 
 Entity createCat(RenderSystem* renderer, vec2 pos)
@@ -43,7 +40,7 @@ Entity createCat(RenderSystem* renderer, vec2 pos)
 	motion.scale = { 100.f, 100.f };
 
 	Boxcollider& bc = registry.boxColliders.emplace(entity);
-	calculateBoxVerteciesAndSetTriangles(motion.position, motion.scale, bc);
+	calculateBoxVerticesAndSetTriangles(motion.position, motion.scale, bc);
 	bc.transformed_required = true;
 
 	registry.players.emplace(entity);
@@ -78,45 +75,22 @@ Entity createWall(vec2 pos, int width, int height) {
 
 	//Adding a box shaped collider
 	Boxcollider& bc = registry.boxColliders.emplace(entity);
-	calculateBoxVerteciesAndSetTriangles(motion.position, motion.scale, bc);
+	calculateBoxVerticesAndSetTriangles(motion.position, motion.scale, bc);
 	bc.transformed_required = true;
 
-	registry.renderRequests.insert(
-		entity,
-		{ TEXTURE_IDS::TOTAL,
-			SHADER_PROGRAM_IDS::WALL,
-			GEOMETRY_BUFFER_IDS::QUAD });
+	// registry.renderRequests.insert(
+	// 	entity,
+	// 	{ TEXTURE_IDS::TOTAL,
+	// 		SHADER_PROGRAM_IDS::WALL,
+	// 		GEOMETRY_BUFFER_IDS::QUAD });
 
 	return entity;
 }
 
-Entity createTile(TILE_TYPES type, float tileScale, vec2 tilePosition) {
-	// TODO:
-	// Each tile entity should only have the components required
-	// for collision handling. This includes Rigidbody and boxcollider.
-	// The position of a tile can be inferred from the tilemap dimensions and tileScale.
-
-	// auto entity = Entity();
-
-	// Add tile component
-	// Tile& tile = registry.tiles.emplace(entity);
-	// tile.type = type;
-	vec2 position = { (tilePosition.y * tileScale) + (tileScale/2), tilePosition.x * tileScale};
-	printf("\nTile position is {%f, %f}]\n", position.x, position.y);
-
-
-	// //Adding rigidbody component
-	// Rigidbody& rb = registry.rigidBodies.emplace(entity);
-	// rb.type = STATIC;
-	//
-	// //Adding a box shaped collider
-	// Boxcollider& bc = registry.boxColliders.emplace(entity);
-	// calculateBoxVerteciesAndSetTriangles(tile.position, {tileScale, tileScale} , bc);
-	// bc.transformed_required = true;
-	//
-	// return entity;
-
-	return createWall(position, (int)tileScale, (int)tileScale);
+Entity createTile(float tileScale, vec2 tilePosition, int numTilesInARow) {
+	vec2 position = { (tilePosition.y * tileScale) + (tileScale * (numTilesInARow + 1) /2), tilePosition.x * tileScale + (tileScale / 2) };
+	printf("\nTile position is {%f, %f}\n", position.x, position.y);
+	return createWall(position, (int)tileScale * (numTilesInARow + 1), (int)tileScale);
 }
 
 Entity createAI(RenderSystem* renderer, vec2 pos)
@@ -137,7 +111,7 @@ Entity createAI(RenderSystem* renderer, vec2 pos)
 	motion.scale = { 60.f, 60.f };
 
 	Boxcollider& bc = registry.boxColliders.emplace(entity);
-	calculateBoxVerteciesAndSetTriangles(motion.position, motion.scale, bc);
+	calculateBoxVerticesAndSetTriangles(motion.position, motion.scale, bc);
 	bc.transformed_required = true;
 
 	registry.players.emplace(entity);
@@ -163,7 +137,7 @@ Entity createProjectile(RenderSystem* renderer, Entity originE, vec4 coefficient
 	motion.scale = { 10.0f, 10.0f };
 
 	Boxcollider& bc = registry.boxColliders.emplace(entity);
-	calculateBoxVerteciesAndSetTriangles(motion.position, motion.scale, bc);
+	calculateBoxVerticesAndSetTriangles(motion.position, motion.scale, bc);
 	bc.transformed_required = true;
 
 	//Using wall textures for now
