@@ -266,7 +266,7 @@ void RenderSystem::animateSprite(RenderRequest& request, Entity& entity, float e
 
 }
 
-void RenderSystem::drawTiles(const glm::mat4& projectionMatrix) {
+void RenderSystem::drawTiles(const mat4& projectionMatrix) {
 	const mat4& projection = projectionMatrix;
 	const auto& tileMap = gameMap.getTileMap();
 	const int& mapWidth = gameMap.getMapWidth();

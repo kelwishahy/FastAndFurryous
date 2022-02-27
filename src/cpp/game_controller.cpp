@@ -222,8 +222,10 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 		float current_speed = 150.0f;
 		if (player_mode == PLAYER_MODE::MOVING) {
 			if (action == GLFW_PRESS && key == GLFW_KEY_W) {
-				catMotion.velocity.y = -current_speed;
-				rb.collision_normal.y = 0;
+				if (catMotion.velocity.y == 2.5) {
+					catMotion.velocity.y = -2.5 * current_speed;
+					rb.collision_normal.y = 0;
+				}
 			}
 
 			if (action == GLFW_PRESS && key == GLFW_KEY_S) {
