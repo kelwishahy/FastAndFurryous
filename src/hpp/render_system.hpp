@@ -13,13 +13,14 @@
 #include <glm/mat3x3.hpp>           // mat3
 
 #include "components.hpp"
+#include "map.hpp"
 
 class RenderSystem {
 
 	// Shaders
 	const std::array<std::string, shaderProgramCount> shaderPaths = {
-		"cat",
-		"triangle",
+		"animation",
+		"texture",
 		"wall",
 		"ai"
 	};
@@ -31,7 +32,8 @@ class RenderSystem {
 		"cat-idle.png",
 		"cat-walk.png",
 		"cat-jump.png",
-		"wall.jpg"
+		"stone.png",
+		"background.png"
 	};
 
 	std::array<GLuint, textureCount> textures; // OpenGL texture names
@@ -59,8 +61,8 @@ class RenderSystem {
 	float CAT_WALK_FRAME_TIME = 100; 
 
 	// CAT JUMP
-	const int CAT_JUMP_FRAMES = 8;
-	const GLfloat CAT_JUMP_FRAME_WIDTH = 0.125;
+	const int CAT_JUMP_FRAMES = 9;
+	const GLfloat CAT_JUMP_FRAME_WIDTH = 0.111;
 	float CAT_JUMP_FRAME_TIME = 100;
 
 
@@ -70,6 +72,17 @@ public:
 
 	// Draw to the screen using shaderProgram
 	void draw(float elapsed_ms);
+
+	// Draw a quad with an optional texture
+	void drawQuad(RenderRequest& request, std::string shaderInputs[], int numInputs);
+
+	void animateSprite(RenderRequest& request, Entity& entity, float elapsed_ms);
+
+	// Draw a tilemap
+	void drawTiles(const glm::mat4& projectionMatrix);
+
+	// Draw the background texture image
+	void drawBackground(RenderRequest& request, glm::mat4& projectionMatrix);
 
 	// Initialize GLFW window and context
 	bool init();
@@ -82,6 +95,8 @@ public:
 	int getScreenWidth() { return this->screenWidth; }
 	int getScreenHeight() { return this->screenHeight; }
 
+	void setTileMap(const Map& gameMap) { this->gameMap = gameMap; }
+
 private:
 	GLFWwindow* window;
 	int screenWidth;
@@ -90,6 +105,12 @@ private:
 	GLuint frameBuffer;
 	GLuint renderBufferColour;
 	GLuint renderBufferDepth;
+	Map gameMap;
+
+	// Reusable quad (square) geometry
+	std::vector<TexturedVertex> texturedQuad;
+	std::vector<glm::vec3> quad;
+	const std::vector<uint16_t> quadIndices = { 2, 0, 3, 2, 1, 0 };
 
 	// Initialize the off screen render buffer
 	// which is used as an intermediate render target
@@ -103,6 +124,12 @@ private:
 	void bindVBOandIBO(GEOMETRY_BUFFER_IDS oid, std::vector<T> vertices, std::vector<uint16_t> indices);
 
 	void loadMeshes();
+
+	// Apply matrix transformations
+	glm::mat4 transform(Motion& motion, float depth, bool translate, bool scale, bool rotate);
+
+	// The last step of the draw function
+	void renderToScreen(glm::mat4& transformationMatrix, glm::mat4& projectionMatrix);
 
 	// Generate a 4x4 orthographic projection matrix
 	// that scales with window size

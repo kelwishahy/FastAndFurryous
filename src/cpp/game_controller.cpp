@@ -46,22 +46,35 @@ void GameController::step(float elapsed_ms)
 	// change the animation type depending on the velocity
 	Motion& catMotion = registry.motions.get(player1_team.front());
 	Player& catPlayer = registry.players.get(player1_team.front());
-	if (catMotion.velocity.x == 0) {
-		catPlayer.animation_type = IDLE;
-	}
-	if (catMotion.velocity.x != 0) {
-		catPlayer.animation_type = WALKING;
-	}
-	if (catMotion.velocity.y < 0) {
-		catPlayer.animation_type = JUMPING;
-	}
-	if (catMotion.velocity.x < 0) {
-		catPlayer.facingLeft = 1;
-	}
-	if (catMotion.velocity.x > 0) {
-		catPlayer.facingLeft = 0;
+	Rigidbody& rb = registry.rigidBodies.get(player1_team.front());
+
+	for (Entity e : registry.animations.entities) {
+		if (registry.players.has(e)) {
+			Animation& catAnimation = registry.animations.get(e);
+
+			if (catMotion.velocity.x == 0) {
+				catAnimation.animation_type = IDLE;
+			}
+			if (catMotion.velocity.x != 0) {
+				catAnimation.animation_type = WALKING;
+			}
+			if (catMotion.velocity.y < 0) {
+				catAnimation.animation_type = JUMPING;
+			}
+			if (catMotion.velocity.x < 0) {
+				catAnimation.facingLeft = true;
+				shooting_system.setAimLoc(e);
+			}
+			if (catMotion.velocity.x > 0) {
+				catAnimation.facingLeft = false;
+				shooting_system.setAimLoc(e);
+			}
+		}
 	}
 
+	// printf("catmotion: %f\n", catMotion.velocity.y);
+	//printf("catmotion: %f\n", rb.collision_normal.y);
+	// 
 	// // FOR AI Animation
 	// Motion& aiMotion = registry.motions.get(ai_cat);
 	// Player& aiCat = registry.players.get(ai_cat);
@@ -84,25 +97,28 @@ void GameController::step(float elapsed_ms)
 }
 
 void GameController::build_map() {
-	//TEMPORARY UNTIL WE FIGURE OUT A SYSTEM FOR MAP BUILDING
-	////Floor
 	const int width = renderer->getScreenWidth();
 	const int height = renderer->getScreenHeight();
-	createWall(renderer, { width / 2, height }, width, 50);
 
-	////Left Wall
-	createWall(renderer, { 0, height / 2 }, 50, height - 10);
+	// Move the walls off screen and don't render them
+	// Floor
+	// createWall({ width / 2, height + 10 }, width, 10);
+	
+	// //Left Wall
+	createWall({ -10, height / 2 }, 10, height - 10);
+	//
+	// //Right Wall
+	createWall({ width + 10, height / 2 }, 10, height);
+	//
+	// //Ceiling
+	createWall({ width / 2, -10 }, width, 10);
 
-	////Right Wall
-	createWall(renderer, { width, height / 2 }, 50, height);
-
-	////Ceiling
-	createWall(renderer, { width / 2, 0 }, width, 50);
-
+	this->gameMap = Map();
+	gameMap.init();
+	renderer->setTileMap(gameMap);
 }
 
 void GameController::init_player_teams() {
-	//TEMPORARY UNTIL WE FIGURE OUT A SYSTEM FOR MAP BUILDING
 	std::vector<int> dummyvector;
 	dummyvector.push_back(1);
 	const int width = renderer->getScreenWidth();
@@ -112,7 +128,9 @@ void GameController::init_player_teams() {
 		for (int dummyval : dummyvector) {
 			//TEMPORARY UNTIL WE HAVE A MAP INIT SYSTEM
 			Entity player_cat = createCat(this->renderer, { width / 2 - 200, height - 400 });
+			// Entity ai_cat = createAI(this->renderer, { width / 2 - 300, height - 400 });
 			player1_team.push_back(player_cat);
+			// player1_team.push_back(ai_cat);
 			curr_selected_char = player_cat;
 		}
 	}
@@ -170,10 +188,22 @@ void GameController::handle_collisions() {
 		Entity entity_other = collisionsRegistry.components[i].other;
 
 		//If a projectile hits any terrain, get rid of the projectile
-		if (registry.projectiles.has(entity) && registry.terrains.has(entity_other)) {
-			registry.remove_all_components_of(entity);
+		if (registry.projectiles.has(entity)) {
+			Projectile& pj = registry.projectiles.get(entity);
+			if (registry.terrains.has(entity_other) && entity_other != pj.origin) {
+				registry.remove_all_components_of(entity);
+			}
 		}
 
+		if (registry.motions.has(entity) && registry.rigidBodies.has(entity) && registry.terrains.has(entity_other)) {
+			Rigidbody& rb = registry.rigidBodies.get(entity);
+			Motion& motion = registry.motions.get(entity);
+
+			if (rb.collision_normal.y == -1) {
+				motion.velocity.y = 0;
+			}
+		
+		}
 	}
 
 	// Remove all collisions from this simulation step
@@ -186,11 +216,15 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 	//Only allowed to move on specified turn
 	if (game_state.turn_possesion == PLAYER1) {
 		Motion& catMotion = registry.motions.get(player1_team[0]);
+		Rigidbody& rb = registry.rigidBodies.get(player1_team[0]);
 
 		float current_speed = 150.0f;
 		if (player_mode == PLAYER_MODE::MOVING) {
 			if (action == GLFW_PRESS && key == GLFW_KEY_W) {
-				catMotion.velocity.y = -current_speed;
+				if (catMotion.velocity.y == 2.5) {
+					catMotion.velocity.y = -2.5 * current_speed;
+					rb.collision_normal.y = 0;
+				}
 			}
 
 			if (action == GLFW_PRESS && key == GLFW_KEY_S) {
@@ -217,16 +251,16 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 		else {
 			if (action == GLFW_PRESS && key == GLFW_KEY_W) {
 				shooting_system.aimUp(curr_selected_char);
-				shooting_system.setAimLoc(curr_selected_char);
 			}
 
 			if (action == GLFW_PRESS && key == GLFW_KEY_S) {
 				shooting_system.aimDown(curr_selected_char);
-				shooting_system.setAimLoc(curr_selected_char);
 			}
 
 			if (action == GLFW_PRESS && key == GLFW_KEY_T) {
 				shooting_system.shoot(curr_selected_char);
+				printf("shooting");
+				printf("Num of projectiles %u\n", (uint)registry.projectiles.components.size());
 			}
 		}
 

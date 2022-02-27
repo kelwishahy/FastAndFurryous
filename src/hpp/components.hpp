@@ -24,8 +24,8 @@ enum AnimationType {
 
 //TODO add AI to the list of IDs
 enum class SHADER_PROGRAM_IDS {
-	CAT,
-	TRIANGLE,
+	ANIMATION,
+	TEXTURE,
 	WALL,
 	AI,
 	TOTAL
@@ -35,15 +35,14 @@ enum class TEXTURE_IDS {
 	CAT_IDLE,
 	CAT_WALK,
 	CAT_JUMP,
-	TRIANGLE,
+	STONE,
+	BACKGROUND,
 	TOTAL
 }; constexpr int textureCount = (int)TEXTURE_IDS::TOTAL;
 
 enum class GEOMETRY_BUFFER_IDS {
-	CAT_IDLE,
-	CAT_WALK,
-	CAT_JUMP,
-	TRIANGLE,
+	QUAD,
+	TEXTURED_QUAD,
 	WALL,
 	AI,
 	TOTAL
@@ -64,14 +63,24 @@ enum WEAPON_TYPES {
 	SHOTGUN = 1
 };
 
+enum TILE_TYPES {
+	NONE,
+	STONE
+};
+
 // Game components ------------------------------------------------------------
 
 struct Player {
-	int character = 1;
-	int frame = 0;
-	int animation_type = IDLE;
-	float frame_counter_ms = 100;
-	float facingLeft = 0;
+
+};
+
+struct Background {
+	
+};
+
+struct Tile {
+	TILE_TYPES type;
+	glm::vec2 position;
 };
 
 struct Health {
@@ -92,7 +101,6 @@ struct Collider {
 
 struct Boxcollider : Collider {
 	std::vector<glm::vec2> vertices;
-	std::vector<int> triangles;
 	bool transformed_required = true;
 	glm::vec2 deltaPos = glm::vec2{ 0,0 };
 };
@@ -133,13 +141,13 @@ struct WeaponBase {
 struct Rifle : WeaponBase {
 	Rifle() { 
 		// pi/2
-		MAX_ANGLE = 1.5708;
+		MAX_ANGLE = 1.4;
 		//0
-		MIN_ANGLE = 0;
+		MIN_ANGLE = 0.2;
 		// pi/4
 		aim_angle = 0.7854;
 		//distance the gun can shoot
-		distance = 200.0f;
+		distance = 500.0f;
 		//"radius" around distance
 		area = 200.0f;
 		damage = 10;
@@ -152,10 +160,12 @@ struct Shotgun : WeaponBase {
 };
 
 struct Projectile {
+	Entity origin;
 	glm::vec4 trajectoryAx;
 	glm::vec4 trajectoryAy;
 	float delta_time = 0;
 	float hit_radius;
+	glm::vec2 end_tangent;
 };
 
 // Stucture to store collision information
@@ -193,6 +203,14 @@ struct RenderRequest {
 	TEXTURE_IDS texture = TEXTURE_IDS::TOTAL;
 	SHADER_PROGRAM_IDS shader = SHADER_PROGRAM_IDS::TOTAL;
 	GEOMETRY_BUFFER_IDS geometry = GEOMETRY_BUFFER_IDS::TOTAL;
+};
+
+struct Animation {
+	int character = 1;
+	int frame = 0;
+	int animation_type = IDLE;
+	float frame_counter_ms = 100;
+	bool facingLeft = false;
 };
 
 // Debug components ------------------------------------------------------------

@@ -12,7 +12,6 @@
 
 //#include <hpp/game_controller.hpp>
 
-// Create the bug world
 WorldSystem::WorldSystem() {
 	// seeding rng with random device
 }
@@ -51,13 +50,13 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	// Remove entities that leave the screen on the left side
 	// Iterate backwards to be able to remove without unterfering with the next object to visit
 	// (the containers exchange the last element with the current)
-	for (int i = (int)motions_registry.components.size() - 1; i >= 0; --i) {
-		Motion& motion = motions_registry.components[i];
-		if (motion.position.x + abs(motion.scale.x) < 0.f) {
-			if (!registry.players.has(motions_registry.entities[i])) // don't remove the player
-				registry.remove_all_components_of(motions_registry.entities[i]);
-		}
-	}
+	//for (int i = (int)motions_registry.components.size() - 1; i >= 0; --i) {
+	//	Motion& motion = motions_registry.components[i];
+	//	if (motion.position.x + abs(motion.scale.x) < 0.f) {
+	//		if (!registry.players.has(motions_registry.entities[i])) // don't remove the player
+	//			registry.remove_all_components_of(motions_registry.entities[i]);
+	//	}
+	//}
 	//
 	if (current_game.inAGame) {
 		current_game.step(elapsed_ms_since_last_update);

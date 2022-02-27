@@ -7,8 +7,6 @@
 #include <hpp/tiny_ecs_registry.hpp>
 #include "glm/ext.hpp"
 
-#include <hpp/Game_Mechanics/health_system.hpp>
-
 #define OUT //for clarity
 
 using namespace glm;
@@ -76,10 +74,10 @@ void project_vertices(std::vector<vec2> box_vertices, vec2 axis, OUT float& min,
 
 }
 
-void move_back_entity(Motion& motion, Rigidbody& rb, Boxcollider& collider, vec2 normal, float depth) {
-	vec2 oldpos = motion.position;
-	motion.position += normal * depth;
-	collider.deltaPos = motion.position - oldpos;
+void move_back_entity(vec2* position, Rigidbody& rb, Boxcollider& collider, vec2 normal, float depth) {
+	vec2 oldpos = *position;
+	*position += normal * depth;
+	collider.deltaPos = *position - oldpos;
 	collider.transformed_required = true;
 	rb.collision_depth = depth;
 	rb.collision_normal = normal;
@@ -172,14 +170,17 @@ bool box_collision(const Boxcollider collider, const Boxcollider collider2, OUT 
 //If an entity gets transformed and they have a boxcollider, we need to recalculate the vertices
 void PhysicsSystem::transformBoxColliders() {
 	ComponentContainer<Boxcollider>& collider_container = registry.boxColliders;
-	for (uint i = 0; i < collider_container.components.size(); i++) {
 
+	// Iterate through all the boxcolliders
+	for (uint i = 0; i < collider_container.components.size(); i++) {
 		Boxcollider& collider = collider_container.components[i];
-		Entity entity = collider_container.entities[i];
+		// Entity entity = collider_container.entities[i];
+
 		if (collider.transformed_required) {
-			Motion motion = registry.motions.get(entity);
-			float angle = motion.angle;
+			// Motion motion = registry.motions.get(entity);
+			// float angle = motion.angle;
 			mat4 transform = mat4(1.0);
+
 			//TODO do rotations
 			//transform = rotate();
 			transform = translate(transform, vec3(collider.deltaPos, 0.0f));
@@ -199,32 +200,39 @@ void PhysicsSystem::checkForCollisions() {
 	for (uint i = 0; i < box_collider_container.components.size(); i++)
 	{
 		Boxcollider& collider_i = box_collider_container.components[i];
-		Entity entity_i = box_collider_container.entities[i];
-		Motion& motion_i = registry.motions.get(entity_i);
+		Entity& entity_i = box_collider_container.entities[i];
+
+		Motion* motion_i = &registry.motions.get(entity_i);
+		vec2* position_i = &motion_i->position;
 
 		// note starting j at i+1 to compare all (i,j) pairs only once (and to not compare with itself)
-		for (uint j = i + 1; j < box_collider_container.components.size(); j++)
-		{
+		for (uint j = i + 1; j < box_collider_container.components.size(); j++) {
+			Entity& entity_j = box_collider_container.entities[j];
+
+			// If this is a tile-tile collision, skip
+			if (registry.terrains.has(entity_i) && registry.terrains.has(entity_j)) continue;
+
 			Boxcollider& collider_j = box_collider_container.components[j];
-			Entity entity_j = box_collider_container.entities[j];
-			Motion& motion_j = registry.motions.get(entity_j);
+
+			Motion* motion_j = &registry.motions.get(entity_j);
+			vec2* position_j = &motion_j->position;
+
 			vec2 normal;
 			float depth = 9999999;
-			if (box_collision(collider_i, collider_j, normal, depth))
-			{
+			if (box_collision(collider_i, collider_j, normal, depth)) {
 				//If its a rigid body collision resolve right away
 				if (registry.rigidBodies.has(entity_i) && registry.rigidBodies.has(entity_j)) {
 					Rigidbody& entity_i_rb = registry.rigidBodies.get(entity_i);
 					Rigidbody& entity_j_rb = registry.rigidBodies.get(entity_j);
 					if (entity_i_rb.type == NORMAL && entity_j_rb.type == STATIC) {
-						move_back_entity(motion_i, entity_i_rb, collider_i, normal, depth);
+						moveBackEntity(entity_i, normal, depth);
 					}
 					else if (entity_i_rb.type == NORMAL && entity_j_rb.type == NORMAL) {
-						move_back_entity(motion_i, entity_i_rb, collider_i, normal, depth/2);
-						move_back_entity(motion_j, entity_j_rb, collider_j, -normal, depth/2);
+						moveBackEntity(entity_i, normal, depth/2);
+						moveBackEntity(entity_j, -normal, depth/2);
 					}
 					else if (entity_i_rb.type == STATIC && entity_j_rb.type == NORMAL) {
-						move_back_entity(motion_j, entity_j_rb, collider_j, -normal, depth);
+						moveBackEntity(entity_j, -normal, depth);
 					}
 					transformBoxColliders();
 				}
@@ -235,11 +243,6 @@ void PhysicsSystem::checkForCollisions() {
 				Collision& collision1 = registry.collisions.emplace_with_duplicates(entity_i, entity_j);
 
 				Collision& collision2 = registry.collisions.emplace_with_duplicates(entity_j, entity_i);
-
-				// Decrease the player's health if they touch an enemy
-				if (registry.health.has(entity_i) && registry.health.has(entity_j)) {
-					decreaseHealth(entity_i, 1);
-				}
 			}
 		}
 	}
@@ -254,66 +257,59 @@ void PhysicsSystem :: applyMotions(float elapsed_ms) {
 		float step_seconds = elapsed_ms / 1000.f;
 		if (registry.rigidBodies.has(entity)) {
 			Rigidbody& rb = registry.rigidBodies.get(entity);
-			if (rb.type == KINEMATIC) {
-				//TODO
-			} 
-			if (rb.type == STATIC) {
-				motion.velocity = vec2{ 0,0 };
-			}
-			if (rb.type == NORMAL) {
-				motion.velocity += vec2{ 0, GRAVITY_CONST };
+			if (registry.rigidBodies.has(entity)) {
+				Rigidbody& rb = registry.rigidBodies.get(entity);
+				if (rb.type == KINEMATIC) {
+					//TODO
+				}
+				if (rb.type == STATIC) {
+					motion.velocity = vec2{ 0,0 };
+				}
+				if (rb.type == NORMAL) {
+					if (motion.velocity.y >= TERMINAL_VELOCITY && !registry.projectiles.has(entity)) {
+						motion.velocity.y = TERMINAL_VELOCITY;
+					}
+					else {
+						motion.velocity.y += GRAVITY_CONST;
+					}
+				}
 			}
 		}
-		//transform(entity, motion, motion.velocity * step_seconds, .0f);
-
-		Boxcollider& collider = registry.boxColliders.get(entity);
-		vec2 oldpos = motion.position;
-		motion.position += motion.velocity * step_seconds;
-		collider.deltaPos = motion.position - oldpos;
-		collider.transformed_required = true;
+		translatePos(entity, motion.velocity * step_seconds);
 	}
 }
 
 void PhysicsSystem::step(float elapsed_ms)
 {
 	transformBoxColliders();
-	// Move bug based on how much time has passed, this is to (partially) avoid
-	// having entities move at different speed based on the machine.
+
 	applyMotions(elapsed_ms);
 
 	transformBoxColliders();
+
 	// Check for collisions between all moving entities
 	checkForCollisions();
 
 	// you may need the following quantities to compute wall positions
 	(float)renderer->getScreenWidth(); (float)renderer->getScreenHeight();
 
+}
 
-	// debugging of bounding boxes
-	//if (debugging.in_debug_mode)
-	//{
-	//	uint size_before_adding_new = (uint)motion_container.components.size();
-	//	for (uint i = 0; i < size_before_adding_new; i++)
-	//	{
-	//		Motion& motion_i = motion_container.components[i];
-	//		Entity entity_i = motion_container.entities[i];
+//translation is the distance to be moved
+void PhysicsSystem::translatePos(Entity e, vec2 translation) {
+	Boxcollider& collider = registry.boxColliders.get(e);
+	Motion& motion = registry.motions.get(e);
 
-	//		// don't draw debugging visuals around debug lines
-	//		if (registry.debugComponents.has(entity_i))
-	//			continue;
+	vec2 oldpos = motion.position;
+	motion.position += translation;
+	collider.deltaPos = motion.position - oldpos;
+	collider.transformed_required = true;
+}
 
-	//		// visualize the radius with two axis-aligned lines
-	//		const vec2 bonding_box = get_bounding_box(motion_i);
-	//		float radius = sqrt(dot(bonding_box/2.f, bonding_box/2.f));
-	//		vec2 line_scale1 = { motion_i.scale.x / 10, 2*radius };
-	//		vec2 line_scale2 = { 2*radius, motion_i.scale.x / 10};
-	//		vec2 position = motion_i.position;
+void PhysicsSystem::moveBackEntity(Entity e, vec2 normal, float depth) {
+	translatePos(e, normal * depth);
 
-	//		//This dosen't work at the moment because we need to setup the geometry for the lines
-	//		//Entity line1 = createLine(motion_i.position, line_scale1);
-	//		//Entity line2 = createLine(motion_i.position, line_scale2);
-
-	//		// !!! TODO A2: implement debug bounding boxes instead of crosses
-	//	}
-	//}
+	Rigidbody& rb = registry.rigidBodies.get(e);
+	rb.collision_depth = depth;
+	rb.collision_normal = normal;
 }

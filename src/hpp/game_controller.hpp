@@ -3,6 +3,7 @@
 // internal
 #include "common.hpp"
 #include "tiny_ecs.hpp"
+#include "map.hpp"
 
 // stlib
 #include <vector>
@@ -36,6 +37,8 @@ public:
 
 	GLFWwindow* window;
 
+	Map getGameMap() { return gameMap; }
+
 
 private:
 	RenderSystem* renderer;
@@ -58,6 +61,7 @@ private:
 	std::vector<Entity> ai_team;
 	std::vector<Entity> npcai_team;
 	std::vector<std::vector<Entity>> teams;
+	Map gameMap;
 
 	//Turn System stuff
 	enum TURN_CODE {
