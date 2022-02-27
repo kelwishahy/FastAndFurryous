@@ -46,6 +46,7 @@ void GameController::step(float elapsed_ms)
 	// change the animation type depending on the velocity
 	Motion& catMotion = registry.motions.get(player1_team.front());
 	Player& catPlayer = registry.players.get(player1_team.front());
+	Rigidbody& rb = registry.rigidBodies.get(player1_team.front());
 	if (catMotion.velocity.x == 0) {
 		catPlayer.animation_type = IDLE;
 	}
@@ -181,7 +182,6 @@ void GameController::handle_collisions() {
 				registry.remove_all_components_of(entity);
 			}
 		}
-
 	}
 
 	// Remove all collisions from this simulation step
@@ -194,6 +194,7 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 	//Only allowed to move on specified turn
 	if (game_state.turn_possesion == PLAYER1) {
 		Motion& catMotion = registry.motions.get(player1_team[0]);
+		Rigidbody& rb = registry.rigidBodies.get(player1_team[0]);
 
 		/*
 		 * DEBUGGING FOR MAP SYSTEM -----------------------------------------------------
@@ -209,6 +210,9 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 		if (player_mode == PLAYER_MODE::MOVING) {
 			if (action == GLFW_PRESS && key == GLFW_KEY_W) {
 				catMotion.velocity.y = -current_speed;
+				rb.grounded = false;
+				rb.collision_normal.y = 0;
+
 			}
 
 			if (action == GLFW_PRESS && key == GLFW_KEY_S) {

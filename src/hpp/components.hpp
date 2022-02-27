@@ -121,6 +121,7 @@ struct Rigidbody {
 	float mass = 1;
 	float collision_depth;
 	glm::vec2 collision_normal;
+	bool grounded = false;
 };
 
 struct RayCast {

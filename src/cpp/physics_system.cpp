@@ -256,9 +256,6 @@ void PhysicsSystem::checkForCollisions() {
 						moveBackEntity(entity_i, normal, depth/2);
 						moveBackEntity(entity_j, -normal, depth/2);
 					}
-					else if (entity_i_rb.type == STATIC && entity_j_rb.type == NORMAL) {
-						moveBackEntity(entity_j, -normal, depth);
-					}
 					transformBoxColliders();
 				}
 				// Create a collisions event
@@ -279,6 +276,7 @@ void PhysicsSystem :: applyMotions(float elapsed_ms) {
 	{
 		Motion& motion = motion_registry.components[i];
 		Entity entity = motion_registry.entities[i];
+		Rigidbody& rb = registry.rigidBodies.get(entity);
 		float step_seconds = elapsed_ms / 1000.f;
 		if (registry.rigidBodies.has(entity)) {
 			Rigidbody& rb = registry.rigidBodies.get(entity);
@@ -289,16 +287,19 @@ void PhysicsSystem :: applyMotions(float elapsed_ms) {
 				motion.velocity = vec2{ 0,0 };
 			}
 			if (rb.type == NORMAL) {
-				if (motion.velocity.y >= TERMINAL_VELOCITY && !registry.projectiles.has(entity)) {
-					motion.velocity.y = TERMINAL_VELOCITY;
+				if (motion.velocity.y >= TERMINAL_VELOCITY && rb.collision_normal.y == -1 && !registry.projectiles.has(entity) ) {
+					rb.grounded = true;
+					motion.velocity.y = 0;
+					//translatePos(entity, vec2{ 0, 1 });
 				}
 				else {
-					motion.velocity.y += GRAVITY_CONST;
+					if (!rb.grounded) {
+						motion.velocity.y += GRAVITY_CONST;
+					}
 				}
 				
 			}
 		}
-
 		translatePos(entity, motion.velocity * step_seconds);
 	}
 }
