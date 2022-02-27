@@ -288,7 +288,12 @@ void PhysicsSystem :: applyMotions(float elapsed_ms) {
 				motion.velocity = vec2{ 0,0 };
 			}
 			if (rb.type == NORMAL) {
-				motion.velocity.y += GRAVITY_CONST;
+				if (motion.velocity.y >= TERMINAL_VELOCITY) {
+					motion.velocity.y = TERMINAL_VELOCITY;
+				}
+				else {
+					motion.velocity.y += GRAVITY_CONST;
+				}
 			}
 		}
 		translatePos(entity, motion.velocity * step_seconds);
