@@ -5,6 +5,7 @@
 
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
+#include <glm/vec4.hpp>
 
 ////////////////////////////////////////////////////////////////////////////////
 // Component IDs
@@ -23,8 +24,8 @@ enum AnimationType {
 
 //TODO add AI to the list of IDs
 enum class SHADER_PROGRAM_IDS {
-	CAT,
-	TRIANGLE,
+	ANIMATION,
+	TEXTURE,
 	WALL,
 	AI,
 	TOTAL
@@ -34,15 +35,13 @@ enum class TEXTURE_IDS {
 	CAT_IDLE,
 	CAT_WALK,
 	CAT_JUMP,
-	TRIANGLE,
+	STONE,
 	TOTAL
 }; constexpr int textureCount = (int)TEXTURE_IDS::TOTAL;
 
 enum class GEOMETRY_BUFFER_IDS {
-	CAT_IDLE,
-	CAT_WALK,
-	CAT_JUMP,
-	TRIANGLE,
+	QUAD,
+	TEXTURED_QUAD,
 	WALL,
 	AI,
 	TOTAL
@@ -58,15 +57,29 @@ enum RB_TYPES {
 	STATIC = 2
 };
 
+enum WEAPON_TYPES {
+	RIFLE = 0,
+	SHOTGUN = 1
+};
+
+enum TILE_TYPES {
+	NONE,
+	STONE
+};
+
 // Game components ------------------------------------------------------------
 
-// we should change the name to Cat 
 struct Player {
 	int character = 1;
 	int frame = 0;
 	int animation_type = IDLE;
 	float frame_counter_ms = 100;
-	float facingLeft = 0;
+	bool facingLeft = false;
+};
+
+struct Tile {
+	TILE_TYPES type;
+	glm::vec2 position;
 };
 
 struct Health {
@@ -82,11 +95,11 @@ struct SolidTerrain {
 };
 
 struct Collider {
+
 };
 
 struct Boxcollider : Collider {
 	std::vector<glm::vec2> vertices;
-	std::vector<int> triangles;
 	bool transformed_required = true;
 	glm::vec2 deltaPos = glm::vec2{ 0,0 };
 };
@@ -111,6 +124,47 @@ struct Rigidbody {
 
 struct RayCast {
 	int max_depth = 1;
+};
+
+struct WeaponBase {
+	float MAX_ANGLE;
+	float MIN_ANGLE;
+	float aim_angle;
+	float distance;
+	float area;
+	float aim_loc_x;
+	float damage;
+	WEAPON_TYPES type;
+};
+
+struct Rifle : WeaponBase {
+	Rifle() { 
+		// pi/2
+		MAX_ANGLE = 1.5708;
+		//0
+		MIN_ANGLE = 0;
+		// pi/4
+		aim_angle = 0.7854;
+		//distance the gun can shoot
+		distance = 500.0f;
+		//"radius" around distance
+		area = 200.0f;
+		damage = 10;
+		type = RIFLE;
+	}
+};
+
+struct Shotgun : WeaponBase {
+
+};
+
+struct Projectile {
+	Entity origin;
+	glm::vec4 trajectoryAx;
+	glm::vec4 trajectoryAy;
+	float delta_time = 0;
+	float hit_radius;
+	glm::vec2 end_tangent;
 };
 
 // Stucture to store collision information

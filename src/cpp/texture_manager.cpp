@@ -18,7 +18,7 @@ void TextureManager::loadTextures(
 	glGenTextures((GLsizei)textures.size(), textures.data());
 	glHasError();
 
-	for (GLuint i = 0; i < texturePaths.size() - 1; i++) {
+	for (GLuint i = 0; i < texturePaths.size(); i++) {
 		const std::string& path = getTexturePath(texturePaths[i]);
 		glm::ivec2& dimensions = textureDimensions[i];
 

@@ -13,6 +13,7 @@
 #include <SDL_mixer.h>
 
 #include "render_system.hpp"
+#include "game_controller.hpp"
 
 using namespace glm;
 
@@ -30,7 +31,7 @@ public:
 	// Releases all associated resources
 	~WorldSystem();
 
-	void init(RenderSystem* renderer);
+	void init(RenderSystem* renderer, GLFWwindow* window);
 
 	// Steps the game ahead by ms milliseconds
 	bool step(float elapsed_ms);
@@ -44,6 +45,8 @@ public:
 	// Input callback functions
 	void on_key(int key, int, int action, int mod);
 	void on_mouse_move(vec2 pos);
+
+	GameController getCurrentGame() { return this->current_game; }
 
 private:
 	// restart level it was in the private 
@@ -59,6 +62,9 @@ private:
 	float next_ai_spawn;
 	Entity ai_cat;
 
+	//Game Controller
+	GameController current_game;
+
 	// OpenGL window handle
-	//GLFWwindow* window;
+	GLFWwindow* window;
 };
