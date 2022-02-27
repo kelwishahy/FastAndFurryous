@@ -15,10 +15,6 @@ void calculateBoxVerticesAndSetTriangles(vec2 pos, vec2 scale, Boxcollider& box)
 	box.vertices.push_back(pos + vec2{ right, up }); //topright
 	box.vertices.push_back(pos + vec2{ right, down }); //downright
 	box.vertices.push_back(pos + vec2{ left, down }); //downleft
-
-	// for (vec2 vertex : box.vertices) {
-	// 	printf("\nBox vertex is (%f, %f)\n", vertex.x, vertex.y);
-	// }
 }
 
 Entity createCat(RenderSystem* renderer, vec2 pos)
@@ -37,7 +33,7 @@ Entity createCat(RenderSystem* renderer, vec2 pos)
 	motion.position = pos;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	motion.scale = { 100.f, 100.f };
+	motion.scale = { 64.f, 64.f };
 
 	Boxcollider& bc = registry.boxColliders.emplace(entity);
 	calculateBoxVerticesAndSetTriangles(motion.position, motion.scale, bc);
@@ -78,19 +74,20 @@ Entity createWall(vec2 pos, int width, int height) {
 	calculateBoxVerticesAndSetTriangles(motion.position, motion.scale, bc);
 	bc.transformed_required = true;
 
-	// registry.renderRequests.insert(
-	// 	entity,
-	// 	{ TEXTURE_IDS::TOTAL,
-	// 		SHADER_PROGRAM_IDS::WALL,
-	// 		GEOMETRY_BUFFER_IDS::QUAD });
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_IDS::TOTAL,
+			SHADER_PROGRAM_IDS::WALL,
+			GEOMETRY_BUFFER_IDS::QUAD });
 
 	return entity;
 }
 
 Entity createTile(float tileScale, vec2 tilePosition, int numTilesInARow) {
-	vec2 position = { (tilePosition.y * tileScale) + (tileScale * (numTilesInARow + 1) /2), tilePosition.x * tileScale + (tileScale / 2) };
-	printf("\nTile position is {%f, %f}\n", position.x, position.y);
-	return createWall(position, (int)tileScale * (numTilesInARow + 1), (int)tileScale);
+	vec2 position = { ((tilePosition.y + 1) * tileScale) + ((tileScale * numTilesInARow) / 2.0), tilePosition.x * tileScale + (tileScale / 2.0)};
+	// if (tilePosition.y == 0.0)
+	// printf("\nTile position is {%f, %f}\n", position.x, position.y);
+	return createWall(position, (int)tileScale * numTilesInARow, (int)tileScale);
 }
 
 Entity createAI(RenderSystem* renderer, vec2 pos)
@@ -116,11 +113,11 @@ Entity createAI(RenderSystem* renderer, vec2 pos)
 
 	registry.players.emplace(entity);
 	registry.ais.emplace(entity);
-	registry.renderRequests.insert(
-		entity,
-		{ TEXTURE_IDS::CAT_IDLE,
-			SHADER_PROGRAM_IDS::ANIMATION,
-			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
+	// registry.renderRequests.insert(
+	// 	entity,
+	// 	{ TEXTURE_IDS::CAT_IDLE,
+	// 		SHADER_PROGRAM_IDS::ANIMATION,
+	// 		GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
 
 	return entity;
 }

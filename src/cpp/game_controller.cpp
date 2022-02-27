@@ -63,7 +63,7 @@ void GameController::step(float elapsed_ms)
 		catPlayer.facingLeft = false;
 	}
 
-	printf("catmotion: %f\n", catMotion.velocity.y);
+	// printf("catmotion: %f\n", catMotion.velocity.y);
 	//printf("catmotion: %f\n", rb.collision_normal.y);
 	// 
 	// // FOR AI Animation
@@ -96,13 +96,13 @@ void GameController::build_map() {
 	// createWall({ width / 2, height + 10 }, width, 10);
 	
 	// //Left Wall
-	// createWall(renderer, { -10, height / 2 }, 10, height - 10);
+	createWall({ -10, height / 2 }, 10, height - 10);
 	//
 	// //Right Wall
-	// createWall(renderer, { width + 10, height / 2 }, 10, height);
+	createWall({ width + 10, height / 2 }, 10, height);
 	//
 	// //Ceiling
-	// createWall(renderer, { width / 2, -10 }, width, 10);
+	createWall({ width / 2, -10 }, width, 10);
 
 	this->gameMap = Map();
 	gameMap.init();
