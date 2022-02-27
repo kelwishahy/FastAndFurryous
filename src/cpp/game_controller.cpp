@@ -47,23 +47,32 @@ void GameController::step(float elapsed_ms)
 	Motion& catMotion = registry.motions.get(player1_team.front());
 	Player& catPlayer = registry.players.get(player1_team.front());
 	Rigidbody& rb = registry.rigidBodies.get(player1_team.front());
-	if (catMotion.velocity.x == 0) {
-		catPlayer.animation_type = IDLE;
-	}
-	if (catMotion.velocity.x != 0) {
-		catPlayer.animation_type = WALKING;
-	}
-	if (catMotion.velocity.y < 0) {
-		catPlayer.animation_type = JUMPING;
-	}
-	if (catMotion.velocity.x < 0) {
-		catPlayer.facingLeft = true;
-	}
-	if (catMotion.velocity.x > 0) {
-		catPlayer.facingLeft = false;
+
+	for (Entity e : registry.animations.entities) {
+		if (registry.players.has(e)) {
+			Animation& catAnimation = registry.animations.get(e);
+
+			if (catMotion.velocity.x == 0) {
+				catAnimation.animation_type = IDLE;
+			}
+			if (catMotion.velocity.x != 0) {
+				catAnimation.animation_type = WALKING;
+			}
+			if (catMotion.velocity.y < 0) {
+				catAnimation.animation_type = JUMPING;
+			}
+			if (catMotion.velocity.x < 0) {
+				catAnimation.facingLeft = true;
+				shooting_system.setAimLoc(e);
+			}
+			if (catMotion.velocity.x > 0) {
+				catAnimation.facingLeft = false;
+				shooting_system.setAimLoc(e);
+			}
+		}
 	}
 
-	printf("catmotion: %f\n", catMotion.velocity.y);
+	// printf("catmotion: %f\n", catMotion.velocity.y);
 	//printf("catmotion: %f\n", rb.collision_normal.y);
 	// 
 	// // FOR AI Animation
@@ -96,13 +105,13 @@ void GameController::build_map() {
 	// createWall({ width / 2, height + 10 }, width, 10);
 	
 	// //Left Wall
-	// createWall(renderer, { -10, height / 2 }, 10, height - 10);
+	createWall({ -10, height / 2 }, 10, height - 10);
 	//
 	// //Right Wall
-	// createWall(renderer, { width + 10, height / 2 }, 10, height);
+	createWall({ width + 10, height / 2 }, 10, height);
 	//
 	// //Ceiling
-	// createWall(renderer, { width / 2, -10 }, width, 10);
+	createWall({ width / 2, -10 }, width, 10);
 
 	this->gameMap = Map();
 	gameMap.init();
@@ -209,21 +218,13 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 		Motion& catMotion = registry.motions.get(player1_team[0]);
 		Rigidbody& rb = registry.rigidBodies.get(player1_team[0]);
 
-		/*
-		 * DEBUGGING FOR MAP SYSTEM -----------------------------------------------------
-		 */
-		// auto& position = catMotion.position;
-		// printf("Cat position is %f, %f\n", position.x, position.y);
-		// vec2 closestTile = {position.x / gameMap.getTileScale(), position.y / gameMap.getTileScale()};
-		// printf("Closest tile is %f, %f\n", closestTile.x, closestTile.y);
-
-		//-------------------------------------------------------------------------------
-
 		float current_speed = 150.0f;
 		if (player_mode == PLAYER_MODE::MOVING) {
 			if (action == GLFW_PRESS && key == GLFW_KEY_W) {
-				catMotion.velocity.y = -current_speed;
-				rb.collision_normal.y = 0;
+				if (catMotion.velocity.y == 2.5) {
+					catMotion.velocity.y = -2.5 * current_speed;
+					rb.collision_normal.y = 0;
+				}
 			}
 
 			if (action == GLFW_PRESS && key == GLFW_KEY_S) {

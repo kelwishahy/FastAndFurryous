@@ -202,44 +202,21 @@ void PhysicsSystem::checkForCollisions() {
 		Boxcollider& collider_i = box_collider_container.components[i];
 		Entity& entity_i = box_collider_container.entities[i];
 
-		Motion* motion_i = nullptr;
-		vec2* position_i = nullptr;
-
-		// If entity_i is a tile, it won't have a motion component.
-		// Trying to access a component that doesn't exist will
-		// cause an assertion error.
-		if (registry.tiles.has(entity_i)) {
-			position_i = &registry.tiles.get(entity_i).position;
-		} else { // entity_i is not a tile
-			motion_i = &registry.motions.get(entity_i);
-			position_i = &motion_i->position;
-		}
+		Motion* motion_i = &registry.motions.get(entity_i);
+		vec2* position_i = &motion_i->position;
 
 		// note starting j at i+1 to compare all (i,j) pairs only once (and to not compare with itself)
-		for (uint j = 0; j < box_collider_container.components.size(); j++) {
+		for (uint j = i + 1; j < box_collider_container.components.size(); j++) {
 			Entity& entity_j = box_collider_container.entities[j];
 
-			// If these are the same entity OR this is a tile-tile collision, skip
-			if (& entity_i == &entity_j || registry.terrains.has(entity_i) && registry.terrains.has(entity_j)) continue;
+			// If this is a tile-tile collision, skip
+			if (registry.terrains.has(entity_i) && registry.terrains.has(entity_j)) continue;
 
 			Boxcollider& collider_j = box_collider_container.components[j];
 
-			// If this is a tile X tile collision, skip
-			Motion* motion_j = nullptr;
-			vec2* position_j = nullptr;
+			Motion* motion_j = &registry.motions.get(entity_j);
+			vec2* position_j = &motion_j->position;
 
-			// If entity_i is a tile, it won't have a motion component.
-			// Trying to access a component that doesn't exist will
-			// cause an assertion error.
-			if (registry.tiles.has(entity_j)) {
-				position_j = &registry.tiles.get(entity_j).position;
-			}
-			else { // entity_i is not a tile
-				motion_j = &registry.motions.get(entity_j);
-				position_j = &motion_j->position;
-			}
-
-			// Motion& motion_j = registry.motions.get(entity_j);
 			vec2 normal;
 			float depth = 9999999;
 			if (box_collision(collider_i, collider_j, normal, depth)) {
@@ -254,6 +231,9 @@ void PhysicsSystem::checkForCollisions() {
 						moveBackEntity(entity_i, normal, depth/2);
 						moveBackEntity(entity_j, -normal, depth/2);
 					}
+					else if (entity_i_rb.type == STATIC && entity_j_rb.type == NORMAL) {
+						moveBackEntity(entity_j, -normal, depth);
+					}
 					transformBoxColliders();
 				}
 				// Create a collisions event
@@ -263,9 +243,6 @@ void PhysicsSystem::checkForCollisions() {
 				Collision& collision1 = registry.collisions.emplace_with_duplicates(entity_i, entity_j);
 
 				Collision& collision2 = registry.collisions.emplace_with_duplicates(entity_j, entity_i);
-				
-				// printf("\nCollision Detected: %f %f %f %f\n", collider_i.vertices[0], collider_i.vertices[1], collider_i.vertices[2], collider_i.vertices[3]);
-				// printf("\nCollision Detected: %f %f %f %f\n", collider_j.vertices[0], collider_j.vertices[1], collider_j.vertices[2], collider_j.vertices[3]);
 			}
 		}
 	}
@@ -281,18 +258,21 @@ void PhysicsSystem :: applyMotions(float elapsed_ms) {
 		float step_seconds = elapsed_ms / 1000.f;
 		if (registry.rigidBodies.has(entity)) {
 			Rigidbody& rb = registry.rigidBodies.get(entity);
-			if (rb.type == KINEMATIC) {
-				//TODO
-			} 
-			if (rb.type == STATIC) {
-				motion.velocity = vec2{ 0,0 };
-			}
-			if (rb.type == NORMAL) {
-				if (motion.velocity.y >= TERMINAL_VELOCITY) {
-					motion.velocity.y = TERMINAL_VELOCITY;
+			if (registry.rigidBodies.has(entity)) {
+				Rigidbody& rb = registry.rigidBodies.get(entity);
+				if (rb.type == KINEMATIC) {
+					//TODO
 				}
-				else {
-					motion.velocity.y += GRAVITY_CONST;
+				if (rb.type == STATIC) {
+					motion.velocity = vec2{ 0,0 };
+				}
+				if (rb.type == NORMAL) {
+					if (motion.velocity.y >= TERMINAL_VELOCITY && !registry.projectiles.has(entity)) {
+						motion.velocity.y = TERMINAL_VELOCITY;
+					}
+					else {
+						motion.velocity.y += GRAVITY_CONST;
+					}
 				}
 			}
 		}

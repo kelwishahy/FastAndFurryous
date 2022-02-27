@@ -24,6 +24,7 @@ private:
 	 * (e.g. if gameMap[i][j] = 1, we render a stone tile)
 	 */
 	std::vector<std::vector<unsigned int>> tileMap;
+	void readMapFromFile();
 
 	// Dimensions of this game map
 	unsigned int mapHeight;

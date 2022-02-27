@@ -36,6 +36,7 @@ enum class TEXTURE_IDS {
 	CAT_WALK,
 	CAT_JUMP,
 	STONE,
+	BACKGROUND,
 	TOTAL
 }; constexpr int textureCount = (int)TEXTURE_IDS::TOTAL;
 
@@ -70,11 +71,11 @@ enum TILE_TYPES {
 // Game components ------------------------------------------------------------
 
 struct Player {
-	int character = 1;
-	int frame = 0;
-	int animation_type = IDLE;
-	float frame_counter_ms = 100;
-	bool facingLeft = false;
+
+};
+
+struct Background {
+	
 };
 
 struct Tile {
@@ -140,9 +141,9 @@ struct WeaponBase {
 struct Rifle : WeaponBase {
 	Rifle() { 
 		// pi/2
-		MAX_ANGLE = 1.5708;
+		MAX_ANGLE = 1.4;
 		//0
-		MIN_ANGLE = 0;
+		MIN_ANGLE = 0.2;
 		// pi/4
 		aim_angle = 0.7854;
 		//distance the gun can shoot
@@ -202,6 +203,14 @@ struct RenderRequest {
 	TEXTURE_IDS texture = TEXTURE_IDS::TOTAL;
 	SHADER_PROGRAM_IDS shader = SHADER_PROGRAM_IDS::TOTAL;
 	GEOMETRY_BUFFER_IDS geometry = GEOMETRY_BUFFER_IDS::TOTAL;
+};
+
+struct Animation {
+	int character = 1;
+	int frame = 0;
+	int animation_type = IDLE;
+	float frame_counter_ms = 100;
+	bool facingLeft = false;
 };
 
 // Debug components ------------------------------------------------------------

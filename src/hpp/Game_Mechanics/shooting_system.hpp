@@ -42,6 +42,9 @@ private:
 	//[ 1  0  0  0]
 	mat4 hermite_matrix = mat4(vec4(2, -3, 0, 1), vec4(-2, 3, 0, 0), vec4(1, -2, 1, 0), vec4(1, -1, 0, 0));
 
+	float pi = 3.14159;
+	float pio2 = 1.57079;
+
 	RenderSystem* renderer;
 
 	enum class SHOOT_ORIENTATION {
