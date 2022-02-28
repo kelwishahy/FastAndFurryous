@@ -35,7 +35,10 @@ class RenderSystem {
 		"stone.png",
 		"background.png",
 		"start_bg.jpg",
+		//selectscreen
+		"select_bg.jpg",
 		"button1.jpg",
+		"select_cat.jpg",
 		"tutorial_bg.jpg"
 	};
 

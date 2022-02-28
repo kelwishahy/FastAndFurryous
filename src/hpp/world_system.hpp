@@ -49,6 +49,8 @@ public:
 	void check_for_button_presses();
 
 	void play_tutorial(std::vector<std::function<void()>> callbacks);
+//selectscreen
+	void play_select(std::vector<std::function<void()>> callbacks);
 
 	glm::vec2 mouse_pos;
 
