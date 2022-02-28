@@ -30,7 +30,7 @@ public:
 
 	void setAimLoc(Entity e);
 
-	void shoot(Entity e);
+	void shoot(Entity e, Mix_Chunk* sound);
 
 private:
 

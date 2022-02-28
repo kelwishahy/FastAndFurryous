@@ -13,7 +13,7 @@
 using Clock = std::chrono::high_resolution_clock;
 
 int main() {
-	std::cout << "Starting The Fast and the Furryous" << std::endl;
+	std::cout << "Starting Fast and Furry-ous" << std::endl;
 
 	// Global systems
 	WorldSystem world;
@@ -36,12 +36,6 @@ int main() {
 	while (!glfwWindowShouldClose(window)) { // TO-DO: Make this loop condition depend on the world state, like in assignment template
 		// Process system events
 		glfwPollEvents();
-		//// TO-DO: Create input system and manage external input here
-		////auto key_redirect = [](GLFWwindow* wnd, int _0, int _1, int _2, int _3) { ((WorldSystem*)glfwGetWindowUserPointer(wnd))->on_key(_0, _1, _2, _3); };
-		//auto cursor_pos_redirect = [](GLFWwindow* wnd, double _0, double _1) { ((WorldSystem*)glfwGetWindowUserPointer(wnd))->on_mouse_move({ _0, _1 }); };
-		////glfwSetKeyCallback(window, key_redirect);
-		//glfwSetCursorPosCallback(window, cursor_pos_redirect);
-		// Note: GLFW is used to track keyboard & mouse input
 
 		// Determine time elapsed
 		auto now = Clock::now();

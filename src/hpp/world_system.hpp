@@ -8,16 +8,8 @@
 #include <vector>
 #include <random>
 
-#define SDL_MAIN_HANDLED
-#include <SDL.h>
-#include <SDL_mixer.h>
-
 #include "render_system.hpp"
 #include "game_controller.hpp"
-
-using namespace glm;
-
-#include <glm/vec2.hpp>				// vec2
 
 //#include "render_system.hpp"
 
@@ -73,12 +65,15 @@ private:
 	//Game Controller
 	GameController current_game;
 
-	//Music references
-	Mix_Music* background_music;
-
 	// OpenGL window handle
 	GLFWwindow* window;
 
 	//Mouse press cooldown - I need to remove this later
 	float cooldown = 0;
+
+	//Audio references
+	Mix_Music* background_music;
+	Mix_Chunk* catScream;
+	Mix_Chunk* gunshot;
+	Mix_Chunk* win;
 };
