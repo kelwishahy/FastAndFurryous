@@ -106,6 +106,7 @@ void ShootingSystem::setAimLoc(Entity e) {
 		float move_step = (x_begin - x_end) * ((weapon.aim_angle - pio2) / (weapon.MAX_ANGLE - weapon.MIN_ANGLE));
 		weapon.aim_loc_x = (x_end + move_step >= x_begin) ? x_begin : x_end + move_step;
 	}
+
 	printf("weapons aim loc: %f\n", weapon.aim_loc_x);
 }
 

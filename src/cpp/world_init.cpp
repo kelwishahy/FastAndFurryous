@@ -115,6 +115,7 @@ Entity createAI(RenderSystem* renderer, vec2 pos)
 
 	registry.players.emplace(entity);
 	registry.ais.emplace(entity);
+
 	// registry.renderRequests.insert(
 	// 	entity,
 	// 	{ TEXTURE_IDS::CAT_IDLE,

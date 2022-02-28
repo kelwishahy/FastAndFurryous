@@ -65,6 +65,9 @@ private:
 	//Game Controller
 	GameController current_game;
 
+	//Music references
+	Mix_Music* background_music;
+
 	// OpenGL window handle
 	GLFWwindow* window;
 };

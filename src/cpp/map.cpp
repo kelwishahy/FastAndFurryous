@@ -96,7 +96,6 @@ void Map::readMapFromFile() {
 }
 
 
-
 std::vector<std::vector<unsigned int>> Map::getTileMap() {
 	return tileMap;
 }

@@ -1,6 +1,7 @@
 // Header
 #include "..\hpp\world_system.hpp"
 #include "..\hpp\world_init.hpp"
+#include "..\hpp\common.hpp"
 
 // stlib
 #include <cassert>
@@ -17,6 +18,11 @@ WorldSystem::WorldSystem() {
 }
 
 WorldSystem::~WorldSystem() {
+	// Destroy music components
+	if (background_music != nullptr)
+		Mix_FreeMusic(background_music);
+	Mix_CloseAudio();
+
 	// Destroy all created components
 	registry.clear_all_components();
 }
@@ -34,6 +40,28 @@ void WorldSystem::init(RenderSystem* renderer, GLFWwindow* window) {
 	this->window = window;
 
 	// Set all states to default
+
+	//////////////////////////////////////
+	// Loading music and sounds with SDL
+	if (SDL_Init(SDL_INIT_AUDIO) < 0) {
+		fprintf(stderr, "Failed to initialize SDL Audio");
+		return;
+	}
+	if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) == -1) {
+		fprintf(stderr, "Failed to open audio device");
+		return;
+	}
+
+	background_music = Mix_LoadMUS(audio_path("background-music.wav").c_str());
+
+	if (background_music == nullptr ) {
+		fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n make sure the data directory is present",
+			audio_path("background-music.wav").c_str());
+		return;
+	}
+
+	Mix_PlayMusic(background_music, -1);
+	fprintf(stderr, "Loaded music\n");
 
 	//creates a wall on the left side of the screen
 	printf("window height is: %i px, window width is: %i px", renderer->getScreenHeight(), renderer->getScreenWidth());

@@ -11,7 +11,6 @@
 #include "hpp/ai_system.hpp"
 #include "hpp/ai_system.hpp"
 
-
 using namespace glm;
 
 RenderSystem::RenderSystem() {}
@@ -43,7 +42,7 @@ void RenderSystem::draw(float elapsed_ms) {
 			drawBackground(request, projectionMatrix);
 			continue;
 		}
-
+    
 		mat4 transformationMatrix;
 
 		switch (request.geometry) {
@@ -190,7 +189,6 @@ void RenderSystem::animateSprite(RenderRequest& request, Entity& entity, float e
 
 	// Get frame
 	int& frame = animation.frame;
-
 
 	TEXTURE_IDS& curr_texture = registry.renderRequests.get(entity).texture;
 
@@ -374,7 +372,6 @@ void RenderSystem::drawBackground(RenderRequest& request, mat4& projectionMatrix
 	drawQuad(request, shaderInputs, 2);
 	renderToScreen(transform.mat, projectionMatrix);
 }
-
 
 
 bool RenderSystem::init() {
