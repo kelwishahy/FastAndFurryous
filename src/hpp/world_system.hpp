@@ -43,14 +43,22 @@ public:
 	void handle_collisions();
 
 	// Input callback functions
-	void on_key(int key, int, int action, int mod);
+	void on_key(int button, int action, int mods);
 	void on_mouse_move(vec2 pos);
+
+	void check_for_button_presses();
+
+	void play_tutorial(std::vector<std::function<void()>> callbacks);
+
+	glm::vec2 mouse_pos;
 
 	GameController getCurrentGame() { return this->current_game; }
 
 private:
 	// restart level it was in the private 
 	void restart_game();
+
+	void init_main_menu();
 
 	RenderSystem* renderer;
 	Entity player_cat;
@@ -70,4 +78,7 @@ private:
 
 	// OpenGL window handle
 	GLFWwindow* window;
+
+	//Mouse press cooldown - I need to remove this later
+	float cooldown = 0;
 };

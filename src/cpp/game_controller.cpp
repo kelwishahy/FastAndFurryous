@@ -27,8 +27,11 @@ void GameController::init(RenderSystem* renderer, GLFWwindow* window) {
 	init_player_teams();
 
 	//Setting player key callback
+	//glfwSetWindowUserPointer(window, this);
 	auto key_redirect = [](GLFWwindow* wnd, int _0, int _1, int _2, int _3) { ((GameController*)glfwGetWindowUserPointer(wnd))->on_player_key(_0, _1, _2, _3); };
 	glfwSetKeyCallback(this->window, key_redirect);
+	auto cursor_pos_redirect = [](GLFWwindow* wnd, double _0, double _1) { ((GameController*)glfwGetWindowUserPointer(wnd))->on_mouse_move({ _0, _1 }); };
+	glfwSetCursorPosCallback(this->window, cursor_pos_redirect);
 
 	inAGame = true;
 	player_mode = PLAYER_MODE::MOVING;
@@ -38,8 +41,8 @@ void GameController::init(RenderSystem* renderer, GLFWwindow* window) {
 
 void GameController::step(float elapsed_ms)
 {
-	//While a game is happening make sure the players are controlling from here
 	glfwSetWindowUserPointer(window, this);
+	//While a game is happening make sure the players are controlling from here
 	shooting_system.step(elapsed_ms);
 	handle_collisions();
 
@@ -282,4 +285,9 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 		next_turn();
 		printf("Currently it is this players turn: %i", game_state.turn_possesion);
 	}
+}
+
+void GameController::on_mouse_move(vec2 mouse_pos) {
+
+	printf("now in game_controller");
 }

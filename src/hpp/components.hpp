@@ -37,6 +37,9 @@ enum class TEXTURE_IDS {
 	CAT_JUMP,
 	STONE,
 	BACKGROUND,
+	START_MENU,
+	BUTTON1,
+	HOWTOMOVE,
 	TOTAL
 }; constexpr int textureCount = (int)TEXTURE_IDS::TOTAL;
 
@@ -66,6 +69,10 @@ enum WEAPON_TYPES {
 enum TILE_TYPES {
 	NONE,
 	STONE
+};
+
+enum MENU_TYPES {
+	START
 };
 
 // Game components ------------------------------------------------------------
@@ -175,6 +182,11 @@ struct Collision {
 	Collision(Entity& other) { this->other = other; };
 };
 
+struct Clickable {
+	std::vector<glm::vec2> vertecies;
+	std::vector<std::function<void()>> callbacks;
+};
+
 // Render components ----------------------------------------------------------
 
 // Single vertex vuffer element for textured sprites
@@ -203,6 +215,12 @@ struct RenderRequest {
 	TEXTURE_IDS texture = TEXTURE_IDS::TOTAL;
 	SHADER_PROGRAM_IDS shader = SHADER_PROGRAM_IDS::TOTAL;
 	GEOMETRY_BUFFER_IDS geometry = GEOMETRY_BUFFER_IDS::TOTAL;
+};
+
+struct MenuItem {
+	float layer;
+	MENU_TYPES menu_id;
+	RenderRequest request;
 };
 
 struct Animation {

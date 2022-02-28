@@ -19,4 +19,8 @@ Entity createAI(RenderSystem* renderer, glm::vec2 pos);
 //Projectile
 Entity createProjectile(RenderSystem* renderer, Entity originE, glm::vec4 coefficientsX, glm::vec4 coefficientsY, glm::vec2 endtangent);
 
+//Specify a menu
+Entity createMenu(MENU_TYPES menu, float layer);
+
+Entity createButton(glm::vec2 pos, glm::vec2 scale, TEXTURE_IDS tex_id, std::vector<std::function<void()>> callbacks);
 

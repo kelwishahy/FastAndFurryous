@@ -155,3 +155,59 @@ Entity createProjectile(RenderSystem* renderer, Entity originE, vec4 coefficient
 
 	return entity;
 }
+
+Entity createMenu(MENU_TYPES menu, float layer) {
+
+	auto entity = Entity();
+
+	MenuItem& menu_comp =  registry.menus.emplace(entity);
+	RenderRequest request;
+	
+	if (menu == MENU_TYPES::START) {
+		request = { TEXTURE_IDS::START_MENU,
+					SHADER_PROGRAM_IDS::TEXTURE,
+					GEOMETRY_BUFFER_IDS::TEXTURED_QUAD };
+	}
+	menu_comp.layer = layer;
+	menu_comp.request = request;
+
+	registry.renderRequests.insert(
+		entity,
+		request
+	);
+
+	return entity;
+}
+
+Entity createButton(vec2 pos, vec2 scale, TEXTURE_IDS tex_id, std::vector<std::function<void()>> callbacks) {
+
+	auto entity = Entity();
+
+	Clickable& button = registry.buttons.emplace(entity);
+	button.callbacks = callbacks;
+
+	float left = -scale.x / 2;
+	float right = scale.x / 2;
+	float up = -scale.y / 2;
+	float down = scale.y / 2;
+
+	button.vertecies.push_back(pos + vec2{ left, up }); //topleft
+	button.vertecies.push_back(pos + vec2{ right, up }); //topright
+	button.vertecies.push_back(pos + vec2{ right, down }); //downright
+	button.vertecies.push_back(pos + vec2{ left, down }); //downleft
+
+	registry.renderRequests.insert(
+		entity,
+		{ tex_id,
+			SHADER_PROGRAM_IDS::TEXTURE,
+			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
+
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = pos;
+	motion.scale = scale;
+	motion.angle = 0.f;
+	motion.velocity = { 0.f, 0.f };
+
+	return entity;
+
+}

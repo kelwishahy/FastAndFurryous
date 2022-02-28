@@ -33,7 +33,10 @@ class RenderSystem {
 		"cat-walk.png",
 		"cat-jump.png",
 		"stone.png",
-		"background.png"
+		"background.png",
+		"start_bg.jpg",
+		"button1.jpg",
+		"tutorial_bg.jpg"
 	};
 
 	std::array<GLuint, textureCount> textures; // OpenGL texture names
@@ -82,7 +85,7 @@ public:
 	void drawTiles(const glm::mat4& projectionMatrix);
 
 	// Draw the background texture image
-	void drawBackground(RenderRequest& request, glm::mat4& projectionMatrix);
+	void drawBackground(RenderRequest& request, glm::mat4& projectionMatrix, float layer);
 
 	// Initialize GLFW window and context
 	bool init();

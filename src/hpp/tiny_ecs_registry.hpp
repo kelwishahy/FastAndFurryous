@@ -30,6 +30,8 @@ public:
 	ComponentContainer<WeaponBase> weapons;
 	ComponentContainer<Projectile> projectiles;
 	ComponentContainer<Animation> animations;
+	ComponentContainer<MenuItem> menus;
+	ComponentContainer<Clickable> buttons;
 
 	ECSRegistry() {
 		registry_list.push_back(&ais);
@@ -51,6 +53,8 @@ public:
 		registry_list.push_back(&weapons);
 		registry_list.push_back(&projectiles);
 		registry_list.push_back(&animations);
+		registry_list.push_back(&menus);
+		registry_list.push_back(&buttons);
 	}
 
 	void clear_all_components() {
