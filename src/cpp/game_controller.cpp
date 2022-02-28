@@ -11,6 +11,7 @@ GameController::GameController() {
 GameController::~GameController() {
 	//do something when this object is destroyed
 }
+AISystem ai_system;
 
 //initialize stuff here
 void GameController::init(RenderSystem* renderer, GLFWwindow* window) {
@@ -18,14 +19,16 @@ void GameController::init(RenderSystem* renderer, GLFWwindow* window) {
 	this->renderer = renderer;
 	this->window = window;
 
-	AISystem ai_system;
-
 	//Init game metadata
 	game_state.turn_number += 1;
 	game_state.turn_possesion = TURN_CODE::PLAYER1;
 
 	//Building the stage via json
 	build_map();
+
+	// initialize ai decision tree
+	ai_system.init();
+	ai_system.updateGameState(game_state.turn_possesion);
 
 	//Building the teams via json
 	init_player_teams();
@@ -44,9 +47,11 @@ void GameController::step(float elapsed_ms)
 {
 	//While a game is happening make sure the players are controlling from here
 
-
 	glfwSetWindowUserPointer(window, this);
 	shooting_system.step(elapsed_ms);
+
+
+	// Control AI turn and timer
 	ai_system.step(elapsed_ms);
 	handle_collisions();
 
@@ -92,7 +97,7 @@ void GameController::init_player_teams() {
 
 	Entity ai = createAI(this->renderer, { width / 2, height - 400 });
 	ai_team.push_back(ai);
-	ai_system.init(game_state);
+	//ai_system.init(game_state);
 
 	/*if (!player2_team.empty()) {
 		for (Entity e : player2_team) {
@@ -125,6 +130,7 @@ void GameController::next_turn() {
 
 	game_state.turn_possesion += 1;
 	game_state.turn_number += 1;
+	ai_system.updateGameState(game_state.turn_possesion);
 	registry.projectiles.clear();
 	if (game_state.turn_possesion == TURN_CODE::END) {
 		game_state.turn_possesion = TURN_CODE::PLAYER1;
@@ -132,6 +138,10 @@ void GameController::next_turn() {
 		game_state.turn_number -= 1;
 		next_turn();
 	}
+	//else if (game_state.turn_possesion == TURN_CODE::AI) {
+	//	ai_system.step();
+	//	//next_turn();
+	//}
 }
 
 void GameController::handle_collisions() {
