@@ -87,7 +87,6 @@ void WorldSystem::init(RenderSystem* renderer, GLFWwindow* window) {
 // Update our game world
 bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
-<<<<<<< HEAD
 	cooldown += elapsed_ms_since_last_update;
 	// Remove entities that leave the screen on the left side
 	// Iterate backwards to be able to remove without unterfering with the next object to visit
@@ -111,10 +110,9 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 			}
 		}
 	}
-=======
+
 	// Removing out of screen entities
 	auto& motions_registry = registry.motions;
->>>>>>> 3ea4b51 (Added various sound effects from freesound.org)
 	if (current_game.inAGame) {
 		current_game.step(elapsed_ms_since_last_update);
 	}
