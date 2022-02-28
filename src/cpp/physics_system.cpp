@@ -254,7 +254,6 @@ void PhysicsSystem :: applyMotions(float elapsed_ms) {
 	{
 		Motion& motion = motion_registry.components[i];
 		Entity entity = motion_registry.entities[i];
-		Rigidbody& rb = registry.rigidBodies.get(entity);
 		float step_seconds = elapsed_ms / 1000.f;
 		if (registry.rigidBodies.has(entity)) {
 			Rigidbody& rb = registry.rigidBodies.get(entity);
