@@ -29,17 +29,13 @@ void AISystem::step(float elapsed_ms)
 		blackboard->entity = &entity;
 		blackboard->motion = &motion;
 		behaviourTree->run();
-		timer -= elapsed_ms;
-		
-		// jumpdelay -= elapsed_ms;
-
 	}
 	
 }
 
 //initialize stuff here
 void AISystem::init() {
-	timer = 0;
+	timer = 2000.f;
 	direction = 1;
 	jumpdelay = 2000;
 

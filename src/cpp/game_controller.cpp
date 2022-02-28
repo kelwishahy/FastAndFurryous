@@ -114,6 +114,7 @@ void GameController::step(float elapsed_ms) {
 
 	if (game_state.turn_possesion == NPCAI) {
 		ai.step(elapsed_ms);
+		next_turn();
 	}
 }
 

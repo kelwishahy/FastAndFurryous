@@ -1,8 +1,10 @@
 #pragma once
 
+#include <chrono>
 #include <list>
 #include "components.hpp"
 #include "tiny_ecs_registry.hpp"
+using Clock = std::chrono::high_resolution_clock;
 
 /*
  * Adapted from http://www.cplusplus.com/forum/general/141582/
@@ -101,7 +103,6 @@ public:
 };
 
 // Jump
-// Stop the entity
 class Jump : public Node {
 public:
 	Jump() {};
