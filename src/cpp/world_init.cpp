@@ -17,8 +17,7 @@ void calculateBoxVerticesAndSetTriangles(vec2 pos, vec2 scale, Boxcollider& box)
 	box.vertices.push_back(pos + vec2{ left, down }); //downleft
 }
 
-Entity createCat(RenderSystem* renderer, vec2 pos)
-{
+Entity createCat(vec2 pos) {
 	auto entity = Entity();
 
 	// Add health component
@@ -26,7 +25,6 @@ Entity createCat(RenderSystem* renderer, vec2 pos)
 
 	//Make player a rigidbody
 	Rigidbody& rb = registry.rigidBodies.emplace(entity);
-	//rb.type = STATIC;
 
 	// Setting initial motion values
 	Motion& motion = registry.motions.emplace(entity);
@@ -39,7 +37,8 @@ Entity createCat(RenderSystem* renderer, vec2 pos)
 	calculateBoxVerticesAndSetTriangles(motion.position, motion.scale, bc);
 	bc.transformed_required = true;
 
-	registry.players.emplace(entity);
+	auto& player = registry.players.emplace(entity);
+	player.team = PLAYER_1_TEAM;
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_IDS::CAT_IDLE,
@@ -54,7 +53,6 @@ Entity createCat(RenderSystem* renderer, vec2 pos)
 }
 
 Entity createWall(vec2 pos, int width, int height) {
-	
 	auto entity = Entity();
 
 	// Setting initial motion values
@@ -92,8 +90,7 @@ Entity createTile(float tileScale, vec2 tilePosition, int numTilesInARow) {
 	return createWall(position, (int)tileScale * numTilesInARow, (int)tileScale);
 }
 
-Entity createAI(RenderSystem* renderer, vec2 pos)
-{
+Entity createAI(vec2 pos) {
 	auto entity = Entity();
 
 	// Add health component
@@ -107,20 +104,22 @@ Entity createAI(RenderSystem* renderer, vec2 pos)
 	motion.position = pos;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	motion.scale = { 60.f, 60.f };
+	motion.scale = { 64.f, 64.f };
 
 	Boxcollider& bc = registry.boxColliders.emplace(entity);
 	calculateBoxVerticesAndSetTriangles(motion.position, motion.scale, bc);
 	bc.transformed_required = true;
 
-	registry.players.emplace(entity);
+	auto& player = registry.players.emplace(entity);
+	player.team = NPC_AI_TEAM;
 	registry.ais.emplace(entity);
-
-	// registry.renderRequests.insert(
-	// 	entity,
-	// 	{ TEXTURE_IDS::CAT_IDLE,
-	// 		SHADER_PROGRAM_IDS::ANIMATION,
-	// 		GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
+	registry.animations.emplace(entity);
+	registry.weapons.insert(entity, Rifle());
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_IDS::CAT_IDLE,
+			SHADER_PROGRAM_IDS::ANIMATION,
+			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
 
 	return entity;
 }
