@@ -193,7 +193,21 @@ void WorldSystem::check_for_button_presses() {
 				}*/
 			}
 			else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::HOWTOMOVE) {
-				registry.remove_all_components_of(e);
+				//selectscreen
+				// registry.remove_all_components_of(e);
+				// restart_game();
+				for (Entity e : registry.buttons.entities) {
+					registry.remove_all_components_of(e);
+				}
+				play_select(button.callbacks);
+			}
+			else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONC) {
+				for (Entity e : registry.menus.entities) {
+					registry.remove_all_components_of(e);
+				}
+				for (Entity e : registry.buttons.entities) {
+					registry.remove_all_components_of(e);
+				}
 				restart_game();
 			}
 		}
@@ -209,4 +223,11 @@ void WorldSystem::on_mouse_move(vec2 mouse_position) {
 
 void WorldSystem::play_tutorial(std::vector<std::function<void()>> callbacks) {
 	createButton(vec2{ renderer->getScreenWidth() / 2, renderer->getScreenHeight() / 2 }, vec2{ renderer->getScreenWidth(), renderer->getScreenHeight() },TEXTURE_IDS::HOWTOMOVE, callbacks);
+}
+//selectscreen
+void WorldSystem::play_select(std::vector<std::function<void()>> callbacks) {
+	std::vector<std::function<void()>> onClick;
+	createMenu(MENU_TYPES::SELECT, 0.75);
+	createButton(vec2{ renderer->getScreenWidth() / 4, renderer->getScreenHeight() / 2 }, vec2{ 500, 500 },TEXTURE_IDS::BUTTONC, onClick);
+	
 }

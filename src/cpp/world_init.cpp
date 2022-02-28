@@ -168,6 +168,13 @@ Entity createMenu(MENU_TYPES menu, float layer) {
 					SHADER_PROGRAM_IDS::TEXTURE,
 					GEOMETRY_BUFFER_IDS::TEXTURED_QUAD };
 	}
+
+	//selectscreen
+	if (menu == MENU_TYPES::SELECT) {
+		request = { TEXTURE_IDS::SELECT_MENU,
+					SHADER_PROGRAM_IDS::TEXTURE,
+					GEOMETRY_BUFFER_IDS::TEXTURED_QUAD };
+	}
 	menu_comp.layer = layer;
 	menu_comp.request = request;
 
