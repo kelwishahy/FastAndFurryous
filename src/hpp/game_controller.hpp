@@ -57,6 +57,8 @@ private:
 
 	void handle_collisions();
 
+	void decrementTurnTime(float elapsed_ms);
+
 	std::vector<Entity> player1_team;
 	std::vector<Entity> player2_team;
 	std::vector<Entity> ai_team;
@@ -91,6 +93,7 @@ private:
 	ShootingSystem shooting_system;
 
 	uint numPlayersInTeam;
+	float timePerTurnMs;
 
 	// Audio references
 	Mix_Chunk* catScream;

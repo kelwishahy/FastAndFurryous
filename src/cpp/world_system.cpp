@@ -239,7 +239,7 @@ void WorldSystem::check_for_button_presses() {
 void WorldSystem::on_mouse_move(vec2 mouse_position) {
 
 	mouse_pos = mouse_position;
-	printf("mouse pos: %f, %f\n", mouse_pos.x, mouse_pos.y);
+	// printf("mouse pos: %f, %f\n", mouse_pos.x, mouse_pos.y);
 }
 
 void WorldSystem::play_tutorial(std::vector<std::function<void()>> callbacks) {

@@ -45,6 +45,7 @@ void GameController::init(RenderSystem* renderer, GLFWwindow* window, std::vecto
 	player_mode = PLAYER_MODE::MOVING;
 
 	this->shooting_system.init(renderer);
+	this->timePerTurnMs = 30000.0;
 }
 
 void GameController::step(float elapsed_ms) {
@@ -105,7 +106,19 @@ void GameController::step(float elapsed_ms) {
 		// 	restart_current_match();
 		// }
 	}
+
+	// decrementTurnTime(elapsed_ms);
 }
+
+void GameController::decrementTurnTime(float elapsed_ms) {
+	if (timePerTurnMs <= 0) {
+		next_turn();
+		timePerTurnMs = 30000.0;
+	} else {
+		timePerTurnMs -= elapsed_ms;
+	}
+}
+
 
 void GameController::build_map() {
 	const int width = renderer->getScreenWidth();
@@ -291,6 +304,6 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 }
 
 void GameController::on_mouse_move(vec2 mouse_pos) {
-
-	printf("now in game_controller");
+	(void)mouse_pos;
+	// printf("now in game_controller");
 }
