@@ -39,10 +39,16 @@ void RenderSystem::draw(float elapsed_ms) {
 		RenderRequest request = registry.renderRequests.get(entity);
 
 		if (registry.backgrounds.has(entity)) {
-			drawBackground(request, projectionMatrix);
+			drawBackground(request, projectionMatrix, -0.5);
 			continue;
 		}
-    
+
+		if (registry.menus.has(entity)) {
+			MenuItem& menu = registry.menus.get(entity);
+			drawBackground(request, projectionMatrix, menu.layer);
+			continue;
+		}
+
 		mat4 transformationMatrix;
 
 		switch (request.geometry) {
@@ -63,7 +69,12 @@ void RenderSystem::draw(float elapsed_ms) {
 				}
 
 				// Draw a static textured quad
-				transformationMatrix = transform(registry.motions.get(entity), 0.f, true, true, false);
+				if (registry.buttons.has(entity)) {
+					transformationMatrix = transform(registry.motions.get(entity), 0.8f, true, true, false);
+				}
+				else {
+					transformationMatrix = transform(registry.motions.get(entity), 0.f, true, true, false);
+				}
 				std::string shaderInputs[] = { "position", "texCoord" };
 				drawQuad(request, shaderInputs, 2);
 				renderToScreen(transformationMatrix, projectionMatrix);
@@ -363,10 +374,10 @@ void RenderSystem::drawTiles(const mat4& projectionMatrix) {
 	bindVBOandIBO(GEOMETRY_BUFFER_IDS::TEXTURED_QUAD, texturedQuad, quadIndices);
 }
 
-void RenderSystem::drawBackground(RenderRequest& request, mat4& projectionMatrix) {
+void RenderSystem::drawBackground(RenderRequest& request, mat4& projectionMatrix, float layer) {
 	Transform transform;
-	transform.mat = translate(transform.mat, vec3(screenWidth/2, screenHeight/2, -0.5));
-	transform.mat = scale(transform.mat, vec3(screenWidth, screenHeight, -0.5));
+	transform.mat = translate(transform.mat, vec3(screenWidth/2, screenHeight/2, layer));
+	transform.mat = scale(transform.mat, vec3(screenWidth, screenHeight, layer));
 
 	std::string shaderInputs[] = { "position", "texCoord" };
 	drawQuad(request, shaderInputs, 2);

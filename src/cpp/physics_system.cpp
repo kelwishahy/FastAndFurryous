@@ -297,13 +297,15 @@ void PhysicsSystem::step(float elapsed_ms)
 
 //translation is the distance to be moved
 void PhysicsSystem::translatePos(Entity e, vec2 translation) {
-	Boxcollider& collider = registry.boxColliders.get(e);
-	Motion& motion = registry.motions.get(e);
+	if (registry.boxColliders.has(e)) {
+		Boxcollider& collider = registry.boxColliders.get(e);
+		Motion& motion = registry.motions.get(e);
 
-	vec2 oldpos = motion.position;
-	motion.position += translation;
-	collider.deltaPos = motion.position - oldpos;
-	collider.transformed_required = true;
+		vec2 oldpos = motion.position;
+		motion.position += translation;
+		collider.deltaPos = motion.position - oldpos;
+		collider.transformed_required = true;
+	}
 }
 
 void PhysicsSystem::moveBackEntity(Entity e, vec2 normal, float depth) {
