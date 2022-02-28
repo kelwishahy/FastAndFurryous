@@ -38,7 +38,10 @@ enum class TEXTURE_IDS {
 	STONE,
 	BACKGROUND,
 	START_MENU,
+	//selectscreen
+	SELECT_MENU,
 	BUTTON1,
+	BUTTONC,
 	HOWTOMOVE,
 	TOTAL
 }; constexpr int textureCount = (int)TEXTURE_IDS::TOTAL;
@@ -71,8 +74,10 @@ enum TILE_TYPES {
 	STONE
 };
 
-	enum MENU_TYPES {
-	START
+enum MENU_TYPES {
+	START,
+	//selectscreen
+	SELECT
 };
 
 enum TEAM {
