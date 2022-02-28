@@ -121,6 +121,8 @@ Entity createAI(vec2 pos) {
 			SHADER_PROGRAM_IDS::ANIMATION,
 			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
 
+	// Add a behaviour tree
+
 	return entity;
 }
 
