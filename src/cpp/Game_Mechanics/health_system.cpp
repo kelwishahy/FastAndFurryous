@@ -4,6 +4,7 @@
 void decreaseHealth(Entity entity, int amount) {
 	auto& health = registry.health.get(entity).hp;
 	health = (health - amount >= 0) ? health - amount : 0;
+	printf("New health = %d\n", health);
 }
 
 void increaseHealth(Entity entity, int amount) {

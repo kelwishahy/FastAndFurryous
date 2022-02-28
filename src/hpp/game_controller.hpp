@@ -90,6 +90,8 @@ private:
 
 	ShootingSystem shooting_system;
 
+	uint numPlayersInTeam;
+
 	// OpenGL window handle
 	//GLFWwindow* window;
 };

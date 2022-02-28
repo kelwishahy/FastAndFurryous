@@ -71,14 +71,21 @@ enum TILE_TYPES {
 	STONE
 };
 
-enum MENU_TYPES {
+	enum MENU_TYPES {
 	START
+};
+
+enum TEAM {
+	PLAYER_1_TEAM,
+	PLAYER_2_TEAM,
+	AI_TEAM,
+	NPC_AI_TEAM
 };
 
 // Game components ------------------------------------------------------------
 
 struct Player {
-
+	TEAM team;
 };
 
 struct Background {
@@ -150,7 +157,7 @@ struct Rifle : WeaponBase {
 		// pi/2
 		MAX_ANGLE = 1.4;
 		//0
-		MIN_ANGLE = 0.2;
+		MIN_ANGLE = 0.0;
 		// pi/4
 		aim_angle = 0.7854;
 		//distance the gun can shoot

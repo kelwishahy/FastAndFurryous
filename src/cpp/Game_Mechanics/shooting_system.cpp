@@ -53,7 +53,7 @@ void ShootingSystem::aimUp(Entity e) {
 	else {
 		weapon.aim_angle = (weapon.aim_angle + 0.1 >= weapon.MAX_ANGLE) ? weapon.MAX_ANGLE : weapon.aim_angle + 0.1;
 	}
-	printf("weapons aim angle: %f \n", weapon.aim_angle);
+	// printf("weapons aim angle: %f \n", weapon.aim_angle);
 	setAimLoc(e);
 }
 
@@ -69,7 +69,7 @@ void ShootingSystem::aimDown(Entity e) {
 	else {
 		weapon.aim_angle = (weapon.aim_angle - 0.1 <= weapon.MIN_ANGLE) ? weapon.MIN_ANGLE : weapon.aim_angle - 0.1;
 	}
-	printf("weapons aim angle: %f \n", weapon.aim_angle);
+	// printf("weapons aim angle: %f \n", weapon.aim_angle);
 	setAimLoc(e);
 }
 
@@ -107,7 +107,7 @@ void ShootingSystem::setAimLoc(Entity e) {
 		weapon.aim_loc_x = (x_begin - move_step <= x_end) ? x_end : x_begin - move_step;
 	}
 
-	printf("weapons aim loc: %f\n", weapon.aim_loc_x);
+	// printf("weapons aim loc: %f\n", weapon.aim_loc_x);
 }
 
 void ShootingSystem::shoot(Entity e) {
@@ -117,9 +117,9 @@ void ShootingSystem::shoot(Entity e) {
 
 	if (weapon.type == RIFLE) {
 		float x1 = registry.motions.get(e).position.x;
-		printf("x1 %f, ", x1);
+		// printf("x1 %f, ", x1);
 		float x2 = weapon.aim_loc_x;
-		printf("x2 %f, ", x2);
+		// printf("x2 %f, ", x2);
 		float x1p = cos(weapon.aim_angle) * 2;
 		float x2p = x1p;
 
