@@ -1,14 +1,20 @@
 #pragma once
-#include <iostream>
-#include <list>
-#include <vector>
 
+#include <list>
 #include "components.hpp"
 #include "tiny_ecs_registry.hpp"
 
 /*
  * Adapted from http://www.cplusplus.com/forum/general/141582/
  */
+
+struct Blackboard {
+	Entity* entity;
+	Motion* motion;
+	bool walking;
+};
+
+static Blackboard* blackboard;
 
  /*
   * NODE TYPES
@@ -17,9 +23,12 @@
   // Generic node
 class Node {
 public:
-	Entity entity;
-	Node();
-	Node(Entity& e) { this->entity = e; };
+	Node() {};
+	~Node() {
+		for (const Node* child : children) {
+			delete(child);
+		}
+	}
 	virtual bool run() = 0; // Run this node
 	const std::list<Node*>& getChildren() const { return children; }
 	void addChild(Node* child) { children.emplace_back(child); }
@@ -30,6 +39,8 @@ private:
 
 // Selector node - only one child needs to succeed
 class SelectorNode : public Node {
+public:
+	SelectorNode() {};
 	bool run() override {
 		for (Node* child : getChildren()) {
 			if (child->run())
@@ -41,6 +52,8 @@ class SelectorNode : public Node {
 
 // Sequence node - all children need to succceed
 class SequenceNode : public Node {
+public:
+	SequenceNode() {};
 	bool run() override {
 		for (Node* child : getChildren()) {
 			if (!child->run())
@@ -55,51 +68,48 @@ class SequenceNode : public Node {
  */
 
 // Move the entity
-class Move : public Node {
+class MoveLeft : public Node {
 public:
-	Move(Entity& e) : Node(e) {
-		this->motion = registry.motions.get(e);
-	}
+	MoveLeft() {};
 
 	bool run() override {
-		motion.velocity.x = -velocity;
-		return true;
+		if (!blackboard->walking) {
+			blackboard->motion->velocity.x = -velocity;
+			blackboard->walking = true;
+			return true;
+		}
+		return false;
 	}
 private:
-	Motion motion;
 	float velocity = 150.f;
 };
 
 // Stop the entity
 class Stop : public Node {
 public:
-	Stop(Entity& e) : Node(e) {
-		this->motion = registry.motions.get(e);
-	}
+	Stop() {};
 
 	bool run() override {
-		motion.velocity.x = 0;
-		motion.velocity.y = 0;
-		return true;
+		if (blackboard->walking) {
+			blackboard->motion->velocity.x = 0.f;
+			blackboard->motion->velocity.y = -2.5f;
+			blackboard->walking = false;
+			return true;
+		}
+		return false;
 	}
-private:
-	Motion motion;
 };
 
 // Jump
 // Stop the entity
 class Jump : public Node {
 public:
-	Jump(Entity& e) : Node(e) {
-		this->motion = registry.motions.get(e);
-	}
+	Jump() {};
 
 	bool run() override {
-		motion.velocity.y = -2.5 * 150.0;
+		blackboard->motion->velocity.y = -2.5 * 150.0;
 		return true;
 	}
-private:
-	Motion motion;
 };
 
 /*

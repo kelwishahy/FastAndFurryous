@@ -1,6 +1,7 @@
 #include <hpp/game_controller.hpp>
 #include <hpp/world_init.hpp>
 
+#include "hpp/ai_system.hpp"
 #include "hpp/Game_Mechanics/health_system.hpp"
 
 GameController::GameController() {
@@ -46,6 +47,8 @@ void GameController::init(RenderSystem* renderer, GLFWwindow* window, std::vecto
 
 	this->shooting_system.init(renderer);
 	this->timePerTurnMs = 30000.0;
+
+	ai.init();
 }
 
 void GameController::step(float elapsed_ms) {
@@ -108,6 +111,10 @@ void GameController::step(float elapsed_ms) {
 	}
 
 	// decrementTurnTime(elapsed_ms);
+
+	if (game_state.turn_possesion == NPCAI) {
+		ai.step(elapsed_ms);
+	}
 }
 
 void GameController::decrementTurnTime(float elapsed_ms) {

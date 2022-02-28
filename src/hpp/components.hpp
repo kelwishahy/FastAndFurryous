@@ -160,11 +160,11 @@ struct WeaponBase {
 struct Rifle : WeaponBase {
 	Rifle() { 
 		// pi/2
-		MAX_ANGLE = 1.4;
+		MAX_ANGLE = 1.4f;
 		//0
-		MIN_ANGLE = 0.0;
+		MIN_ANGLE = 0.0f;
 		// pi/4
-		aim_angle = 0.7854;
+		aim_angle = 0.7854f;
 		//distance the gun can shoot
 		distance = 500.0f;
 		//"radius" around distance

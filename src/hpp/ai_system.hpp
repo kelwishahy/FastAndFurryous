@@ -1,13 +1,7 @@
 #pragma once
 
-#include <vector>
 #include <random>
-
 #include "behaviour_tree.hpp"
-#include "common.hpp"
-#include "tiny_ecs.hpp"
-#include "components.hpp"
-#include "tiny_ecs_registry.hpp"
 
 class AISystem
 {
