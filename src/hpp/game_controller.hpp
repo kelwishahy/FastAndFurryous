@@ -11,10 +11,24 @@
 #include <hpp/render_system.hpp>
 
 using namespace glm;
-
+#include <hpp/ai_system.hpp>
 #include <glm/vec2.hpp>	
 #include <hpp/tiny_ecs_registry.hpp>
 #include <hpp/Game_Mechanics/shooting_system.hpp>
+//Turn System stuff
+enum TURN_CODE {
+	PLAYER1,
+	PLAYER2,
+	AI,
+	NPCAI,
+	END
+};
+
+struct GameState {
+	float timer = 0;
+	uint turn_number = 0;
+	uint turn_possesion = TURN_CODE::PLAYER1;
+};
 
 class GameController
 {
@@ -60,13 +74,13 @@ private:
 	std::vector<std::vector<Entity>> teams;
 
 	//Turn System stuff
-	enum TURN_CODE {
-		PLAYER1,
-		PLAYER2,
-		AI,
-		NPCAI,
-		END
-	};
+	//enum TURN_CODE {
+	//	PLAYER1,
+	//	PLAYER2,
+	//	AI,
+	//	NPCAI,
+	//	END
+	//};
 
 	enum class PLAYER_MODE {
 		MOVING,
@@ -74,15 +88,14 @@ private:
 	};
 	PLAYER_MODE player_mode;
 
-	struct GameState {
+	/*struct GameState {
 		float timer = 0;
 		uint turn_number = 0;
 		uint turn_possesion = TURN_CODE::PLAYER1;
-	};
+	};*/
 	GameState game_state;
 
 	Entity curr_selected_char;
-
 	ShootingSystem shooting_system;
 
 	// OpenGL window handle

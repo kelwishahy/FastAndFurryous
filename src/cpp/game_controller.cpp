@@ -1,5 +1,7 @@
 #include <hpp/game_controller.hpp>
 #include <hpp/world_init.hpp>
+#include "../src/hpp/ai_system.hpp"
+
 
 GameController::GameController() {
 	inAGame = false;
@@ -15,6 +17,8 @@ void GameController::init(RenderSystem* renderer, GLFWwindow* window) {
 	//Set renderer
 	this->renderer = renderer;
 	this->window = window;
+
+	AISystem ai_system;
 
 	//Init game metadata
 	game_state.turn_number += 1;
@@ -39,8 +43,11 @@ void GameController::init(RenderSystem* renderer, GLFWwindow* window) {
 void GameController::step(float elapsed_ms)
 {
 	//While a game is happening make sure the players are controlling from here
+
+
 	glfwSetWindowUserPointer(window, this);
 	shooting_system.step(elapsed_ms);
+	ai_system.step(elapsed_ms);
 	handle_collisions();
 
 }
@@ -85,6 +92,8 @@ void GameController::init_player_teams() {
 
 	Entity ai = createAI(this->renderer, { width / 2, height - 400 });
 	ai_team.push_back(ai);
+	ai_system.init(game_state);
+
 	/*if (!player2_team.empty()) {
 		for (Entity e : player2_team) {
 

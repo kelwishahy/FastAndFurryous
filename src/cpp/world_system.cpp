@@ -119,7 +119,7 @@ void WorldSystem::handle_collisions() {
 			if (registry.boxColliders.has(entity_other)) {
 				Motion& motion = registry.motions.get(entity);
 				
-				motion.velocity.y = -100.f;
+				//motion.velocity.y = -100.f;
 			}
 		}
 	}

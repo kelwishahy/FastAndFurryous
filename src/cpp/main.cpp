@@ -19,13 +19,13 @@ int main() {
 	WorldSystem world;
 	PhysicsSystem physics;
 	RenderSystem renderer;
-	AISystem ai;
+	//AISystem ai;
 
 	// Initialize game systems
 	renderer.init();
 	GLFWwindow* window = renderer.getWindow(); // Window is part of the renderer context
 
-	ai.init();
+	//ai.init();
 	physics.init(&renderer);
 	world.init(&renderer, window);
 
@@ -49,7 +49,7 @@ int main() {
 		time = now;
 
 		world.step(elapsed_ms);
-		ai.step(elapsed_ms);
+		//ai.step(elapsed_ms);
 		physics.step(elapsed_ms);
 		world.handle_collisions();
 

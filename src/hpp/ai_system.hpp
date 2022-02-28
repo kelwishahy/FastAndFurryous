@@ -9,6 +9,7 @@
 #include "tiny_ecs_registry.hpp"
 #include <hpp/Game_Mechanics/shooting_system.hpp>
 #include <glm/vec2.hpp>
+#include <hpp/game_controller.hpp>
 
 class BehaviorTree {
 public:
@@ -69,11 +70,13 @@ class AISystem
 {
 public:
 	void step(float elapsed_ms);
-	void init();
+	void init(GameState gamestate);
 
 private:
 	//float jumpdelay;
 	//float timer;
+
+	GameState gameState;
 	BehaviorTree::Sequence sequence; // Sequence of 2 actions. 
 	//int MIN_DISTANCE;
 	//std::default_random_engine rng;
@@ -159,5 +162,20 @@ public:
 		shootingSystem.setAimLoc(ai);
 		shootingSystem.shoot(ai);
 		return true;
+	}
+};
+
+class AITurn : public BehaviorTree::Node
+{
+private:
+	GameState gamestate;
+public:
+	AITurn();
+
+	virtual bool run() override {
+		if (gamestate.turn_possesion == TURN_CODE::AI) {
+			return true;
+		}
+		return false;
 	}
 };

@@ -2,12 +2,16 @@
 #include "../src/hpp/ai_system.hpp"
 #include <stdio.h>
 #include "glm/ext.hpp"
+#include <hpp/game_controller.hpp>
+#include <hpp/tiny_ecs_registry.hpp>
+
 
 using namespace glm;
 
 //initialize stuff here
-void AISystem::init() {
+void AISystem::init(GameState gamestate) {
 
+	gameState = gamestate;
 	/*timer = 0;
 	jumpdelay = 2000;*/
 }
@@ -27,7 +31,7 @@ void AISystem::step(float elapsed_ms)
 	Entity& entity = ai_container.entities[0];
 
 	ShootingSystem shootingSystem;
-	//Sequence* sequence1 = new Sequence;
+	
 	BehaviorTree::Selector selector;
 	AILeft* moveLeft = new AILeft(player_pos, entity);
 	AIRight* moveRight = new AIRight(player_pos, entity);
@@ -39,11 +43,11 @@ void AISystem::step(float elapsed_ms)
 	//sequence[0].addChild(move);
 	sequence.addChild(&selector);
 	//sequence.addChild(shoot);
-	// runs each child in sequence till it fails or runs thru each child
+	//Sequence* sequence1 = new Sequence;
+	
 	while (!sequence.run()) {
 		//printf("------------------------------\n");
 	}
-
 	// delete the actions done from the decision tree
 	sequence.clear();
 
