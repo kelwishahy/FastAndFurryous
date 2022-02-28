@@ -25,7 +25,7 @@ public:
 	// Releases all associated resources
 	~GameController();
 
-	void init(RenderSystem* renderer, GLFWwindow* window);
+	void init(RenderSystem* renderer, GLFWwindow* window, std::vector<Mix_Chunk*> soundEffects);
 
 	// Steps the game ahead by ms milliseconds
 	void step(float elapsed_ms);
@@ -92,6 +92,8 @@ private:
 
 	uint numPlayersInTeam;
 
-	// OpenGL window handle
-	//GLFWwindow* window;
+	// Audio references
+	Mix_Chunk* catScream;
+	Mix_Chunk* gunshot;
+	Mix_Chunk* win;
 };

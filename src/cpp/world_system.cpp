@@ -56,14 +56,19 @@ void WorldSystem::init(RenderSystem* renderer, GLFWwindow* window) {
 		return;
 	}
 
+	Mix_AllocateChannels(3);
+
 	background_music = Mix_LoadMUS(audio_path("background-music.wav").c_str());
+	catScream = Mix_LoadWAV(audio_path("cat_scream.wav").c_str());
+	gunshot = Mix_LoadWAV(audio_path("gunshot.wav").c_str());
+	win = Mix_LoadWAV(audio_path("win.wav").c_str());
 
 	if (background_music == nullptr ) {
 		fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n make sure the data directory is present",
 			audio_path("background-music.wav").c_str());
 		return;
 	}
-
+	Mix_VolumeMusic(MIX_MAX_VOLUME / 12);
 	Mix_PlayMusic(background_music, -1);
 	fprintf(stderr, "Loaded music\n");
 
@@ -82,6 +87,7 @@ void WorldSystem::init(RenderSystem* renderer, GLFWwindow* window) {
 // Update our game world
 bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
+<<<<<<< HEAD
 	cooldown += elapsed_ms_since_last_update;
 	// Remove entities that leave the screen on the left side
 	// Iterate backwards to be able to remove without unterfering with the next object to visit
@@ -105,6 +111,10 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 			}
 		}
 	}
+=======
+	// Removing out of screen entities
+	auto& motions_registry = registry.motions;
+>>>>>>> 3ea4b51 (Added various sound effects from freesound.org)
 	if (current_game.inAGame) {
 		current_game.step(elapsed_ms_since_last_update);
 	}
@@ -116,12 +126,25 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 void WorldSystem::restart_game() {
 	// Debugging for memory/component leaks
 	//registry.list_all_components();
+	//printf("Restarting\n");
+
+	//// Reset the game speed
+	//current_speed = 1.f;
+
+	//// Remove all entities that we created
+	//// All that have a motion, we could also iterate over all bug, eagles, ... but that would be more cumbersome
+	while (registry.motions.entities.size() > 0)
+		registry.remove_all_components_of(registry.motions.entities.back());
 
 	//Load Title screen
 	//Character Select
 
 	//INITIALIZE Current game
-	current_game.init(renderer, window);
+	std::vector<Mix_Chunk*> sounds;
+	sounds.push_back(gunshot);
+	sounds.push_back(catScream);
+	sounds.push_back(win);
+	current_game.init(renderer, window, sounds);
 }
 
 void WorldSystem::handle_collisions() {

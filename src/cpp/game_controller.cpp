@@ -13,10 +13,15 @@ GameController::~GameController() {
 }
 
 //initialize stuff here
-void GameController::init(RenderSystem* renderer, GLFWwindow* window) {
+void GameController::init(RenderSystem* renderer, GLFWwindow* window, std::vector<Mix_Chunk*> soundEffects) {
 	//Set renderer
 	this->renderer = renderer;
 	this->window = window;
+
+	//Set sound effects
+	this->gunshot = soundEffects[0];
+	this->catScream = soundEffects[1];
+	this->win = soundEffects[2];
 
 	//Init game metadata
 	game_state.turn_number += 1;
@@ -92,6 +97,8 @@ void GameController::step(float elapsed_ms) {
 		if (registry.health.get(e).hp == 0) {
 			npcai_team.erase(npcai_team.begin() + i);
 			registry.remove_all_components_of(e);
+			Mix_PauseMusic();
+			Mix_PlayChannel(-1, win, 0);
 		}
 
 		// if (npcai_team.size() == 0) {
@@ -188,7 +195,7 @@ void GameController::handle_collisions() {
 
 				// Decrease that players health
 				if (team != otherTeam) {
-					decreaseHealth(entity_other, registry.weapons.get(pj.origin).damage);
+					decreaseHealth(entity_other, registry.weapons.get(pj.origin).damage, catScream);
 				}
 				registry.remove_all_components_of(entity);
 			}
@@ -257,7 +264,7 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 			}
 
 			if (action == GLFW_PRESS && key == GLFW_KEY_T) {
-				shooting_system.shoot(curr_selected_char);
+				shooting_system.shoot(curr_selected_char, gunshot);
 				// printf("shooting");
 				// printf("Num of projectiles %u\n", (uint)registry.projectiles.components.size());
 			}

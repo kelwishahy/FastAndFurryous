@@ -110,7 +110,7 @@ void ShootingSystem::setAimLoc(Entity e) {
 	// printf("weapons aim loc: %f\n", weapon.aim_loc_x);
 }
 
-void ShootingSystem::shoot(Entity e) {
+void ShootingSystem::shoot(Entity e, Mix_Chunk* sound) {
 
 	assert(registry.weapons.has(e));
 	WeaponBase& weapon = registry.weapons.get(e);
@@ -136,6 +136,7 @@ void ShootingSystem::shoot(Entity e) {
 		vec4 yt = calculate_A(y1, y2, y1p, y2p);
 		
 		createProjectile(renderer, e, xt, yt, vec2{x2p * 100.0f, y2p});
+		Mix_PlayChannel(-1, sound, 0);
 	}
 
 
