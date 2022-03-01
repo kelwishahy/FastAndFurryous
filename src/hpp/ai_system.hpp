@@ -1,21 +1,14 @@
 #pragma once
 
-#include <vector>
 #include <random>
-
-#include "common.hpp"
-#include "tiny_ecs.hpp"
-#include "components.hpp"
-#include "tiny_ecs_registry.hpp"
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// DON'T WORRY ABOUT THIS CLASS UNTIL ASSIGNMENT 3
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#include "decision_tree.hpp"
+#include "Game_Mechanics/shooting_system.hpp"
 
 class AISystem
 {
 public:
-	void step(float elapsed_ms);
-	void init();
+	void step(float elapsed_ms, int turn);
+	void init(ShootingSystem& shootingSystem, Mix_Chunk* gunshot);
 
 private:
 	float jumpdelay;
@@ -23,4 +16,7 @@ private:
 	int direction;
 	std::default_random_engine rng;
 	std::uniform_real_distribution<float> uniform_dist; // number between 0..1
+	Node* decisionTree;
+	ShootingSystem shootingSystem;
+	Mix_Chunk* gunshot;
 };

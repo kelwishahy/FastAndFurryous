@@ -1,6 +1,7 @@
 #include <hpp/game_controller.hpp>
 #include <hpp/world_init.hpp>
 
+#include "hpp/ai_system.hpp"
 #include "hpp/Game_Mechanics/health_system.hpp"
 
 GameController::GameController() {
@@ -45,6 +46,9 @@ void GameController::init(RenderSystem* renderer, GLFWwindow* window, std::vecto
 	player_mode = PLAYER_MODE::MOVING;
 
 	this->shooting_system.init(renderer);
+	this->timePerTurnMs = 30000.0;
+
+	ai.init(shooting_system, gunshot);
 }
 
 void GameController::step(float elapsed_ms) {
@@ -105,7 +109,22 @@ void GameController::step(float elapsed_ms) {
 		// 	restart_current_match();
 		// }
 	}
+
+	// decrementTurnTime(elapsed_ms);
+
+	ai.step(elapsed_ms, game_state.turn_possesion);
+	// if (game_state.turn_possesion == TURN_CODE::NPCAI) next_turn();
 }
+
+void GameController::decrementTurnTime(float elapsed_ms) {
+	if (timePerTurnMs <= 0) {
+		next_turn();
+		timePerTurnMs = 30000.0;
+	} else {
+		timePerTurnMs -= elapsed_ms;
+	}
+}
+
 
 void GameController::build_map() {
 	const int width = renderer->getScreenWidth();
@@ -150,7 +169,7 @@ void GameController::init_player_teams() {
 	// Init npcai team
 	// NOTE: We should add some kind of bool to check if we should init a specific team,
 	// and then add the contents of this loop to the loop above
-	for (int i = 0; i < numPlayersInTeam; i++) {
+	for (int i = 0; i < 2; i++) {
 		Entity ai_cat = createAI({ width - 200,200 });
 		npcai_team.push_back(ai_cat);
 	}
@@ -168,7 +187,11 @@ void GameController::next_turn() {
 
 	game_state.turn_possesion += 1;
 	game_state.turn_number += 1;
-	registry.projectiles.clear();
+	
+	for (Entity e : registry.projectiles.entities) {
+		registry.remove_all_components_of(e);
+	}
+
 	if (game_state.turn_possesion == TURN_CODE::END) {
 		game_state.turn_possesion = TURN_CODE::PLAYER1;
 	} else if (teams[game_state.turn_possesion].empty()) {
@@ -291,6 +314,6 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 }
 
 void GameController::on_mouse_move(vec2 mouse_pos) {
-
-	printf("now in game_controller");
+	(void)mouse_pos;
+	// printf("now in game_controller");
 }

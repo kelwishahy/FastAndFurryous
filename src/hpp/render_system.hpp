@@ -58,17 +58,17 @@ class RenderSystem {
 
 	// CAT IDLE
 	const int CAT_IDLE_FRAMES = 9;
-	const GLfloat CAT_IDLE_FRAME_WIDTH = 0.111;
+	const GLfloat CAT_IDLE_FRAME_WIDTH = 0.111f;
 	float CAT_IDLE_FRAME_TIME = 100; // lowering the value makes the animation faster
 
 	// CAT WALK
 	const int CAT_WALK_FRAMES = 9;
-	const GLfloat CAT_WALK_FRAME_WIDTH = 0.111;
+	const GLfloat CAT_WALK_FRAME_WIDTH = 0.111f;
 	float CAT_WALK_FRAME_TIME = 100; 
 
 	// CAT JUMP
 	const int CAT_JUMP_FRAMES = 9;
-	const GLfloat CAT_JUMP_FRAME_WIDTH = 0.111;
+	const GLfloat CAT_JUMP_FRAME_WIDTH = 0.111f;
 	float CAT_JUMP_FRAME_TIME = 100;
 
 

@@ -11,6 +11,8 @@
 
 #include <hpp/render_system.hpp>
 
+#include "ai_system.hpp"
+
 using namespace glm;
 
 #include <glm/vec2.hpp>	
@@ -39,6 +41,23 @@ public:
 
 	Map getGameMap() { return gameMap; }
 
+	//Turn System stuff
+	enum TURN_CODE {
+		PLAYER1,
+		PLAYER2,
+		AI,
+		NPCAI,
+		END
+	};
+
+	struct GameState {
+		float timer = 0;
+		uint turn_number = 0;
+		uint turn_possesion = TURN_CODE::PLAYER1;
+	};
+
+	TURN_CODE getTurnCode() { return (TURN_CODE)this->game_state.turn_possesion; }
+
 
 private:
 	RenderSystem* renderer;
@@ -57,6 +76,8 @@ private:
 
 	void handle_collisions();
 
+	void decrementTurnTime(float elapsed_ms);
+
 	std::vector<Entity> player1_team;
 	std::vector<Entity> player2_team;
 	std::vector<Entity> ai_team;
@@ -64,33 +85,22 @@ private:
 	std::vector<std::vector<Entity>> teams;
 	Map gameMap;
 
-	//Turn System stuff
-	enum TURN_CODE {
-		PLAYER1,
-		PLAYER2,
-		AI,
-		NPCAI,
-		END
-	};
-
 	enum class PLAYER_MODE {
 		MOVING,
 		SHOOTING
 	};
 	PLAYER_MODE player_mode;
 
-	struct GameState {
-		float timer = 0;
-		uint turn_number = 0;
-		uint turn_possesion = TURN_CODE::PLAYER1;
-	};
 	GameState game_state;
 
 	Entity curr_selected_char;
 
 	ShootingSystem shooting_system;
 
+	AISystem ai;
+
 	uint numPlayersInTeam;
+	float timePerTurnMs;
 
 	// Audio references
 	Mix_Chunk* catScream;

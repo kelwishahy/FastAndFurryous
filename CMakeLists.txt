@@ -121,6 +121,7 @@ elseif (IS_OS_WINDOWS)
         "${SDLMIXER_DLL}"
         "$<TARGET_FILE_DIR:${PROJECT_NAME}>/SDL2_mixer.dll")
 
+    string(REGEX REPLACE "/W[3]" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
     target_compile_options(${PROJECT_NAME} PUBLIC
         # increase warning level
         "/W4"

@@ -137,6 +137,7 @@ void ShootingSystem::shoot(Entity e, Mix_Chunk* sound) {
 		
 		createProjectile(renderer, e, xt, yt, vec2{x2p * 100.0f, y2p});
 		Mix_PlayChannel(-1, sound, 0);
+		
 	}
 
 
