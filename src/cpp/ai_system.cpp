@@ -1,6 +1,6 @@
 // internal
 #include "../src/hpp/ai_system.hpp"
-#include <hpp/behaviour_tree.hpp>
+#include <hpp/decision_tree.hpp>
 
 #include "glm/ext.hpp"
 
@@ -9,60 +9,71 @@ using namespace glm;
 const uint VELOCITY_CHANGE_DELAY = 3500;
 //float counter_ms = 3000.f;
 
-void AISystem::step(float elapsed_ms)
-{
+void AISystem::step(float elapsed_ms, int turn) {
 	ComponentContainer<AI>& ai_container = registry.ais;
-
-	Entity& player = registry.players.entities[0];
 	for (uint i = 0; i < ai_container.components.size(); i++) {
 		Entity& entity = ai_container.entities[i];
 		Motion& motion = registry.motions.get(entity);
-		// if (timer <= 0) {
-		// 	motion.velocity.x = direction * uniform_dist(rng) * 100;
-		// 	timer = VELOCITY_CHANGE_DELAY;
-		// 	direction *= -1;
-		// }
-
-		// Don't jump for now
-		// if (jumpdelay <= 0) {
-		// 	motion.velocity.y = -300.f;
-		// 	jumpdelay = uniform_dist(rng) * 100000;
-		// }
 
 		blackboard->entity = &entity;
 		blackboard->motion = &motion;
-		blackboard->player = &player;
+		blackboard->turn = turn;
+		timer -= elapsed_ms;
+		blackboard->timer = timer;
 
-		behaviourTree->run();
+		if (timer <= 0.f) {
+			timer = 2000.f;
+		}
+
+		decisionTree->traverse();
 	}
 	
 }
 
 //initialize stuff here
-void AISystem::init() {
+void AISystem::init(ShootingSystem& shootingSystem) {
+	this->shootingSystem = shootingSystem;
 	timer = 2000.f;
 	direction = 1;
 	jumpdelay = 2000;
 
 	
-	// Behaviour tree
+	// Decision tree
 	blackboard = new Blackboard;
-	behaviourTree = new SequenceNode();
-	// auto*sequence1 = new SequenceNode;
-	auto* selector1 = new SelectorNode;
-	auto* move = new Move;
-	//auto* moveLeft = new MoveLeft;
-	// auto* jump = new Jump;
-	auto* stop = new Stop;
-	
-	// behaviourTree->addChild(sequence1);
-	behaviourTree->addChild(selector1);
-	
-	// sequence1->addChild(jump);
-	// sequence1->addChild(moveLeft);
-	// sequence1->addChild(stop);
+	blackboard->velocity = 60.f;
+	blackboard->shootingSystem = &this->shootingSystem;
+	decisionTree = new IsAITurn;
 
-	// selector1->addChild(jump);
-	selector1->addChild(move);
-	selector1->addChild(stop);
+	// Tasks
+	auto moveLeft = new MoveLeft;
+	auto moveRight = new MoveRight;
+	auto endTurn = new EndTurn;
+	auto shoot = new Shoot;
+
+	// Decisions
+	auto moving = new IsMoving;
+	auto movingLeft = new IsMovingLeft;
+	auto movingRight = new IsMovingRight;
+	auto didTimeEnd = new DidTimeEnd;
+	auto isNearEnemy = new IsNearEnemy;
+	auto isHurt = new IsHurt;
+
+	// Build the tree
+	decisionTree->addFalseConditionNode(endTurn); // If not ai turn, skip
+	decisionTree->addTrueConditionNode(moving); // If ai turn, check if moving
+
+	moving->addFalseConditionNode(moveLeft); // If not moving, move left
+	moving->addTrueConditionNode(didTimeEnd); // If moving, check if the timer ended
+
+	didTimeEnd->addFalseConditionNode(isHurt); // If time hasn't ended, check if hurt
+	didTimeEnd->addTrueConditionNode(movingLeft); // If time ended check which direction ai was moving
+
+	isHurt->addFalseConditionNode(nullptr); // If not hurt, do nothing
+	isHurt->addTrueConditionNode(shoot); // If hurt, shoot
+
+	shoot->addFalseConditionNode(nullptr);
+	shoot->addTrueConditionNode(endTurn); // After shooting, end turn
+
+	movingLeft->addFalseConditionNode(moveLeft); // If ai was moving right, move left
+	movingLeft->addTrueConditionNode(moveRight); // If ai was moving left, move right
 }

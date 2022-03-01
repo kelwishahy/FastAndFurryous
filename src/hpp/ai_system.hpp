@@ -1,13 +1,14 @@
 #pragma once
 
 #include <random>
-#include "behaviour_tree.hpp"
+#include "decision_tree.hpp"
+#include "Game_Mechanics/shooting_system.hpp"
 
 class AISystem
 {
 public:
-	void step(float elapsed_ms);
-	void init();
+	void step(float elapsed_ms, int turn);
+	void init(ShootingSystem& shootingSystem);
 
 private:
 	float jumpdelay;
@@ -15,5 +16,6 @@ private:
 	int direction;
 	std::default_random_engine rng;
 	std::uniform_real_distribution<float> uniform_dist; // number between 0..1
-	Node* behaviourTree;
+	Node* decisionTree;
+	ShootingSystem shootingSystem;
 };

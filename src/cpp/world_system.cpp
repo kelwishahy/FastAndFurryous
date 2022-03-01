@@ -61,6 +61,7 @@ void WorldSystem::init(RenderSystem* renderer, GLFWwindow* window) {
 	background_music = Mix_LoadMUS(audio_path("background-music.wav").c_str());
 	catScream = Mix_LoadWAV(audio_path("cat_scream.wav").c_str());
 	gunshot = Mix_LoadWAV(audio_path("gunshot.wav").c_str());
+	defaultGunshot = gunshot;
 	win = Mix_LoadWAV(audio_path("win.wav").c_str());
 
 	if (background_music == nullptr ) {

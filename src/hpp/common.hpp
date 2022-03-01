@@ -25,3 +25,6 @@ void APIENTRY glDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum 
 struct Transform {
 	glm::mat4 mat = glm::mat4(1.0); // 4x4 Identity matrix
 };
+
+// Global audios
+static Mix_Chunk* defaultGunshot;

@@ -48,7 +48,7 @@ void GameController::init(RenderSystem* renderer, GLFWwindow* window, std::vecto
 	this->shooting_system.init(renderer);
 	this->timePerTurnMs = 30000.0;
 
-	ai.init();
+	ai.init(shooting_system);
 }
 
 void GameController::step(float elapsed_ms) {
@@ -112,10 +112,8 @@ void GameController::step(float elapsed_ms) {
 
 	// decrementTurnTime(elapsed_ms);
 
-	if (game_state.turn_possesion == NPCAI) {
-		ai.step(elapsed_ms);
-		next_turn();
-	}
+	ai.step(elapsed_ms, game_state.turn_possesion);
+	// if (game_state.turn_possesion == TURN_CODE::NPCAI) next_turn();
 }
 
 void GameController::decrementTurnTime(float elapsed_ms) {

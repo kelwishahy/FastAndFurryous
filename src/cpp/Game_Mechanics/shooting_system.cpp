@@ -136,7 +136,12 @@ void ShootingSystem::shoot(Entity e, Mix_Chunk* sound) {
 		vec4 yt = calculate_A(y1, y2, y1p, y2p);
 		
 		createProjectile(renderer, e, xt, yt, vec2{x2p * 100.0f, y2p});
-		Mix_PlayChannel(-1, sound, 0);
+		if (sound == nullptr) {
+			Mix_PlayChannel(-1, defaultGunshot, 0);
+		} else {
+			Mix_PlayChannel(-1, sound, 0);
+		}
+		
 	}
 
 
