@@ -22,7 +22,7 @@ void AISystem::step(float elapsed_ms, int turn) {
 		blackboard->timer = timer;
 
 		if (timer <= 0.f) {
-			timer = 2000.f;
+			timer = 1500.f;
 		}
 
 		decisionTree->traverse();
@@ -31,9 +31,10 @@ void AISystem::step(float elapsed_ms, int turn) {
 }
 
 //initialize stuff here
-void AISystem::init(ShootingSystem& shootingSystem) {
+void AISystem::init(ShootingSystem& shootingSystem, Mix_Chunk* gunshot) {
 	this->shootingSystem = shootingSystem;
-	timer = 2000.f;
+	this->gunshot = gunshot;
+	timer = 1500.f;
 	direction = 1;
 	jumpdelay = 2000;
 
@@ -42,6 +43,7 @@ void AISystem::init(ShootingSystem& shootingSystem) {
 	blackboard = new Blackboard;
 	blackboard->velocity = 60.f;
 	blackboard->shootingSystem = &this->shootingSystem;
+	blackboard->gunshot = this->gunshot;
 	decisionTree = new IsAITurn;
 
 	// Tasks

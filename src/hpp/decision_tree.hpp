@@ -19,6 +19,7 @@ struct Blackboard {
 	int turn;
 	float timer;
 	ShootingSystem* shootingSystem;
+	Mix_Chunk* gunshot;
 };
 
 static Blackboard* blackboard;
@@ -119,15 +120,15 @@ class Shoot : public Node {
 		blackboard->motion->velocity.x = 0;
 		blackboard->motion->velocity.y = -2.5;
 		blackboard->shootingSystem->setAimLoc(*blackboard->entity);
-		blackboard->shootingSystem->shoot(*blackboard->entity, nullptr);
+		blackboard->shootingSystem->shoot(*blackboard->entity, blackboard->gunshot);
 		return true;
 	}
 };
 
 class EndTurn : public Node {
 	bool run() override {
-		blackboard->motion->velocity.x = 0;
-		blackboard->motion->velocity.y = -2.5;
+		blackboard->motion->velocity.x = 0.f;
+		blackboard->motion->velocity.y = 350.f;
 		return true;
 	}
 };
