@@ -6,7 +6,7 @@
 - Game logic to user input
   - File: `src/cpp/ai_system.cpp`
   - Function: `AISystem::init()`
-  - Relavant Line Numbers: `37 - 61`
+  - Relavant Line Numbers: `34 - 81`
 - Sprite sheet animation
   - File: `src/cpp/render_system.cpp`
   - Function: `RenderSystem::draw()`
@@ -28,7 +28,7 @@
 - Gameplay mechanics
   - File: `src/cpp/game_controller.cpp`
   - Function: `GameController::step()`
-  - Relavant Line Numbers: `54 - 119`
+  - Relavant Line Numbers: `54 - 117`
 
 ### Stability
 - Consistent game resolution
