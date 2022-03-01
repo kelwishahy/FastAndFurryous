@@ -118,7 +118,9 @@ class Shoot : public Node {
 	bool run() override {
 		blackboard->motion->velocity.x = 0;
 		blackboard->motion->velocity.y = -2.5;
-		blackboard->shootingSystem->setAimLoc(*blackboard->entity);
+		for (int i = 0; i < 7; i++) {
+			blackboard->shootingSystem->aimDown(*blackboard->entity);
+		}
 		blackboard->shootingSystem->shoot(*blackboard->entity, nullptr);
 		return true;
 	}
