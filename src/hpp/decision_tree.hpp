@@ -115,6 +115,13 @@ class MoveRight : public Node {
 	}
 };
 
+class SwitchDirection : public Node {
+	bool run() override {
+		blackboard->motion->velocity.x *= -1.f;
+		return (blackboard->motion->velocity.x != 0);
+	}
+};
+
 class Shoot : public Node {
 	bool run() override {
 		blackboard->motion->velocity.x = 0;

@@ -22,7 +22,7 @@ void AISystem::step(float elapsed_ms, int turn) {
 		blackboard->timer = timer;
 
 		if (timer <= 0.f) {
-			timer = 1500.f;
+			timer = 1800.f;
 		}
 
 		decisionTree->traverse();
@@ -34,7 +34,7 @@ void AISystem::step(float elapsed_ms, int turn) {
 void AISystem::init(ShootingSystem& shootingSystem, Mix_Chunk* gunshot) {
 	this->shootingSystem = shootingSystem;
 	this->gunshot = gunshot;
-	timer = 1500.f;
+	timer = 1800.f;
 	direction = 1;
 	jumpdelay = 2000;
 
@@ -51,6 +51,7 @@ void AISystem::init(ShootingSystem& shootingSystem, Mix_Chunk* gunshot) {
 	auto moveRight = new MoveRight;
 	auto endTurn = new EndTurn;
 	auto shoot = new Shoot;
+	auto switchDirection = new SwitchDirection;
 
 	// Decisions
 	auto moving = new IsMoving;
@@ -76,6 +77,6 @@ void AISystem::init(ShootingSystem& shootingSystem, Mix_Chunk* gunshot) {
 	shoot->addFalseConditionNode(nullptr);
 	shoot->addTrueConditionNode(endTurn); // After shooting, end turn
 
-	movingLeft->addFalseConditionNode(moveLeft); // If ai was moving right, move left
-	movingLeft->addTrueConditionNode(moveRight); // If ai was moving left, move right
+	movingLeft->addFalseConditionNode(switchDirection); // If ai was moving right, move left
+	movingLeft->addTrueConditionNode(switchDirection); // If ai was moving left, move right
 }
