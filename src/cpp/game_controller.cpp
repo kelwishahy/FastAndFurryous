@@ -169,7 +169,7 @@ void GameController::init_player_teams() {
 	// Init npcai team
 	// NOTE: We should add some kind of bool to check if we should init a specific team,
 	// and then add the contents of this loop to the loop above
-	for (int i = 0; i < numPlayersInTeam; i++) {
+	for (int i = 0; i < 2; i++) {
 		Entity ai_cat = createAI({ width - 200,200 });
 		npcai_team.push_back(ai_cat);
 	}
