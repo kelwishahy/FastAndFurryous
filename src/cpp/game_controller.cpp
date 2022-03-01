@@ -187,7 +187,11 @@ void GameController::next_turn() {
 
 	game_state.turn_possesion += 1;
 	game_state.turn_number += 1;
-	registry.projectiles.clear();
+	
+	for (Entity e : registry.projectiles.entities) {
+		registry.remove_all_components_of(e);
+	}
+
 	if (game_state.turn_possesion == TURN_CODE::END) {
 		game_state.turn_possesion = TURN_CODE::PLAYER1;
 	} else if (teams[game_state.turn_possesion].empty()) {
