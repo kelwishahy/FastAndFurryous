@@ -1,69 +1,47 @@
 # Fast and Furryous
 
-## Milestone 1: Skeletal Game
+## Milestone 2: Minimally Playable Game
 
-### Demo
-https://drive.google.com/uc?export=view&id=1vNFM6YWkKFrvqDjGO7FZI0pdRcVGa95t
+### Improved Gameplay
+- Game logic to user input
+  - File: `src/cpp/ai_system.cpp`
+  - Function: `AISystem::init()`
+  - Relavant Line Numbers: `37 - 61`
+- Sprite sheet animation
+  - File: `src/cpp/render_system.cpp`
+  - Function: `RenderSystem::draw()`
+  - Relavant Line Numbers: `66 - 69`
+- New integrated assets (audio)
+  - File: `src/cpp/world_system.cpp`
+  - Function: `WorldSystem::init()`
+  - Relavant Line Numbers: `61 - 64`
+- New integrated assets (textures)
+  - File: `src/hpp/render_system.hpp`
+  - Functions: `RenderSystem::drawTiles()`, `RenderSystem::drawBackground()`
+  - Relavant Line Numbers: `31 - 43, 88, 91`
+- Basic user tutorial/help
+  - File: `src/cpp/world_init.cpp`
+  - Functions: `createMenu()`, `createButton()`
+  - Relavant Line Numbers: `160 - 221`
 
-### Rendering
+### Playability
+- Gameplay mechanics
+  - File: `src/cpp/game_controller.cpp`
+  - Function: `GameController::step()`
+  - Relavant Line Numbers: `54 - 119`
 
-  - Initialization of the sprite geometry (square shape):
-    - File: `src/cpp/render_system.cpp`
-    - Function:  `RenderSystem::initRenderData()`
-    - Relevant Line Number(s): `244 - 282`
-    
-  - Loading in cat texture (`assets/textures/cat.png`):
-    - File: `src/cpp/texture_manager.cpp`
-    - Function:  `TextureManager::loadTextures()`
-    - Relevant Line Number(s): `12 - 50`
-
-  - Drawing a sprite with the cat texture:
-    - File: `src/cpp/render_system.cpp`
-    - Function:  `RenderSystem::draw()`
-    - Relevant Line Number(s): `33 - 91`
-
-  - 2D transformations of the rendered geometry:
-    - File: `src/cpp/render_system.cpp`
-    - Function:  `RenderSystem::draw()`
-    - Relevant Line Number(s): `21, 73 - 87`<br><br>
-    ##### Note: Smooth movement is handled in `PhysicsSystem::applyMotions()`, lines `227 - 254`
-    
-### Gameplay
-
-  - Player cat initialization
-    - File: `src/cpp/world_system.cpp`
-    - Function: `WorldSystem::restart_game()`
-    - Relavant Line Numbers: `80`
-  
-  - Wall initialization
-    - File: `src/cpp/world_system.cpp`
-    - Function: `WorldSystem::restart_game()`
-    - Relavant Line Numbers: `84 - 94`
-
-  - Box Collision algorithm, with inspiration from https://github.com/twobitcoder101/FlatPhysics
-    - File: `physics_system.cpp`
-    - Function: `phsyscs_system::box_collision()`
-    - Relavant Line Numbers: `96 - 161`
-  
-  - Movement
-    - File: `world_system.cpp`
-    - Function: `WorldSystem::on_key`
-    - Relavant Line Numbers: `127 - 180`
-  
-  - Collision resolution
-    - File: `world_system.cpp`
-    - Function: `WorldSystem::handle_collisions()`
-    - Relavant Line Numbers: `101 - 118`
-    
+### Stability
+- Consistent game resolution
+  - File: `src/cpp/render_system.cpp`
+  - Function: `RenderSystem::init()`
+  - Relavant Line Numbers: `397 - 405`
     
 ### Creative Component
-
-  - AI initialization
-    - File: `src/cpp/world_system.cpp`
-    - Function: `WorldSystem::restart_game()`
-    - Relavant Line Numbers: `81`
-
-  - Gravity
-    - File: `physics_system.cpp`
-    - Function: `PhsysicsSystem::applyMotions()`
-    - Relavant Line Numbers: `242 - 244`
+- Background music and sound effects
+  - File: `src/cpp/world_system.cpp`
+  - Function: `WorldSystem::Init()`
+  - Relavant Line Numbers: `50 - 73`
+- Complex projectile motion
+  - File: `src/cpp/Game_Mechanics/shooting_system.cpp`
+  - Function: `ShootingSystem::step()`
+  - Relavant Line Numbers: `36 - 39`
