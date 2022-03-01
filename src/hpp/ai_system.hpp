@@ -8,7 +8,7 @@ class AISystem
 {
 public:
 	void step(float elapsed_ms, int turn);
-	void init(ShootingSystem& shootingSystem);
+	void init(ShootingSystem& shootingSystem, Mix_Chunk* gunshot);
 
 private:
 	float jumpdelay;
@@ -18,4 +18,5 @@ private:
 	std::uniform_real_distribution<float> uniform_dist; // number between 0..1
 	Node* decisionTree;
 	ShootingSystem shootingSystem;
+	Mix_Chunk* gunshot;
 };

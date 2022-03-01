@@ -48,7 +48,7 @@ void GameController::init(RenderSystem* renderer, GLFWwindow* window, std::vecto
 	this->shooting_system.init(renderer);
 	this->timePerTurnMs = 30000.0;
 
-	ai.init(shooting_system);
+	ai.init(shooting_system, gunshot);
 }
 
 void GameController::step(float elapsed_ms) {
