@@ -4,6 +4,8 @@
 #include <list>
 #include "components.hpp"
 #include "tiny_ecs_registry.hpp"
+#include <glm/vec2.hpp>
+
 using Clock = std::chrono::high_resolution_clock;
 
 /*
@@ -13,6 +15,7 @@ using Clock = std::chrono::high_resolution_clock;
 struct Blackboard {
 	Entity* entity;
 	Motion* motion;
+	Entity* player;
 	bool walking;
 };
 
@@ -70,15 +73,26 @@ public:
  */
 
 // Move the entity
-class MoveLeft : public Node {
+class Move : public Node {
 public:
-	MoveLeft() {};
+	Move() {};
 
 	bool run() override {
 		if (!blackboard->walking) {
-			blackboard->motion->velocity.x = -velocity;
+			Entity& player = registry.players.entities[0];
+
+			Motion& player_motion = registry.motions.get(player);
+			glm::vec2 player_pos = player_motion.position;
 			blackboard->walking = true;
-			return true;
+
+			if (blackboard->motion->position.x > player_pos.x) {
+				blackboard->motion->velocity.x = -velocity;
+				return true;
+			}
+			else {
+				blackboard->motion->velocity.x = velocity;
+				return true;
+			}
 		}
 		return false;
 	}

@@ -7,10 +7,13 @@
 using namespace glm;
 
 const uint VELOCITY_CHANGE_DELAY = 3500;
+//float counter_ms = 3000.f;
 
 void AISystem::step(float elapsed_ms)
 {
 	ComponentContainer<AI>& ai_container = registry.ais;
+
+	Entity& player = registry.players.entities[0];
 	for (uint i = 0; i < ai_container.components.size(); i++) {
 		Entity& entity = ai_container.entities[i];
 		Motion& motion = registry.motions.get(entity);
@@ -28,6 +31,8 @@ void AISystem::step(float elapsed_ms)
 
 		blackboard->entity = &entity;
 		blackboard->motion = &motion;
+		blackboard->player = &player;
+
 		behaviourTree->run();
 	}
 	
@@ -39,12 +44,14 @@ void AISystem::init() {
 	direction = 1;
 	jumpdelay = 2000;
 
+	
 	// Behaviour tree
 	blackboard = new Blackboard;
 	behaviourTree = new SequenceNode();
 	// auto*sequence1 = new SequenceNode;
 	auto* selector1 = new SelectorNode;
-	auto* moveLeft = new MoveLeft;
+	auto* move = new Move;
+	//auto* moveLeft = new MoveLeft;
 	// auto* jump = new Jump;
 	auto* stop = new Stop;
 	
@@ -56,6 +63,6 @@ void AISystem::init() {
 	// sequence1->addChild(stop);
 
 	// selector1->addChild(jump);
-	selector1->addChild(moveLeft);
+	selector1->addChild(move);
 	selector1->addChild(stop);
 }
