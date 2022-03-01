@@ -122,7 +122,7 @@ class Shoot : public Node {
 		for (int i = 0; i < 7; i++) {
 			blackboard->shootingSystem->aimDown(*blackboard->entity);
 		}
-		blackboard->shootingSystem->shoot(*blackboard->entity, nullptr);
+		blackboard->shootingSystem->shoot(*blackboard->entity, blackboard->gunshot);
 		return true;
 	}
 };
