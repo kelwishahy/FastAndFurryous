@@ -46,7 +46,7 @@ void GameController::init(RenderSystem* renderer, GLFWwindow* window, std::vecto
 	player_mode = PLAYER_MODE::MOVING;
 
 	this->shooting_system.init(renderer);
-	this->timePerTurnMs = 30000.0;
+	this->timePerTurnMs = 5000.0;
 
 	ai.init(shooting_system, gunshot);
 }
@@ -89,6 +89,7 @@ void GameController::step(float elapsed_ms) {
 		if (registry.health.get(e).hp == 0) {
 			player1_team.erase(player1_team.begin() + i);
 			registry.remove_all_components_of(e);
+			inAGame = false;
 		}
 
 		// if (player1_team.size() == 0) {
@@ -97,7 +98,7 @@ void GameController::step(float elapsed_ms) {
 	}
 
 	for (int i = 0; i < npcai_team.size(); i++) {
-		auto& e = npcai_team[i];
+		auto e = npcai_team[i];
 		if (registry.health.get(e).hp == 0) {
 			npcai_team.erase(npcai_team.begin() + i);
 			registry.remove_all_components_of(e);
@@ -114,12 +115,14 @@ void GameController::step(float elapsed_ms) {
 
 	ai.step(elapsed_ms, game_state.turn_possesion);
 	// if (game_state.turn_possesion == TURN_CODE::NPCAI) next_turn();
+	decrementTurnTime(elapsed_ms);
+	printf("time in turn: %f\n", timePerTurnMs);
 }
 
 void GameController::decrementTurnTime(float elapsed_ms) {
 	if (timePerTurnMs <= 0) {
 		next_turn();
-		timePerTurnMs = 30000.0;
+		timePerTurnMs = 5000.0;
 	} else {
 		timePerTurnMs -= elapsed_ms;
 	}
@@ -169,10 +172,10 @@ void GameController::init_player_teams() {
 	// Init npcai team
 	// NOTE: We should add some kind of bool to check if we should init a specific team,
 	// and then add the contents of this loop to the loop above
-	for (int i = 0; i < 2; i++) {
-		Entity ai_cat = createAI({ width - 200,200 });
-		npcai_team.push_back(ai_cat);
-	}
+	Entity ai_cat0 = createAI({ width - 400,300 });
+	Entity ai_cat1 = createAI({ width - 200,300 });
+	npcai_team.push_back(ai_cat0);
+	npcai_team.push_back(ai_cat1);
 
 	//This needs to be in order
 	teams.push_back(player1_team);
@@ -243,7 +246,7 @@ void GameController::handle_collisions() {
 void GameController::on_player_key(int key, int, int action, int mod) {
 
 	//Only allowed to move on specified turn
-	if (game_state.turn_possesion == PLAYER1) {
+	if (game_state.turn_possesion == PLAYER1 && inAGame) {
 		Motion& catMotion = registry.motions.get(player1_team[0]);
 		Rigidbody& rb = registry.rigidBodies.get(player1_team[0]);
 
