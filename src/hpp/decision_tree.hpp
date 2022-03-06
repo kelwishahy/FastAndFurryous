@@ -19,7 +19,6 @@ struct Blackboard {
 	int turn;
 	float timer;
 	ShootingSystem* shootingSystem;
-	Mix_Chunk* gunshot;
 };
 
 static Blackboard* blackboard;
@@ -129,7 +128,7 @@ class Shoot : public Node {
 		for (int i = 0; i < 7; i++) {
 			blackboard->shootingSystem->aimDown(*blackboard->entity);
 		}
-		blackboard->shootingSystem->shoot(*blackboard->entity, blackboard->gunshot);
+		blackboard->shootingSystem->shoot(*blackboard->entity);
 		return true;
 	}
 };
