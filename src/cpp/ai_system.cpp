@@ -31,7 +31,7 @@ void AISystem::step(float elapsed_ms, int turn) {
 }
 
 //initialize stuff here
-void AISystem::init(ShootingSystem& shootingSystem, Mix_Chunk* gunshot) {
+void AISystem::init(ShootingSystem& shootingSystem) {
 	this->shootingSystem = shootingSystem;
 	this->gunshot = gunshot;
 	timer = 1800.f;
@@ -43,7 +43,6 @@ void AISystem::init(ShootingSystem& shootingSystem, Mix_Chunk* gunshot) {
 	blackboard = new Blackboard;
 	blackboard->velocity = 60.f;
 	blackboard->shootingSystem = &this->shootingSystem;
-	blackboard->gunshot = this->gunshot;
 	decisionTree = new IsAITurn;
 
 	// Tasks

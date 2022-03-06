@@ -11,6 +11,8 @@
 #include "..\hpp\tiny_ecs_registry.hpp"
 #include <hpp/physics_system.hpp>
 
+#include "hpp/audio_manager.hpp";
+
 //#include <hpp/game_controller.hpp>
 
 void testCallback() {
@@ -22,10 +24,6 @@ WorldSystem::WorldSystem() {
 }
 
 WorldSystem::~WorldSystem() {
-	// Destroy music components
-	if (background_music != nullptr)
-		Mix_FreeMusic(background_music);
-	Mix_CloseAudio();
 
 	// Destroy all created components
 	registry.clear_all_components();
@@ -44,33 +42,7 @@ void WorldSystem::init(RenderSystem* renderer, GLFWwindow* window) {
 	this->window = window;
 
 	init_main_menu();
-
-	//////////////////////////////////////
-	// Loading music and sounds with SDL
-	if (SDL_Init(SDL_INIT_AUDIO) < 0) {
-		fprintf(stderr, "Failed to initialize SDL Audio");
-		return;
-	}
-	if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) == -1) {
-		fprintf(stderr, "Failed to open audio device");
-		return;
-	}
-
-	Mix_AllocateChannels(3);
-
-	background_music = Mix_LoadMUS(audio_path("background-music.wav").c_str());
-	catScream = Mix_LoadWAV(audio_path("cat_scream.wav").c_str());
-	gunshot = Mix_LoadWAV(audio_path("gunshot.wav").c_str());
-	win = Mix_LoadWAV(audio_path("win.wav").c_str());
-
-	if (background_music == nullptr ) {
-		fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n make sure the data directory is present",
-			audio_path("background-music.wav").c_str());
-		return;
-	}
-	Mix_VolumeMusic(MIX_MAX_VOLUME / 12);
-	Mix_PlayMusic(background_music, -1);
-	fprintf(stderr, "Loaded music\n");
+	audio.play_music(MUSIC_LIST::IN_GAME_BACKGROUND);
 
 	auto cursor_pos_redirect = [](GLFWwindow* wnd, double _0, double _1) { ((WorldSystem*)glfwGetWindowUserPointer(wnd))->on_mouse_move({ _0, _1 }); };
 	glfwSetCursorPosCallback(this->window, cursor_pos_redirect);
@@ -79,7 +51,7 @@ void WorldSystem::init(RenderSystem* renderer, GLFWwindow* window) {
 	glfwSetKeyCallback(wthis->window, key_redirect);*/
 
 	//creates a wall on the left side of the screen
-	printf("window height is: %i px, window width is: %i px", renderer->getScreenHeight(), renderer->getScreenWidth());
+	printf("window height is: %i px, window width is: %i px\n", renderer->getScreenHeight(), renderer->getScreenWidth());
 
 	//restart_game();
 }
@@ -138,11 +110,7 @@ void WorldSystem::restart_game() {
 	//Character Select
 
 	//INITIALIZE Current game
-	std::vector<Mix_Chunk*> sounds;
-	sounds.push_back(gunshot);
-	sounds.push_back(catScream);
-	sounds.push_back(win);
-	current_game.init(renderer, window, sounds);
+	current_game.init(renderer, window);
 }
 
 void WorldSystem::handle_collisions() {

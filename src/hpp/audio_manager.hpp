@@ -35,7 +35,7 @@ public:
 			return;
 		}
 
-		Mix_AllocateChannels(3);
+		Mix_AllocateChannels(5);
 
 		//Audio references
 		Mix_Music* background_music = Mix_LoadMUS(audio_path("background-music.wav").c_str());
@@ -55,17 +55,25 @@ public:
 				audio_path("background-music.wav").c_str());
 			return;
 		}
+
 		Mix_VolumeMusic(MIX_MAX_VOLUME / 12);
-		Mix_PlayMusic(background_music, -1);
-		fprintf(stderr, "Loaded music\n");
+	}
+
+	~AudioManager() {
+		// Destroy music components
+		if (music_list.at(IN_GAME_BACKGROUND) != nullptr)
+			Mix_FreeMusic(music_list.at(IN_GAME_BACKGROUND));
+		Mix_CloseAudio();
 	}
 
 	void play_music(MUSIC_LIST music) {
 		Mix_PlayMusic(music_list.at(music), -1);
+		fprintf(stderr, "Loaded music\n");
 	}
 
 	void play_sfx(SOUND_EFFECTS sound) {
 		Mix_PlayChannel(-1, sound_effects.at(sound), 0);
+		fprintf(stderr, "play sound fx");
 	}
 
 };
