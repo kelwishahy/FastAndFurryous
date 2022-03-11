@@ -49,6 +49,9 @@ void GameController::init(RenderSystem* renderer, GLFWwindow* window, std::vecto
 	this->timePerTurnMs = 30000.0;
 
 	ai.init(shooting_system, gunshot);
+
+	//TEST TEXT
+	createText({ 10.0f, 10.0f }, 1.0f, { 0.172f, 0.929f, 0.286f }, "~The quick brown fox~ $jumped over the lazy$ dog !., 1234567890");
 }
 
 void GameController::step(float elapsed_ms) {

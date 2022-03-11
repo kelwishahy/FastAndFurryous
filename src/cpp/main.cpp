@@ -14,8 +14,6 @@ using Clock = std::chrono::high_resolution_clock;
 
 int main() {
 
-	FT_Library library;
-
 	std::cout << "Starting Fast and Furry-ous" << std::endl;
 
 	// Global systems
