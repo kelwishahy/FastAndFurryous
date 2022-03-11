@@ -8,16 +8,8 @@
 #include <vector>
 #include <random>
 
-#define SDL_MAIN_HANDLED
-#include <SDL.h>
-#include <SDL_mixer.h>
-
 #include "render_system.hpp"
 #include "game_controller.hpp"
-
-using namespace glm;
-
-#include <glm/vec2.hpp>				// vec2
 
 //#include "render_system.hpp"
 
@@ -43,14 +35,24 @@ public:
 	void handle_collisions();
 
 	// Input callback functions
-	void on_key(int key, int, int action, int mod);
+	void on_key(int button, int action, int mods);
 	void on_mouse_move(vec2 pos);
+
+	void check_for_button_presses();
+
+	void play_tutorial(std::vector<std::function<void()>> callbacks);
+//selectscreen
+	void play_select(std::vector<std::function<void()>> callbacks);
+
+	glm::vec2 mouse_pos;
 
 	GameController getCurrentGame() { return this->current_game; }
 
 private:
 	// restart level it was in the private 
 	void restart_game();
+
+	void init_main_menu();
 
 	RenderSystem* renderer;
 	Entity player_cat;
@@ -65,9 +67,15 @@ private:
 	//Game Controller
 	GameController current_game;
 
-	//Music references
-	Mix_Music* background_music;
-
 	// OpenGL window handle
 	GLFWwindow* window;
+
+	//Mouse press cooldown - I need to remove this later
+	float cooldown = 0;
+
+	//Audio references
+	Mix_Music* background_music;
+	Mix_Chunk* catScream;
+	Mix_Chunk* gunshot;
+	Mix_Chunk* win;
 };

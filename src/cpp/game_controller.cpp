@@ -1,6 +1,9 @@
 #include <hpp/game_controller.hpp>
 #include <hpp/world_init.hpp>
 
+#include "hpp/ai_system.hpp"
+#include "hpp/Game_Mechanics/health_system.hpp"
+
 GameController::GameController() {
 	inAGame = false;
 	//ShootingSystem shooting_system(renderer);
@@ -24,85 +27,116 @@ void GameController::init(RenderSystem* renderer, GLFWwindow* window) {
 	build_map();
 
 	//Building the teams via json
+	numPlayersInTeam = 1; // Default number of players for each team
 	init_player_teams();
 
 	//Setting player key callback
+	//glfwSetWindowUserPointer(window, this);
 	auto key_redirect = [](GLFWwindow* wnd, int _0, int _1, int _2, int _3) { ((GameController*)glfwGetWindowUserPointer(wnd))->on_player_key(_0, _1, _2, _3); };
 	glfwSetKeyCallback(this->window, key_redirect);
+	auto cursor_pos_redirect = [](GLFWwindow* wnd, double _0, double _1) { ((GameController*)glfwGetWindowUserPointer(wnd))->on_mouse_move({ _0, _1 }); };
+	glfwSetCursorPosCallback(this->window, cursor_pos_redirect);
 
 	inAGame = true;
 	player_mode = PLAYER_MODE::MOVING;
 
 	this->shooting_system.init(renderer);
+	this->timePerTurnMs = 5000.0;
+
+	ai.init(shooting_system);
 }
 
-void GameController::step(float elapsed_ms)
-{
+void GameController::step(float elapsed_ms) {
 	//While a game is happening make sure the players are controlling from here
 	glfwSetWindowUserPointer(window, this);
+	//While a game is happening make sure the players are controlling from here
 	shooting_system.step(elapsed_ms);
 	handle_collisions();
 
 	// change the animation type depending on the velocity
-	Motion& catMotion = registry.motions.get(player1_team.front());
-	Player& catPlayer = registry.players.get(player1_team.front());
-	Rigidbody& rb = registry.rigidBodies.get(player1_team.front());
-	if (catMotion.velocity.x == 0) {
-		catPlayer.animation_type = IDLE;
-	}
-	if (catMotion.velocity.x != 0) {
-		catPlayer.animation_type = WALKING;
-	}
-	if (catMotion.velocity.y < 0) {
-		catPlayer.animation_type = JUMPING;
-	}
-	if (catMotion.velocity.x < 0) {
-		catPlayer.facingLeft = true;
-	}
-	if (catMotion.velocity.x > 0) {
-		catPlayer.facingLeft = false;
+	for (Entity e : registry.animations.entities) {
+		if (registry.players.has(e)) {
+			Motion& catMotion = registry.motions.get(e);
+			Animation& catAnimation = registry.animations.get(e);
+
+			if (catMotion.velocity.x == 0) {
+				catAnimation.animation_type = IDLE;
+			}
+			if (catMotion.velocity.x != 0) {
+				catAnimation.animation_type = WALKING;
+			}
+			if (catMotion.velocity.y < 0) {
+				catAnimation.animation_type = JUMPING;
+			}
+			if (catMotion.velocity.x < 0) {
+				catAnimation.facingLeft = true;
+				shooting_system.setAimLoc(e);
+			}
+			if (catMotion.velocity.x > 0) {
+				catAnimation.facingLeft = false;
+				shooting_system.setAimLoc(e);
+			}
+		}
 	}
 
-	printf("catmotion: %f\n", catMotion.velocity.y);
-	//printf("catmotion: %f\n", rb.collision_normal.y);
-	// 
-	// // FOR AI Animation
-	// Motion& aiMotion = registry.motions.get(ai_cat);
-	// Player& aiCat = registry.players.get(ai_cat);
-	// if (aiMotion.velocity.x == 0) {
-	// 	aiCat.animation_type = IDLE;
-	// }
-	// if (aiMotion.velocity.x != 0) {
-	// 	aiCat.animation_type = WALKING;
-	// }
-	// if (aiMotion.velocity.y < 0) {
-	// 	aiCat.animation_type = JUMPING;
-	// }
-	// if (aiMotion.velocity.x < 0) {
-	// 	aiCat.facingLeft = 1;
-	// }
-	// if (aiMotion.velocity.x > 0) {
-	// 	aiCat.facingLeft = 0;
-	// }
+	for (int i = 0; i < player1_team.size(); i++) {
+		auto& e = player1_team[i];
+		if (registry.health.get(e).hp == 0) {
+			player1_team.erase(player1_team.begin() + i);
+			registry.remove_all_components_of(e);
+			inAGame = false;
+		}
 
+		// if (player1_team.size() == 0) {
+		// 	restart_current_match();
+		// }
+	}
+
+	for (int i = 0; i < npcai_team.size(); i++) {
+		auto e = npcai_team[i];
+		if (registry.health.get(e).hp == 0) {
+			npcai_team.erase(npcai_team.begin() + i);
+			registry.remove_all_components_of(e);
+		}
+
+		// if (npcai_team.size() == 0) {
+		// 	restart_current_match();
+		// }
+	}
+
+	// decrementTurnTime(elapsed_ms);
+
+	ai.step(elapsed_ms, game_state.turn_possesion);
+	// if (game_state.turn_possesion == TURN_CODE::NPCAI) next_turn();
+	decrementTurnTime(elapsed_ms);
 }
+
+void GameController::decrementTurnTime(float elapsed_ms) {
+	if (timePerTurnMs <= 0) {
+		next_turn();
+		timePerTurnMs = 5000.0;
+	} else {
+		timePerTurnMs -= elapsed_ms;
+	}
+}
+
 
 void GameController::build_map() {
 	const int width = renderer->getScreenWidth();
 	const int height = renderer->getScreenHeight();
 
-	// Move the walls off screen and don't render them
+	// Move the walls off screen
 	// Floor
 	// createWall({ width / 2, height + 10 }, width, 10);
 	
 	// //Left Wall
-	// createWall(renderer, { -10, height / 2 }, 10, height - 10);
+	createWall({ -10, height / 2 }, 10, height - 10);
 	//
 	// //Right Wall
-	// createWall(renderer, { width + 10, height / 2 }, 10, height);
+	createWall({ width + 10, height / 2 }, 10, height);
 	//
 	// //Ceiling
-	// createWall(renderer, { width / 2, -10 }, width, 10);
+	createWall({ width / 2, -10 }, width, 10);
 
 	this->gameMap = Map();
 	gameMap.init();
@@ -110,42 +144,30 @@ void GameController::build_map() {
 }
 
 void GameController::init_player_teams() {
-	std::vector<int> dummyvector;
-	dummyvector.push_back(1);
+
+	if (numPlayersInTeam < 1) {
+		printf("CRITICAL ERROR: NO TEAMS CAN BE INITIALIZED");
+		assert(false);
+	}
+
 	const int width = renderer->getScreenWidth();
 	const int height = renderer->getScreenHeight();
-	//If our game gets more complex I'd probably abstract this out an have an Entity hierarchy -Fred
-	if (!dummyvector.empty()) {
-		for (int dummyval : dummyvector) {
-			//TEMPORARY UNTIL WE HAVE A MAP INIT SYSTEM
-			Entity player_cat = createCat(this->renderer, { width / 2 - 200, height - 400 });
-			// Entity ai_cat = createAI(this->renderer, { width / 2 - 300, height - 400 });
-			player1_team.push_back(player_cat);
-			// player1_team.push_back(ai_cat);
-			curr_selected_char = player_cat;
-		}
-	}
-	else {
-		printf("CRITICAL ERROR: NO PLAYER1 TEAM INITIALIZED");
+
+	// Init the player team
+	// If our game gets more complex I'd probably abstract this out an have an Entity hierarchy -Fred
+	for (int i = 0; i < numPlayersInTeam; i++) {
+		Entity player_cat = createCat({ width / 2 - 200, height - 400 });
+		player1_team.push_back(player_cat);
+		curr_selected_char = player_cat;
 	}
 
-	/*if (!player2_team.empty()) {
-		for (Entity e : player2_team) {
-
-		}
-	}
-
-	if (!ai_team.empty()) {
-		for (Entity e : ai_team) {
-
-		}
-	}
-
-	if (!npcai_team.empty()) {
-		for (Entity e : ai_team) {
-
-		}
-	}*/
+	// Init npcai team
+	// NOTE: We should add some kind of bool to check if we should init a specific team,
+	// and then add the contents of this loop to the loop above
+	Entity ai_cat0 = createAI({ width - 400,300 });
+	Entity ai_cat1 = createAI({ width - 200,300 });
+	npcai_team.push_back(ai_cat0);
+	npcai_team.push_back(ai_cat1);
 
 	//This needs to be in order
 	teams.push_back(player1_team);
@@ -160,7 +182,11 @@ void GameController::next_turn() {
 
 	game_state.turn_possesion += 1;
 	game_state.turn_number += 1;
-	registry.projectiles.clear();
+	
+	for (Entity e : registry.projectiles.entities) {
+		registry.remove_all_components_of(e);
+	}
+
 	if (game_state.turn_possesion == TURN_CODE::END) {
 		game_state.turn_possesion = TURN_CODE::PLAYER1;
 	} else if (teams[game_state.turn_possesion].empty()) {
@@ -171,17 +197,24 @@ void GameController::next_turn() {
 
 void GameController::handle_collisions() {
 	// Loop over all collisions detected by the physics system
-
-	auto& collisionsRegistry = registry.collisions; // TODO: @Tim, is the reference here needed?
+	auto& collisionsRegistry = registry.collisions;
 	for (uint i = 0; i < collisionsRegistry.components.size(); i++) {
 		// The entity and its collider
 		Entity entity = collisionsRegistry.entities[i];
 		Entity entity_other = collisionsRegistry.components[i].other;
-
-		//If a projectile hits any terrain, get rid of the projectile
-		if (registry.projectiles.has(entity)) {
+		
+		if (registry.projectiles.has(entity)) {// Projectile hit terrain
 			Projectile& pj = registry.projectiles.get(entity);
 			if (registry.terrains.has(entity_other) && entity_other != pj.origin) {
+				registry.remove_all_components_of(entity);
+			} else if (entity_other != pj.origin && registry.players.has(entity_other)) { // Projectile hit another player
+				auto team = registry.players.get(pj.origin).team;
+				auto otherTeam = registry.players.get(entity_other).team;
+
+				// Decrease that players health
+				if (team != otherTeam) {
+					decreaseHealth(entity_other, registry.weapons.get(pj.origin).damage);
+				}
 				registry.remove_all_components_of(entity);
 			}
 		}
@@ -205,25 +238,17 @@ void GameController::handle_collisions() {
 void GameController::on_player_key(int key, int, int action, int mod) {
 
 	//Only allowed to move on specified turn
-	if (game_state.turn_possesion == PLAYER1) {
+	if (game_state.turn_possesion == PLAYER1 && inAGame) {
 		Motion& catMotion = registry.motions.get(player1_team[0]);
 		Rigidbody& rb = registry.rigidBodies.get(player1_team[0]);
-
-		/*
-		 * DEBUGGING FOR MAP SYSTEM -----------------------------------------------------
-		 */
-		// auto& position = catMotion.position;
-		// printf("Cat position is %f, %f\n", position.x, position.y);
-		// vec2 closestTile = {position.x / gameMap.getTileScale(), position.y / gameMap.getTileScale()};
-		// printf("Closest tile is %f, %f\n", closestTile.x, closestTile.y);
-
-		//-------------------------------------------------------------------------------
 
 		float current_speed = 150.0f;
 		if (player_mode == PLAYER_MODE::MOVING) {
 			if (action == GLFW_PRESS && key == GLFW_KEY_W) {
-				catMotion.velocity.y = -current_speed;
-				rb.collision_normal.y = 0;
+				if (catMotion.velocity.y == 2.5) {
+					catMotion.velocity.y = -2.5 * current_speed;
+					rb.collision_normal.y = 0;
+				}
 			}
 
 			if (action == GLFW_PRESS && key == GLFW_KEY_S) {
@@ -258,8 +283,8 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 
 			if (action == GLFW_PRESS && key == GLFW_KEY_T) {
 				shooting_system.shoot(curr_selected_char);
-				printf("shooting");
-				printf("Num of projectiles %u\n", (uint)registry.projectiles.components.size());
+				// printf("shooting");
+				// printf("Num of projectiles %u\n", (uint)registry.projectiles.components.size());
 			}
 		}
 
@@ -272,13 +297,18 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 				player_mode = PLAYER_MODE::SHOOTING;
 				shooting_system.setAimLoc(curr_selected_char);
 			}
-			printf("Current mode is: %s", (player_mode == PLAYER_MODE::SHOOTING) ? "SHOOTING" : "MOVING");
+			// printf("Current mode is: %s", (player_mode == PLAYER_MODE::SHOOTING) ? "SHOOTING" : "MOVING");
 		}
 
 	}
 
 	if (action == GLFW_PRESS && key == GLFW_KEY_N) {
 		next_turn();
-		printf("Currently it is this players turn: %i", game_state.turn_possesion);
+		// printf("Currently it is this players turn: %i", game_state.turn_possesion);
 	}
+}
+
+void GameController::on_mouse_move(vec2 mouse_pos) {
+	(void)mouse_pos;
+	// printf("now in game_controller");
 }

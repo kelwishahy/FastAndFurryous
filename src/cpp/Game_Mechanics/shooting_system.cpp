@@ -2,6 +2,7 @@
 #include <hpp/tiny_ecs_registry.hpp>
 #include <hpp/world_init.hpp>
 #include <hpp/physics_system.hpp>
+#include "hpp/audio_manager.hpp"
 
 ShootingSystem::ShootingSystem() {
 	
@@ -45,15 +46,15 @@ void ShootingSystem::aimUp(Entity e) {
 
 	WeaponBase& weapon = registry.weapons.get(e);
 	Motion& motion = registry.motions.get(e);
-	SHOOT_ORIENTATION orientation = (motion.scale.x > 0) ? SHOOT_ORIENTATION::RIGHT : SHOOT_ORIENTATION::LEFT;
+	SHOOT_ORIENTATION orientation = (registry.animations.get(e).facingLeft) ? SHOOT_ORIENTATION::LEFT : SHOOT_ORIENTATION::RIGHT;
 
 	if (orientation == SHOOT_ORIENTATION::LEFT) {
-		weapon.aim_angle = (weapon.aim_angle - 0.1 <= 3.14159 - weapon.MAX_ANGLE) ? 3.14159 - weapon.MAX_ANGLE : weapon.aim_angle - 0.1;
+		weapon.aim_angle = (weapon.aim_angle - 0.1 <= pi - weapon.MAX_ANGLE) ? pi - weapon.MAX_ANGLE : weapon.aim_angle - 0.1;
 	}
 	else {
 		weapon.aim_angle = (weapon.aim_angle + 0.1 >= weapon.MAX_ANGLE) ? weapon.MAX_ANGLE : weapon.aim_angle + 0.1;
 	}
-	printf("weapons aim angle: %f \n", weapon.aim_angle);
+	// printf("weapons aim angle: %f \n", weapon.aim_angle);
 	setAimLoc(e);
 }
 
@@ -61,15 +62,15 @@ void ShootingSystem::aimDown(Entity e) {
 
 	WeaponBase& weapon = registry.weapons.get(e);
 	Motion& motion = registry.motions.get(e);
-	SHOOT_ORIENTATION orientation = (motion.scale.x > 0) ? SHOOT_ORIENTATION::RIGHT : SHOOT_ORIENTATION::LEFT;
+	SHOOT_ORIENTATION orientation = (registry.animations.get(e).facingLeft) ? SHOOT_ORIENTATION::LEFT : SHOOT_ORIENTATION::RIGHT;
 
 	if (orientation == SHOOT_ORIENTATION::LEFT) {
-		weapon.aim_angle = (weapon.aim_angle + 0.1 >= 3.14159 - weapon.MIN_ANGLE) ? 3.14159 - weapon.MIN_ANGLE : weapon.aim_angle + 0.1;
+		weapon.aim_angle = (weapon.aim_angle + 0.1 >= pi - weapon.MIN_ANGLE) ? pi - weapon.MIN_ANGLE : weapon.aim_angle + 0.1;
 	}
 	else {
 		weapon.aim_angle = (weapon.aim_angle - 0.1 <= weapon.MIN_ANGLE) ? weapon.MIN_ANGLE : weapon.aim_angle - 0.1;
 	}
-	printf("weapons aim angle: %f \n", weapon.aim_angle);
+	// printf("weapons aim angle: %f \n", weapon.aim_angle);
 	setAimLoc(e);
 }
 
@@ -77,7 +78,7 @@ void ShootingSystem::setAimLoc(Entity e) {
 
 	WeaponBase& weapon = registry.weapons.get(e);
 	Motion& motion = registry.motions.get(e);
-	SHOOT_ORIENTATION orientation = (motion.scale.x > 0) ? SHOOT_ORIENTATION::RIGHT : SHOOT_ORIENTATION::LEFT;
+	SHOOT_ORIENTATION orientation = (registry.animations.get(e).facingLeft) ? SHOOT_ORIENTATION::LEFT : SHOOT_ORIENTATION::RIGHT;
 
 	float x_end;
 	float x_begin;
@@ -85,17 +86,29 @@ void ShootingSystem::setAimLoc(Entity e) {
 	if (orientation == SHOOT_ORIENTATION::RIGHT) {
 		x_end = motion.position.x + weapon.distance + weapon.area;
 		x_begin = motion.position.x + weapon.distance - weapon.area;
+		if (weapon.aim_angle > pio2) {
+			weapon.aim_angle -= pio2;
+		}
 	}
 	//left facing
 	else {
 		x_end = motion.position.x - weapon.distance - weapon.area;
 		x_begin = motion.position.x - weapon.distance + weapon.area;
+		if (weapon.aim_angle < pio2) {
+			weapon.aim_angle += pio2;
+		}
 	}
 
-	float move_step = (x_end - x_begin) * (weapon.aim_angle / (weapon.MAX_ANGLE - weapon.MIN_ANGLE));
+	if (orientation == SHOOT_ORIENTATION::RIGHT) {
+		float move_step = (x_end - x_begin) * (weapon.aim_angle / (weapon.MAX_ANGLE - weapon.MIN_ANGLE));
+		weapon.aim_loc_x = (x_end - move_step <= x_begin) ? x_begin : x_end - move_step;
+	}
+	else {
+		float move_step = (x_begin - x_end) * ((weapon.aim_angle - pio2) / (weapon.MAX_ANGLE - weapon.MIN_ANGLE));
+		weapon.aim_loc_x = (x_begin - move_step <= x_end) ? x_end : x_begin - move_step;
+	}
 
-	weapon.aim_loc_x = (x_end - move_step <= x_begin) ? x_begin : x_end - move_step;
-	printf("weapons aim loc: %f\n", weapon.aim_loc_x);
+	// printf("weapons aim loc: %f\n", weapon.aim_loc_x);
 }
 
 void ShootingSystem::shoot(Entity e) {
@@ -105,7 +118,9 @@ void ShootingSystem::shoot(Entity e) {
 
 	if (weapon.type == RIFLE) {
 		float x1 = registry.motions.get(e).position.x;
+		// printf("x1 %f, ", x1);
 		float x2 = weapon.aim_loc_x;
+		// printf("x2 %f, ", x2);
 		float x1p = cos(weapon.aim_angle) * 2;
 		float x2p = x1p;
 
@@ -122,6 +137,7 @@ void ShootingSystem::shoot(Entity e) {
 		vec4 yt = calculate_A(y1, y2, y1p, y2p);
 		
 		createProjectile(renderer, e, xt, yt, vec2{x2p * 100.0f, y2p});
+		audio.play_sfx(SOUND_EFFECTS::GUNSHOT);
 	}
 
 

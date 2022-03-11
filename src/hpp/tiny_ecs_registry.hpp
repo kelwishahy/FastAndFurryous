@@ -12,6 +12,7 @@ class ECSRegistry
 public:
 	// All game components in alphabetical order
 	ComponentContainer<AI> ais;
+	ComponentContainer<Background> backgrounds;
 	ComponentContainer<Boxcollider> boxColliders;
 	ComponentContainer<Circlecollider> circleColliders;
 	ComponentContainer<Collision> collisions;
@@ -28,9 +29,13 @@ public:
 	ComponentContainer<Tile> tiles;
 	ComponentContainer<WeaponBase> weapons;
 	ComponentContainer<Projectile> projectiles;
+	ComponentContainer<Animation> animations;
+	ComponentContainer<MenuItem> menus;
+	ComponentContainer<Clickable> buttons;
 
 	ECSRegistry() {
 		registry_list.push_back(&ais);
+		registry_list.push_back(&backgrounds);
 		registry_list.push_back(&boxColliders);
 		registry_list.push_back(&circleColliders);
 		registry_list.push_back(&collisions);
@@ -47,6 +52,9 @@ public:
 		registry_list.push_back(&tiles);
 		registry_list.push_back(&weapons);
 		registry_list.push_back(&projectiles);
+		registry_list.push_back(&animations);
+		registry_list.push_back(&menus);
+		registry_list.push_back(&buttons);
 	}
 
 	void clear_all_components() {

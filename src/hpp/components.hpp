@@ -36,6 +36,13 @@ enum class TEXTURE_IDS {
 	CAT_WALK,
 	CAT_JUMP,
 	STONE,
+	BACKGROUND,
+	START_MENU,
+	//selectscreen
+	SELECT_MENU,
+	BUTTON1,
+	BUTTONC,
+	HOWTOMOVE,
 	TOTAL
 }; constexpr int textureCount = (int)TEXTURE_IDS::TOTAL;
 
@@ -67,14 +74,27 @@ enum TILE_TYPES {
 	STONE
 };
 
+enum MENU_TYPES {
+	START,
+	//selectscreen
+	SELECT
+};
+
+enum TEAM {
+	PLAYER_1_TEAM,
+	PLAYER_2_TEAM,
+	AI_TEAM,
+	NPC_AI_TEAM
+};
+
 // Game components ------------------------------------------------------------
 
 struct Player {
-	int character = 1;
-	int frame = 0;
-	int animation_type = IDLE;
-	float frame_counter_ms = 100;
-	bool facingLeft = false;
+	TEAM team;
+};
+
+struct Background {
+	
 };
 
 struct Tile {
@@ -140,11 +160,12 @@ struct WeaponBase {
 struct Rifle : WeaponBase {
 	Rifle() { 
 		// pi/2
-		MAX_ANGLE = 1.5708;
+		MAX_ANGLE = 1.4f;
 		//0
-		MIN_ANGLE = 0;
+		MIN_ANGLE = 0.0f;
 		// pi/4
-		aim_angle = 0.7854;
+		// aim_angle = 0.7854f;
+		aim_angle = MIN_ANGLE;
 		//distance the gun can shoot
 		distance = 500.0f;
 		//"radius" around distance
@@ -172,6 +193,11 @@ struct Collision {
 	// Note, the first object is stored in the ECS container.entities
 	Entity other; // the second object involved in the collision
 	Collision(Entity& other) { this->other = other; };
+};
+
+struct Clickable {
+	std::vector<glm::vec2> vertecies;
+	std::vector<std::function<void()>> callbacks;
 };
 
 // Render components ----------------------------------------------------------
@@ -202,6 +228,20 @@ struct RenderRequest {
 	TEXTURE_IDS texture = TEXTURE_IDS::TOTAL;
 	SHADER_PROGRAM_IDS shader = SHADER_PROGRAM_IDS::TOTAL;
 	GEOMETRY_BUFFER_IDS geometry = GEOMETRY_BUFFER_IDS::TOTAL;
+};
+
+struct MenuItem {
+	float layer;
+	MENU_TYPES menu_id;
+	RenderRequest request;
+};
+
+struct Animation {
+	int character = 1;
+	int frame = 0;
+	int animation_type = IDLE;
+	float frame_counter_ms = 100;
+	bool facingLeft = false;
 };
 
 // Debug components ------------------------------------------------------------

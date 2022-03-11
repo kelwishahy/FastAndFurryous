@@ -8,6 +8,8 @@
 #include "glm/ext.hpp"
 #include <iostream>
 
+#include "hpp/ai_system.hpp"
+#include "hpp/ai_system.hpp"
 
 using namespace glm;
 
@@ -35,6 +37,18 @@ void RenderSystem::draw(float elapsed_ms) {
 			continue;
 
 		RenderRequest request = registry.renderRequests.get(entity);
+
+		if (registry.backgrounds.has(entity)) {
+			drawBackground(request, projectionMatrix, -0.5);
+			continue;
+		}
+
+		if (registry.menus.has(entity)) {
+			MenuItem& menu = registry.menus.get(entity);
+			drawBackground(request, projectionMatrix, menu.layer);
+			continue;
+		}
+
 		mat4 transformationMatrix;
 
 		switch (request.geometry) {
@@ -55,7 +69,12 @@ void RenderSystem::draw(float elapsed_ms) {
 				}
 
 				// Draw a static textured quad
-				transformationMatrix = transform(registry.motions.get(entity), 0.f, true, true, false);
+				if (registry.buttons.has(entity)) {
+					transformationMatrix = transform(registry.motions.get(entity), 0.8f, true, true, false);
+				}
+				else {
+					transformationMatrix = transform(registry.motions.get(entity), 0.f, true, true, false);
+				}
 				std::string shaderInputs[] = { "position", "texCoord" };
 				drawQuad(request, shaderInputs, 2);
 				renderToScreen(transformationMatrix, projectionMatrix);
@@ -164,23 +183,23 @@ void RenderSystem::animateSprite(RenderRequest& request, Entity& entity, float e
 	int numFrames = 0;
 	int timePerFrame = 0;
 
+	Animation& animation = registry.animations.get(entity);
 	// Decrement the frame counter
-	float* counter = &registry.players.get(entity).frame_counter_ms;
+	float *counter = &animation.frame_counter_ms;
 
 	*counter -= elapsed_ms;
 
 	// Get the type of animation (IDLE, WALKING)
-	int animationType = registry.players.get(entity).animation_type;
+	int animationType = animation.animation_type;
 
 	// Get the type of character (CAT, DOG)
-	int characterType = registry.players.get(entity).character;
+	int characterType = animation.character;
 
 	// Get if character is facing left or not
-	bool facingLeft = registry.players.get(entity).facingLeft;
+	bool facingLeft = animation.facingLeft;
 
 	// Get frame
-	int& frame = registry.players.get(entity).frame;
-
+	int& frame = animation.frame;
 
 	TEXTURE_IDS& curr_texture = registry.renderRequests.get(entity).texture;
 
@@ -266,7 +285,7 @@ void RenderSystem::animateSprite(RenderRequest& request, Entity& entity, float e
 
 }
 
-void RenderSystem::drawTiles(const glm::mat4& projectionMatrix) {
+void RenderSystem::drawTiles(const mat4& projectionMatrix) {
 	const mat4& projection = projectionMatrix;
 	const auto& tileMap = gameMap.getTileMap();
 	const int& mapWidth = gameMap.getMapWidth();
@@ -355,6 +374,16 @@ void RenderSystem::drawTiles(const glm::mat4& projectionMatrix) {
 	bindVBOandIBO(GEOMETRY_BUFFER_IDS::TEXTURED_QUAD, texturedQuad, quadIndices);
 }
 
+void RenderSystem::drawBackground(RenderRequest& request, mat4& projectionMatrix, float layer) {
+	Transform transform;
+	transform.mat = translate(transform.mat, vec3(screenWidth/2, screenHeight/2, layer));
+	transform.mat = scale(transform.mat, vec3(screenWidth, screenHeight, layer));
+
+	std::string shaderInputs[] = { "position", "texCoord" };
+	drawQuad(request, shaderInputs, 2);
+	renderToScreen(transform.mat, projectionMatrix);
+}
+
 
 bool RenderSystem::init() {
 	// Create window & context
@@ -369,7 +398,7 @@ bool RenderSystem::init() {
 	glfwWindowHint(GLFW_MAXIMIZED, GL_TRUE); // Make the window full screen
 
 	// NOTE: The width & height here are unimportant as the window will be maximized on creation
-	this->window = glfwCreateWindow(1000, 800, "The Fast and the Furryous", NULL, NULL);
+	this->window = glfwCreateWindow(1000, 800, "Fast and the Furry-ous", NULL, NULL);
 	glfwSetWindowAspectRatio(window, 16, 9);
 	glfwGetWindowSize(window, &this->screenWidth, &this->screenHeight);
 
