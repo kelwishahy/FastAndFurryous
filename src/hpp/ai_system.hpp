@@ -8,7 +8,7 @@ class AISystem
 {
 public:
 	void step(float elapsed_ms, int turn);
-	void init(ShootingSystem& shootingSystem, Mix_Chunk* gunshot);
+	void init(ShootingSystem& shootingSystem);
 
 private:
 	float jumpdelay;
