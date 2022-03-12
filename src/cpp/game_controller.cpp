@@ -43,7 +43,7 @@ void GameController::init(RenderSystem* renderer, GLFWwindow* window) {
 	this->shooting_system.init(renderer);
 	this->timePerTurnMs = 5000.0;
 
-	ai.init(shooting_system, gunshot);
+	ai.init(shooting_system);
 
 	//TEST TEXT
 	createText({ 10.0f, 10.0f }, 1.0f, { 0.172f, 0.929f, 0.286f }, "~The quick brown fox~ $jumped over the lazy$ dog !., 1234567890");
