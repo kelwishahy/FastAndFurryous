@@ -21,7 +21,6 @@ void calculateBoxVerticesAndSetTriangles(vec2 pos, vec2 scale, Boxcollider& box)
 	box.vertices.push_back(pos + vec2{ left, down }); //downleft
 }
 
-=======
 Entity createCat(RenderSystem* renderer, vec2 pos) {
 
   auto head = Entity();
@@ -61,8 +60,8 @@ Entity createCat(RenderSystem* renderer, vec2 pos) {
 	motion.position = pos;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	float scale = ceil((64.f / defaultResolution.x) * renderer->getScreenWidth() * 1.655f);
-	motion.scale = { scale, scale };
+	float scale = ceil((64.f / defaultResolution.x) * renderer->getScreenWidth());
+	motion.scale = { scale, scale * 1.655f }; //Look at the dimensions of the sprite sheet to get the right ratio
 
 	Boxcollider& bc = registry.boxColliders.emplace(entity);
 	calculateBoxVerticesAndSetTriangles(motion.position, motion.scale, bc);
