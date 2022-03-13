@@ -114,6 +114,7 @@ void ShootingSystem::setAimLoc(Entity e) {
 void ShootingSystem::shoot(Entity e) {
 
 	assert(registry.weapons.has(e));
+	setAimLoc(e);
 	WeaponBase& weapon = registry.weapons.get(e);
 
 	if (weapon.type == RIFLE) {

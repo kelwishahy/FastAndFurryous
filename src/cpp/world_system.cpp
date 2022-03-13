@@ -44,11 +44,7 @@ void WorldSystem::init(RenderSystem* renderer, GLFWwindow* window) {
 	init_main_menu();
 	audio.play_music(MUSIC_LIST::IN_GAME_BACKGROUND);
 
-	auto cursor_pos_redirect = [](GLFWwindow* wnd, double _0, double _1) { ((WorldSystem*)glfwGetWindowUserPointer(wnd))->on_mouse_move({ _0, _1 }); };
-	glfwSetCursorPosCallback(this->window, cursor_pos_redirect);
-
-	/*auto key_redirect = [](GLFWwindow* wnd, int _0, int _1, int _2) { ((WorldSystem*)glfwGetWindowUserPointer(wnd))->on_key(_0, _1, _2); };
-	glfwSetKeyCallback(wthis->window, key_redirect);*/
+	set_user_input_callbacks();
 
 	//creates a wall on the left side of the screen
 	printf("window height is: %i px, window width is: %i px\n", renderer->getScreenHeight(), renderer->getScreenWidth());
@@ -59,7 +55,6 @@ void WorldSystem::init(RenderSystem* renderer, GLFWwindow* window) {
 // Update our game world
 bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
-	cooldown += elapsed_ms_since_last_update;
 	// Remove entities that leave the screen on the left side
 	// Iterate backwards to be able to remove without unterfering with the next object to visit
 	// (the containers exchange the last element with the current)
@@ -71,17 +66,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	//	}
 	//}
 	//
-	if (!current_game.inAGame) {
-		if (cooldown > 2000.0f) {
-			glfwGetWindowUserPointer(this->window);
-			int state = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT);
-			if (state == GLFW_PRESS)
-			{
-				check_for_button_presses();
-				cooldown = 0;
-			}
-		}
-	}
 
 	// Removing out of screen entities
 	auto& motions_registry = registry.motions;
@@ -160,6 +144,13 @@ void WorldSystem::on_key(int button, int action, int mods) {
 	
 }
 
+void WorldSystem::on_mouse_click(int button, int action, int mods) {
+	if (action == GLFW_PRESS) {
+		printf("hello");
+		check_for_button_presses();
+	}
+}
+
 //I need to refactor everything from this point and beyond
 void WorldSystem::check_for_button_presses() {
 
@@ -208,6 +199,17 @@ void WorldSystem::on_mouse_move(vec2 mouse_position) {
 
 	mouse_pos = mouse_position;
 	// printf("mouse pos: %f, %f\n", mouse_pos.x, mouse_pos.y);
+}
+
+void WorldSystem::set_user_input_callbacks() {
+	auto cursor_pos_redirect = [](GLFWwindow* wnd, double _0, double _1) { ((WorldSystem*)glfwGetWindowUserPointer(wnd))->on_mouse_move({ _0, _1 }); };
+	glfwSetCursorPosCallback(this->window, cursor_pos_redirect);
+
+	//auto key_redirect = [](GLFWwindow* wnd, int _0, int _1, int _2) { ((WorldSystem*)glfwGetWindowUserPointer(wnd))->on_key(_0, _1, _2); };
+	//glfwSetKeyCallback(wthis->window, key_redirect);*/
+
+	auto mouse_input = [](GLFWwindow* wnd, int _0, int _1, int _2) { ((WorldSystem*)glfwGetWindowUserPointer(wnd))->on_mouse_click(_0, _1, _2); };
+	glfwSetMouseButtonCallback(this->window, mouse_input);
 }
 
 void WorldSystem::play_tutorial(std::vector<std::function<void()>> callbacks) {
