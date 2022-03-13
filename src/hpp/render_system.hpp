@@ -85,8 +85,8 @@ class RenderSystem {
 
 
 public:
-	RenderSystem ();
-	~RenderSystem ();
+	RenderSystem () {};
+	~RenderSystem () {};
 
 	// Draw to the screen using shaderProgram
 	void draw(float elapsed_ms);
@@ -153,7 +153,9 @@ private:
 	void loadMeshes();
 
 	// Apply matrix transformations
-	glm::mat4 transform(Motion& motion, float depth, bool translate, bool scale, bool rotate);
+	// position is generally motion.position
+	// scale is generally motion.scale
+	glm::mat4 transform(glm::vec2 position, glm::vec2 scale, float depth);
 
 	// The last step of the draw function
 	void renderToScreen(glm::mat4& transformationMatrix, glm::mat4& projectionMatrix);
