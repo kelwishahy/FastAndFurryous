@@ -33,6 +33,7 @@ public:
 	ComponentContainer<MenuItem> menus;
 	ComponentContainer<Clickable> buttons;
 	ComponentContainer<Text> texts;
+	ComponentContainer<AnimationExtra> animExtras;
 
 	ECSRegistry() {
 		registry_list.push_back(&ais);
@@ -57,6 +58,7 @@ public:
 		registry_list.push_back(&menus);
 		registry_list.push_back(&buttons);
 		registry_list.push_back(&texts);
+		registry_list.push_back(&animExtras);
 	}
 
 	void clear_all_components() {

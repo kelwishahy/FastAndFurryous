@@ -64,13 +64,14 @@ void GameController::step(float elapsed_ms) {
 			Animation& catAnimation = registry.animations.get(e);
 
 			if (catMotion.velocity.x == 0) {
-				catAnimation.animation_type = IDLE;
+				AnimationSystem::animate_cat_idle(e);
 			}
 			if (catMotion.velocity.x != 0) {
-				catAnimation.animation_type = WALKING;
+				AnimationSystem::animate_cat_walk(e);
 			}
 			if (catMotion.velocity.y < 0) {
-				catAnimation.animation_type = JUMPING;
+				//TODO change this here, replace with a single all to AnimationSystem
+				catAnimation.anim_state = TEXTURE_IDS::CAT_JUMP;
 			}
 			if (catMotion.velocity.x < 0) {
 				catAnimation.facingLeft = true;
