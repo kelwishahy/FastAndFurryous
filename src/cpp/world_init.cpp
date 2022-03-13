@@ -23,7 +23,7 @@ void calculateBoxVerticesAndSetTriangles(vec2 pos, vec2 scale, Boxcollider& box)
 
 Entity createCat(RenderSystem* renderer, vec2 pos) {
 
-  auto head = Entity();
+    auto head = Entity();
 	auto entity = Entity();
 
 	//---Head animation subentity---- putting this in front so that head gets rendered ontop of body
@@ -80,6 +80,7 @@ Entity createCat(RenderSystem* renderer, vec2 pos) {
 	Animation& anim = registry.animations.emplace(entity);
 	anim.animation_states_constants.insert({TEXTURE_IDS::CAT_FRONT_IDLE, CAT_IDLE_CONSTANTS});
 	anim.animation_states_constants.insert({TEXTURE_IDS::CAT_WALK, CAT_WALK_CONSTANTS });
+	anim.anim_state = TEXTURE_IDS::CAT_FRONT_IDLE;
 
 	return entity;
 }
@@ -154,6 +155,7 @@ Entity createAI(RenderSystem* renderer, vec2 pos) {
 	Animation& anim = registry.animations.emplace(entity);
 	anim.animation_states_constants.insert({ TEXTURE_IDS::CAT_FRONT_IDLE, CAT_IDLE_CONSTANTS });
 	anim.animation_states_constants.insert({ TEXTURE_IDS::CAT_WALK, CAT_WALK_CONSTANTS });
+	anim.anim_state = TEXTURE_IDS::CAT_FRONT_IDLE;
 	// Add a behaviour tree
 
 	return entity;

@@ -63,16 +63,6 @@ void GameController::step(float elapsed_ms) {
 			Motion& catMotion = registry.motions.get(e);
 			Animation& catAnimation = registry.animations.get(e);
 
-			if (catMotion.velocity.x == 0) {
-				AnimationSystem::animate_cat_idle(e);
-			}
-			if (catMotion.velocity.x != 0) {
-				AnimationSystem::animate_cat_walk(e);
-			}
-			if (catMotion.velocity.y < 0) {
-				//TODO change this here, replace with a single all to AnimationSystem
-				catAnimation.anim_state = TEXTURE_IDS::CAT_JUMP;
-			}
 			if (catMotion.velocity.x < 0) {
 				catAnimation.facingLeft = true;
 				shooting_system.setAimLoc(e);
@@ -244,8 +234,8 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 
 	//Only allowed to move on specified turn
 	if (game_state.turn_possesion == PLAYER1 && inAGame) {
-		Motion& catMotion = registry.motions.get(player1_team[0]);
-		Rigidbody& rb = registry.rigidBodies.get(player1_team[0]);
+		Motion& catMotion = registry.motions.get(curr_selected_char);
+		Rigidbody& rb = registry.rigidBodies.get(curr_selected_char);
 
 		float current_speed = 150.0f;
 		if (player_mode == PLAYER_MODE::MOVING) {
@@ -262,18 +252,22 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 
 			if (action == GLFW_PRESS && key == GLFW_KEY_D) {
 				catMotion.velocity.x = current_speed;
+				AnimationSystem::animate_cat_walk(curr_selected_char);
 			}
 
 			if (action == GLFW_PRESS && key == GLFW_KEY_A) {
 				catMotion.velocity.x = -current_speed;
+				AnimationSystem::animate_cat_walk(curr_selected_char);
 			}
 
 			if (action == GLFW_RELEASE) {
 				if (key == GLFW_KEY_A && catMotion.velocity.x < 0) {
 					catMotion.velocity.x = 0.0f;
+					AnimationSystem::animate_cat_idle(curr_selected_char);
 				}
 				if (key == GLFW_KEY_D && catMotion.velocity.x > 0) {
 					catMotion.velocity.x = 0.0f;
+					AnimationSystem::animate_cat_idle(curr_selected_char);
 				}
 			}
 		}
