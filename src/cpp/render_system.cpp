@@ -7,13 +7,15 @@
 #include <hpp/tiny_ecs_registry.hpp>
 #include "glm/ext.hpp"
 #include <iostream>
+#include "../project_path.hpp"
 
 #include "hpp/ai_system.hpp"
 #include "hpp/ai_system.hpp"
 
 using namespace glm;
 
-RenderSystem::RenderSystem() {}
+RenderSystem::RenderSystem() {
+}
 
 // Destructor
 RenderSystem::~RenderSystem() {
@@ -46,6 +48,11 @@ void RenderSystem::draw(float elapsed_ms) {
 		if (registry.menus.has(entity)) {
 			MenuItem& menu = registry.menus.get(entity);
 			drawBackground(request, projectionMatrix, menu.layer);
+			continue;
+		}
+
+		if (registry.texts.has(entity)) {
+			drawText(entity);
 			continue;
 		}
 
@@ -384,6 +391,111 @@ void RenderSystem::drawBackground(RenderRequest& request, mat4& projectionMatrix
 	renderToScreen(transform.mat, projectionMatrix);
 }
 
+void RenderSystem::drawText(Entity e) {
+	bool isItalic = false;
+	bool isBold = false;
+
+	GLuint fontvbo;
+	RenderRequest rr = registry.renderRequests.get(e);
+
+	Motion motion = registry.motions.get(e);
+	Text fonttext = registry.texts.get(e);
+
+	//we need to do this we're dynamically creating geometry in this function
+	glGenBuffers(1, &fontvbo);
+	glBindBuffer(GL_ARRAY_BUFFER, fontvbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	// set shaders
+	const GLuint shaderProgram = shaders[(GLuint)SHADER_PROGRAM_IDS::FONT];
+	glUseProgram(shaderProgram);
+	glHasError();
+
+	glUniform3f(glGetUniformLocation(shaderProgram, "textColor"), fonttext.color.x, fonttext.color.y, fonttext.color.z);
+	glActiveTexture(GL_TEXTURE0);
+
+	//this is capital 'A' for reference
+	float captialsize = glyphs[65].size.y;
+
+	// iterate through all characters
+	std::string::const_iterator c;
+	float acc = motion.position.x;
+	for (c = fonttext.text.begin(); c != fonttext.text.end(); c++)
+	{
+		//'$' character
+		if (*c == 36) {
+			isBold = isBold ? false : true;
+			continue;
+		}
+		if (*c == 126) {
+			isItalic = isItalic? false : true;
+			continue;
+		}
+
+		Glyph ch;
+		if (isItalic) {
+			assert(!bold_glyphs.empty());
+			ch = italic_glyphs[*c];
+		}
+		else if (isBold) {
+			assert(!bold_glyphs.empty());
+			ch = bold_glyphs[*c];
+		}
+		else {
+			assert(!glyphs.empty());
+			ch = glyphs[*c];
+		}
+
+		float xpos = acc + ch.bearing.x * motion.scale.x;
+		float ypos = motion.position.y + (ch.size.y - ch.bearing.y) * motion.scale.y;
+
+		//We need to offset lower case letters because of our coordinate system (since 0,0 is top left)
+		if (!isupper((int)*c)) {
+			ypos += captialsize - ch.size.y;
+		}
+
+		float w = ch.size.x * motion.scale.x;
+		float h = ch.size.y * motion.scale.y;
+		// update VBO for each character
+		float vertices[6][4] = {
+			{ xpos,     ypos + h,   0.0f, 1.0f },
+			{ xpos,     ypos,       0.0f, 0.0f },
+			{ xpos + w, ypos,       1.0f, 0.0f },
+
+			{ xpos,     ypos + h,   0.0f, 1.0f },
+			{ xpos + w, ypos,       1.0f, 0.0f },
+			{ xpos + w, ypos + h,   1.0f, 1.0f }
+		};
+		// render glyph texture over quad
+		glBindTexture(GL_TEXTURE_2D, ch.textureID);
+		// update content of VBO memory
+		glBindBuffer(GL_ARRAY_BUFFER, fontvbo);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		// render quad
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+		// now advance cursors for next glyph (note that advance is number of 1/64 pixels)
+		// the isItalic prevents glitching since italics are slanted but the quads are not
+		if (isItalic) {
+			acc += (ch.advance >> 6) * motion.scale.x + 3.0f;
+		}
+		else {
+			acc += (ch.advance >> 6) * motion.scale.x; // bitshift by 6 to get value in pixels (2^6 = 64)
+		}
+	}
+	//glBindVertexArray(0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	//Custom projection matrix
+	mat4 transformationMatrix = transform(registry.motions.get(e), 1.0f, true, true, false);
+	//mat4 projection = ortho(0.0f, 800.0f, 0.0f, 600.0f);
+	mat4 projection = createProjectionMatrix();
+	renderToScreen(transformationMatrix, projection);
+}
+
 
 bool RenderSystem::init() {
 	// Create window & context
@@ -462,6 +574,9 @@ bool RenderSystem::init() {
 	//Load vertex data
 	initRenderData();
 
+	initFonts();
+
+
 	return true;
 }
 
@@ -521,6 +636,95 @@ void RenderSystem::initRenderData() {
 
 	bindVBOandIBO(GEOMETRY_BUFFER_IDS::QUAD, quad, quadIndices);
 	bindVBOandIBO(GEOMETRY_BUFFER_IDS::TEXTURED_QUAD, texturedQuad, quadIndices);
+}
+
+void RenderSystem::initFonts() {
+
+	std::string path = std::string(PROJECT_SOURCE_DIR) + "assets/fonts/SF_Atarian_System.ttf";
+	std::string italic_path = std::string(PROJECT_SOURCE_DIR) + "assets/fonts/SF_Atarian_System_Italic.ttf";
+	std::string bold_path = std::string(PROJECT_SOURCE_DIR) + "assets/fonts/SF_Atarian_System_Bold.ttf";
+	std::vector<std::string> fontpaths = {path, italic_path, bold_path};
+
+
+	//The fonts NEED to be initialized properly otherwise the anything subsequent in the program starts breaking
+	FT_Library ft;
+	if (FT_Init_FreeType(&ft)) {
+		std::cout << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
+	}
+
+	FT_Face face;
+	FT_Face italic_face;
+	FT_Face bold_face;
+	std::vector<FT_Face*> faces = { &face, &italic_face, &bold_face };
+
+
+	
+	//Not character size, this size is just for initial processing
+
+
+	//Storing texture id of the first 128 ascii characters
+	int acc = 0;
+	for (FT_Face *face_element: faces) {
+		// load character glyph
+		if (FT_New_Face(ft, fontpaths[acc].c_str(), 0, face_element)) {
+			std::cout << "ERROR::FREETYPE: Failed to load font" << std::endl;
+		}
+		FT_Set_Pixel_Sizes(*face_element, 0, 48);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+		for (unsigned char c = 0; c < 128; c++) {
+			if (FT_Load_Char(*face_element, c, FT_LOAD_RENDER))
+			{
+				std::cout << "ERROR::FREETYTPE: Failed to load Glyph" << std::endl;
+				continue;
+			}
+
+			// generate texture
+			FT_Face fe = *face_element;
+			unsigned int texture;
+			glGenTextures(1, &texture);
+			glBindTexture(GL_TEXTURE_2D, texture);
+			glTexImage2D(
+				GL_TEXTURE_2D,
+				0,
+				GL_RED,
+				fe->glyph->bitmap.width,
+				fe->glyph->bitmap.rows,
+				0,
+				GL_RED,
+				GL_UNSIGNED_BYTE,
+				fe->glyph->bitmap.buffer
+			);
+
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+			Glyph glyph = {
+				texture,
+				glm::ivec2(fe->glyph->bitmap.width, fe->glyph->bitmap.rows),
+				glm::ivec2(fe->glyph->bitmap_left, fe->glyph->bitmap_top),
+				fe->glyph->advance.x
+			};
+
+			if (acc == 0) {
+				glyphs.insert(std::pair<char, Glyph>(c, glyph));
+			}
+			else if (acc == 1) {
+				italic_glyphs.insert(std::pair<char, Glyph>(c, glyph));
+			}
+			else {
+				bold_glyphs.insert(std::pair<char, Glyph>(c, glyph));
+			}
+		}
+		FT_Done_Face(*face_element);
+		acc++;
+	}
+
+	//Enabling blending for EVERYTHING
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	FT_Done_FreeType(ft);
 }
 
 template <class T>

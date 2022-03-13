@@ -13,6 +13,7 @@
 using Clock = std::chrono::high_resolution_clock;
 
 int main() {
+
 	std::cout << "Starting Fast and Furry-ous" << std::endl;
 
 	// Global systems

@@ -219,3 +219,26 @@ Entity createButton(vec2 pos, vec2 scale, TEXTURE_IDS tex_id, std::vector<std::f
 	return entity;
 
 }
+
+Entity createText(vec2 pos, float scale, glm::vec3 color, std::string text) {
+	auto entity = Entity();
+
+	// Setting initial motion values
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = pos;
+	motion.angle = 0.f;
+	motion.velocity = { 0.f, 0.f };
+	motion.scale = { scale, scale };
+
+	Text& textfield = registry.texts.emplace(entity);
+	textfield.text = text;
+	textfield.color = color;
+
+	registry.renderRequests.insert(
+		entity,
+		{	TEXTURE_IDS::TOTAL,
+			SHADER_PROGRAM_IDS::FONT,
+			GEOMETRY_BUFFER_IDS::TOTAL });
+
+	return entity;
+}

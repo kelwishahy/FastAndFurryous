@@ -2,10 +2,12 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <../project_path.hpp>
 
 #include <array>
 #include <vector>
 #include <string>
+#include <map>
 
 #include <glm/vec2.hpp>				// vec2
 #include <glm/ext/vector_int2.hpp>  // ivec2
@@ -22,7 +24,8 @@ class RenderSystem {
 		"animation",
 		"texture",
 		"wall",
-		"ai"
+		"ai",
+		"font"
 	};
 
 	std::array<GLuint, shaderProgramCount> shaders; // OpenGL shader names
@@ -90,6 +93,9 @@ public:
 	// Draw the background texture image
 	void drawBackground(RenderRequest& request, glm::mat4& projectionMatrix, float layer);
 
+	// Draw any text entities
+	void drawText(Entity e);
+
 	// Initialize GLFW window and context
 	bool init();
 
@@ -112,6 +118,9 @@ private:
 	GLuint renderBufferColour;
 	GLuint renderBufferDepth;
 	Map gameMap;
+	std::map<char, Glyph> glyphs;
+	std::map<char, Glyph> italic_glyphs;
+	std::map<char, Glyph> bold_glyphs;
 
 	// Reusable quad (square) geometry
 	std::vector<TexturedVertex> texturedQuad;
@@ -124,6 +133,9 @@ private:
 
 	// Load vertex data into the vertex buffers
 	void initRenderData();
+
+	//Load font stuff
+	void initFonts();
 
 	// Bind the given vertex and index buffer objects
 	template <class T>
