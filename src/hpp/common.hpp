@@ -8,6 +8,9 @@
 #include <SDL.h>
 #include <SDL_mixer.h>
 
+#include <ft2build.h>
+#include FT_FREETYPE_H 
+
 // Functions
 // Simplicity for audio path
 

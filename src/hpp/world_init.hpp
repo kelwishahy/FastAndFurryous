@@ -28,3 +28,5 @@ Entity createProjectile(RenderSystem* renderer, Entity originE, glm::vec4 coeffi
 Entity createMenu(MENU_TYPES menu, float layer);
 
 Entity createButton(glm::vec2 pos, glm::vec2 scale, TEXTURE_IDS tex_id, std::vector<std::function<void()>> callbacks);
+
+Entity createText(glm::vec2 pos, float scale, glm::vec3 color, std::string text);

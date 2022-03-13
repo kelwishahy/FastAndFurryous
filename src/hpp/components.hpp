@@ -28,6 +28,7 @@ enum class SHADER_PROGRAM_IDS {
 	TEXTURE,
 	WALL,
 	AI,
+	FONT,
 	TOTAL
 }; constexpr int shaderProgramCount = (int)SHADER_PROGRAM_IDS::TOTAL;
 
@@ -242,6 +243,18 @@ struct Animation {
 	int animation_type = IDLE;
 	float frame_counter_ms = 100;
 	bool facingLeft = false;
+};
+
+struct Text {
+	std::string text;
+	glm::vec3 color;
+};
+
+struct Glyph {
+	unsigned int textureID;  // ID handle of the glyph texture
+	glm::ivec2   size;       // Size of glyph
+	glm::ivec2   bearing;    // Offset from baseline to left/top of glyph
+	unsigned int advance;    // Offset to advance to next glyph
 };
 
 // Debug components ------------------------------------------------------------

@@ -49,6 +49,24 @@ target_include_directories(${PROJECT_NAME} PUBLIC ext/stb_image/)
 add_subdirectory(ext/glad/)
 target_link_libraries(${PROJECT_NAME} PUBLIC glad)
 
+#Freetype
+if (IS_OS_WINDOWS)
+    set(FREETYPE_FOUND TRUE)
+
+    set(FREETYPE_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/ft/include")
+
+    set(FREETYPE_LIBRARIES "${CMAKE_CURRENT_SOURCE_DIR}/ext/ft/release_static/vs2015-2022/win64/freetype.lib")
+
+elseif(IS_OS_MAC OR IS_OS_LINUX)
+    find_package(PkgConfig REQUIRED)
+
+    pkg_search_module(FREETYPE REQUIRED freetype)
+endif()
+if (NOT FREETYPE_FOUND)
+    message("couldn't find Freetype")
+endif()
+target_include_directories(${PROJECT_NAME} PUBLIC ${FREETYPE_INCLUDE_DIR})
+target_link_libraries(${PROJECT_NAME} PUBLIC ${FREETYPE_LIBRARIES})
 
 # Find OpenGL
 find_package(OpenGL REQUIRED)
