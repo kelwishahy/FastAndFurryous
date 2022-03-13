@@ -16,6 +16,7 @@
 
 #include "components.hpp"
 #include "map.hpp"
+#include "animation_system.hpp"
 
 class RenderSystem {
 
@@ -32,9 +33,17 @@ class RenderSystem {
 
 	// Textures
 	const std::array<std::string, textureCount> texturePaths = {
-		"cat-idle.png",
-		"cat-walk.png",
-		"cat-jump.png",
+		//Cat sprites
+		"cat_side_idle.png",
+		"cat_front_idle.png",
+		"cat_walk.png",
+		"cat_jump.png",
+		"cat_side_blink.png",
+		"cat_front_blink.png",
+		"cat_hurt_face.png",
+		"cat_hurt.png",
+		"cat_dead.png",
+		//
 		"stone.png",
 		"background.png",
 		"start_bg.jpg",
@@ -152,6 +161,8 @@ private:
 	// Generate a 4x4 orthographic projection matrix
 	// that scales with window size
 	glm::mat4 createProjectionMatrix();
+
+	AnimationSystem animation_system;
 
 };
 

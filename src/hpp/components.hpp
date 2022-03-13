@@ -6,21 +6,12 @@
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
+#include <string>
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // Component IDs
 ////////////////////////////////////////////////////////////////////////////////
-
-enum CharacterType {
-	CAT = 1,
-	DOG = 2,
-};
-
-enum AnimationType {
-	IDLE = 1,
-	WALKING = 2,
-	JUMPING = 3
-};
 
 //TODO add AI to the list of IDs
 enum class SHADER_PROGRAM_IDS {
@@ -33,9 +24,17 @@ enum class SHADER_PROGRAM_IDS {
 }; constexpr int shaderProgramCount = (int)SHADER_PROGRAM_IDS::TOTAL;
 
 enum class TEXTURE_IDS {
-	CAT_IDLE,
+	//Cat textures
+	CAT_SIDE_IDLE,
+	CAT_FRONT_IDLE,
 	CAT_WALK,
 	CAT_JUMP,
+	CAT_SIDE_BLINK,
+	CAT_FRONT_BLINK,
+	CAT_HURT_FACE,
+	CAT_HURT,
+	CAT_DEAD,
+	//
 	STONE,
 	BACKGROUND,
 	START_MENU,
@@ -203,6 +202,12 @@ struct Clickable {
 
 // Render components ----------------------------------------------------------
 
+struct TEXTURE_ANIM_CONSTANTS {
+	int NUM_FRAMES;
+	float FRAME_TEXTURE_WIDTH;
+	float TOTAL_FRAME_TIME;
+};
+
 // Single vertex vuffer element for textured sprites
 struct TexturedVertex {
 	glm::vec3 position;
@@ -238,11 +243,18 @@ struct MenuItem {
 };
 
 struct Animation {
-	int character = 1;
 	int frame = 0;
-	int animation_type = IDLE;
 	float frame_counter_ms = 100;
 	bool facingLeft = false;
+	int curr_frame = 0;
+	TEXTURE_IDS anim_state = TEXTURE_IDS::TOTAL;
+	//map of TEXTUREID to animation constants for shaders
+	std::unordered_map<TEXTURE_IDS, TEXTURE_ANIM_CONSTANTS> animation_states_constants;
+};
+
+struct AnimationExtra {
+	Entity parent;
+	glm::vec2 offset_from_parent;
 };
 
 struct Text {

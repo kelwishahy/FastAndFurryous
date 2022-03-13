@@ -23,6 +23,9 @@ RenderSystem::~RenderSystem() {
 }
 
 void RenderSystem::draw(float elapsed_ms) {
+
+	animation_system.step(elapsed_ms);
+
 	mat4 projectionMatrix = createProjectionMatrix();
 
 	glViewport(0, 0, this->screenWidth, this->screenHeight);
@@ -70,7 +73,7 @@ void RenderSystem::draw(float elapsed_ms) {
 			case GEOMETRY_BUFFER_IDS::TEXTURED_QUAD: {
 
 				// Animate player sprites
-				if (registry.players.has(entity)) {
+				if (registry.animations.has(entity)) {
 					animateSprite(request, entity, elapsed_ms);
 					continue;
 				}
@@ -184,82 +187,15 @@ void RenderSystem::drawQuad(RenderRequest& request, std::string shaderInputs[], 
 void RenderSystem::animateSprite(RenderRequest& request, Entity& entity, float elapsed_ms) {
 	mat4 projection = createProjectionMatrix();
 
-	// Frames for animation
-	GLint curr_frame = 0;
-	GLfloat frame_width = 0;
-	int numFrames = 0;
-	int timePerFrame = 0;
-
 	Animation& animation = registry.animations.get(entity);
-	// Decrement the frame counter
-	float *counter = &animation.frame_counter_ms;
-
-	*counter -= elapsed_ms;
-
-	// Get the type of animation (IDLE, WALKING)
-	int animationType = animation.animation_type;
-
-	// Get the type of character (CAT, DOG)
-	int characterType = animation.character;
-
-	// Get if character is facing left or not
-	bool facingLeft = animation.facingLeft;
-
-	// Get frame
-	int& frame = animation.frame;
-
-	TEXTURE_IDS& curr_texture = registry.renderRequests.get(entity).texture;
+	TEXTURE_ANIM_CONSTANTS constants = animation.animation_states_constants.at(animation.anim_state);
 
 	// Updating the texture coordinates for use with the animation sprite sheets
-	texturedQuad[0].texCoord = { 0.111f, 1.0f }; // top right
-	texturedQuad[1].texCoord = { 0.111f, 0.0f }; // bottom right
+	texturedQuad[0].texCoord = { constants.FRAME_TEXTURE_WIDTH, 1.0f }; // top right
+	texturedQuad[1].texCoord = { constants.FRAME_TEXTURE_WIDTH, 0.0f }; // bottom right
 	texturedQuad[2].texCoord = { 0.0f, 0.0f }; // bottom left
 	texturedQuad[3].texCoord = { 0.0f, 1.0f }; // top left
 	bindVBOandIBO(GEOMETRY_BUFFER_IDS::TEXTURED_QUAD, texturedQuad, quadIndices);
-
-	switch (characterType) {
-		case CAT: {
-			switch (animationType) {
-				case IDLE: {
-					curr_texture = TEXTURE_IDS::CAT_IDLE;
-					numFrames = CAT_IDLE_FRAMES;
-					frame_width = CAT_IDLE_FRAME_WIDTH;
-					timePerFrame = CAT_IDLE_FRAME_TIME;
-					break;
-				}
-
-				case WALKING: {
-					curr_texture = TEXTURE_IDS::CAT_WALK;
-					numFrames = CAT_WALK_FRAMES;
-					frame_width = CAT_WALK_FRAME_WIDTH;
-					timePerFrame = CAT_WALK_FRAME_TIME;
-					break;
-				}
-
-				case JUMPING: {
-					curr_texture = TEXTURE_IDS::CAT_JUMP;
-					numFrames = CAT_JUMP_FRAMES;
-					frame_width = CAT_JUMP_FRAME_WIDTH;
-					timePerFrame = CAT_JUMP_FRAME_TIME;
-					break;
-				}
-
-				default: break;
-			}
-		}
-	}
-
-	if (*counter <= 0) {
-		curr_frame = frame;
-		curr_frame += 1;
-		frame = curr_frame % numFrames;
-
-		// Reset frame timer
-		*counter = timePerFrame;
-	} else {
-		curr_frame = frame;
-	}
-
 	
 	std::string shaderInputs[] = { "position", "texCoord" };
 	drawQuad(request, shaderInputs, 2);
@@ -275,9 +211,9 @@ void RenderSystem::animateSprite(RenderRequest& request, Entity& entity, float e
 	GLint frame_uloc = glGetUniformLocation(shaderProgram, "currentFrame");
 	GLfloat frame_width_uloc = glGetUniformLocation(shaderProgram, "frameWidth");
 	GLint facing_left_uloc = glGetUniformLocation(shaderProgram, "facingLeft");
-	glUniform1i(frame_uloc, curr_frame);
-	glUniform1f(frame_width_uloc, frame_width);
-	glUniform1i(facing_left_uloc, facingLeft);
+	glUniform1i(frame_uloc, animation.curr_frame);
+	glUniform1f(frame_width_uloc, constants.FRAME_TEXTURE_WIDTH);
+	glUniform1i(facing_left_uloc, animation.facingLeft);
 
 	// Render to the screen
 	mat4 transformationMatrix = transform(registry.motions.get(entity), 0.5f, true, true, false);
