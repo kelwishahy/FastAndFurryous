@@ -262,18 +262,22 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 
 		if (action == GLFW_PRESS && key == GLFW_KEY_D) {
 			catMotion.velocity.x = current_speed;
+			player_mode = PLAYER_MODE::MOVING;
 		}
 
 		if (action == GLFW_PRESS && key == GLFW_KEY_A) {
 			catMotion.velocity.x = -current_speed;
+			player_mode = PLAYER_MODE::MOVING;
 		}
 
 		if (action == GLFW_RELEASE) {
 			if (key == GLFW_KEY_A && catMotion.velocity.x < 0) {
 				catMotion.velocity.x = 0.0f;
+				player_mode = PLAYER_MODE::SHOOTING;
 			}
 			if (key == GLFW_KEY_D && catMotion.velocity.x > 0) {
 				catMotion.velocity.x = 0.0f;
+				player_mode = PLAYER_MODE::SHOOTING;
 			}
 		}
 		
