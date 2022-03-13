@@ -38,6 +38,7 @@ void GameController::init(RenderSystem* renderer, GLFWwindow* window) {
 	glfwSetCursorPosCallback(this->window, cursor_pos_redirect);
 
 	inAGame = true;
+	player_mode = PLAYER_MODE::MOVING;
 
 	this->shooting_system.init(renderer);
 	this->timePerTurnMs = 20000.0;
@@ -246,10 +247,11 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 		Rigidbody& rb = registry.rigidBodies.get(player1_team[0]);
 
 		float current_speed = 150.0f;
+		float gravity_force = 2.5;
 		
 		if (action == GLFW_PRESS && key == GLFW_KEY_W) {
-			if (catMotion.velocity.y == 2.5) {
-				catMotion.velocity.y = -2.5 * current_speed;
+			if (catMotion.velocity.y == gravity_force) {
+				catMotion.velocity.y = -gravity_force * current_speed;
 				rb.collision_normal.y = 0;
 			}
 		}
@@ -284,9 +286,10 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 		}
 
 		if (action == GLFW_PRESS && key == GLFW_KEY_ENTER) {
-			shooting_system.shoot(curr_selected_char);
-			// printf("shooting");
-			// printf("Num of projectiles %u\n", (uint)registry.projectiles.components.size());
+			// should only shoot when standing
+			if (catMotion.velocity.y == gravity_force && catMotion.velocity.x == 0.0) {
+				shooting_system.shoot(curr_selected_char);
+			}
 		}
 	}
 }

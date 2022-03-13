@@ -85,6 +85,12 @@ private:
 	std::vector<std::vector<Entity>> teams;
 	Map gameMap;
 
+	enum class PLAYER_MODE {
+		MOVING,
+		SHOOTING
+	};
+	PLAYER_MODE player_mode;
+
 	GameState game_state;
 
 	Entity curr_selected_char;
