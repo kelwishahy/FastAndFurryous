@@ -38,10 +38,9 @@ void GameController::init(RenderSystem* renderer, GLFWwindow* window) {
 	glfwSetCursorPosCallback(this->window, cursor_pos_redirect);
 
 	inAGame = true;
-	player_mode = PLAYER_MODE::MOVING;
 
 	this->shooting_system.init(renderer);
-	this->timePerTurnMs = 5000.0;
+	this->timePerTurnMs = 20000.0;
 
 	ai.init(shooting_system);
 }
@@ -114,7 +113,7 @@ void GameController::step(float elapsed_ms) {
 void GameController::decrementTurnTime(float elapsed_ms) {
 	if (timePerTurnMs <= 0) {
 		next_turn();
-		timePerTurnMs = 5000.0;
+		timePerTurnMs = 20000.0;
 	} else {
 		timePerTurnMs -= elapsed_ms;
 	}
@@ -243,68 +242,48 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 		Rigidbody& rb = registry.rigidBodies.get(player1_team[0]);
 
 		float current_speed = 150.0f;
-		if (player_mode == PLAYER_MODE::MOVING) {
-			if (action == GLFW_PRESS && key == GLFW_KEY_W) {
-				if (catMotion.velocity.y == 2.5) {
-					catMotion.velocity.y = -2.5 * current_speed;
-					rb.collision_normal.y = 0;
-				}
-			}
-
-			if (action == GLFW_PRESS && key == GLFW_KEY_S) {
-				catMotion.velocity.y = current_speed;
-			}
-
-			if (action == GLFW_PRESS && key == GLFW_KEY_D) {
-				catMotion.velocity.x = current_speed;
-			}
-
-			if (action == GLFW_PRESS && key == GLFW_KEY_A) {
-				catMotion.velocity.x = -current_speed;
-			}
-
-			if (action == GLFW_RELEASE) {
-				if (key == GLFW_KEY_A && catMotion.velocity.x < 0) {
-					catMotion.velocity.x = 0.0f;
-				}
-				if (key == GLFW_KEY_D && catMotion.velocity.x > 0) {
-					catMotion.velocity.x = 0.0f;
-				}
-			}
-		}
-		else {
-			if (action == GLFW_PRESS && key == GLFW_KEY_W) {
-				shooting_system.aimUp(curr_selected_char);
-			}
-
-			if (action == GLFW_PRESS && key == GLFW_KEY_S) {
-				shooting_system.aimDown(curr_selected_char);
-			}
-
-			if (action == GLFW_PRESS && key == GLFW_KEY_T) {
-				shooting_system.shoot(curr_selected_char);
-				// printf("shooting");
-				// printf("Num of projectiles %u\n", (uint)registry.projectiles.components.size());
+		
+		if (action == GLFW_PRESS && key == GLFW_KEY_W) {
+			if (catMotion.velocity.y == 2.5) {
+				catMotion.velocity.y = -2.5 * current_speed;
+				rb.collision_normal.y = 0;
 			}
 		}
 
-		//switch between shooting and firing for curr_selected_char
-		if (action == GLFW_PRESS && key == GLFW_KEY_M) {
-			if (player_mode == PLAYER_MODE::SHOOTING) {
-				player_mode = PLAYER_MODE::MOVING;
-			}
-			else {
-				player_mode = PLAYER_MODE::SHOOTING;
-				shooting_system.setAimLoc(curr_selected_char);
-			}
-			// printf("Current mode is: %s", (player_mode == PLAYER_MODE::SHOOTING) ? "SHOOTING" : "MOVING");
+		if (action == GLFW_PRESS && key == GLFW_KEY_S) {
+			catMotion.velocity.y = current_speed;
 		}
 
-	}
+		if (action == GLFW_PRESS && key == GLFW_KEY_D) {
+			catMotion.velocity.x = current_speed;
+		}
 
-	if (action == GLFW_PRESS && key == GLFW_KEY_N) {
-		next_turn();
-		// printf("Currently it is this players turn: %i", game_state.turn_possesion);
+		if (action == GLFW_PRESS && key == GLFW_KEY_A) {
+			catMotion.velocity.x = -current_speed;
+		}
+
+		if (action == GLFW_RELEASE) {
+			if (key == GLFW_KEY_A && catMotion.velocity.x < 0) {
+				catMotion.velocity.x = 0.0f;
+			}
+			if (key == GLFW_KEY_D && catMotion.velocity.x > 0) {
+				catMotion.velocity.x = 0.0f;
+			}
+		}
+		
+		if (action == GLFW_PRESS && key == GLFW_KEY_UP) {
+			shooting_system.aimUp(curr_selected_char);
+		}
+
+		if (action == GLFW_PRESS && key == GLFW_KEY_DOWN) {
+			shooting_system.aimDown(curr_selected_char);
+		}
+
+		if (action == GLFW_PRESS && key == GLFW_KEY_ENTER) {
+			shooting_system.shoot(curr_selected_char);
+			// printf("shooting");
+			// printf("Num of projectiles %u\n", (uint)registry.projectiles.components.size());
+		}
 	}
 }
 
