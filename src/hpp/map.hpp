@@ -7,7 +7,7 @@ public:
 
 	~Map();
 
-	void init();
+	void init(int screenWidth);
 
 	std::vector<std::vector<unsigned int>> getTileMap();
 

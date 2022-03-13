@@ -32,10 +32,7 @@ void GameController::init(RenderSystem* renderer, GLFWwindow* window) {
 
 	//Setting player key callback
 	//glfwSetWindowUserPointer(window, this);
-	auto key_redirect = [](GLFWwindow* wnd, int _0, int _1, int _2, int _3) { ((GameController*)glfwGetWindowUserPointer(wnd))->on_player_key(_0, _1, _2, _3); };
-	glfwSetKeyCallback(this->window, key_redirect);
-	auto cursor_pos_redirect = [](GLFWwindow* wnd, double _0, double _1) { ((GameController*)glfwGetWindowUserPointer(wnd))->on_mouse_move({ _0, _1 }); };
-	glfwSetCursorPosCallback(this->window, cursor_pos_redirect);
+	set_user_input_callbacks();
 
 	inAGame = true;
 	player_mode = PLAYER_MODE::MOVING;
@@ -63,15 +60,6 @@ void GameController::step(float elapsed_ms) {
 			Motion& catMotion = registry.motions.get(e);
 			Animation& catAnimation = registry.animations.get(e);
 
-			if (catMotion.velocity.x == 0) {
-				catAnimation.animation_type = IDLE;
-			}
-			if (catMotion.velocity.x != 0) {
-				catAnimation.animation_type = WALKING;
-			}
-			if (catMotion.velocity.y < 0) {
-				catAnimation.animation_type = JUMPING;
-			}
 			if (catMotion.velocity.x < 0) {
 				catAnimation.facingLeft = true;
 				shooting_system.setAimLoc(e);
@@ -143,7 +131,7 @@ void GameController::build_map() {
 	createWall({ width / 2, -10 }, width, 10);
 
 	this->gameMap = Map();
-	gameMap.init();
+	gameMap.init(renderer->getScreenWidth());
 	renderer->setTileMap(gameMap);
 }
 
@@ -160,7 +148,7 @@ void GameController::init_player_teams() {
 	// Init the player team
 	// If our game gets more complex I'd probably abstract this out an have an Entity hierarchy -Fred
 	for (int i = 0; i < numPlayersInTeam; i++) {
-		Entity player_cat = createCat({ width / 2 - 200, height - 400 });
+		Entity player_cat = createCat(renderer, { width / 2 - 200, height - 400 });
 		player1_team.push_back(player_cat);
 		curr_selected_char = player_cat;
 	}
@@ -168,8 +156,8 @@ void GameController::init_player_teams() {
 	// Init npcai team
 	// NOTE: We should add some kind of bool to check if we should init a specific team,
 	// and then add the contents of this loop to the loop above
-	Entity ai_cat0 = createAI({ width - 400,300 });
-	Entity ai_cat1 = createAI({ width - 200,300 });
+	Entity ai_cat0 = createAI(renderer, { width - 400,300 });
+	Entity ai_cat1 = createAI(renderer, { width - 200,300 });
 	npcai_team.push_back(ai_cat0);
 	npcai_team.push_back(ai_cat1);
 
@@ -243,8 +231,8 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 
 	//Only allowed to move on specified turn
 	if (game_state.turn_possesion == PLAYER1 && inAGame) {
-		Motion& catMotion = registry.motions.get(player1_team[0]);
-		Rigidbody& rb = registry.rigidBodies.get(player1_team[0]);
+		Motion& catMotion = registry.motions.get(curr_selected_char);
+		Rigidbody& rb = registry.rigidBodies.get(curr_selected_char);
 
 		float current_speed = 150.0f;
 		float gravity_force = 2.5;
@@ -253,11 +241,34 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 			if (catMotion.velocity.y == gravity_force) {
 				catMotion.velocity.y = -gravity_force * current_speed;
 				rb.collision_normal.y = 0;
+				}
+			}
+
+			if (action == GLFW_PRESS && key == GLFW_KEY_S) {
+				catMotion.velocity.y = current_speed;
+			}
+
+			if (action == GLFW_PRESS && key == GLFW_KEY_D) {
+				catMotion.velocity.x = current_speed;
+				AnimationSystem::animate_cat_walk(curr_selected_char);
+			}
+
+			if (action == GLFW_PRESS && key == GLFW_KEY_A) {
+				catMotion.velocity.x = -current_speed;
+				AnimationSystem::animate_cat_walk(curr_selected_char);
 			}
 		}
 
-		if (action == GLFW_PRESS && key == GLFW_KEY_S) {
-			catMotion.velocity.y = current_speed;
+			if (action == GLFW_RELEASE) {
+				if (key == GLFW_KEY_A && catMotion.velocity.x < 0) {
+					catMotion.velocity.x = 0.0f;
+					AnimationSystem::animate_cat_idle(curr_selected_char);
+				}
+				if (key == GLFW_KEY_D && catMotion.velocity.x > 0) {
+					catMotion.velocity.x = 0.0f;
+					AnimationSystem::animate_cat_idle(curr_selected_char);
+				}
+			}
 		}
 
 		if (action == GLFW_PRESS && key == GLFW_KEY_D) {
@@ -301,4 +312,20 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 void GameController::on_mouse_move(vec2 mouse_pos) {
 	(void)mouse_pos;
 	// printf("now in game_controller");
+}
+
+void GameController::on_mouse_click(int button, int action, int mods) {
+
+	if (action == GLFW_PRESS) {
+		printf("In A Game");
+	}
+}
+
+void GameController::set_user_input_callbacks() {
+	auto key_redirect = [](GLFWwindow* wnd, int _0, int _1, int _2, int _3) { ((GameController*)glfwGetWindowUserPointer(wnd))->on_player_key(_0, _1, _2, _3); };
+	glfwSetKeyCallback(this->window, key_redirect);
+	auto cursor_pos_redirect = [](GLFWwindow* wnd, double _0, double _1) { ((GameController*)glfwGetWindowUserPointer(wnd))->on_mouse_move({ _0, _1 }); };
+	glfwSetCursorPosCallback(this->window, cursor_pos_redirect);
+	auto mouse_input = [](GLFWwindow* wnd, int _0, int _1, int _2) { ((GameController*)glfwGetWindowUserPointer(wnd))->on_mouse_click(_0, _1, _2); };
+	glfwSetMouseButtonCallback(this->window, mouse_input);
 }

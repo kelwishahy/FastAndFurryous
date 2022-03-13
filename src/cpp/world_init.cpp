@@ -3,6 +3,10 @@
 #include "glm/detail/_noise.hpp"
 #include "glm/detail/_noise.hpp"
 
+#include "hpp/common.hpp"
+
+#include "hpp/ANIMATION_CONSTANTS.hpp"
+
 using namespace glm;
 
 void calculateBoxVerticesAndSetTriangles(vec2 pos, vec2 scale, Boxcollider& box) {
@@ -17,8 +21,33 @@ void calculateBoxVerticesAndSetTriangles(vec2 pos, vec2 scale, Boxcollider& box)
 	box.vertices.push_back(pos + vec2{ left, down }); //downleft
 }
 
-Entity createCat(vec2 pos) {
+Entity createCat(RenderSystem* renderer, vec2 pos) {
+
+    auto head = Entity();
 	auto entity = Entity();
+
+	//---Head animation subentity---- putting this in front so that head gets rendered ontop of body
+	AnimationExtra& headbone = registry.animExtras.emplace(head);
+	headbone.parent = entity;
+	//This is hardcoded and theres not much we can do to change that
+	headbone.offset_from_parent = { 9.5f, -41.0f };
+	headbone.tag = "cat_head";
+
+	Motion& headmotion = registry.motions.emplace(head);
+	headmotion.position = pos + headbone.offset_from_parent;
+	headmotion.scale = { 64.f, 64.f * 0.72803f}; //Look at the dimensions of the sprite sheet to get the right ratio
+
+	Animation& headanim = registry.animations.emplace(head);
+	headanim.animation_states_constants.insert({ TEXTURE_IDS::CAT_FRONT_BLINK, CAT_FRONT_BLINK_CONSTANTS });
+	headanim.animation_states_constants.insert({ TEXTURE_IDS::CAT_SIDE_BLINK, CAT_SIDE_BLINK_CONSTANTS });
+	headanim.anim_state = TEXTURE_IDS::CAT_FRONT_BLINK;
+
+	registry.renderRequests.insert(
+		head,
+		{ TEXTURE_IDS::CAT_FRONT_BLINK,
+			SHADER_PROGRAM_IDS::ANIMATION,
+			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
+	//----------------------------------------------
 
 	// Add health component
 	Health& health = registry.health.emplace(entity);
@@ -31,7 +60,8 @@ Entity createCat(vec2 pos) {
 	motion.position = pos;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	motion.scale = { 64.f, 64.f };
+	float scale = ceil((64.f / defaultResolution.x) * renderer->getScreenWidth());
+	motion.scale = { scale, scale * 1.655f }; //Look at the dimensions of the sprite sheet to get the right ratio
 
 	Boxcollider& bc = registry.boxColliders.emplace(entity);
 	calculateBoxVerticesAndSetTriangles(motion.position, motion.scale, bc);
@@ -41,18 +71,21 @@ Entity createCat(vec2 pos) {
 	player.team = PLAYER_1_TEAM;
 	registry.renderRequests.insert(
 		entity,
-		{ TEXTURE_IDS::CAT_IDLE,
+		{ TEXTURE_IDS::CAT_FRONT_IDLE,
 			SHADER_PROGRAM_IDS::ANIMATION,
 			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
 
 	registry.weapons.insert(entity, Rifle());
 
-	registry.animations.emplace(entity);
+	Animation& anim = registry.animations.emplace(entity);
+	anim.animation_states_constants.insert({TEXTURE_IDS::CAT_FRONT_IDLE, CAT_IDLE_CONSTANTS});
+	anim.animation_states_constants.insert({TEXTURE_IDS::CAT_WALK, CAT_WALK_CONSTANTS });
+	anim.anim_state = TEXTURE_IDS::CAT_FRONT_IDLE;
 
 	return entity;
 }
 
-Entity createWall(vec2 pos, int width, int height) {
+Entity createWall(vec2 pos, float width, float height) {
 	auto entity = Entity();
 
 	// Setting initial motion values
@@ -85,12 +118,10 @@ Entity createWall(vec2 pos, int width, int height) {
 
 Entity createTile(float tileScale, vec2 tilePosition, int numTilesInARow) {
 	vec2 position = { ((tilePosition.y + 1) * tileScale) + ((tileScale * numTilesInARow) / 2.0), tilePosition.x * tileScale + (tileScale / 2.0)};
-	// if (tilePosition.y == 0.0)
-	// printf("\nTile position is {%f, %f}\n", position.x, position.y);
-	return createWall(position, (int)tileScale * numTilesInARow, (int)tileScale);
+	return createWall(position, tileScale * numTilesInARow, tileScale);
 }
 
-Entity createAI(vec2 pos) {
+Entity createAI(RenderSystem* renderer, vec2 pos) {
 	auto entity = Entity();
 
 	// Add health component
@@ -104,7 +135,8 @@ Entity createAI(vec2 pos) {
 	motion.position = pos;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	motion.scale = { 64.f, 64.f };
+	float scale = ceil((64.f / defaultResolution.x) * renderer->getScreenWidth());
+	motion.scale = { scale, scale };
 
 	Boxcollider& bc = registry.boxColliders.emplace(entity);
 	calculateBoxVerticesAndSetTriangles(motion.position, motion.scale, bc);
@@ -113,14 +145,17 @@ Entity createAI(vec2 pos) {
 	auto& player = registry.players.emplace(entity);
 	player.team = NPC_AI_TEAM;
 	registry.ais.emplace(entity);
-	registry.animations.emplace(entity);
 	registry.weapons.insert(entity, Rifle());
 	registry.renderRequests.insert(
 		entity,
-		{ TEXTURE_IDS::CAT_IDLE,
+		{ TEXTURE_IDS::CAT_FRONT_IDLE,
 			SHADER_PROGRAM_IDS::ANIMATION,
 			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
 
+	Animation& anim = registry.animations.emplace(entity);
+	anim.animation_states_constants.insert({ TEXTURE_IDS::CAT_FRONT_IDLE, CAT_IDLE_CONSTANTS });
+	anim.animation_states_constants.insert({ TEXTURE_IDS::CAT_WALK, CAT_WALK_CONSTANTS });
+	anim.anim_state = TEXTURE_IDS::CAT_FRONT_IDLE;
 	// Add a behaviour tree
 
 	return entity;
@@ -135,7 +170,8 @@ Entity createProjectile(RenderSystem* renderer, Entity originE, vec4 coefficient
 	motion.position = registry.motions.get(originE).position;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	motion.scale = { 10.0f, 10.0f };
+	float scale = ceil((10.f / defaultResolution.x) * renderer->getScreenWidth());
+	motion.scale = { scale, scale };
 
 	Boxcollider& bc = registry.boxColliders.emplace(entity);
 	calculateBoxVerticesAndSetTriangles(motion.position, motion.scale, bc);

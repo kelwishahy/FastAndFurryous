@@ -44,11 +44,7 @@ void WorldSystem::init(RenderSystem* renderer, GLFWwindow* window) {
 	init_main_menu();
 	audio.play_music(MUSIC_LIST::IN_GAME_BACKGROUND);
 
-	auto cursor_pos_redirect = [](GLFWwindow* wnd, double _0, double _1) { ((WorldSystem*)glfwGetWindowUserPointer(wnd))->on_mouse_move({ _0, _1 }); };
-	glfwSetCursorPosCallback(this->window, cursor_pos_redirect);
-
-	/*auto key_redirect = [](GLFWwindow* wnd, int _0, int _1, int _2) { ((WorldSystem*)glfwGetWindowUserPointer(wnd))->on_key(_0, _1, _2); };
-	glfwSetKeyCallback(wthis->window, key_redirect);*/
+	set_user_input_callbacks();
 
 	//creates a wall on the left side of the screen
 	printf("window height is: %i px, window width is: %i px\n", renderer->getScreenHeight(), renderer->getScreenWidth());
@@ -59,7 +55,6 @@ void WorldSystem::init(RenderSystem* renderer, GLFWwindow* window) {
 // Update our game world
 bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
-	cooldown += elapsed_ms_since_last_update;
 	// Remove entities that leave the screen on the left side
 	// Iterate backwards to be able to remove without unterfering with the next object to visit
 	// (the containers exchange the last element with the current)
@@ -71,17 +66,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	//	}
 	//}
 	//
-	if (!current_game.inAGame) {
-		if (cooldown > 2000.0f) {
-			glfwGetWindowUserPointer(this->window);
-			int state = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT);
-			if (state == GLFW_PRESS)
-			{
-				check_for_button_presses();
-				cooldown = 0;
-			}
-		}
-	}
 
 	// Removing out of screen entities
 	auto& motions_registry = registry.motions;
@@ -116,7 +100,7 @@ void WorldSystem::restart_game() {
 void WorldSystem::handle_collisions() {
 	// Loop over all collisions detected by the physics system
 
-	auto& collisionsRegistry = registry.collisions; // TODO: @Tim, is the reference here needed?
+	auto& collisionsRegistry = registry.collisions;
 	for (uint i = 0; i < collisionsRegistry.components.size(); i++) {
 		// The entity and its collider
 		Entity entity = collisionsRegistry.entities[i];
@@ -134,16 +118,12 @@ void WorldSystem::handle_collisions() {
 }
 
 void WorldSystem::init_main_menu() {
-
 	createMenu(MENU_TYPES::START, 0.75);
-
-	//Init buttons
-	//add onClickCallbacks
 	std::vector<std::function<void()>> onClick;
 	onClick.push_back(testCallback);
-	//std::function<void()> test = std::bind(&restart_game);
-	//onClick.push_back(restart_game);
-	createButton(vec2{ renderer->getScreenWidth() - 300, 400 }, vec2{400, 80},TEXTURE_IDS::BUTTON1, onClick);
+	vec2 pos = {(defaultResolution.x - 300.f) / defaultResolution.x * renderer->getScreenWidth(), (400.f / defaultResolution.y) * renderer->getScreenHeight() };
+	vec2 scale = { (400.f / defaultResolution.x) * renderer->getScreenWidth(), (80.f / defaultResolution.y) * renderer->getScreenHeight() };
+	createButton(pos, scale,TEXTURE_IDS::BUTTON1, onClick);
 
 }
 
@@ -158,6 +138,13 @@ void WorldSystem::on_key(int button, int action, int mods) {
 	//ALL PLAYER MOVE FUNCTIONALITY IS MOVED TO game_controller
 	//THIS AREA SHOULD BE FOR CONTROLS THAT ARE FOR NAVIGATING THE MAIN MENU etc...
 	
+}
+
+void WorldSystem::on_mouse_click(int button, int action, int mods) {
+	if (action == GLFW_PRESS) {
+		printf("hello");
+		check_for_button_presses();
+	}
 }
 
 //I need to refactor everything from this point and beyond
@@ -210,6 +197,17 @@ void WorldSystem::on_mouse_move(vec2 mouse_position) {
 	// printf("mouse pos: %f, %f\n", mouse_pos.x, mouse_pos.y);
 }
 
+void WorldSystem::set_user_input_callbacks() {
+	auto cursor_pos_redirect = [](GLFWwindow* wnd, double _0, double _1) { ((WorldSystem*)glfwGetWindowUserPointer(wnd))->on_mouse_move({ _0, _1 }); };
+	glfwSetCursorPosCallback(this->window, cursor_pos_redirect);
+
+	//auto key_redirect = [](GLFWwindow* wnd, int _0, int _1, int _2) { ((WorldSystem*)glfwGetWindowUserPointer(wnd))->on_key(_0, _1, _2); };
+	//glfwSetKeyCallback(wthis->window, key_redirect);*/
+
+	auto mouse_input = [](GLFWwindow* wnd, int _0, int _1, int _2) { ((WorldSystem*)glfwGetWindowUserPointer(wnd))->on_mouse_click(_0, _1, _2); };
+	glfwSetMouseButtonCallback(this->window, mouse_input);
+}
+
 void WorldSystem::play_tutorial(std::vector<std::function<void()>> callbacks) {
 	createButton(vec2{ renderer->getScreenWidth() / 2, renderer->getScreenHeight() / 2 }, vec2{ renderer->getScreenWidth(), renderer->getScreenHeight() },TEXTURE_IDS::HOWTOMOVE, callbacks);
 }
@@ -217,6 +215,8 @@ void WorldSystem::play_tutorial(std::vector<std::function<void()>> callbacks) {
 void WorldSystem::play_select(std::vector<std::function<void()>> callbacks) {
 	std::vector<std::function<void()>> onClick;
 	createMenu(MENU_TYPES::SELECT, 0.75);
-	createButton(vec2{ renderer->getScreenWidth() / 4, renderer->getScreenHeight() / 2 }, vec2{ 500, 500 },TEXTURE_IDS::BUTTONC, onClick);
+	vec2 pos = { (defaultResolution.x / 4.f) / defaultResolution.x * renderer->getScreenWidth(), (defaultResolution.y / 2.0) / defaultResolution.y * renderer->getScreenHeight() };
+	vec2 scale = { (500.f / defaultResolution.x) * renderer->getScreenWidth(), (500.f / defaultResolution.y) * renderer->getScreenHeight() };
+	createButton(pos, scale,TEXTURE_IDS::BUTTONC, onClick);
 	
 }
