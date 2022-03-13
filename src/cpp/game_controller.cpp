@@ -32,10 +32,7 @@ void GameController::init(RenderSystem* renderer, GLFWwindow* window) {
 
 	//Setting player key callback
 	//glfwSetWindowUserPointer(window, this);
-	auto key_redirect = [](GLFWwindow* wnd, int _0, int _1, int _2, int _3) { ((GameController*)glfwGetWindowUserPointer(wnd))->on_player_key(_0, _1, _2, _3); };
-	glfwSetKeyCallback(this->window, key_redirect);
-	auto cursor_pos_redirect = [](GLFWwindow* wnd, double _0, double _1) { ((GameController*)glfwGetWindowUserPointer(wnd))->on_mouse_move({ _0, _1 }); };
-	glfwSetCursorPosCallback(this->window, cursor_pos_redirect);
+	set_user_input_callbacks();
 
 	inAGame = true;
 	player_mode = PLAYER_MODE::MOVING;
@@ -310,4 +307,20 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 void GameController::on_mouse_move(vec2 mouse_pos) {
 	(void)mouse_pos;
 	// printf("now in game_controller");
+}
+
+void GameController::on_mouse_click(int button, int action, int mods) {
+
+	if (action == GLFW_PRESS) {
+		printf("In A Game");
+	}
+}
+
+void GameController::set_user_input_callbacks() {
+	auto key_redirect = [](GLFWwindow* wnd, int _0, int _1, int _2, int _3) { ((GameController*)glfwGetWindowUserPointer(wnd))->on_player_key(_0, _1, _2, _3); };
+	glfwSetKeyCallback(this->window, key_redirect);
+	auto cursor_pos_redirect = [](GLFWwindow* wnd, double _0, double _1) { ((GameController*)glfwGetWindowUserPointer(wnd))->on_mouse_move({ _0, _1 }); };
+	glfwSetCursorPosCallback(this->window, cursor_pos_redirect);
+	auto mouse_input = [](GLFWwindow* wnd, int _0, int _1, int _2) { ((GameController*)glfwGetWindowUserPointer(wnd))->on_mouse_click(_0, _1, _2); };
+	glfwSetMouseButtonCallback(this->window, mouse_input);
 }
