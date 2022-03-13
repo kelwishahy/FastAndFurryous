@@ -8,24 +8,14 @@
 #include "glm/ext.hpp"
 #include <iostream>
 #include "../project_path.hpp"
-
-#include "hpp/ai_system.hpp"
 #include "hpp/ai_system.hpp"
 
 using namespace glm;
 
-RenderSystem::RenderSystem() {
-}
-
-// Destructor
-RenderSystem::~RenderSystem() {
-	glfwTerminate();
-}
-
 void RenderSystem::draw(float elapsed_ms) {
 	mat4 projectionMatrix = createProjectionMatrix();
 
-	glViewport(0, 0, this->screenWidth, this->screenHeight);
+	glViewport(0, 0, screenWidth, screenHeight);
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
@@ -59,8 +49,10 @@ void RenderSystem::draw(float elapsed_ms) {
 		mat4 transformationMatrix;
 
 		switch (request.geometry) {
+			mat4 transformationMatrix;
 			case GEOMETRY_BUFFER_IDS::QUAD: {
-				 transformationMatrix = transform(registry.motions.get(entity), 0.f, true, true, false);
+				auto& motion = registry.motions.get(entity);
+				transformationMatrix = transform(motion.position, motion.scale, 0.f);
 				std::string shaderInputs[] = { "position" };
 				drawQuad(request, shaderInputs, 1);
 				renderToScreen(transformationMatrix, projectionMatrix);
@@ -76,11 +68,12 @@ void RenderSystem::draw(float elapsed_ms) {
 				}
 
 				// Draw a static textured quad
+				auto& motion = registry.motions.get(entity);
 				if (registry.buttons.has(entity)) {
-					transformationMatrix = transform(registry.motions.get(entity), 0.8f, true, true, false);
+					transformationMatrix = transform(motion.position, motion.scale, 0.8f);
 				}
 				else {
-					transformationMatrix = transform(registry.motions.get(entity), 0.f, true, true, false);
+					transformationMatrix = transform(motion.position, motion.scale, 0.f);
 				}
 				std::string shaderInputs[] = { "position", "texCoord" };
 				drawQuad(request, shaderInputs, 2);
@@ -95,24 +88,12 @@ void RenderSystem::draw(float elapsed_ms) {
 	}
 }
 
-glm::mat4 RenderSystem::transform(Motion& motion, float depth, bool translate, bool scale, bool rotate) {
+mat4 RenderSystem::transform(vec2 position, vec2 scale, float depth) {
 	Transform transform;
-
-	if (translate) {
-		transform.mat = glm::translate(transform.mat, vec3(motion.position, depth));
-	}
-
-	if (scale) {
-		transform.mat = glm::scale(transform.mat, vec3(motion.scale, depth));
-	}
-
-	if (rotate) {
-		printf("No rotations yet\n");
-	}
-	
+	transform.mat = glm::translate(transform.mat, vec3(position, depth));
+	transform.mat = glm::scale(transform.mat, vec3(scale, depth));
 	return transform.mat;
 }
-
 
 void RenderSystem::renderToScreen(mat4& transformationMatrix, mat4& projectionMatrix) {
 	GLint size = 0;
@@ -133,8 +114,6 @@ void RenderSystem::renderToScreen(mat4& transformationMatrix, mat4& projectionMa
 	glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_SHORT, nullptr);
 	glHasError();
 }
-
-
 
 void RenderSystem::drawQuad(RenderRequest& request, std::string shaderInputs[], int numInputs) {
 	const GLuint vbo = vertexBuffers[(GLuint)request.geometry];
@@ -280,7 +259,8 @@ void RenderSystem::animateSprite(RenderRequest& request, Entity& entity, float e
 	glUniform1i(facing_left_uloc, facingLeft);
 
 	// Render to the screen
-	mat4 transformationMatrix = transform(registry.motions.get(entity), 0.5f, true, true, false);
+	auto& motion = registry.motions.get(entity);
+	mat4 transformationMatrix = transform(motion.position, motion.scale, 0.5f);
 	renderToScreen(transformationMatrix, projection);
 
 	// Resetting the texture coordinates after use
@@ -353,16 +333,17 @@ void RenderSystem::drawTiles(const mat4& projectionMatrix) {
 				const GLsizei numIndices = size / sizeof(uint16_t);
 
 				/* MATRIX TRANSFORMATIONS */
-				Transform transform;
-				transform.mat = translate(transform.mat, vec3((0.5 + j) * scaleFactor, (0.5 + i) * scaleFactor, 0.0f));
-				transform.mat = scale(transform.mat, vec3(scaleFactor, scaleFactor, 0.f));
+				mat4 transformationMatrix = transform(
+					{ (0.5 + j) * scaleFactor, (0.5 + i) * scaleFactor }, 
+					{ scaleFactor, scaleFactor }, 
+					0.f);
 
 				GLint currProgram;
 				glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
 
 				// Setting uniform values to the currently bound program
 				GLuint transform_loc = glGetUniformLocation(currProgram, "transform");
-				glUniformMatrix4fv(transform_loc, 1, GL_FALSE, (float*)&transform.mat);
+				glUniformMatrix4fv(transform_loc, 1, GL_FALSE, (float*)&transformationMatrix);
 				GLuint projection_loc = glGetUniformLocation(currProgram, "projection");
 				glUniformMatrix4fv(projection_loc, 1, GL_FALSE, (float*)&projection);
 				glHasError();
@@ -382,13 +363,10 @@ void RenderSystem::drawTiles(const mat4& projectionMatrix) {
 }
 
 void RenderSystem::drawBackground(RenderRequest& request, mat4& projectionMatrix, float layer) {
-	Transform transform;
-	transform.mat = translate(transform.mat, vec3(screenWidth/2, screenHeight/2, layer));
-	transform.mat = scale(transform.mat, vec3(screenWidth, screenHeight, layer));
-
+	mat4 transformationMatrix = transform({ screenWidth / 2, screenHeight / 2 }, { screenWidth, screenHeight }, layer);
 	std::string shaderInputs[] = { "position", "texCoord" };
 	drawQuad(request, shaderInputs, 2);
-	renderToScreen(transform.mat, projectionMatrix);
+	renderToScreen(transformationMatrix, projectionMatrix);
 }
 
 void RenderSystem::drawText(Entity e) {
@@ -490,12 +468,13 @@ void RenderSystem::drawText(Entity e) {
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	//Custom projection matrix
-	mat4 transformationMatrix = transform(registry.motions.get(e), 1.0f, true, true, false);
-	//mat4 projection = ortho(0.0f, 800.0f, 0.0f, 600.0f);
+	auto m = registry.motions.get(e);
+	m.position = {m.position.x / defaultResolution.x * screenWidth, m.position.y / defaultResolution.y * screenHeight};
+	m.scale = { m.scale.x / defaultResolution.x * screenWidth, m.scale.y / defaultResolution.y * screenHeight };
+	mat4 transformationMatrix = transform(m.position, m.scale, 1.0f);
 	mat4 projection = createProjectionMatrix();
 	renderToScreen(transformationMatrix, projection);
 }
-
 
 bool RenderSystem::init() {
 	// Create window & context
@@ -510,10 +489,9 @@ bool RenderSystem::init() {
 	glfwWindowHint(GLFW_MAXIMIZED, GL_TRUE); // Make the window full screen
 
 	// NOTE: The width & height here are unimportant as the window will be maximized on creation
-	this->window = glfwCreateWindow(1000, 800, "Fast and the Furry-ous", NULL, NULL);
+	this->window = glfwCreateWindow(1600, 900, "Fast and the Furry-ous", NULL, NULL);
 	glfwSetWindowAspectRatio(window, 16, 9);
-	glfwGetWindowSize(window, &this->screenWidth, &this->screenHeight);
-
+	glfwGetFramebufferSize(window, &this->screenWidth, &this->screenHeight);
 	printf("Screen size: %d, %d\n", this->screenWidth, this->screenHeight);
 
 	if (window == NULL) {

@@ -10,16 +10,16 @@
 #include "glm/detail/_noise.hpp"
 
 // Player entities
-Entity createCat(glm::vec2 pos);
+Entity createCat(RenderSystem* renderer, glm::vec2 pos);
 
 // solid terrain
-Entity createWall(glm::vec2 pos, int width, int height);
+Entity createWall(glm::vec2 pos, float width, float height);
 
 // Tile
 Entity createTile(float tileScale, glm::vec2 tilePosition, int numTilesInARow);
 
 // AI
-Entity createAI(glm::vec2 pos);
+Entity createAI(RenderSystem* renderer, glm::vec2 pos);
 
 //Projectile
 Entity createProjectile(RenderSystem* renderer, Entity originE, glm::vec4 coefficientsX, glm::vec4 coefficientsY, glm::vec2 endtangent);

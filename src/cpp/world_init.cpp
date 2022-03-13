@@ -2,6 +2,7 @@
 #include "..\hpp\tiny_ecs_registry.hpp"
 #include "glm/detail/_noise.hpp"
 #include "glm/detail/_noise.hpp"
+#include "hpp/common.hpp"
 
 using namespace glm;
 
@@ -17,7 +18,7 @@ void calculateBoxVerticesAndSetTriangles(vec2 pos, vec2 scale, Boxcollider& box)
 	box.vertices.push_back(pos + vec2{ left, down }); //downleft
 }
 
-Entity createCat(vec2 pos) {
+Entity createCat(RenderSystem* renderer, vec2 pos) {
 	auto entity = Entity();
 
 	// Add health component
@@ -31,7 +32,8 @@ Entity createCat(vec2 pos) {
 	motion.position = pos;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	motion.scale = { 64.f, 64.f };
+	float scale = ceil((64.f / defaultResolution.x) * renderer->getScreenWidth());
+	motion.scale = { scale, scale };
 
 	Boxcollider& bc = registry.boxColliders.emplace(entity);
 	calculateBoxVerticesAndSetTriangles(motion.position, motion.scale, bc);
@@ -52,7 +54,7 @@ Entity createCat(vec2 pos) {
 	return entity;
 }
 
-Entity createWall(vec2 pos, int width, int height) {
+Entity createWall(vec2 pos, float width, float height) {
 	auto entity = Entity();
 
 	// Setting initial motion values
@@ -85,12 +87,10 @@ Entity createWall(vec2 pos, int width, int height) {
 
 Entity createTile(float tileScale, vec2 tilePosition, int numTilesInARow) {
 	vec2 position = { ((tilePosition.y + 1) * tileScale) + ((tileScale * numTilesInARow) / 2.0), tilePosition.x * tileScale + (tileScale / 2.0)};
-	// if (tilePosition.y == 0.0)
-	// printf("\nTile position is {%f, %f}\n", position.x, position.y);
-	return createWall(position, (int)tileScale * numTilesInARow, (int)tileScale);
+	return createWall(position, tileScale * numTilesInARow, tileScale);
 }
 
-Entity createAI(vec2 pos) {
+Entity createAI(RenderSystem* renderer, vec2 pos) {
 	auto entity = Entity();
 
 	// Add health component
@@ -104,7 +104,8 @@ Entity createAI(vec2 pos) {
 	motion.position = pos;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	motion.scale = { 64.f, 64.f };
+	float scale = ceil((64.f / defaultResolution.x) * renderer->getScreenWidth());
+	motion.scale = { scale, scale };
 
 	Boxcollider& bc = registry.boxColliders.emplace(entity);
 	calculateBoxVerticesAndSetTriangles(motion.position, motion.scale, bc);
@@ -135,7 +136,8 @@ Entity createProjectile(RenderSystem* renderer, Entity originE, vec4 coefficient
 	motion.position = registry.motions.get(originE).position;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	motion.scale = { 10.0f, 10.0f };
+	float scale = ceil((10.f / defaultResolution.x) * renderer->getScreenWidth());
+	motion.scale = { scale, scale };
 
 	Boxcollider& bc = registry.boxColliders.emplace(entity);
 	calculateBoxVerticesAndSetTriangles(motion.position, motion.scale, bc);
