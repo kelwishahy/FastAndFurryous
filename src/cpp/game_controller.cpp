@@ -64,12 +64,13 @@ void GameController::step(float elapsed_ms) {
 			Animation& catAnimation = registry.animations.get(e);
 
 			if (catMotion.velocity.x == 0) {
-				catAnimation.anim_state = TEXTURE_IDS::CAT_FRONT_IDLE;
+				AnimationSystem::animate_cat_idle(e);
 			}
 			if (catMotion.velocity.x != 0) {
-				catAnimation.anim_state = TEXTURE_IDS::CAT_WALK;
+				AnimationSystem::animate_cat_walk(e);
 			}
 			if (catMotion.velocity.y < 0) {
+				//TODO change this here, replace with a single all to AnimationSystem
 				catAnimation.anim_state = TEXTURE_IDS::CAT_JUMP;
 			}
 			if (catMotion.velocity.x < 0) {

@@ -67,9 +67,45 @@ void AnimationSystem::step(float elapsed_ms) {
 
 }
 
-//void AnimationSystem::animate_cat_walk(Entity e) {
-//
-//}
+//PLEASE ONLY PASS IN CATS THAT HAVE THE CORRECT ANIM_CONSTATNST LOADED
+void AnimationSystem::animate_cat_walk(Entity e) {
+
+	//assert(entity is cat)
+
+	//Animate the cat's main torso
+	Animation& anim = registry.animations.get(e);
+	anim.anim_state = TEXTURE_IDS::CAT_WALK;
+
+	//This is scuffed but we can just look for the extraAnim we need
+	for (Entity e : registry.animExtras.entities) {
+
+		AnimationExtra extra = registry.animExtras.get(e);
+		if (extra.tag == "cat_head") {
+			//Animate the head
+			Animation& headanim = registry.animations.get(e);
+			headanim.anim_state = TEXTURE_IDS::CAT_SIDE_BLINK;
+		}
+
+	}
+
+}
+
+void AnimationSystem::animate_cat_idle(Entity e) {
+
+	//assert(entity is cat)
+	Animation& anim = registry.animations.get(e);
+	anim.anim_state = TEXTURE_IDS::CAT_FRONT_IDLE;
+
+	for (Entity e : registry.animExtras.entities) {
+
+		AnimationExtra extra = registry.animExtras.get(e);
+		if (extra.tag == "cat_head") {
+			Animation& headanim = registry.animations.get(e);
+			headanim.anim_state = TEXTURE_IDS::CAT_FRONT_BLINK;
+		}
+
+	}
+}
 //
 //void AnimationSystem::change_anim_orientation(Entity e) {
 //

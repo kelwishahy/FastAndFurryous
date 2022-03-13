@@ -253,6 +253,7 @@ struct Animation {
 };
 
 struct AnimationExtra {
+	std::string tag;   //This is scuffed but we can just name the extra anim for now
 	Entity parent;
 	glm::vec2 offset_from_parent;
 };

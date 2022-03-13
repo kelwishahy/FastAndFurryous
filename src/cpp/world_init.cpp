@@ -27,6 +27,7 @@ Entity createCat(vec2 pos) {
 	headbone.parent = entity;
 	//This is hardcoded and theres not much we can do to change that
 	headbone.offset_from_parent = { 9.5f, -41.0f };
+	headbone.tag = "cat_head";
 
 	Motion& headmotion = registry.motions.emplace(head);
 	headmotion.position = pos + headbone.offset_from_parent;
