@@ -70,7 +70,9 @@ private:
 	void init_player_teams();
 
 	void on_player_key(int key, int, int action, int mod);
-	void GameController::on_mouse_move(glm::vec2 mouse_pos);
+	void on_mouse_move(glm::vec2 mouse_pos);
+	void on_mouse_click(int button, int action, int mods);
+	void set_user_input_callbacks();
 
 	void next_turn();
 

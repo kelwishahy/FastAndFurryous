@@ -37,6 +37,8 @@ public:
 	// Input callback functions
 	void on_key(int button, int action, int mods);
 	void on_mouse_move(vec2 pos);
+	void on_mouse_click(int button, int action, int mods);
+	void set_user_input_callbacks();
 
 	void check_for_button_presses();
 
@@ -69,13 +71,4 @@ private:
 
 	// OpenGL window handle
 	GLFWwindow* window;
-
-	//Mouse press cooldown - I need to remove this later
-	float cooldown = 0;
-
-	//Audio references
-	Mix_Music* background_music;
-	Mix_Chunk* catScream;
-	Mix_Chunk* gunshot;
-	Mix_Chunk* win;
 };
