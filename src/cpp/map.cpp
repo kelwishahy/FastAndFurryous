@@ -14,11 +14,12 @@ Map::~Map() {
 	
 }
 
-void Map::init() {
+void Map::init(int screenWidth) {
 	// Create a default game map
 	this->mapHeight = 18;
 	this->mapWidth = 30;
-	this->tileScale = 64.f;
+	this->tileScale = ceil((float)screenWidth / mapWidth);
+	printf("Tiles are %fx%f\n", tileScale, tileScale);
 
 	readMapFromFile();
 

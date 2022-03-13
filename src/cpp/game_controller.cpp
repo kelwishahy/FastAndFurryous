@@ -143,7 +143,7 @@ void GameController::build_map() {
 	createWall({ width / 2, -10 }, width, 10);
 
 	this->gameMap = Map();
-	gameMap.init();
+	gameMap.init(renderer->getScreenWidth());
 	renderer->setTileMap(gameMap);
 }
 
@@ -160,7 +160,7 @@ void GameController::init_player_teams() {
 	// Init the player team
 	// If our game gets more complex I'd probably abstract this out an have an Entity hierarchy -Fred
 	for (int i = 0; i < numPlayersInTeam; i++) {
-		Entity player_cat = createCat({ width / 2 - 200, height - 400 });
+		Entity player_cat = createCat(renderer, { width / 2 - 200, height - 400 });
 		player1_team.push_back(player_cat);
 		curr_selected_char = player_cat;
 	}
@@ -168,8 +168,8 @@ void GameController::init_player_teams() {
 	// Init npcai team
 	// NOTE: We should add some kind of bool to check if we should init a specific team,
 	// and then add the contents of this loop to the loop above
-	Entity ai_cat0 = createAI({ width - 400,300 });
-	Entity ai_cat1 = createAI({ width - 200,300 });
+	Entity ai_cat0 = createAI(renderer, { width - 400,300 });
+	Entity ai_cat1 = createAI(renderer, { width - 200,300 });
 	npcai_team.push_back(ai_cat0);
 	npcai_team.push_back(ai_cat1);
 

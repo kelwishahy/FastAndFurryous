@@ -116,7 +116,7 @@ void WorldSystem::restart_game() {
 void WorldSystem::handle_collisions() {
 	// Loop over all collisions detected by the physics system
 
-	auto& collisionsRegistry = registry.collisions; // TODO: @Tim, is the reference here needed?
+	auto& collisionsRegistry = registry.collisions;
 	for (uint i = 0; i < collisionsRegistry.components.size(); i++) {
 		// The entity and its collider
 		Entity entity = collisionsRegistry.entities[i];
@@ -134,16 +134,12 @@ void WorldSystem::handle_collisions() {
 }
 
 void WorldSystem::init_main_menu() {
-
 	createMenu(MENU_TYPES::START, 0.75);
-
-	//Init buttons
-	//add onClickCallbacks
 	std::vector<std::function<void()>> onClick;
 	onClick.push_back(testCallback);
-	//std::function<void()> test = std::bind(&restart_game);
-	//onClick.push_back(restart_game);
-	createButton(vec2{ renderer->getScreenWidth() - 300, 400 }, vec2{400, 80},TEXTURE_IDS::BUTTON1, onClick);
+	vec2 pos = {(defaultResolution.x - 300.f) / defaultResolution.x * renderer->getScreenWidth(), (400.f / defaultResolution.y) * renderer->getScreenHeight() };
+	vec2 scale = { (400.f / defaultResolution.x) * renderer->getScreenWidth(), (80.f / defaultResolution.y) * renderer->getScreenHeight() };
+	createButton(pos, scale,TEXTURE_IDS::BUTTON1, onClick);
 
 }
 
@@ -217,6 +213,8 @@ void WorldSystem::play_tutorial(std::vector<std::function<void()>> callbacks) {
 void WorldSystem::play_select(std::vector<std::function<void()>> callbacks) {
 	std::vector<std::function<void()>> onClick;
 	createMenu(MENU_TYPES::SELECT, 0.75);
-	createButton(vec2{ renderer->getScreenWidth() / 4, renderer->getScreenHeight() / 2 }, vec2{ 500, 500 },TEXTURE_IDS::BUTTONC, onClick);
+	vec2 pos = { (defaultResolution.x / 4.f) / defaultResolution.x * renderer->getScreenWidth(), (defaultResolution.y / 2.0) / defaultResolution.y * renderer->getScreenHeight() };
+	vec2 scale = { (500.f / defaultResolution.x) * renderer->getScreenWidth(), (500.f / defaultResolution.y) * renderer->getScreenHeight() };
+	createButton(pos, scale,TEXTURE_IDS::BUTTONC, onClick);
 	
 }
