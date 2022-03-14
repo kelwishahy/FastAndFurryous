@@ -71,18 +71,16 @@ void GameController::step(float elapsed_ms) {
 
 	// change the animation type depending on the velocity
 	for (Entity e : registry.animations.entities) {
-		if (registry.players.has(e)) {
-			Motion& catMotion = registry.motions.get(e);
-			Animation& catAnimation = registry.animations.get(e);
+		Motion& catMotion = registry.motions.get(e);
+		Animation& catAnimation = registry.animations.get(e);
 
-			if (catMotion.velocity.x < 0) {
+		if (catMotion.velocity.x < 0) {
 				catAnimation.facingLeft = true;
 				shooting_system.setAimLoc(e);
-			}
-			if (catMotion.velocity.x > 0) {
-				catAnimation.facingLeft = false;
-				shooting_system.setAimLoc(e);
-			}
+		}
+		if (catMotion.velocity.x > 0) {
+			catAnimation.facingLeft = false;
+			shooting_system.setAimLoc(e);
 		}
 	}
 
@@ -213,13 +211,18 @@ void GameController::handle_collisions() {
 			Projectile& pj = registry.projectiles.get(entity);
 			if (registry.terrains.has(entity_other) && entity_other != pj.origin) {
 				registry.remove_all_components_of(entity);
-			} else if (entity_other != pj.origin && registry.players.has(entity_other)) { // Projectile hit another player
-				auto team = registry.players.get(pj.origin).team;
-				auto otherTeam = registry.players.get(entity_other).team;
-
-				// Decrease that players health
-				if (team != otherTeam) {
-					decreaseHealth(entity_other, registry.weapons.get(pj.origin).damage);
+			} else if (entity_other != pj.origin) { // Projectile hit another player
+				for (std::vector<Entity> vec : teams) {
+					bool origin_isonteam = false;
+					bool entity_other_isonteam = false;
+					for (Entity e : vec) { //check for friendly fire, since std::find dosen't work
+						if (e == pj.origin) 
+							origin_isonteam = true;
+						if (e == entity_other) 
+							entity_other_isonteam = true;
+					}
+					if (origin_isonteam && !entity_other_isonteam)
+						decreaseHealth(entity_other, registry.weapons.get(pj.origin).damage);
 				}
 				registry.remove_all_components_of(entity);
 			}
@@ -294,11 +297,11 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 
 
 		if (action == GLFW_PRESS && key == GLFW_KEY_UP) {
-			shooting_system.aimUp(curr_selected_char);
+			shooting_system.aimUp(curr_selected_char, 0.05f);
 		}
 
 		if (action == GLFW_PRESS && key == GLFW_KEY_DOWN) {
-			shooting_system.aimDown(curr_selected_char);
+			shooting_system.aimDown(curr_selected_char, 0.05f);
 		}
 
 		if (action == GLFW_PRESS && key == GLFW_KEY_ENTER) {

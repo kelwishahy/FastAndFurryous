@@ -21,6 +21,7 @@ void UISystem::step(float elapsed_ms) {
 				assert(registry.weapons.has(crosshair_marker.second));
 				WeaponBase weapon = registry.weapons.get(crosshair_marker.second);
 				Motion& crosshair_motion = registry.motions.get(crosshair_marker.first);
+				printf("aim angle is: %f\n", weapon.aim_angle);
 				crosshair_motion.position = { ShootingSystem::calculate_point(weapon.curr_trajectory_x, 0.35f), ShootingSystem::calculate_point(weapon.curr_trajectory_y, 0.35f) };
 				break;
 			}

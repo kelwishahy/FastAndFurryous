@@ -18,7 +18,6 @@ public:
 	ComponentContainer<Collision> collisions;
 	ComponentContainer<glm::vec3> colors;
 	ComponentContainer<Health> health;
-	ComponentContainer<Player> players;
 	ComponentContainer<Mesh*> meshPtrs;
 	ComponentContainer<Motion> motions;
 	ComponentContainer<RayCast> rayCasts;
@@ -46,7 +45,6 @@ public:
 		registry_list.push_back(&collisions);
 		registry_list.push_back(&colors);
 		registry_list.push_back(&health);
-		registry_list.push_back(&players);
 		registry_list.push_back(&meshPtrs);
 		registry_list.push_back(&motions);
 		registry_list.push_back(&rayCasts);

@@ -1,7 +1,5 @@
 #include "..\hpp\world_init.hpp"
 #include "..\hpp\tiny_ecs_registry.hpp"
-#include "glm/detail/_noise.hpp"
-#include "glm/detail/_noise.hpp"
 
 #include "hpp/common.hpp"
 
@@ -69,8 +67,6 @@ Entity createCat(RenderSystem* renderer, vec2 pos) {
 	calculateBoxVerticesAndSetTriangles(motion.position, motion.scale, bc);
 	bc.transformed_required = true;
 
-	auto& player = registry.players.emplace(entity);
-	player.team = PLAYER_1_TEAM;
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_IDS::CAT_FRONT_IDLE,
@@ -144,8 +140,6 @@ Entity createAI(RenderSystem* renderer, vec2 pos) {
 	calculateBoxVerticesAndSetTriangles(motion.position, motion.scale, bc);
 	bc.transformed_required = true;
 
-	auto& player = registry.players.emplace(entity);
-	player.team = NPC_AI_TEAM;
 	registry.ais.emplace(entity);
 	registry.weapons.insert(entity, Rifle());
 	registry.renderRequests.insert(

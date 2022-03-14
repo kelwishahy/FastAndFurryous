@@ -24,9 +24,9 @@ public:
 	//deltaTime is normalized between 0 and 1, where 0 is the time at and 1 is the time at end
 	static float calculate_point(vec4 A, float deltaTime);
 
-	void aimUp(Entity e);
+	void aimUp(Entity e, float aimrate);
 
-	void aimDown(Entity e);
+	void aimDown(Entity e, float amount);
 
 	void setAimLoc(Entity e);
 

@@ -41,7 +41,7 @@ void ShootingSystem::step(float elapsed_time) {
 	}
 }
 
-void ShootingSystem::aimUp(Entity e) {
+void ShootingSystem::aimUp(Entity e, float amount) {
 
 
 	WeaponBase& weapon = registry.weapons.get(e);
@@ -49,16 +49,16 @@ void ShootingSystem::aimUp(Entity e) {
 	SHOOT_ORIENTATION orientation = (registry.animations.get(e).facingLeft) ? SHOOT_ORIENTATION::LEFT : SHOOT_ORIENTATION::RIGHT;
 
 	if (orientation == SHOOT_ORIENTATION::LEFT) {
-		weapon.aim_angle = (weapon.aim_angle - 0.1 <= pi - weapon.MAX_ANGLE) ? pi - weapon.MAX_ANGLE : weapon.aim_angle - 0.1;
+		weapon.aim_angle = (weapon.aim_angle - amount <= pi - weapon.MAX_ANGLE) ? pi - weapon.MAX_ANGLE : weapon.aim_angle - amount;
 	}
 	else {
-		weapon.aim_angle = (weapon.aim_angle + 0.1 >= weapon.MAX_ANGLE) ? weapon.MAX_ANGLE : weapon.aim_angle + 0.1;
+		weapon.aim_angle = (weapon.aim_angle + amount >= weapon.MAX_ANGLE) ? weapon.MAX_ANGLE : weapon.aim_angle + amount;
 	}
 	// printf("weapons aim angle: %f \n", weapon.aim_angle);
 	setAimLoc(e);
 }
 
-void ShootingSystem::aimDown(Entity e) {
+void ShootingSystem::aimDown(Entity e, float amount) {
 
 	WeaponBase& weapon = registry.weapons.get(e);
 	Motion& motion = registry.motions.get(e);

@@ -79,11 +79,11 @@ public:
 
 	bool run() override {
 		if (!blackboard->walking) {
-			Entity& player = registry.players.entities[0];
+			//Entity& player = registry.players.entities[0];
 
-			Motion& player_motion = registry.motions.get(player);
-			glm::vec2 player_pos = player_motion.position;
-			blackboard->walking = true;
+			//Motion& player_motion = registry.motions.get(player);
+			//glm::vec2 player_pos = player_motion.position;
+			/*blackboard->walking = true;
 
 			if (blackboard->motion->position.x > player_pos.x) {
 				blackboard->motion->velocity.x = -velocity;
@@ -92,7 +92,7 @@ public:
 			else {
 				blackboard->motion->velocity.x = velocity;
 				return true;
-			}
+			}*/
 		}
 		return false;
 	}

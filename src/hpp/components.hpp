@@ -91,10 +91,6 @@ enum TEAM {
 
 // Game components ------------------------------------------------------------
 
-struct Player {
-	TEAM team;
-};
-
 enum UI_ELEMENT {
 	CROSSHAIR,
 	HEALTH_DISPLAY,
