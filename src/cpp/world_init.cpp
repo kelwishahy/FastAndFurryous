@@ -23,8 +23,10 @@ void calculateBoxVerticesAndSetTriangles(vec2 pos, vec2 scale, Boxcollider& box)
 
 Entity createCat(RenderSystem* renderer, vec2 pos) {
 
-  auto head = Entity();
+	auto head = Entity();
 	auto entity = Entity();
+	auto frontArm = Entity();
+	//auto backArm = Entity();
 
 	//---Head animation subentity---- putting this in front so that head gets rendered ontop of body
 	AnimationExtra& headbone = registry.animExtras.emplace(head);
@@ -45,6 +47,27 @@ Entity createCat(RenderSystem* renderer, vec2 pos) {
 	registry.renderRequests.insert(
 		head,
 		{ TEXTURE_IDS::CAT_FRONT_BLINK,
+			SHADER_PROGRAM_IDS::ANIMATION,
+			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
+
+	//---Front arm animation subentity---- putting this in front so that front arm gets rendered ontop of body
+	AnimationExtra& frontArmBone = registry.animExtras.emplace(frontArm);
+	frontArmBone.parent = entity;
+	frontArmBone.offset_from_parent = { 4.5f, +11.0f };
+	frontArmBone.tag = "cat_frontArm";
+
+	Motion& frontArmMotion = registry.motions.emplace(frontArm);
+	frontArmMotion.position = pos + frontArmBone.offset_from_parent;
+	frontArmMotion.scale = { 64.f / 3, 138.f / 3 };
+
+	Animation& frontArmAnim = registry.animations.emplace(frontArm);
+	frontArmAnim.animation_states_constants.insert({ TEXTURE_IDS::CAT_FRONT_ARM, CAT_FRONT_ARM_CONSTANTS });
+	frontArmAnim.anim_state = TEXTURE_IDS::CAT_FRONT_ARM;
+
+	// error is here
+	registry.renderRequests.insert(
+		frontArm,
+		{ TEXTURE_IDS::CAT_FRONT_ARM,
 			SHADER_PROGRAM_IDS::ANIMATION,
 			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
 	//----------------------------------------------

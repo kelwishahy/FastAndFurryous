@@ -40,6 +40,8 @@ class RenderSystem {
 		"cat_jump.png",
 		"cat_side_blink.png",
 		"cat_front_blink.png",
+		"cat_front_arm.png",
+		"cat_back_arm.png",
 		"cat_hurt_face.png",
 		"cat_hurt.png",
 		"cat_dead.png",
