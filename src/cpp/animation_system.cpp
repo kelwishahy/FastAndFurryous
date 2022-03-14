@@ -82,8 +82,16 @@ void AnimationSystem::animate_cat_walk(Entity e) {
 		AnimationExtra extra = registry.animExtras.get(e);
 		if (extra.tag == "cat_head") {
 			//Animate the head
-			Animation& headanim = registry.animations.get(e);
-			headanim.anim_state = TEXTURE_IDS::CAT_SIDE_BLINK;
+			Animation& headAnim = registry.animations.get(e);
+			headAnim.anim_state = TEXTURE_IDS::CAT_SIDE_BLINK;
+			// change position of the head if looking left
+			// not working yet
+			if (anim.facingLeft == true) {
+				Motion& headmotion = registry.motions.get(e);
+				printf("Position old X %d\n", headmotion.position);
+				headmotion.position.x += 100.f ;
+				printf("Position new X %d\n", headmotion.position);
+			}
 		}
 		if (extra.tag == "cat_frontArm") {
 			Animation& frontArmAnim = registry.animations.get(e);

@@ -26,7 +26,7 @@ Entity createCat(RenderSystem* renderer, vec2 pos) {
 	auto head = Entity();
 	auto entity = Entity();
 	auto frontArm = Entity();
-	//auto backArm = Entity();
+	auto backArm = Entity();
 
 	//---Head animation subentity---- putting this in front so that head gets rendered ontop of body
 	AnimationExtra& headbone = registry.animExtras.emplace(head);
@@ -64,10 +64,29 @@ Entity createCat(RenderSystem* renderer, vec2 pos) {
 	frontArmAnim.animation_states_constants.insert({ TEXTURE_IDS::CAT_FRONT_ARM, CAT_FRONT_ARM_CONSTANTS });
 	frontArmAnim.anim_state = TEXTURE_IDS::CAT_FRONT_ARM;
 
-	// error is here
 	registry.renderRequests.insert(
 		frontArm,
 		{ TEXTURE_IDS::CAT_FRONT_ARM,
+			SHADER_PROGRAM_IDS::ANIMATION,
+			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
+
+	//---Back arm animation subentity---- putting this in back so that front arm gets rendered on back of body
+	AnimationExtra& backArmBone = registry.animExtras.emplace(backArm);
+	backArmBone.parent = entity;
+	backArmBone.offset_from_parent = { +34.5f, +11.0f };
+	backArmBone.tag = "cat_backArm";
+
+	Motion& backArmMotion = registry.motions.emplace(backArm);
+	backArmMotion.position = pos + backArmBone.offset_from_parent;
+	backArmMotion.scale = { 64.f / 3, 138.f / 3 };
+
+	Animation& backArmAnim = registry.animations.emplace(backArm);
+	backArmAnim.animation_states_constants.insert({ TEXTURE_IDS::CAT_BACK_ARM, CAT_BACK_ARM_CONSTANTS });
+	backArmAnim.anim_state = TEXTURE_IDS::CAT_BACK_ARM;
+
+	registry.renderRequests.insert(
+		backArm,
+		{ TEXTURE_IDS::CAT_BACK_ARM,
 			SHADER_PROGRAM_IDS::ANIMATION,
 			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
 	//----------------------------------------------
