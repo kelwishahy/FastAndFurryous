@@ -236,12 +236,11 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 
 		float current_speed = 150.0f;
 		float gravity_force = 2.5;
-		
+
 		if (action == GLFW_PRESS && key == GLFW_KEY_W) {
 			if (catMotion.velocity.y == gravity_force) {
 				catMotion.velocity.y = -gravity_force * current_speed;
 				rb.collision_normal.y = 0;
-				}
 			}
 
 			if (action == GLFW_PRESS && key == GLFW_KEY_S) {
@@ -259,15 +258,15 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 			}
 		}
 
-			if (action == GLFW_RELEASE) {
-				if (key == GLFW_KEY_A && catMotion.velocity.x < 0) {
-					catMotion.velocity.x = 0.0f;
-					AnimationSystem::animate_cat_idle(curr_selected_char);
-				}
-				if (key == GLFW_KEY_D && catMotion.velocity.x > 0) {
-					catMotion.velocity.x = 0.0f;
-					AnimationSystem::animate_cat_idle(curr_selected_char);
-				}
+
+		if (action == GLFW_RELEASE) {
+			if (key == GLFW_KEY_A && catMotion.velocity.x < 0) {
+				catMotion.velocity.x = 0.0f;
+				AnimationSystem::animate_cat_idle(curr_selected_char);
+			}
+			if (key == GLFW_KEY_D && catMotion.velocity.x > 0) {
+				catMotion.velocity.x = 0.0f;
+				AnimationSystem::animate_cat_idle(curr_selected_char);
 			}
 		}
 
@@ -291,7 +290,7 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 				player_mode = PLAYER_MODE::SHOOTING;
 			}
 		}
-		
+
 		if (action == GLFW_PRESS && key == GLFW_KEY_UP) {
 			shooting_system.aimUp(curr_selected_char);
 		}
