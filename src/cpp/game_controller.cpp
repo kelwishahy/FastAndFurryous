@@ -242,21 +242,21 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 				catMotion.velocity.y = -gravity_force * current_speed;
 				rb.collision_normal.y = 0;
 			}
-
-			if (action == GLFW_PRESS && key == GLFW_KEY_S) {
-				catMotion.velocity.y = current_speed;
-			}
-
-			if (action == GLFW_PRESS && key == GLFW_KEY_D) {
-				catMotion.velocity.x = current_speed;
-				AnimationSystem::animate_cat_walk(curr_selected_char);
-			}
-
-			if (action == GLFW_PRESS && key == GLFW_KEY_A) {
-				catMotion.velocity.x = -current_speed;
-				AnimationSystem::animate_cat_walk(curr_selected_char);
-			}
 		}
+
+		if (action == GLFW_PRESS && key == GLFW_KEY_S) {
+			catMotion.velocity.y = current_speed;
+		}
+
+		if (action == GLFW_PRESS && key == GLFW_KEY_D) {
+			catMotion.velocity.x = current_speed;
+			AnimationSystem::animate_cat_walk(curr_selected_char);
+		}
+
+		if (action == GLFW_PRESS && key == GLFW_KEY_A) {
+			catMotion.velocity.x = -current_speed;
+			AnimationSystem::animate_cat_walk(curr_selected_char);
+			}
 
 
 		if (action == GLFW_RELEASE) {
