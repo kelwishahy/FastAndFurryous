@@ -253,7 +253,8 @@ void GameController::next_turn() {
 
 	if (game_state.turn_possesion == TURN_CODE::END) {
 		game_state.turn_possesion = TURN_CODE::PLAYER1;
-	} else if (teams[game_state.turn_possesion].empty()) {
+	}
+	else if (teams[game_state.turn_possesion].empty()) {
 		game_state.turn_number -= 1;
 		next_turn();
 	}
@@ -267,7 +268,7 @@ void GameController::handle_collisions() {
 		// The entity and its collider
 		Entity entity = collisionsRegistry.entities[i];
 		Entity entity_other = collisionsRegistry.components[i].other;
-		
+
 		if (registry.projectiles.has(entity)) {// Projectile hit terrain
 			Projectile& pj = registry.projectiles.get(entity);
 			if (registry.terrains.has(entity_other) && entity_other != pj.origin) {
@@ -297,7 +298,7 @@ void GameController::handle_collisions() {
 			if (rb.collision_normal.y == -1) {
 				motion.velocity.y = 0;
 			}
-		
+
 		}
 	}
 
