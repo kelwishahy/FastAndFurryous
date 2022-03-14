@@ -4,6 +4,9 @@
 #include "hpp/ai_system.hpp"
 #include "hpp/Game_Mechanics/health_system.hpp"
 
+#include <glm/vec2.hpp>	
+#include <hpp/tiny_ecs_registry.hpp>
+
 GameController::GameController() {
 	inAGame = false;
 	//ShootingSystem shooting_system(renderer);
@@ -254,6 +257,7 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 					catMotion.velocity.y = -gravity_force * current_speed;
 					rb.collision_normal.y = 0;
 					player_mode = PLAYER_MODE::MOVING;
+					ui.hide_crosshair();
 				}
 			}
 
@@ -261,12 +265,14 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 				catMotion.velocity.x = current_speed;
 				AnimationSystem::animate_cat_walk(curr_selected_char);
 				player_mode = PLAYER_MODE::MOVING;
+				ui.hide_crosshair();
 			}
 
 			if (key == GLFW_KEY_A) {
 				catMotion.velocity.x = -current_speed;
 				AnimationSystem::animate_cat_walk(curr_selected_char);
 				player_mode = PLAYER_MODE::MOVING;
+				ui.hide_crosshair();
 			}
 		}
 
@@ -276,6 +282,7 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 				catMotion.velocity.x = 0.0f;
 				AnimationSystem::animate_cat_idle(curr_selected_char);
 				player_mode = PLAYER_MODE::SHOOTING;
+				ui.show_crosshair(curr_selected_char);
 			}
 			if (key == GLFW_KEY_D && catMotion.velocity.x > 0) {
 				catMotion.velocity.x = 0.0f;

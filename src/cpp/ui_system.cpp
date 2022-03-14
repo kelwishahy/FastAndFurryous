@@ -1,5 +1,6 @@
 #include "hpp/ui_system.hpp"
 #include "hpp/world_init.hpp"
+#include <hpp/Game_Mechanics/shooting_system.hpp>
 
 UISystem::UISystem() {
 	
@@ -18,8 +19,9 @@ void UISystem::step(float elapsed_ms) {
 		switch (ui.element_type) {
 			case UI_ELEMENT::CROSSHAIR: {
 				assert(registry.weapons.has(crosshair_marker.second));
-				Motion& anchor_motion = registry.motions.get(crosshair_marker.first);
-				anchor_motion.angle = registry.weapons.get(crosshair_marker.second).aim_angle;
+				WeaponBase weapon = registry.weapons.get(crosshair_marker.second);
+				Motion& crosshair_motion = registry.motions.get(crosshair_marker.first);
+				crosshair_motion.position = { ShootingSystem::calculate_point(weapon.curr_trajectory_x, 0.35f), ShootingSystem::calculate_point(weapon.curr_trajectory_y, 0.35f) };
 				break;
 			}
 			default:
@@ -33,7 +35,7 @@ void UISystem::step(float elapsed_ms) {
 void UISystem::show_crosshair(Entity e) {
 
 	Motion entity_motion = registry.motions.get(e);
-	Entity crosshair = createCrosshair(entity_motion.position, registry.cats.has(e));
+	Entity crosshair = createCrosshair(registry.cats.has(e));
 
 	crosshair_marker.first = crosshair;
 	crosshair_marker.second = e;

@@ -281,31 +281,20 @@ Entity createText(vec2 pos, float scale, glm::vec3 color, std::string text) {
 	return entity;
 }
 
-Entity createCrosshair(vec2 anchorpos, bool iscat) {
+Entity createCrosshair(bool iscat) {
 
 	auto entity = Entity();
-	auto crosshair_entity = Entity();
 
 	// Main entity
 	Motion& motion = registry.motions.emplace(entity);
-	motion.position = anchorpos;
-	motion.scale = { 1.0f, 1.0f };
-
-	AnchoredEntities& anchor = registry.anchors.emplace(entity); 
-	anchor.normal_distance = vec2(50.0f, 50.0f);
-	anchor.child = crosshair_entity;
+	motion.scale = { 50.0f, 50.0f };
 
 	registry.uiElements.insert(
 		entity, { UI_ELEMENT::CROSSHAIR }
 	);
 
-	//Crosshair entity
-	Motion& crosshair_motion = registry.motions.emplace(crosshair_entity);
-	crosshair_motion.position = anchorpos + anchor.normal_distance;
-	crosshair_motion.scale = { 50.0f, 50.0f };
-
 	registry.renderRequests.insert(
-		crosshair_entity,
+		entity,
 		{ iscat ? TEXTURE_IDS::CAT_CROSSHAIR : TEXTURE_IDS::DOG_CROSSHAIR,
 				SHADER_PROGRAM_IDS::TEXTURE,
 				GEOMETRY_BUFFER_IDS::TEXTURED_QUAD }

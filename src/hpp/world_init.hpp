@@ -26,4 +26,4 @@ Entity createButton(glm::vec2 pos, glm::vec2 scale, TEXTURE_IDS tex_id, std::vec
 
 Entity createText(glm::vec2 pos, float scale, glm::vec3 color, std::string text);
 
-Entity createCrosshair(glm::vec2 anchorpos, bool iscat);
+Entity createCrosshair(bool iscat);

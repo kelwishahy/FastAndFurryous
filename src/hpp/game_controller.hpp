@@ -14,8 +14,6 @@
 
 using namespace glm;
 
-#include <glm/vec2.hpp>	
-#include <hpp/tiny_ecs_registry.hpp>
 #include <hpp/Game_Mechanics/shooting_system.hpp>
 #include <hpp/ui_system.hpp>
 

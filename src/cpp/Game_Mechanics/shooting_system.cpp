@@ -87,7 +87,7 @@ void ShootingSystem::setAimLoc(Entity e) {
 		x_end = motion.position.x + weapon.distance + weapon.area;
 		x_begin = motion.position.x + weapon.distance - weapon.area;
 		if (weapon.aim_angle > pio2) {
-			weapon.aim_angle -= pio2;
+			weapon.aim_angle = pio2 - (weapon.aim_angle - pio2);
 		}
 	}
 	//left facing
@@ -95,7 +95,7 @@ void ShootingSystem::setAimLoc(Entity e) {
 		x_end = motion.position.x - weapon.distance - weapon.area;
 		x_begin = motion.position.x - weapon.distance + weapon.area;
 		if (weapon.aim_angle < pio2) {
-			weapon.aim_angle += pio2;
+			weapon.aim_angle = pio2 + (pio2 - weapon.aim_angle);
 		}
 	}
 
@@ -108,7 +108,8 @@ void ShootingSystem::setAimLoc(Entity e) {
 		weapon.aim_loc_x = (x_begin - move_step <= x_end) ? x_end : x_begin - move_step;
 	}
 
-	// printf("weapons aim loc: %f\n", weapon.aim_loc_x);
+	//Calculate cubic curves
+	calculate_trajectory(e);
 }
 
 void ShootingSystem::shoot(Entity e) {
@@ -117,12 +118,26 @@ void ShootingSystem::shoot(Entity e) {
 	setAimLoc(e);
 	WeaponBase& weapon = registry.weapons.get(e);
 
+	float x2p = cos(weapon.aim_angle) * 2.0f;
+	float y2p = sin(weapon.aim_angle) * 2000.0f;
+		
+	createProjectile(renderer, e, weapon.curr_trajectory_x, weapon.curr_trajectory_y, vec2{x2p * 100.0f, y2p});
+	audio.play_sfx(SOUND_EFFECTS::GUNSHOT);
+
+
+}
+
+void ShootingSystem::calculate_trajectory(Entity e) {
+
+	assert(registry.weapons.has(e));
+	WeaponBase& weapon = registry.weapons.get(e);
+
 	if (weapon.type == RIFLE) {
 		float x1 = registry.motions.get(e).position.x;
 		// printf("x1 %f, ", x1);
 		float x2 = weapon.aim_loc_x;
 		// printf("x2 %f, ", x2);
-		float x1p = cos(weapon.aim_angle) * 2;
+		float x1p = cos(weapon.aim_angle) * 2.0f;
 		float x2p = x1p;
 
 		float plane = registry.motions.get(e).position.y;
@@ -136,12 +151,10 @@ void ShootingSystem::shoot(Entity e) {
 		float y2p = -y1p;
 		vec4 xt = calculate_A(x1, x2, x1p, x2p);
 		vec4 yt = calculate_A(y1, y2, y1p, y2p);
-		
-		createProjectile(renderer, e, xt, yt, vec2{x2p * 100.0f, y2p});
-		audio.play_sfx(SOUND_EFFECTS::GUNSHOT);
+
+		weapon.curr_trajectory_x = xt;
+		weapon.curr_trajectory_y = yt;
 	}
-
-
 }
 
 vec4 ShootingSystem::calculate_A(float c1, float c2, float c1p, float c2p) {

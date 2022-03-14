@@ -164,6 +164,8 @@ struct WeaponBase {
 	float aim_loc_x;
 	float damage;
 	WEAPON_TYPES type;
+	glm::vec4 curr_trajectory_x;
+	glm::vec4 curr_trajectory_y;
 };
 
 struct Rifle : WeaponBase {
@@ -181,6 +183,8 @@ struct Rifle : WeaponBase {
 		area = 200.0f;
 		damage = 10;
 		type = RIFLE;
+		curr_trajectory_x = {0.f,0.f,0.f,0.f};
+		curr_trajectory_y = { 0.f,0.f,0.f,0.f };
 	}
 };
 

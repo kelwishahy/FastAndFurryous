@@ -22,7 +22,7 @@ public:
 
 	//calculate the interpolated point
 	//deltaTime is normalized between 0 and 1, where 0 is the time at and 1 is the time at end
-	float calculate_point(vec4 A, float deltaTime);
+	static float calculate_point(vec4 A, float deltaTime);
 
 	void aimUp(Entity e);
 
@@ -46,6 +46,8 @@ private:
 	float pio2 = 1.57079;
 
 	RenderSystem* renderer;
+
+	void calculate_trajectory(Entity e);
 
 	enum class SHOOT_ORIENTATION {
 		RIGHT,
