@@ -38,7 +38,7 @@ void GameController::init(RenderSystem* renderer, GLFWwindow* window) {
 	player_mode = PLAYER_MODE::MOVING;
 
 	this->shooting_system.init(renderer);
-	this->timePerTurnMs = 5000.0;
+	this->timePerTurnMs = 20000.0;
 
 	ai.init(shooting_system);
 
@@ -60,16 +60,6 @@ void GameController::step(float elapsed_ms) {
 			Motion& catMotion = registry.motions.get(e);
 			Animation& catAnimation = registry.animations.get(e);
 
-			if (catMotion.velocity.x == 0) {
-				AnimationSystem::animate_cat_idle(e);
-			}
-			if (catMotion.velocity.x != 0) {
-				AnimationSystem::animate_cat_walk(e);
-			}
-			if (catMotion.velocity.y < 0) {
-				//TODO change this here, replace with a single all to AnimationSystem
-				catAnimation.anim_state = TEXTURE_IDS::CAT_JUMP;
-			}
 			if (catMotion.velocity.x < 0) {
 				catAnimation.facingLeft = true;
 				shooting_system.setAimLoc(e);
@@ -116,7 +106,7 @@ void GameController::step(float elapsed_ms) {
 void GameController::decrementTurnTime(float elapsed_ms) {
 	if (timePerTurnMs <= 0) {
 		next_turn();
-		timePerTurnMs = 5000.0;
+		timePerTurnMs = 20000.0;
 	} else {
 		timePerTurnMs -= elapsed_ms;
 	}
@@ -241,16 +231,16 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 
 	//Only allowed to move on specified turn
 	if (game_state.turn_possesion == PLAYER1 && inAGame) {
-		Motion& catMotion = registry.motions.get(player1_team[0]);
-		Rigidbody& rb = registry.rigidBodies.get(player1_team[0]);
+		Motion& catMotion = registry.motions.get(curr_selected_char);
+		Rigidbody& rb = registry.rigidBodies.get(curr_selected_char);
 
 		float current_speed = 150.0f;
-		if (player_mode == PLAYER_MODE::MOVING) {
-			if (action == GLFW_PRESS && key == GLFW_KEY_W) {
-				if (catMotion.velocity.y == 2.5) {
-					catMotion.velocity.y = -2.5 * current_speed;
-					rb.collision_normal.y = 0;
-				}
+		float gravity_force = 2.5;
+
+		if (action == GLFW_PRESS && key == GLFW_KEY_W) {
+			if (catMotion.velocity.y == gravity_force) {
+				catMotion.velocity.y = -gravity_force * current_speed;
+				rb.collision_normal.y = 0;
 			}
 
 			if (action == GLFW_PRESS && key == GLFW_KEY_S) {
@@ -259,54 +249,62 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 
 			if (action == GLFW_PRESS && key == GLFW_KEY_D) {
 				catMotion.velocity.x = current_speed;
+				AnimationSystem::animate_cat_walk(curr_selected_char);
 			}
 
 			if (action == GLFW_PRESS && key == GLFW_KEY_A) {
 				catMotion.velocity.x = -current_speed;
-			}
-
-			if (action == GLFW_RELEASE) {
-				if (key == GLFW_KEY_A && catMotion.velocity.x < 0) {
-					catMotion.velocity.x = 0.0f;
-				}
-				if (key == GLFW_KEY_D && catMotion.velocity.x > 0) {
-					catMotion.velocity.x = 0.0f;
-				}
-			}
-		}
-		else {
-			if (action == GLFW_PRESS && key == GLFW_KEY_W) {
-				shooting_system.aimUp(curr_selected_char);
-			}
-
-			if (action == GLFW_PRESS && key == GLFW_KEY_S) {
-				shooting_system.aimDown(curr_selected_char);
-			}
-
-			if (action == GLFW_PRESS && key == GLFW_KEY_T) {
-				shooting_system.shoot(curr_selected_char);
-				// printf("shooting");
-				// printf("Num of projectiles %u\n", (uint)registry.projectiles.components.size());
+				AnimationSystem::animate_cat_walk(curr_selected_char);
 			}
 		}
 
-		//switch between shooting and firing for curr_selected_char
-		if (action == GLFW_PRESS && key == GLFW_KEY_M) {
-			if (player_mode == PLAYER_MODE::SHOOTING) {
-				player_mode = PLAYER_MODE::MOVING;
+
+		if (action == GLFW_RELEASE) {
+			if (key == GLFW_KEY_A && catMotion.velocity.x < 0) {
+				catMotion.velocity.x = 0.0f;
+				AnimationSystem::animate_cat_idle(curr_selected_char);
 			}
-			else {
+			if (key == GLFW_KEY_D && catMotion.velocity.x > 0) {
+				catMotion.velocity.x = 0.0f;
+				AnimationSystem::animate_cat_idle(curr_selected_char);
+			}
+		}
+
+		if (action == GLFW_PRESS && key == GLFW_KEY_D) {
+			catMotion.velocity.x = current_speed;
+			player_mode = PLAYER_MODE::MOVING;
+		}
+
+		if (action == GLFW_PRESS && key == GLFW_KEY_A) {
+			catMotion.velocity.x = -current_speed;
+			player_mode = PLAYER_MODE::MOVING;
+		}
+
+		if (action == GLFW_RELEASE) {
+			if (key == GLFW_KEY_A && catMotion.velocity.x < 0) {
+				catMotion.velocity.x = 0.0f;
 				player_mode = PLAYER_MODE::SHOOTING;
-				shooting_system.setAimLoc(curr_selected_char);
 			}
-			// printf("Current mode is: %s", (player_mode == PLAYER_MODE::SHOOTING) ? "SHOOTING" : "MOVING");
+			if (key == GLFW_KEY_D && catMotion.velocity.x > 0) {
+				catMotion.velocity.x = 0.0f;
+				player_mode = PLAYER_MODE::SHOOTING;
+			}
 		}
 
-	}
+		if (action == GLFW_PRESS && key == GLFW_KEY_UP) {
+			shooting_system.aimUp(curr_selected_char);
+		}
 
-	if (action == GLFW_PRESS && key == GLFW_KEY_N) {
-		next_turn();
-		// printf("Currently it is this players turn: %i", game_state.turn_possesion);
+		if (action == GLFW_PRESS && key == GLFW_KEY_DOWN) {
+			shooting_system.aimDown(curr_selected_char);
+		}
+
+		if (action == GLFW_PRESS && key == GLFW_KEY_ENTER) {
+			// should only shoot when standing
+			if (catMotion.velocity.y == gravity_force && catMotion.velocity.x == 0.0) {
+				shooting_system.shoot(curr_selected_char);
+			}
+		}
 	}
 }
 
