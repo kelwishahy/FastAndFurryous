@@ -206,6 +206,8 @@ void GameController::handle_collisions() {
 				// Decrease that players health
 				if (team != otherTeam) {
 					decreaseHealth(entity_other, registry.weapons.get(pj.origin).damage);
+					// Will switch it to entity_other when the animation is implemented on AI
+					AnimationSystem::animate_cat_hurt(curr_selected_char);
 				}
 				registry.remove_all_components_of(entity);
 			}

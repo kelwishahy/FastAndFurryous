@@ -42,6 +42,7 @@ Entity createCat(RenderSystem* renderer, vec2 pos) {
 	Animation& headanim = registry.animations.emplace(head);
 	headanim.animation_states_constants.insert({ TEXTURE_IDS::CAT_FRONT_BLINK, CAT_FRONT_BLINK_CONSTANTS });
 	headanim.animation_states_constants.insert({ TEXTURE_IDS::CAT_SIDE_BLINK, CAT_SIDE_BLINK_CONSTANTS });
+	headanim.animation_states_constants.insert({ TEXTURE_IDS::CAT_HURT_FACE, CAT_HURT_FACE_CONSTANTS });
 	headanim.anim_state = TEXTURE_IDS::CAT_FRONT_BLINK;
 
 	registry.renderRequests.insert(
@@ -123,6 +124,7 @@ Entity createCat(RenderSystem* renderer, vec2 pos) {
 	anim.animation_states_constants.insert({TEXTURE_IDS::CAT_FRONT_IDLE, CAT_IDLE_CONSTANTS});
 	anim.animation_states_constants.insert({TEXTURE_IDS::CAT_WALK, CAT_WALK_CONSTANTS });
 	anim.animation_states_constants.insert({ TEXTURE_IDS::CAT_JUMP, CAT_JUMP_CONSTANTS });
+	anim.animation_states_constants.insert({ TEXTURE_IDS::CAT_HURT, CAT_HURT_CONSTANTS });
 	anim.anim_state = TEXTURE_IDS::CAT_FRONT_IDLE;
 
 	return entity;

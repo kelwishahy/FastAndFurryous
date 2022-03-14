@@ -135,6 +135,23 @@ void AnimationSystem::animate_cat_jump(Entity e) {
 
 	}
 }
+
+void AnimationSystem::animate_cat_hurt(Entity e) {
+
+	//assert(entity is cat)
+	Animation& anim = registry.animations.get(e);
+	anim.anim_state = TEXTURE_IDS::CAT_HURT;
+
+	for (Entity e : registry.animExtras.entities) {
+
+		AnimationExtra extra = registry.animExtras.get(e);
+		if (extra.tag == "cat_head") {
+			Animation& headanim = registry.animations.get(e);
+			headanim.anim_state = TEXTURE_IDS::CAT_HURT_FACE;
+		}
+
+	}
+}
 //
 //void AnimationSystem::change_anim_orientation(Entity e) {
 //
