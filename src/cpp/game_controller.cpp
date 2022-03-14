@@ -241,6 +241,7 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 			if (catMotion.velocity.y == gravity_force) {
 				catMotion.velocity.y = -gravity_force * current_speed;
 				rb.collision_normal.y = 0;
+				AnimationSystem::animate_cat_jump(curr_selected_char);
 			}
 		}
 

@@ -122,6 +122,7 @@ Entity createCat(RenderSystem* renderer, vec2 pos) {
 	Animation& anim = registry.animations.emplace(entity);
 	anim.animation_states_constants.insert({TEXTURE_IDS::CAT_FRONT_IDLE, CAT_IDLE_CONSTANTS});
 	anim.animation_states_constants.insert({TEXTURE_IDS::CAT_WALK, CAT_WALK_CONSTANTS });
+	anim.animation_states_constants.insert({ TEXTURE_IDS::CAT_JUMP, CAT_JUMP_CONSTANTS });
 	anim.anim_state = TEXTURE_IDS::CAT_FRONT_IDLE;
 
 	return entity;

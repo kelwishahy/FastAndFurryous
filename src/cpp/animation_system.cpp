@@ -115,9 +115,22 @@ void AnimationSystem::animate_cat_idle(Entity e) {
 			Animation& headanim = registry.animations.get(e);
 			headanim.anim_state = TEXTURE_IDS::CAT_FRONT_BLINK;
 		}
-		if (extra.tag == "cat_frontArm") {
-			Animation& frontArmAnim = registry.animations.get(e);
-			frontArmAnim.anim_state = TEXTURE_IDS::CAT_FRONT_ARM;
+
+	}
+}
+
+void AnimationSystem::animate_cat_jump(Entity e) {
+
+	//assert(entity is cat)
+	Animation& anim = registry.animations.get(e);
+	anim.anim_state = TEXTURE_IDS::CAT_JUMP;
+
+	for (Entity e : registry.animExtras.entities) {
+
+		AnimationExtra extra = registry.animExtras.get(e);
+		if (extra.tag == "cat_head") {
+			Animation& headanim = registry.animations.get(e);
+			headanim.anim_state = TEXTURE_IDS::CAT_FRONT_BLINK;
 		}
 
 	}
