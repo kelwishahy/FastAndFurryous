@@ -55,7 +55,7 @@ void RenderSystem::draw(float elapsed_ms) {
 			mat4 transformationMatrix;
 			case GEOMETRY_BUFFER_IDS::QUAD: {
 				auto& motion = registry.motions.get(entity);
-				transformationMatrix = transform(motion.position, motion.scale, 0.f);
+				transformationMatrix = transform(motion.position, motion.scale, 0.f, 0);
 				std::string shaderInputs[] = { "position" };
 				drawQuad(request, shaderInputs, 1);
 				renderToScreen(transformationMatrix, projectionMatrix);
@@ -73,10 +73,10 @@ void RenderSystem::draw(float elapsed_ms) {
 				// Draw a static textured quad
 				auto& motion = registry.motions.get(entity);
 				if (registry.buttons.has(entity)) {
-					transformationMatrix = transform(motion.position, motion.scale, 0.8f);
+					transformationMatrix = transform(motion.position, motion.scale, 0.8f, 0);
 				}
 				else {
-					transformationMatrix = transform(motion.position, motion.scale, 0.f);
+					transformationMatrix = transform(motion.position, motion.scale, 0.f, 0);
 				}
 				std::string shaderInputs[] = { "position", "texCoord" };
 				drawQuad(request, shaderInputs, 2);
@@ -91,10 +91,11 @@ void RenderSystem::draw(float elapsed_ms) {
 	}
 }
 
-mat4 RenderSystem::transform(vec2 position, vec2 scale, float depth) {
+mat4 RenderSystem::transform(vec2 position, vec2 scale, float depth, float angle) {
 	Transform transform;
 	transform.mat = glm::translate(transform.mat, vec3(position, depth));
 	transform.mat = glm::scale(transform.mat, vec3(scale, depth));
+	transform.mat = glm::rotate(transform.mat, angle, vec3(0.0f, 0.0f, 1.0f));
 	return transform.mat;
 }
 
@@ -196,7 +197,7 @@ void RenderSystem::animateSprite(RenderRequest& request, Entity& entity, float e
 
 	// Render to the screen
 	auto& motion = registry.motions.get(entity);
-	mat4 transformationMatrix = transform(motion.position, motion.scale, 0.5f);
+	mat4 transformationMatrix = transform(motion.position, motion.scale, 0.5f, 0);
 	renderToScreen(transformationMatrix, projection);
 
 	// Resetting the texture coordinates after use
@@ -272,7 +273,7 @@ void RenderSystem::drawTiles(const mat4& projectionMatrix) {
 				mat4 transformationMatrix = transform(
 					{ (0.5 + j) * scaleFactor, (0.5 + i) * scaleFactor }, 
 					{ scaleFactor, scaleFactor }, 
-					0.f);
+					0.f, 0);
 
 				GLint currProgram;
 				glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
@@ -299,7 +300,7 @@ void RenderSystem::drawTiles(const mat4& projectionMatrix) {
 }
 
 void RenderSystem::drawBackground(RenderRequest& request, mat4& projectionMatrix, float layer) {
-	mat4 transformationMatrix = transform({ screenWidth / 2, screenHeight / 2 }, { screenWidth, screenHeight }, layer);
+	mat4 transformationMatrix = transform({ screenWidth / 2, screenHeight / 2 }, { screenWidth, screenHeight }, layer, 0);
 	std::string shaderInputs[] = { "position", "texCoord" };
 	drawQuad(request, shaderInputs, 2);
 	renderToScreen(transformationMatrix, projectionMatrix);
@@ -407,7 +408,7 @@ void RenderSystem::drawText(Entity e) {
 	auto m = registry.motions.get(e);
 	m.position = {m.position.x / defaultResolution.x * screenWidth, m.position.y / defaultResolution.y * screenHeight};
 	m.scale = { m.scale.x / defaultResolution.x * screenWidth, m.scale.y / defaultResolution.y * screenHeight };
-	mat4 transformationMatrix = transform(m.position, m.scale, 1.0f);
+	mat4 transformationMatrix = transform(m.position, m.scale, 1.0f, 0);
 	mat4 projection = createProjectionMatrix();
 	renderToScreen(transformationMatrix, projection);
 }

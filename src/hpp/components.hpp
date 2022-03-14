@@ -43,6 +43,8 @@ enum class TEXTURE_IDS {
 	BUTTON1,
 	BUTTONC,
 	HOWTOMOVE,
+	CAT_CROSSHAIR,
+	DOG_CROSSHAIR,
 	TOTAL
 }; constexpr int textureCount = (int)TEXTURE_IDS::TOTAL;
 
@@ -93,6 +95,13 @@ struct Player {
 	TEAM team;
 };
 
+enum UI_ELEMENT {
+	CROSSHAIR,
+	HEALTH_DISPLAY,
+	NAME
+};
+
+// Game components ------------------------------------------------------------
 struct Background {
 	
 };
@@ -198,6 +207,23 @@ struct Collision {
 struct Clickable {
 	std::vector<glm::vec2> vertecies;
 	std::vector<std::function<void()>> callbacks;
+};
+
+struct AnchoredEntities {
+	glm::vec2 normal_distance = {0.0f, 0.0f};
+	Entity child;
+};
+
+struct UIElement {
+	UI_ELEMENT element_type;
+};
+
+struct Cat {
+	
+};
+
+struct Dog {
+	
 };
 
 // Render components ----------------------------------------------------------

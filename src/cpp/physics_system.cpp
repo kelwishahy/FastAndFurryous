@@ -56,8 +56,8 @@ bool circle_collision(const Motion& motion, const Motion& motion2) {
 
 void project_vertices(std::vector<vec2> box_vertices, vec2 axis, OUT float& min, OUT float& max) {
 
-	min = 99999999;
-	max = -99999999;
+	min = 99999999.0f;
+	max = -99999999.0f;
 
 	for (uint i = 0; i < box_vertices.size(); i++) {
 
@@ -285,6 +285,8 @@ void PhysicsSystem::step(float elapsed_ms)
 
 	applyMotions(elapsed_ms);
 
+	transformAnchoredEntities();
+
 	transformBoxColliders();
 
 	// Check for collisions between all moving entities
@@ -314,4 +316,18 @@ void PhysicsSystem::moveBackEntity(Entity e, vec2 normal, float depth) {
 	Rigidbody& rb = registry.rigidBodies.get(e);
 	rb.collision_depth = depth;
 	rb.collision_normal = normal;
+}
+
+void PhysicsSystem::transformAnchoredEntities() {
+
+	for (Entity e : registry.anchors.entities) {
+
+		AnchoredEntities anchor = registry.anchors.get(e);
+
+		Motion& child_motion = registry.motions.get(anchor.child);
+		Motion anchor_motion = registry.motions.get(e);
+		child_motion.position = anchor_motion.position + vec2{ cos(anchor_motion.angle), sin(anchor_motion.angle) } * anchor.normal_distance;
+
+	}
+
 }

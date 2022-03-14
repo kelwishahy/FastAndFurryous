@@ -52,7 +52,19 @@ void GameController::step(float elapsed_ms) {
 	glfwSetWindowUserPointer(window, this);
 	//While a game is happening make sure the players are controlling from here
 	shooting_system.step(elapsed_ms);
+	ui.step(elapsed_ms);
+
 	handle_collisions();
+
+	if (game_state.turn_possesion == PLAYER1) {
+		//DO STUFF
+	} else if (game_state.turn_possesion == PLAYER2) {
+		//DO STUFF
+	} else if (game_state.turn_possesion == AI) {
+		//DO STUFF
+	} else if (game_state.turn_possesion == NPCAI_TURN) {
+		//DO STUFF
+	}
 
 	// change the animation type depending on the velocity
 	for (Entity e : registry.animations.entities) {
@@ -96,7 +108,6 @@ void GameController::step(float elapsed_ms) {
 		// }
 	}
 
-	// decrementTurnTime(elapsed_ms);
 
 	ai.step(elapsed_ms, game_state.turn_possesion);
 	// if (game_state.turn_possesion == TURN_CODE::NPCAI) next_turn();
@@ -237,24 +248,25 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 		float current_speed = 150.0f;
 		float gravity_force = 2.5;
 
-		if (action == GLFW_PRESS && key == GLFW_KEY_W) {
-			if (catMotion.velocity.y == gravity_force) {
-				catMotion.velocity.y = -gravity_force * current_speed;
-				rb.collision_normal.y = 0;
+		if (action == GLFW_PRESS) {
+			if (key == GLFW_KEY_W) {
+				if (catMotion.velocity.y == gravity_force) {
+					catMotion.velocity.y = -gravity_force * current_speed;
+					rb.collision_normal.y = 0;
+					player_mode = PLAYER_MODE::MOVING;
+				}
 			}
 
-			if (action == GLFW_PRESS && key == GLFW_KEY_S) {
-				catMotion.velocity.y = current_speed;
-			}
-
-			if (action == GLFW_PRESS && key == GLFW_KEY_D) {
+			if (key == GLFW_KEY_D) {
 				catMotion.velocity.x = current_speed;
 				AnimationSystem::animate_cat_walk(curr_selected_char);
+				player_mode = PLAYER_MODE::MOVING;
 			}
 
-			if (action == GLFW_PRESS && key == GLFW_KEY_A) {
+			if (key == GLFW_KEY_A) {
 				catMotion.velocity.x = -current_speed;
 				AnimationSystem::animate_cat_walk(curr_selected_char);
+				player_mode = PLAYER_MODE::MOVING;
 			}
 		}
 
@@ -263,33 +275,16 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 			if (key == GLFW_KEY_A && catMotion.velocity.x < 0) {
 				catMotion.velocity.x = 0.0f;
 				AnimationSystem::animate_cat_idle(curr_selected_char);
+				player_mode = PLAYER_MODE::SHOOTING;
 			}
 			if (key == GLFW_KEY_D && catMotion.velocity.x > 0) {
 				catMotion.velocity.x = 0.0f;
 				AnimationSystem::animate_cat_idle(curr_selected_char);
-			}
-		}
-
-		if (action == GLFW_PRESS && key == GLFW_KEY_D) {
-			catMotion.velocity.x = current_speed;
-			player_mode = PLAYER_MODE::MOVING;
-		}
-
-		if (action == GLFW_PRESS && key == GLFW_KEY_A) {
-			catMotion.velocity.x = -current_speed;
-			player_mode = PLAYER_MODE::MOVING;
-		}
-
-		if (action == GLFW_RELEASE) {
-			if (key == GLFW_KEY_A && catMotion.velocity.x < 0) {
-				catMotion.velocity.x = 0.0f;
 				player_mode = PLAYER_MODE::SHOOTING;
-			}
-			if (key == GLFW_KEY_D && catMotion.velocity.x > 0) {
-				catMotion.velocity.x = 0.0f;
-				player_mode = PLAYER_MODE::SHOOTING;
+				ui.show_crosshair(curr_selected_char);
 			}
 		}
+
 
 		if (action == GLFW_PRESS && key == GLFW_KEY_UP) {
 			shooting_system.aimUp(curr_selected_char);

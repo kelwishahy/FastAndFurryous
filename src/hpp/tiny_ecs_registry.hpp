@@ -17,7 +17,6 @@ public:
 	ComponentContainer<Circlecollider> circleColliders;
 	ComponentContainer<Collision> collisions;
 	ComponentContainer<glm::vec3> colors;
-	ComponentContainer<DebugComponent> debugComponents;
 	ComponentContainer<Health> health;
 	ComponentContainer<Player> players;
 	ComponentContainer<Mesh*> meshPtrs;
@@ -34,6 +33,10 @@ public:
 	ComponentContainer<Clickable> buttons;
 	ComponentContainer<Text> texts;
 	ComponentContainer<AnimationExtra> animExtras;
+	ComponentContainer<AnchoredEntities> anchors;
+	ComponentContainer<UIElement> uiElements;
+	ComponentContainer<Cat> cats;
+	ComponentContainer<Dog> dogs;
 
 	ECSRegistry() {
 		registry_list.push_back(&ais);
@@ -42,7 +45,6 @@ public:
 		registry_list.push_back(&circleColliders);
 		registry_list.push_back(&collisions);
 		registry_list.push_back(&colors);
-		registry_list.push_back(&debugComponents);
 		registry_list.push_back(&health);
 		registry_list.push_back(&players);
 		registry_list.push_back(&meshPtrs);
@@ -59,6 +61,10 @@ public:
 		registry_list.push_back(&buttons);
 		registry_list.push_back(&texts);
 		registry_list.push_back(&animExtras);
+		registry_list.push_back(&anchors);
+		registry_list.push_back(&uiElements);
+		registry_list.push_back(&cats);
+		registry_list.push_back(&dogs);
 	}
 
 	void clear_all_components() {
