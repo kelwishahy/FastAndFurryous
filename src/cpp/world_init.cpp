@@ -315,7 +315,7 @@ Entity createCrosshair(Entity origin, bool iscat) {
 
 Entity createHealthCounter(Entity origin, int health) {
 
-	vec3 color = registry.cats.has(origin) ? vec3{0.862f, 0.525f, 0.517f} : vec3{0.603f, 0.662f, 0.894f};
+	vec3 color = registry.cats.has(origin) ? vec3{0.862f, 0.525f, 0.517f} : vec3{ 0.039, 0.454, 1 };
 
 	auto entity = Entity();
 
