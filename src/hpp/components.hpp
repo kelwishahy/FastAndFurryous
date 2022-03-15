@@ -43,6 +43,8 @@ enum class TEXTURE_IDS {
 	BUTTON1,
 	BUTTONC,
 	HOWTOMOVE,
+	CAT_CROSSHAIR,
+	DOG_CROSSHAIR,
 	TOTAL
 }; constexpr int textureCount = (int)TEXTURE_IDS::TOTAL;
 
@@ -89,10 +91,13 @@ enum TEAM {
 
 // Game components ------------------------------------------------------------
 
-struct Player {
-	TEAM team;
+enum UI_ELEMENT {
+	CROSSHAIR,
+	HEALTH_DISPLAY,
+	NAME
 };
 
+// Game components ------------------------------------------------------------
 struct Background {
 	
 };
@@ -155,6 +160,8 @@ struct WeaponBase {
 	float aim_loc_x;
 	float damage;
 	WEAPON_TYPES type;
+	glm::vec4 curr_trajectory_x;
+	glm::vec4 curr_trajectory_y;
 };
 
 struct Rifle : WeaponBase {
@@ -172,6 +179,8 @@ struct Rifle : WeaponBase {
 		area = 200.0f;
 		damage = 10;
 		type = RIFLE;
+		curr_trajectory_x = {0.f,0.f,0.f,0.f};
+		curr_trajectory_y = { 0.f,0.f,0.f,0.f };
 	}
 };
 
@@ -198,6 +207,23 @@ struct Collision {
 struct Clickable {
 	std::vector<glm::vec2> vertecies;
 	std::vector<std::function<void()>> callbacks;
+};
+
+struct AnchoredEntities {
+	glm::vec2 normal_distance = {0.0f, 0.0f};
+	Entity child;
+};
+
+struct UIElement {
+	UI_ELEMENT element_type;
+};
+
+struct Cat {
+	
+};
+
+struct Dog {
+	
 };
 
 // Render components ----------------------------------------------------------

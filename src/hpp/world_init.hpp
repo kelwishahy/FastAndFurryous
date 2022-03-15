@@ -4,11 +4,6 @@
 #include "render_system.hpp"
 #include <glm/vec2.hpp>				// vec2
 
-#include "glm/detail/_noise.hpp"
-#include "glm/detail/_noise.hpp"
-#include "glm/detail/_noise.hpp"
-#include "glm/detail/_noise.hpp"
-
 // Player entities
 Entity createCat(RenderSystem* renderer, glm::vec2 pos);
 
@@ -30,3 +25,5 @@ Entity createMenu(MENU_TYPES menu, float layer);
 Entity createButton(glm::vec2 pos, glm::vec2 scale, TEXTURE_IDS tex_id, std::vector<std::function<void()>> callbacks);
 
 Entity createText(glm::vec2 pos, float scale, glm::vec3 color, std::string text);
+
+Entity createCrosshair(bool iscat);

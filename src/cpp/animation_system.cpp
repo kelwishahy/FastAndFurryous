@@ -4,9 +4,6 @@
 #include <map>
 
 #include <glm/vec2.hpp>				// vec2
-#include <glm/ext/vector_int2.hpp>  // ivec2
-#include <glm/vec3.hpp>             // vec3
-#include <glm/mat3x3.hpp>           // mat3
 
 #include "hpp/components.hpp"
 #include "hpp/tiny_ecs_registry.hpp"

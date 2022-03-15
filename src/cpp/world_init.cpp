@@ -1,7 +1,5 @@
 #include "..\hpp\world_init.hpp"
 #include "..\hpp\tiny_ecs_registry.hpp"
-#include "glm/detail/_noise.hpp"
-#include "glm/detail/_noise.hpp"
 
 #include "hpp/common.hpp"
 
@@ -49,6 +47,8 @@ Entity createCat(RenderSystem* renderer, vec2 pos) {
 			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
 	//----------------------------------------------
 
+	registry.cats.emplace(entity);
+
 	// Add health component
 	Health& health = registry.health.emplace(entity);
 
@@ -67,8 +67,6 @@ Entity createCat(RenderSystem* renderer, vec2 pos) {
 	calculateBoxVerticesAndSetTriangles(motion.position, motion.scale, bc);
 	bc.transformed_required = true;
 
-	auto& player = registry.players.emplace(entity);
-	player.team = PLAYER_1_TEAM;
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_IDS::CAT_FRONT_IDLE,
@@ -142,8 +140,6 @@ Entity createAI(RenderSystem* renderer, vec2 pos) {
 	calculateBoxVerticesAndSetTriangles(motion.position, motion.scale, bc);
 	bc.transformed_required = true;
 
-	auto& player = registry.players.emplace(entity);
-	player.team = NPC_AI_TEAM;
 	registry.ais.emplace(entity);
 	registry.weapons.insert(entity, Rifle());
 	registry.renderRequests.insert(
@@ -277,4 +273,28 @@ Entity createText(vec2 pos, float scale, glm::vec3 color, std::string text) {
 			GEOMETRY_BUFFER_IDS::TOTAL });
 
 	return entity;
+}
+
+Entity createCrosshair(bool iscat) {
+
+	auto entity = Entity();
+
+	// Main entity
+	Motion& motion = registry.motions.emplace(entity);
+	motion.scale = { 50.0f, 50.0f };
+
+	registry.uiElements.insert(
+		entity, { UI_ELEMENT::CROSSHAIR }
+	);
+
+	registry.renderRequests.insert(
+		entity,
+		{ iscat ? TEXTURE_IDS::CAT_CROSSHAIR : TEXTURE_IDS::DOG_CROSSHAIR,
+				SHADER_PROGRAM_IDS::TEXTURE,
+				GEOMETRY_BUFFER_IDS::TEXTURED_QUAD }
+	);
+
+	return entity;
+
+
 }

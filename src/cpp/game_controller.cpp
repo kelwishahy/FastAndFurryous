@@ -4,6 +4,9 @@
 #include "hpp/ai_system.hpp"
 #include "hpp/Game_Mechanics/health_system.hpp"
 
+#include <glm/vec2.hpp>	
+#include <hpp/tiny_ecs_registry.hpp>
+
 GameController::GameController() {
 	inAGame = false;
 	//ShootingSystem shooting_system(renderer);
@@ -52,22 +55,32 @@ void GameController::step(float elapsed_ms) {
 	glfwSetWindowUserPointer(window, this);
 	//While a game is happening make sure the players are controlling from here
 	shooting_system.step(elapsed_ms);
+	ui.step(elapsed_ms);
+
 	handle_collisions();
+
+	if (game_state.turn_possesion == PLAYER1) {
+		//DO STUFF
+	} else if (game_state.turn_possesion == PLAYER2) {
+		//DO STUFF
+	} else if (game_state.turn_possesion == AI) {
+		//DO STUFF
+	} else if (game_state.turn_possesion == NPCAI_TURN) {
+		//DO STUFF
+	}
 
 	// change the animation type depending on the velocity
 	for (Entity e : registry.animations.entities) {
-		if (registry.players.has(e)) {
-			Motion& catMotion = registry.motions.get(e);
-			Animation& catAnimation = registry.animations.get(e);
+		Motion& catMotion = registry.motions.get(e);
+		Animation& catAnimation = registry.animations.get(e);
 
-			if (catMotion.velocity.x < 0) {
+		if (catMotion.velocity.x < 0) {
 				catAnimation.facingLeft = true;
 				shooting_system.setAimLoc(e);
-			}
-			if (catMotion.velocity.x > 0) {
-				catAnimation.facingLeft = false;
-				shooting_system.setAimLoc(e);
-			}
+		}
+		if (catMotion.velocity.x > 0) {
+			catAnimation.facingLeft = false;
+			shooting_system.setAimLoc(e);
 		}
 	}
 
@@ -96,7 +109,6 @@ void GameController::step(float elapsed_ms) {
 		// }
 	}
 
-	// decrementTurnTime(elapsed_ms);
 
 	ai.step(elapsed_ms, game_state.turn_possesion);
 	// if (game_state.turn_possesion == TURN_CODE::NPCAI) next_turn();
@@ -199,13 +211,18 @@ void GameController::handle_collisions() {
 			Projectile& pj = registry.projectiles.get(entity);
 			if (registry.terrains.has(entity_other) && entity_other != pj.origin) {
 				registry.remove_all_components_of(entity);
-			} else if (entity_other != pj.origin && registry.players.has(entity_other)) { // Projectile hit another player
-				auto team = registry.players.get(pj.origin).team;
-				auto otherTeam = registry.players.get(entity_other).team;
-
-				// Decrease that players health
-				if (team != otherTeam) {
-					decreaseHealth(entity_other, registry.weapons.get(pj.origin).damage);
+			} else if (entity_other != pj.origin) { // Projectile hit another player
+				for (std::vector<Entity> vec : teams) {
+					bool origin_isonteam = false;
+					bool entity_other_isonteam = false;
+					for (Entity e : vec) { //check for friendly fire, since std::find dosen't work
+						if (e == pj.origin) 
+							origin_isonteam = true;
+						if (e == entity_other) 
+							entity_other_isonteam = true;
+					}
+					if (origin_isonteam && !entity_other_isonteam)
+						decreaseHealth(entity_other, registry.weapons.get(pj.origin).damage);
 				}
 				registry.remove_all_components_of(entity);
 			}
@@ -237,24 +254,28 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 		float current_speed = 150.0f;
 		float gravity_force = 2.5;
 
-		if (action == GLFW_PRESS && key == GLFW_KEY_W) {
-			if (catMotion.velocity.y == gravity_force) {
-				catMotion.velocity.y = -gravity_force * current_speed;
-				rb.collision_normal.y = 0;
+		if (action == GLFW_PRESS) {
+			if (key == GLFW_KEY_W) {
+				if (catMotion.velocity.y == gravity_force) {
+					catMotion.velocity.y = -gravity_force * current_speed;
+					rb.collision_normal.y = 0;
+					player_mode = PLAYER_MODE::MOVING;
+					ui.hide_crosshair();
+				}
 			}
 
-			if (action == GLFW_PRESS && key == GLFW_KEY_S) {
-				catMotion.velocity.y = current_speed;
-			}
-
-			if (action == GLFW_PRESS && key == GLFW_KEY_D) {
+			if (key == GLFW_KEY_D) {
 				catMotion.velocity.x = current_speed;
 				AnimationSystem::animate_cat_walk(curr_selected_char);
+				player_mode = PLAYER_MODE::MOVING;
+				ui.hide_crosshair();
 			}
 
-			if (action == GLFW_PRESS && key == GLFW_KEY_A) {
+			if (key == GLFW_KEY_A) {
 				catMotion.velocity.x = -current_speed;
 				AnimationSystem::animate_cat_walk(curr_selected_char);
+				player_mode = PLAYER_MODE::MOVING;
+				ui.hide_crosshair();
 			}
 		}
 
@@ -263,40 +284,24 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 			if (key == GLFW_KEY_A && catMotion.velocity.x < 0) {
 				catMotion.velocity.x = 0.0f;
 				AnimationSystem::animate_cat_idle(curr_selected_char);
+				player_mode = PLAYER_MODE::SHOOTING;
+				ui.show_crosshair(curr_selected_char);
 			}
 			if (key == GLFW_KEY_D && catMotion.velocity.x > 0) {
 				catMotion.velocity.x = 0.0f;
 				AnimationSystem::animate_cat_idle(curr_selected_char);
-			}
-		}
-
-		if (action == GLFW_PRESS && key == GLFW_KEY_D) {
-			catMotion.velocity.x = current_speed;
-			player_mode = PLAYER_MODE::MOVING;
-		}
-
-		if (action == GLFW_PRESS && key == GLFW_KEY_A) {
-			catMotion.velocity.x = -current_speed;
-			player_mode = PLAYER_MODE::MOVING;
-		}
-
-		if (action == GLFW_RELEASE) {
-			if (key == GLFW_KEY_A && catMotion.velocity.x < 0) {
-				catMotion.velocity.x = 0.0f;
 				player_mode = PLAYER_MODE::SHOOTING;
-			}
-			if (key == GLFW_KEY_D && catMotion.velocity.x > 0) {
-				catMotion.velocity.x = 0.0f;
-				player_mode = PLAYER_MODE::SHOOTING;
+				ui.show_crosshair(curr_selected_char);
 			}
 		}
+
 
 		if (action == GLFW_PRESS && key == GLFW_KEY_UP) {
-			shooting_system.aimUp(curr_selected_char);
+			shooting_system.aimUp(curr_selected_char, 0.05f);
 		}
 
 		if (action == GLFW_PRESS && key == GLFW_KEY_DOWN) {
-			shooting_system.aimDown(curr_selected_char);
+			shooting_system.aimDown(curr_selected_char, 0.05f);
 		}
 
 		if (action == GLFW_PRESS && key == GLFW_KEY_ENTER) {

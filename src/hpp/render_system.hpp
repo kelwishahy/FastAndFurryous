@@ -51,7 +51,9 @@ class RenderSystem {
 		"select_bg.jpg",
 		"button1.jpg",
 		"select_cat.jpg",
-		"tutorial_bg.jpg"
+		"tutorial_bg.jpg",
+		"cat_crosshair.png",
+		"dog_crosshair.png"
 	};
 
 	std::array<GLuint, textureCount> textures; // OpenGL texture names
@@ -155,7 +157,7 @@ private:
 	// Apply matrix transformations
 	// position is generally motion.position
 	// scale is generally motion.scale
-	glm::mat4 transform(glm::vec2 position, glm::vec2 scale, float depth);
+	glm::mat4 transform(glm::vec2 position, glm::vec2 scale, float depth, float angle);
 
 	// The last step of the draw function
 	void renderToScreen(glm::mat4& transformationMatrix, glm::mat4& projectionMatrix);
