@@ -260,7 +260,10 @@ void PhysicsSystem :: applyMotions(float elapsed_ms) {
 			if (registry.rigidBodies.has(entity)) {
 				Rigidbody& rb = registry.rigidBodies.get(entity);
 				if (rb.type == KINEMATIC) {
-					//TODO
+					//we are applying gravity forces here
+					applyForce(entity, GRAVITY_FORCE);
+					//sum of Forces + inv(mass) + deltaTime
+					motion.velocity = rb.force_accumulator * (1.0f / rb.mass) * elapsed_ms;
 				}
 				if (rb.type == STATIC) {
 					motion.velocity = vec2{ 0,0 };
@@ -316,6 +319,16 @@ void PhysicsSystem::moveBackEntity(Entity e, vec2 normal, float depth) {
 	Rigidbody& rb = registry.rigidBodies.get(e);
 	rb.collision_depth = depth;
 	rb.collision_normal = normal;
+}
+
+void  PhysicsSystem::applyForce(Entity e, glm::vec2 force) {
+
+	assert(registry.motions.has(e));
+	assert(registry.rigidBodies.has(e));
+
+	Rigidbody& rb = registry.rigidBodies.get(e);
+	rb.force_accumulator += force;
+
 }
 
 void PhysicsSystem::transformAnchoredEntities() {

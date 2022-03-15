@@ -22,6 +22,8 @@ public:
 
 	void static translatePos(Entity e, glm::vec2 translation);
 
+	void static applyForce(Entity e, glm::vec2 force);
+
 private:
 	void checkForCollisions();
 
@@ -35,6 +37,7 @@ private:
 
 	const float GRAVITY_CONST = 2.5f;
 	const float TERMINAL_VELOCITY = 500.0f;
+	const glm::vec2 GRAVITY_FORCE = { 0.0f, 2.0f };
 
 	RenderSystem* renderer;
 };

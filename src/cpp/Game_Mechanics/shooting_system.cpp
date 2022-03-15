@@ -28,16 +28,6 @@ void ShootingSystem::step(float elapsed_time) {
 
 		float step_seconds = elapsed_time / 1000.0f;
 
-		projectile.delta_time = (projectile.delta_time + step_seconds >= 1) ? 1 : projectile.delta_time + step_seconds;
-		if (projectile.delta_time == 1 && !registry.rigidBodies.has(entity)) {
-			Rigidbody& rb = registry.rigidBodies.emplace(entity);
-			rb.type = NORMAL;
-			motion.velocity = projectile.end_tangent;
-		}
-		if (!registry.rigidBodies.has(entity)) {
-			vec2 translation = vec2{ calculate_point(projectile.trajectoryAx, projectile.delta_time) , calculate_point(projectile.trajectoryAy, projectile.delta_time) } - motion.position;
-			PhysicsSystem::translatePos(entity, translation);
-		}
 	}
 }
 
@@ -99,15 +89,6 @@ void ShootingSystem::setAimLoc(Entity e) {
 		}
 	}
 
-	if (orientation == SHOOT_ORIENTATION::RIGHT) {
-		float move_step = (x_end - x_begin) * (weapon.aim_angle / (weapon.MAX_ANGLE - weapon.MIN_ANGLE));
-		weapon.aim_loc_x = (x_end - move_step <= x_begin) ? x_begin : x_end - move_step;
-	}
-	else {
-		float move_step = (x_begin - x_end) * ((weapon.aim_angle - pio2) / (weapon.MAX_ANGLE - weapon.MIN_ANGLE));
-		weapon.aim_loc_x = (x_begin - move_step <= x_end) ? x_end : x_begin - move_step;
-	}
-
 	//Calculate cubic curves
 	calculate_trajectory(e);
 }
@@ -118,10 +99,10 @@ void ShootingSystem::shoot(Entity e) {
 	setAimLoc(e);
 	WeaponBase& weapon = registry.weapons.get(e);
 
-	float x2p = cos(weapon.aim_angle) * 2.0f;
-	float y2p = sin(weapon.aim_angle) * 2000.0f;
+	float xforce = cos(weapon.aim_angle) * 200.0f;
+	float yforce = -sin(weapon.aim_angle) * 200.0f;
 		
-	createProjectile(renderer, e, weapon.curr_trajectory_x, weapon.curr_trajectory_y, vec2{x2p * 100.0f, y2p});
+	createProjectile(renderer, e, {xforce, yforce});
 	audio.play_sfx(SOUND_EFFECTS::GUNSHOT);
 
 
@@ -133,27 +114,7 @@ void ShootingSystem::calculate_trajectory(Entity e) {
 	WeaponBase& weapon = registry.weapons.get(e);
 
 	if (weapon.type == RIFLE) {
-		float x1 = registry.motions.get(e).position.x;
-		// printf("x1 %f, ", x1);
-		float x2 = weapon.aim_loc_x;
-		// printf("x2 %f, ", x2);
-		float x1p = cos(weapon.aim_angle) * 2.0f;
-		float x2p = x1p;
 
-		float plane = registry.motions.get(e).position.y;
-
-		float y1 = plane;
-		//Hard coded value
-		float y2 = plane;
-		//Multiplier is hard coded
-		float y1p = -sin(weapon.aim_angle) * 2000.0f;
-		//Currently the second tangent just mirrors first tangent, we can change this
-		float y2p = -y1p;
-		vec4 xt = calculate_A(x1, x2, x1p, x2p);
-		vec4 yt = calculate_A(y1, y2, y1p, y2p);
-
-		weapon.curr_trajectory_x = xt;
-		weapon.curr_trajectory_y = yt;
 	}
 }
 

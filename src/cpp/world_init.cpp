@@ -4,6 +4,7 @@
 #include "hpp/common.hpp"
 
 #include "hpp/ANIMATION_CONSTANTS.hpp"
+#include "hpp/physics_system.hpp"
 
 using namespace glm;
 
@@ -157,7 +158,7 @@ Entity createAI(RenderSystem* renderer, vec2 pos) {
 	return entity;
 }
 
-Entity createProjectile(RenderSystem* renderer, Entity originE, vec4 coefficientsX, vec4 coefficientsY, vec2 endtangent) {
+Entity createProjectile(RenderSystem* renderer, Entity originE, vec2 force) {
 
 	auto entity = Entity();
 
@@ -182,9 +183,12 @@ Entity createProjectile(RenderSystem* renderer, Entity originE, vec4 coefficient
 
 	Projectile& projectile = registry.projectiles.emplace(entity);
 	projectile.origin = originE;
-	projectile.trajectoryAx = coefficientsX;
-	projectile.trajectoryAy = coefficientsY;
-	projectile.end_tangent = endtangent;
+
+	Rigidbody& rb = registry.rigidBodies.emplace(entity);
+	rb.type = KINEMATIC;
+
+	PhysicsSystem::applyForce(entity, force);
+
 
 	return entity;
 }
@@ -275,20 +279,31 @@ Entity createText(vec2 pos, float scale, glm::vec3 color, std::string text) {
 	return entity;
 }
 
-Entity createCrosshair(bool iscat) {
+Entity createCrosshair(Entity origin, bool iscat) {
 
 	auto entity = Entity();
+	auto crosshair_sub = Entity();
 
 	// Main entity
 	Motion& motion = registry.motions.emplace(entity);
-	motion.scale = { 50.0f, 50.0f };
+	motion.position = registry.motions.get(origin).position;
+	motion.scale = { 1.0f, 1.0f };
 
 	registry.uiElements.insert(
 		entity, { UI_ELEMENT::CROSSHAIR }
 	);
 
+	AnchoredEntities& anchor = registry.anchors.emplace(entity);
+	anchor.normal_distance = { 200.0f, 200.0f };
+	anchor.child = crosshair_sub;
+
+	//Sub entity
+	Motion& cross_hair_motion = registry.motions.emplace(crosshair_sub);
+	cross_hair_motion.position = motion.position + anchor.normal_distance;
+	cross_hair_motion.scale = { 50.0f, 50.0f };
+
 	registry.renderRequests.insert(
-		entity,
+		crosshair_sub,
 		{ iscat ? TEXTURE_IDS::CAT_CROSSHAIR : TEXTURE_IDS::DOG_CROSSHAIR,
 				SHADER_PROGRAM_IDS::TEXTURE,
 				GEOMETRY_BUFFER_IDS::TEXTURED_QUAD }

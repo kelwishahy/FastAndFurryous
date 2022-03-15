@@ -22,4 +22,5 @@ private:
 	//First entity is the actual UIElement, second entity is the character it is attached to
 
 	std::pair<Entity, Entity> crosshair_marker;
+	std::pair<Entity, Entity> crosshair_obj;
 };
