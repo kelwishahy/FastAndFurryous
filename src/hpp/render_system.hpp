@@ -53,7 +53,8 @@ class RenderSystem {
 		"select_cat.jpg",
 		"tutorial_bg.jpg",
 		"cat_crosshair.png",
-		"dog_crosshair.png"
+		"dog_crosshair.png",
+		"health_square.png"
 	};
 
 	std::array<GLuint, textureCount> textures; // OpenGL texture names

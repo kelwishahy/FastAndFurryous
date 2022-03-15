@@ -45,6 +45,7 @@ enum class TEXTURE_IDS {
 	HOWTOMOVE,
 	CAT_CROSSHAIR,
 	DOG_CROSSHAIR,
+	HEALTH_SQUARE,
 	TOTAL
 }; constexpr int textureCount = (int)TEXTURE_IDS::TOTAL;
 
@@ -145,6 +146,7 @@ struct Rigidbody {
 	float mass = 1;
 	float collision_depth;
 	glm::vec2 collision_normal;
+	glm::vec2 force_accumulator;
 };
 
 struct RayCast {
@@ -157,11 +159,9 @@ struct WeaponBase {
 	float aim_angle;
 	float distance;
 	float area;
-	float aim_loc_x;
+	//float aim_loc_x;
 	float damage;
 	WEAPON_TYPES type;
-	glm::vec4 curr_trajectory_x;
-	glm::vec4 curr_trajectory_y;
 };
 
 struct Rifle : WeaponBase {
@@ -179,8 +179,6 @@ struct Rifle : WeaponBase {
 		area = 200.0f;
 		damage = 10;
 		type = RIFLE;
-		curr_trajectory_x = {0.f,0.f,0.f,0.f};
-		curr_trajectory_y = { 0.f,0.f,0.f,0.f };
 	}
 };
 
@@ -190,11 +188,11 @@ struct Shotgun : WeaponBase {
 
 struct Projectile {
 	Entity origin;
-	glm::vec4 trajectoryAx;
+	/*glm::vec4 trajectoryAx;
 	glm::vec4 trajectoryAy;
-	float delta_time = 0;
-	float hit_radius;
-	glm::vec2 end_tangent;
+	float delta_time = 0;*/
+	//float hit_radius;
+	//glm::vec2 end_tangent;
 };
 
 // Stucture to store collision information

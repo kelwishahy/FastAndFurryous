@@ -260,7 +260,10 @@ void PhysicsSystem :: applyMotions(float elapsed_ms) {
 			if (registry.rigidBodies.has(entity)) {
 				Rigidbody& rb = registry.rigidBodies.get(entity);
 				if (rb.type == KINEMATIC) {
-					//TODO
+					//we are applying gravity forces here
+					applyForce(entity, GRAVITY_FORCE);
+					//sum of Forces + inv(mass) + deltaTime
+					motion.velocity = rb.force_accumulator * (1.0f / rb.mass) * elapsed_ms;
 				}
 				if (rb.type == STATIC) {
 					motion.velocity = vec2{ 0,0 };
@@ -281,9 +284,22 @@ void PhysicsSystem :: applyMotions(float elapsed_ms) {
 
 void PhysicsSystem::step(float elapsed_ms)
 {
+	fixed_update_accumulator += elapsed_ms - FIXED_UPDATE_STEP;
+	//printf("accumulator: %f\n", fixed_update_accumulator);
+
+	fixed_update();
+	if (fixed_update_accumulator >= FIXED_UPDATE_STEP) {
+		fixed_update();
+		fixed_update_accumulator = 0.0f;
+		printf("extra is being called fixed step\n");
+	}
+}
+
+void PhysicsSystem::fixed_update() {
 	transformBoxColliders();
 
-	applyMotions(elapsed_ms);
+	//1/60th of a second
+	applyMotions(FIXED_UPDATE_STEP);
 
 	transformAnchoredEntities();
 
@@ -294,8 +310,8 @@ void PhysicsSystem::step(float elapsed_ms)
 
 	// you may need the following quantities to compute wall positions
 	(float)renderer->getScreenWidth(); (float)renderer->getScreenHeight();
-
 }
+
 
 //translation is the distance to be moved
 void PhysicsSystem::translatePos(Entity e, vec2 translation) {
@@ -318,6 +334,16 @@ void PhysicsSystem::moveBackEntity(Entity e, vec2 normal, float depth) {
 	rb.collision_normal = normal;
 }
 
+void  PhysicsSystem::applyForce(Entity e, glm::vec2 force) {
+
+	assert(registry.motions.has(e));
+	assert(registry.rigidBodies.has(e));
+
+	Rigidbody& rb = registry.rigidBodies.get(e);
+	rb.force_accumulator += force;
+
+}
+
 void PhysicsSystem::transformAnchoredEntities() {
 
 	for (Entity e : registry.anchors.entities) {
@@ -326,7 +352,11 @@ void PhysicsSystem::transformAnchoredEntities() {
 
 		Motion& child_motion = registry.motions.get(anchor.child);
 		Motion anchor_motion = registry.motions.get(e);
-		child_motion.position = anchor_motion.position + vec2{ cos(anchor_motion.angle), -sin(anchor_motion.angle) } * anchor.normal_distance;
+		if (anchor_motion.angle != 0.0f) {
+			child_motion.position = anchor_motion.position + vec2{ cos(anchor_motion.angle), -sin(anchor_motion.angle) } *anchor.normal_distance;
+		} else {
+			child_motion.position = anchor_motion.position + vec2{ 1.0f, 1.0f } *anchor.normal_distance;
+		}
 
 	}
 
