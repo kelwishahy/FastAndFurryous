@@ -3,7 +3,9 @@
 #include <hpp/world_init.hpp>
 #include <fstream>
 #include <../ext/project_path.hpp>
+#include "hpp/common.hpp"
 #include "hpp/tiny_ecs_registry.hpp"
+
 using namespace std;
 
 Map::Map() {
@@ -17,8 +19,8 @@ Map::~Map() {
 void Map::init(int screenWidth) {
 	// Create a default game map
 	this->mapHeight = 18;
-	this->mapWidth = 30;
-	this->tileScale = ceil((float)screenWidth / mapWidth);
+	this->mapWidth = 60;
+	this->tileScale = ceil((defaultResolution.x / 30.f));
 	printf("Tiles are %fx%f\n", tileScale, tileScale);
 
 	readMapFromFile();

@@ -102,10 +102,13 @@ void GameController::step(float elapsed_ms) {
 	//		inAGame = false;
 	//	}
 
-	//	// if (player1_team.size() == 0) {
-	//	// 	restart_current_match();
-	//	// }
-	//}
+		// if (registry.motions.get(e).position.x >= renderer->getScreenWidth() - 200.f) {
+		// 	renderer->camera.setPosition(renderer->camera.getPosition() + vec3(5.f, 0.f, 0.f));
+		// }
+
+		// if (player1_team.size() == 0) {
+		// 	restart_current_match();
+		// }
 
 	for (int i = 0; i < npcai_team.size(); i++) {
 		auto e = npcai_team[i];
@@ -152,10 +155,10 @@ void GameController::build_map() {
 	createWall({ -10, height / 2 }, 10, height - 10);
 	//
 	// //Right Wall
-	createWall({ width + 10, height / 2 }, 10, height);
+	createWall({ 2 * width + 10, height / 2 }, 10, height);
 	//
 	// //Ceiling
-	createWall({ width / 2, -10 }, width, 10);
+	// createWall({ width / 2, -10 }, width, 10);
 
 	this->gameMap = Map();
 	gameMap.init(renderer->getScreenWidth());
@@ -260,6 +263,14 @@ void GameController::handle_collisions() {
 
 // On key callback
 void GameController::on_player_key(int key, int, int action, int mod) {
+
+	// if (action == GLFW_REPEAT && key == GLFW_KEY_L) {
+	// 	renderer->camera.setPosition(renderer->camera.getPosition() + vec3(1.f, 0.f, 0.f ));
+	// 	auto pos = renderer->camera.getPosition();
+	// 	printf("Camera pos = %f %f %f\n", pos.x, pos.y, pos.z);
+	// } else if (action == GLFW_PRESS && key == GLFW_KEY_K) {
+	// 	// renderer->camera.setPosition(renderer->camera.getPosition() + vec3(-10.f, 0.f, 0.f));
+	// }
 
 	//Only allowed to move on specified turn
 	if (game_state.turn_possesion == PLAYER1 && inAGame) {

@@ -2,7 +2,6 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <../project_path.hpp>
 
 #include <array>
 #include <vector>
@@ -17,6 +16,7 @@
 #include "components.hpp"
 #include "map.hpp"
 #include "animation_system.hpp"
+#include "hpp/orthographic_camera.hpp"
 
 class RenderSystem {
 
@@ -113,6 +113,8 @@ class RenderSystem {
 public:
 	RenderSystem () {};
 	~RenderSystem () {};
+
+	OrthographicCamera camera;
 
 	// Draw to the screen using shaderProgram
 	void draw(float elapsed_ms);

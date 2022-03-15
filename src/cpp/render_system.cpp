@@ -112,7 +112,8 @@ void RenderSystem::renderToScreen(mat4& transformationMatrix, mat4& projectionMa
 	GLuint transform_loc = glGetUniformLocation(currProgram, "transform");
 	glUniformMatrix4fv(transform_loc, 1, GL_FALSE, (float*)&transformationMatrix);
 	GLuint projection_loc = glGetUniformLocation(currProgram, "projection");
-	glUniformMatrix4fv(projection_loc, 1, GL_FALSE, (float*)&projectionMatrix);
+	auto proj = camera.getViewProjectionMatrix(); // Passing in the camera's viewProjectionMatrix
+	glUniformMatrix4fv(projection_loc, 1, GL_FALSE, (float*)&proj);
 	glHasError();
 
 	glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_SHORT, nullptr);
@@ -282,7 +283,8 @@ void RenderSystem::drawTiles(const mat4& projectionMatrix) {
 				GLuint transform_loc = glGetUniformLocation(currProgram, "transform");
 				glUniformMatrix4fv(transform_loc, 1, GL_FALSE, (float*)&transformationMatrix);
 				GLuint projection_loc = glGetUniformLocation(currProgram, "projection");
-				glUniformMatrix4fv(projection_loc, 1, GL_FALSE, (float*)&projection);
+				auto proj = camera.getViewProjectionMatrix(); // Passing in the camera's viewProjectionMatrix
+				glUniformMatrix4fv(projection_loc, 1, GL_FALSE, (float*)&proj);
 				glHasError();
 
 				glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_SHORT, nullptr);
@@ -493,6 +495,7 @@ bool RenderSystem::init() {
 
 	initFonts();
 
+	camera = OrthographicCamera(0.f, screenWidth, screenHeight, 0.f);
 
 	return true;
 }
