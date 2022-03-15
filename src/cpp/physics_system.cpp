@@ -339,7 +339,11 @@ void PhysicsSystem::transformAnchoredEntities() {
 
 		Motion& child_motion = registry.motions.get(anchor.child);
 		Motion anchor_motion = registry.motions.get(e);
-		child_motion.position = anchor_motion.position + vec2{ cos(anchor_motion.angle), -sin(anchor_motion.angle) } * anchor.normal_distance;
+		if (anchor_motion.angle != 0.0f) {
+			child_motion.position = anchor_motion.position + vec2{ cos(anchor_motion.angle), -sin(anchor_motion.angle) } *anchor.normal_distance;
+		} else {
+			child_motion.position = anchor_motion.position + vec2{ 1.0f, 1.0f } *anchor.normal_distance;
+		}
 
 	}
 

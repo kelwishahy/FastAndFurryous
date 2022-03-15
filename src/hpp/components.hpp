@@ -45,6 +45,7 @@ enum class TEXTURE_IDS {
 	HOWTOMOVE,
 	CAT_CROSSHAIR,
 	DOG_CROSSHAIR,
+	HEALTH_SQUARE,
 	TOTAL
 }; constexpr int textureCount = (int)TEXTURE_IDS::TOTAL;
 

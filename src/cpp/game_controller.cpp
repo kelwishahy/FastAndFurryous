@@ -48,6 +48,7 @@ void GameController::init(RenderSystem* renderer, GLFWwindow* window) {
 	//TEST TEXT
 	createText({ 10.0f, 10.0f }, 1.0f, { 0.172f, 0.929f, 0.286f }, "~The quick brown fox~ $jumped over the lazy$ dog !., 1234567890");
 	ai.init(shooting_system);
+	ui.init();
 }
 
 void GameController::step(float elapsed_ms) {
@@ -85,7 +86,7 @@ void GameController::step(float elapsed_ms) {
 	}
 
 	for (int i = 0; i < player1_team.size(); i++) {
-		auto& e = player1_team[i];
+		auto e = player1_team[i];
 		if (registry.health.get(e).hp == 0) {
 			player1_team.erase(player1_team.begin() + i);
 			registry.remove_all_components_of(e);

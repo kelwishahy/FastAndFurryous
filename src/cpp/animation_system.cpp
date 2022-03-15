@@ -1,7 +1,4 @@
-#include <array>
 #include <vector>
-#include <string>
-#include <map>
 
 #include <glm/vec2.hpp>				// vec2
 

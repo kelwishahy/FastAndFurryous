@@ -311,5 +311,28 @@ Entity createCrosshair(Entity origin, bool iscat) {
 
 	return entity;
 
+}
+
+Entity createHealthCounter(Entity origin, int health) {
+
+	vec3 color = registry.cats.has(origin) ? vec3{0.862f, 0.525f, 0.517f} : vec3{0.603f, 0.662f, 0.894f};
+
+	auto entity = Entity();
+
+	Motion& motion = registry.motions.emplace(entity);
+	motion.scale = vec2(100.0f, 100.0f);
+
+	registry.uiElements.insert(entity, { UI_ELEMENT::HEALTH_DISPLAY });
+
+	AnchoredEntities& anchor = registry.anchors.emplace(entity);
+	anchor.normal_distance = { -17.0f,-18.0f };
+	anchor.child = createText(motion.position, 0.7f, color, std::to_string(health));
+
+	registry.renderRequests.insert(entity,
+		{ TEXTURE_IDS::HEALTH_SQUARE,
+		SHADER_PROGRAM_IDS::TEXTURE,
+		GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
+
+	return entity;
 
 }
