@@ -284,9 +284,22 @@ void PhysicsSystem :: applyMotions(float elapsed_ms) {
 
 void PhysicsSystem::step(float elapsed_ms)
 {
+	fixed_update_accumulator += elapsed_ms - FIXED_UPDATE_STEP;
+	//printf("accumulator: %f\n", fixed_update_accumulator);
+
+	fixed_update();
+	if (fixed_update_accumulator >= FIXED_UPDATE_STEP) {
+		fixed_update();
+		fixed_update_accumulator = 0.0f;
+		printf("extra is being called fixed step\n");
+	}
+}
+
+void PhysicsSystem::fixed_update() {
 	transformBoxColliders();
 
-	applyMotions(elapsed_ms);
+	//1/60th of a second
+	applyMotions(FIXED_UPDATE_STEP);
 
 	transformAnchoredEntities();
 
@@ -297,8 +310,8 @@ void PhysicsSystem::step(float elapsed_ms)
 
 	// you may need the following quantities to compute wall positions
 	(float)renderer->getScreenWidth(); (float)renderer->getScreenHeight();
-
 }
+
 
 //translation is the distance to be moved
 void PhysicsSystem::translatePos(Entity e, vec2 translation) {

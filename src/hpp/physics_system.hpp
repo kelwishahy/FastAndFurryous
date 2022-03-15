@@ -14,6 +14,8 @@ public:
 
 	void step(float elapsed_ms);
 
+	void fixed_update();
+
 	PhysicsSystem()
 	{
 	}
@@ -37,7 +39,10 @@ private:
 
 	const float GRAVITY_CONST = 2.5f;
 	const float TERMINAL_VELOCITY = 500.0f;
-	const glm::vec2 GRAVITY_FORCE = { 0.0f, 2.0f };
+	const glm::vec2 GRAVITY_FORCE = { 0.0f, 0.5f };
+
+	float fixed_update_accumulator = 0.0f;
+	const float FIXED_UPDATE_STEP = 1000.0f / 60.0f;
 
 	RenderSystem* renderer;
 };

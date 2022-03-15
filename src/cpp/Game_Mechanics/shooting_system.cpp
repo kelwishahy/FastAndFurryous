@@ -99,11 +99,16 @@ void ShootingSystem::shoot(Entity e) {
 	setAimLoc(e);
 	WeaponBase& weapon = registry.weapons.get(e);
 
-	float xforce = cos(weapon.aim_angle) * 200.0f;
-	float yforce = -sin(weapon.aim_angle) * 200.0f;
-		
-	createProjectile(renderer, e, {xforce, yforce});
-	audio.play_sfx(SOUND_EFFECTS::GUNSHOT);
+	if (weapon.type == RIFLE) {
+		//float direction_scaler = abs(tanf(weapon.aim_angle));
+		//direction_scaler = clamp(direction_scaler, 0.75f, 0.25f);
+		//printf("direction scaler %f\n", direction_scaler);
+		float xforce = cosf(weapon.aim_angle) * 40.0f;
+		float yforce = -sinf(weapon.aim_angle) * 45.0f;
+
+		createProjectile(renderer, e, { xforce, yforce });
+		audio.play_sfx(SOUND_EFFECTS::GUNSHOT);
+	}
 
 
 }
