@@ -45,6 +45,18 @@ class RenderSystem {
 		"cat_hurt_face.png",
 		"cat_hurt.png",
 		"cat_dead.png",
+		// Dog Sprites
+		"dog_front_blink.png",
+		"dog_side_blink.png",
+		"dog_front_idle.png",
+		"dog_front_arm.png",
+		"dog_back_arm.png",
+		"dog_walk.png",
+		"dog_jump.png",
+		"dog_hurt.png",
+		"dog_hurt_face.png",
+		"dog_dead.png",
+		"empty.png",
 		//
 		"stone.png",
 		"background.png",

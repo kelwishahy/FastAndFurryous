@@ -43,6 +43,7 @@ Entity createCat(RenderSystem* renderer, vec2 pos) {
 	headanim.animation_states_constants.insert({ TEXTURE_IDS::CAT_FRONT_BLINK, CAT_FRONT_BLINK_CONSTANTS });
 	headanim.animation_states_constants.insert({ TEXTURE_IDS::CAT_SIDE_BLINK, CAT_SIDE_BLINK_CONSTANTS });
 	headanim.animation_states_constants.insert({ TEXTURE_IDS::CAT_HURT_FACE, CAT_HURT_FACE_CONSTANTS });
+	headanim.animation_states_constants.insert({ TEXTURE_IDS::EMPTY, CAT_HURT_FACE_CONSTANTS });
 	headanim.anim_state = TEXTURE_IDS::CAT_FRONT_BLINK;
 
 	registry.renderRequests.insert(
@@ -62,7 +63,8 @@ Entity createCat(RenderSystem* renderer, vec2 pos) {
 	frontArmMotion.scale = { 64.f / 3, 138.f / 3 };
 
 	Animation& frontArmAnim = registry.animations.emplace(frontArm);
-	frontArmAnim.animation_states_constants.insert({ TEXTURE_IDS::CAT_FRONT_ARM, CAT_FRONT_ARM_CONSTANTS });
+	frontArmAnim.animation_states_constants.insert({ TEXTURE_IDS::CAT_FRONT_ARM, STABILIZED_CONSTANTS });
+	frontArmAnim.animation_states_constants.insert({ TEXTURE_IDS::EMPTY, STABILIZED_CONSTANTS });
 	frontArmAnim.anim_state = TEXTURE_IDS::CAT_FRONT_ARM;
 
 	registry.renderRequests.insert(
@@ -82,7 +84,8 @@ Entity createCat(RenderSystem* renderer, vec2 pos) {
 	backArmMotion.scale = { 64.f / 3, 138.f / 3 };
 
 	Animation& backArmAnim = registry.animations.emplace(backArm);
-	backArmAnim.animation_states_constants.insert({ TEXTURE_IDS::CAT_BACK_ARM, CAT_BACK_ARM_CONSTANTS });
+	backArmAnim.animation_states_constants.insert({ TEXTURE_IDS::CAT_BACK_ARM, STABILIZED_CONSTANTS });
+	backArmAnim.animation_states_constants.insert({ TEXTURE_IDS::EMPTY, STABILIZED_CONSTANTS });
 	backArmAnim.anim_state = TEXTURE_IDS::CAT_BACK_ARM;
 
 	registry.renderRequests.insert(
@@ -125,10 +128,125 @@ Entity createCat(RenderSystem* renderer, vec2 pos) {
 	anim.animation_states_constants.insert({TEXTURE_IDS::CAT_WALK, CAT_WALK_CONSTANTS });
 	anim.animation_states_constants.insert({ TEXTURE_IDS::CAT_JUMP, CAT_JUMP_CONSTANTS });
 	anim.animation_states_constants.insert({ TEXTURE_IDS::CAT_HURT, CAT_HURT_CONSTANTS });
+	anim.animation_states_constants.insert({ TEXTURE_IDS::CAT_DEAD, STABILIZED_CONSTANTS });
 	anim.anim_state = TEXTURE_IDS::CAT_FRONT_IDLE;
 
 	return entity;
 }
+
+Entity createDog(RenderSystem* renderer, vec2 pos) {
+
+	auto head = Entity();
+	auto entity = Entity();
+	auto frontArm = Entity();
+	auto backArm = Entity();
+
+	//---Head animation subentity---- putting this in front so that head gets rendered ontop of body
+	AnimationExtra& headbone = registry.animExtras.emplace(head);
+	headbone.parent = entity;
+	//This is hardcoded and theres not much we can do to change that
+	headbone.offset_from_parent = { 9.5f, -51.0f };
+	headbone.tag = "dog_head";
+
+	Motion& headmotion = registry.motions.emplace(head);
+	headmotion.position = pos + headbone.offset_from_parent;
+	headmotion.scale = { 64.f, 64.f * 0.72803f }; //Look at the dimensions of the sprite sheet to get the right ratio
+
+	Animation& headanim = registry.animations.emplace(head);
+	headanim.animation_states_constants.insert({ TEXTURE_IDS::DOG_FRONT_BLINK, CAT_FRONT_BLINK_CONSTANTS });
+	headanim.animation_states_constants.insert({ TEXTURE_IDS::DOG_SIDE_BLINK, CAT_SIDE_BLINK_CONSTANTS });
+	headanim.animation_states_constants.insert({ TEXTURE_IDS::DOG_HURT_FACE, CAT_HURT_FACE_CONSTANTS });
+	headanim.animation_states_constants.insert({ TEXTURE_IDS::EMPTY, CAT_HURT_FACE_CONSTANTS });
+	headanim.anim_state = TEXTURE_IDS::DOG_FRONT_BLINK;
+
+	registry.renderRequests.insert(
+		head,
+		{ TEXTURE_IDS::DOG_FRONT_BLINK,
+			SHADER_PROGRAM_IDS::ANIMATION,
+			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
+
+	//---Front arm animation subentity---- putting this in front so that front arm gets rendered ontop of body
+	AnimationExtra& frontArmBone = registry.animExtras.emplace(frontArm);
+	frontArmBone.parent = entity;
+	frontArmBone.offset_from_parent = { 0.0f, 0.0f };
+	frontArmBone.tag = "dog_frontArm";
+
+	Motion& frontArmMotion = registry.motions.emplace(frontArm);
+	frontArmMotion.position = pos + frontArmBone.offset_from_parent;
+	frontArmMotion.scale = { 64.f / 3, 138.f / 3 };
+
+	Animation& frontArmAnim = registry.animations.emplace(frontArm);
+	frontArmAnim.animation_states_constants.insert({ TEXTURE_IDS::DOG_FRONT_ARM, STABILIZED_CONSTANTS });
+	frontArmAnim.animation_states_constants.insert({ TEXTURE_IDS::EMPTY, STABILIZED_CONSTANTS });
+	frontArmAnim.anim_state = TEXTURE_IDS::DOG_FRONT_ARM;
+
+	registry.renderRequests.insert(
+		frontArm,
+		{ TEXTURE_IDS::DOG_FRONT_ARM,
+			SHADER_PROGRAM_IDS::ANIMATION,
+			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
+
+	//---Back arm animation subentity---- putting this in back so that front arm gets rendered on back of body
+	AnimationExtra& backArmBone = registry.animExtras.emplace(backArm);
+	backArmBone.parent = entity;
+	backArmBone.offset_from_parent = { +30.0f, 0.0f };
+	backArmBone.tag = "dog_backArm";
+
+	Motion& backArmMotion = registry.motions.emplace(backArm);
+	backArmMotion.position = pos + backArmBone.offset_from_parent;
+	backArmMotion.scale = { 64.f / 3, 138.f / 3 };
+
+	Animation& backArmAnim = registry.animations.emplace(backArm);
+	backArmAnim.animation_states_constants.insert({ TEXTURE_IDS::DOG_BACK_ARM, STABILIZED_CONSTANTS });
+	backArmAnim.animation_states_constants.insert({ TEXTURE_IDS::EMPTY, STABILIZED_CONSTANTS });
+	backArmAnim.anim_state = TEXTURE_IDS::DOG_BACK_ARM;
+
+	registry.renderRequests.insert(
+		backArm,
+		{ TEXTURE_IDS::DOG_BACK_ARM,
+			SHADER_PROGRAM_IDS::ANIMATION,
+			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
+	//----------------------------------------------
+
+	// Add health component
+	Health& health = registry.health.emplace(entity);
+
+	//Make player a rigidbody
+	Rigidbody& rb = registry.rigidBodies.emplace(entity);
+
+	// Setting initial motion values
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = pos;
+	motion.angle = 0.f;
+	motion.velocity = { 0.f, 0.f };
+	float scale = ceil((64.f / defaultResolution.x) * renderer->getScreenWidth());
+	motion.scale = { scale, scale * 1.125f }; //Look at the dimensions of the sprite sheet to get the right ratio
+
+	Boxcollider& bc = registry.boxColliders.emplace(entity);
+	calculateBoxVerticesAndSetTriangles(motion.position, motion.scale, bc);
+	bc.transformed_required = true;
+
+	auto& player = registry.players.emplace(entity);
+	player.team = PLAYER_1_TEAM;
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_IDS::DOG_FRONT_IDLE,
+			SHADER_PROGRAM_IDS::ANIMATION,
+			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
+
+	registry.weapons.insert(entity, Rifle());
+
+	Animation& anim = registry.animations.emplace(entity);
+	anim.animation_states_constants.insert({ TEXTURE_IDS::DOG_FRONT_IDLE, CAT_IDLE_CONSTANTS });
+	anim.animation_states_constants.insert({ TEXTURE_IDS::DOG_WALK, CAT_WALK_CONSTANTS });
+	anim.animation_states_constants.insert({ TEXTURE_IDS::DOG_JUMP, CAT_JUMP_CONSTANTS });
+	anim.animation_states_constants.insert({ TEXTURE_IDS::DOG_HURT, CAT_HURT_CONSTANTS });
+	anim.animation_states_constants.insert({ TEXTURE_IDS::DOG_DEAD, STABILIZED_CONSTANTS });
+	anim.anim_state = TEXTURE_IDS::DOG_FRONT_IDLE;
+
+	return entity;
+}
+
 
 Entity createWall(vec2 pos, float width, float height) {
 	auto entity = Entity();

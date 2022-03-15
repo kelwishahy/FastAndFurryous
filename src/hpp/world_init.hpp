@@ -12,6 +12,9 @@
 // Player entities
 Entity createCat(RenderSystem* renderer, glm::vec2 pos);
 
+// Player entities
+Entity createDog(RenderSystem* renderer, glm::vec2 pos);
+
 // solid terrain
 Entity createWall(glm::vec2 pos, float width, float height);
 

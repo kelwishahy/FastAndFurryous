@@ -207,7 +207,13 @@ void GameController::handle_collisions() {
 				if (team != otherTeam) {
 					decreaseHealth(entity_other, registry.weapons.get(pj.origin).damage);
 					// Will switch it to entity_other when the animation is implemented on AI
+					// will be added when ai animation is implemented
 					AnimationSystem::animate_cat_hurt(curr_selected_char);
+					// if the cat is dead call the following
+					// AnimationSystem::animate_cat_dead(curr_selected_char);
+					// if the entity is dog call these instead
+					// AnimationSystem::animate_dog_hurt(curr_selected_char);
+					// AnimationSystem::animate_dog_dead(curr_selected_char);
 				}
 				registry.remove_all_components_of(entity);
 			}
@@ -243,7 +249,13 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 			if (catMotion.velocity.y == gravity_force) {
 				catMotion.velocity.y = -gravity_force * current_speed;
 				rb.collision_normal.y = 0;
-				AnimationSystem::animate_cat_jump(curr_selected_char);
+				// depending on cat or dog entity, do one of the following
+				if (curr_selected_char == 19) {
+					AnimationSystem::animate_cat_jump(curr_selected_char);
+				}
+				else {
+					AnimationSystem::animate_dog_jump(curr_selected_char);
+				}
 			}
 		}
 
@@ -253,23 +265,44 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 
 		if (action == GLFW_PRESS && key == GLFW_KEY_D) {
 			catMotion.velocity.x = current_speed;
-			AnimationSystem::animate_cat_walk(curr_selected_char);
+			// should probably change it to some other value
+			if (curr_selected_char == 19) {
+				AnimationSystem::animate_cat_walk(curr_selected_char);
+			}
+			else {
+				AnimationSystem::animate_dog_walk(curr_selected_char);
+			}
 		}
 
 		if (action == GLFW_PRESS && key == GLFW_KEY_A) {
 			catMotion.velocity.x = -current_speed;
-			AnimationSystem::animate_cat_walk(curr_selected_char);
+			if (curr_selected_char == 19) {
+				AnimationSystem::animate_cat_walk(curr_selected_char);
+			} 
+			else {
+				AnimationSystem::animate_dog_walk(curr_selected_char);
 			}
+		}
 
 
 		if (action == GLFW_RELEASE) {
 			if (key == GLFW_KEY_A && catMotion.velocity.x < 0) {
 				catMotion.velocity.x = 0.0f;
-				AnimationSystem::animate_cat_idle(curr_selected_char);
+				if (curr_selected_char == 19) {
+					AnimationSystem::animate_cat_idle(curr_selected_char);
+				}
+				else {
+					AnimationSystem::animate_dog_idle(curr_selected_char);
+				}
 			}
 			if (key == GLFW_KEY_D && catMotion.velocity.x > 0) {
 				catMotion.velocity.x = 0.0f;
-				AnimationSystem::animate_cat_idle(curr_selected_char);
+				if (curr_selected_char == 19) {
+					AnimationSystem::animate_cat_idle(curr_selected_char);
+				}
+				else {
+					AnimationSystem::animate_dog_idle(curr_selected_char);
+				}
 			}
 		}
 
