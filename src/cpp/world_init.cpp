@@ -1,11 +1,10 @@
 #include "..\hpp\world_init.hpp"
 #include "..\hpp\tiny_ecs_registry.hpp"
-#include "glm/detail/_noise.hpp"
-#include "glm/detail/_noise.hpp"
 
 #include "hpp/common.hpp"
 
 #include "hpp/ANIMATION_CONSTANTS.hpp"
+#include "hpp/physics_system.hpp"
 
 using namespace glm;
 
@@ -95,6 +94,8 @@ Entity createCat(RenderSystem* renderer, vec2 pos) {
 			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
 	//----------------------------------------------
 
+	registry.cats.emplace(entity);
+
 	// Add health component
 	Health& health = registry.health.emplace(entity);
 
@@ -113,8 +114,6 @@ Entity createCat(RenderSystem* renderer, vec2 pos) {
 	calculateBoxVerticesAndSetTriangles(motion.position, motion.scale, bc);
 	bc.transformed_required = true;
 
-	auto& player = registry.players.emplace(entity);
-	player.team = PLAYER_1_TEAM;
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_IDS::CAT_FRONT_IDLE,
@@ -305,8 +304,6 @@ Entity createAI(RenderSystem* renderer, vec2 pos) {
 	calculateBoxVerticesAndSetTriangles(motion.position, motion.scale, bc);
 	bc.transformed_required = true;
 
-	auto& player = registry.players.emplace(entity);
-	player.team = NPC_AI_TEAM;
 	registry.ais.emplace(entity);
 	registry.weapons.insert(entity, Rifle());
 	registry.renderRequests.insert(
@@ -324,7 +321,7 @@ Entity createAI(RenderSystem* renderer, vec2 pos) {
 	return entity;
 }
 
-Entity createProjectile(RenderSystem* renderer, Entity originE, vec4 coefficientsX, vec4 coefficientsY, vec2 endtangent) {
+Entity createProjectile(RenderSystem* renderer, Entity originE, vec2 force) {
 
 	auto entity = Entity();
 
@@ -349,9 +346,12 @@ Entity createProjectile(RenderSystem* renderer, Entity originE, vec4 coefficient
 
 	Projectile& projectile = registry.projectiles.emplace(entity);
 	projectile.origin = originE;
-	projectile.trajectoryAx = coefficientsX;
-	projectile.trajectoryAy = coefficientsY;
-	projectile.end_tangent = endtangent;
+
+	Rigidbody& rb = registry.rigidBodies.emplace(entity);
+	rb.type = KINEMATIC;
+
+	PhysicsSystem::applyForce(entity, force);
+
 
 	return entity;
 }
@@ -440,4 +440,62 @@ Entity createText(vec2 pos, float scale, glm::vec3 color, std::string text) {
 			GEOMETRY_BUFFER_IDS::TOTAL });
 
 	return entity;
+}
+
+Entity createCrosshair(Entity origin, bool iscat) {
+
+	auto entity = Entity();
+	auto crosshair_sub = Entity();
+
+	// Main entity
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = registry.motions.get(origin).position;
+	motion.scale = { 1.0f, 1.0f };
+
+	registry.uiElements.insert(
+		entity, { UI_ELEMENT::CROSSHAIR }
+	);
+
+	AnchoredEntities& anchor = registry.anchors.emplace(entity);
+	anchor.normal_distance = { 200.0f, 200.0f };
+	anchor.child = crosshair_sub;
+
+	//Sub entity
+	Motion& cross_hair_motion = registry.motions.emplace(crosshair_sub);
+	cross_hair_motion.position = motion.position + anchor.normal_distance;
+	cross_hair_motion.scale = { 50.0f, 50.0f };
+
+	registry.renderRequests.insert(
+		crosshair_sub,
+		{ iscat ? TEXTURE_IDS::CAT_CROSSHAIR : TEXTURE_IDS::DOG_CROSSHAIR,
+				SHADER_PROGRAM_IDS::TEXTURE,
+				GEOMETRY_BUFFER_IDS::TEXTURED_QUAD }
+	);
+
+	return entity;
+
+}
+
+Entity createHealthCounter(Entity origin, int health) {
+
+	vec3 color = registry.cats.has(origin) ? vec3{0.862f, 0.525f, 0.517f} : vec3{ 0.039, 0.454, 1 };
+
+	auto entity = Entity();
+
+	Motion& motion = registry.motions.emplace(entity);
+	motion.scale = vec2(100.0f, 100.0f);
+
+	registry.uiElements.insert(entity, { UI_ELEMENT::HEALTH_DISPLAY });
+
+	AnchoredEntities& anchor = registry.anchors.emplace(entity);
+	anchor.normal_distance = { -17.0f,-18.0f };
+	anchor.child = createText(motion.position, 0.7f, color, std::to_string(health));
+
+	registry.renderRequests.insert(entity,
+		{ TEXTURE_IDS::HEALTH_SQUARE,
+		SHADER_PROGRAM_IDS::TEXTURE,
+		GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
+
+	return entity;
+
 }

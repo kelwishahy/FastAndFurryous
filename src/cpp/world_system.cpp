@@ -106,11 +106,6 @@ void WorldSystem::handle_collisions() {
 		Entity entity = collisionsRegistry.entities[i];
 		Entity entity_other = collisionsRegistry.components[i].other;
 
-		// Not resolving rigidbody here
-		if (registry.players.has(entity)) {
-			if (registry.rigidBodies.has(entity_other)) {
-			}
-		}
 	}
 
 	// Remove all collisions from this simulation step

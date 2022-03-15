@@ -57,6 +57,9 @@ enum class TEXTURE_IDS {
 	BUTTON1,
 	BUTTONC,
 	HOWTOMOVE,
+	CAT_CROSSHAIR,
+	DOG_CROSSHAIR,
+	HEALTH_SQUARE,
 	TOTAL
 }; constexpr int textureCount = (int)TEXTURE_IDS::TOTAL;
 
@@ -103,10 +106,13 @@ enum TEAM {
 
 // Game components ------------------------------------------------------------
 
-struct Player {
-	TEAM team;
+enum UI_ELEMENT {
+	CROSSHAIR,
+	HEALTH_DISPLAY,
+	NAME
 };
 
+// Game components ------------------------------------------------------------
 struct Background {
 	
 };
@@ -154,6 +160,7 @@ struct Rigidbody {
 	float mass = 1;
 	float collision_depth;
 	glm::vec2 collision_normal;
+	glm::vec2 force_accumulator;
 };
 
 struct RayCast {
@@ -166,7 +173,7 @@ struct WeaponBase {
 	float aim_angle;
 	float distance;
 	float area;
-	float aim_loc_x;
+	//float aim_loc_x;
 	float damage;
 	WEAPON_TYPES type;
 };
@@ -195,11 +202,11 @@ struct Shotgun : WeaponBase {
 
 struct Projectile {
 	Entity origin;
-	glm::vec4 trajectoryAx;
+	/*glm::vec4 trajectoryAx;
 	glm::vec4 trajectoryAy;
-	float delta_time = 0;
-	float hit_radius;
-	glm::vec2 end_tangent;
+	float delta_time = 0;*/
+	//float hit_radius;
+	//glm::vec2 end_tangent;
 };
 
 // Stucture to store collision information
@@ -212,6 +219,23 @@ struct Collision {
 struct Clickable {
 	std::vector<glm::vec2> vertecies;
 	std::vector<std::function<void()>> callbacks;
+};
+
+struct AnchoredEntities {
+	glm::vec2 normal_distance = {0.0f, 0.0f};
+	Entity child;
+};
+
+struct UIElement {
+	UI_ELEMENT element_type;
+};
+
+struct Cat {
+	
+};
+
+struct Dog {
+	
 };
 
 // Render components ----------------------------------------------------------
