@@ -31,9 +31,22 @@ enum class TEXTURE_IDS {
 	CAT_JUMP,
 	CAT_SIDE_BLINK,
 	CAT_FRONT_BLINK,
+	CAT_FRONT_ARM,
+	CAT_BACK_ARM,
 	CAT_HURT_FACE,
 	CAT_HURT,
 	CAT_DEAD,
+	// Dog Textures
+	DOG_FRONT_BLINK,
+	DOG_SIDE_BLINK,
+	DOG_FRONT_IDLE,
+	DOG_FRONT_ARM,
+	DOG_BACK_ARM,
+	DOG_WALK,
+	DOG_JUMP,
+	DOG_HURT,
+	DOG_HURT_FACE,
+	DOG_DEAD,
 	//
 	STONE,
 	BACKGROUND,
@@ -208,8 +221,11 @@ struct Clickable {
 };
 
 struct AnchoredEntities {
+	Entity parent; //just for setting the transform and removing after done
 	glm::vec2 normal_distance = {0.0f, 0.0f};
 	Entity child;
+	std::string tag; //optional, tag the type of entity you are attaching
+	glm::vec2 original_distance = { 0.0f, 0.0f }; //optional, hacking in more stuff...
 };
 
 struct UIElement {
@@ -222,6 +238,11 @@ struct Cat {
 
 struct Dog {
 	
+};
+
+struct HealthBox {
+	Entity parent;
+	Entity text;
 };
 
 // Render components ----------------------------------------------------------
@@ -267,6 +288,7 @@ struct MenuItem {
 };
 
 struct Animation {
+	std::string name;
 	int frame = 0;
 	float frame_counter_ms = 100;
 	bool facingLeft = false;
@@ -276,11 +298,6 @@ struct Animation {
 	std::unordered_map<TEXTURE_IDS, TEXTURE_ANIM_CONSTANTS> animation_states_constants;
 };
 
-struct AnimationExtra {
-	std::string tag;   //This is scuffed but we can just name the extra anim for now
-	Entity parent;
-	glm::vec2 offset_from_parent;
-};
 
 struct Text {
 	std::string text;

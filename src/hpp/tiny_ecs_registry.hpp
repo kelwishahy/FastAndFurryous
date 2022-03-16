@@ -31,11 +31,11 @@ public:
 	ComponentContainer<MenuItem> menus;
 	ComponentContainer<Clickable> buttons;
 	ComponentContainer<Text> texts;
-	ComponentContainer<AnimationExtra> animExtras;
 	ComponentContainer<AnchoredEntities> anchors;
 	ComponentContainer<UIElement> uiElements;
 	ComponentContainer<Cat> cats;
 	ComponentContainer<Dog> dogs;
+	ComponentContainer<HealthBox> healthboxes;
 
 	ECSRegistry() {
 		registry_list.push_back(&ais);
@@ -58,11 +58,11 @@ public:
 		registry_list.push_back(&menus);
 		registry_list.push_back(&buttons);
 		registry_list.push_back(&texts);
-		registry_list.push_back(&animExtras);
 		registry_list.push_back(&anchors);
 		registry_list.push_back(&uiElements);
 		registry_list.push_back(&cats);
 		registry_list.push_back(&dogs);
+		registry_list.push_back(&healthboxes);
 	}
 
 	void clear_all_components() {

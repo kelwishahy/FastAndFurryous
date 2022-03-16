@@ -346,14 +346,20 @@ void  PhysicsSystem::applyForce(Entity e, glm::vec2 force) {
 
 void PhysicsSystem::transformAnchoredEntities() {
 
-	for (Entity e : registry.anchors.entities) {
+	for (int i = 0; i < registry.anchors.components.size(); i++) {
 
-		AnchoredEntities anchor = registry.anchors.get(e);
+
+		AnchoredEntities anchor = registry.anchors.components[i];
+		Entity e = registry.anchors.entities[i];
 
 		Motion& child_motion = registry.motions.get(anchor.child);
-		Motion anchor_motion = registry.motions.get(e);
+		Motion parent_motion = registry.motions.get(anchor.parent);
+		Motion& anchor_motion = registry.motions.get(e);
+
+		anchor_motion.position = parent_motion.position;
+
 		if (anchor_motion.angle != 0.0f) {
-			child_motion.position = anchor_motion.position + vec2{ cos(anchor_motion.angle), -sin(anchor_motion.angle) } *anchor.normal_distance;
+			child_motion.position = anchor_motion.position + vec2{ cos(anchor_motion.angle), -sin(anchor_motion.angle) } * anchor.normal_distance;
 		} else {
 			child_motion.position = anchor_motion.position + vec2{ 1.0f, 1.0f } *anchor.normal_distance;
 		}
