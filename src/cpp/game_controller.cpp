@@ -93,22 +93,28 @@ void GameController::step(float elapsed_ms) {
 		}
 	}
 
-	//for (int i = 0; i < player1_team.size(); i++) {
-	//	auto e = player1_team[i];
-	//	if (registry.health.get(e).hp == 0) {
-	//		player1_team.erase(player1_team.begin() + i);
-	//		
-	//		registry.remove_all_components_of(e);
-	//		inAGame = false;
-	//	}
+	for (int i = 0; i < player1_team.size(); i++) {
+		auto e = player1_team[i];
+		if (registry.health.get(e).hp == 0) {
+			player1_team.erase(player1_team.begin() + i);
 
-		// if (registry.motions.get(e).position.x >= renderer->getScreenWidth() - 200.f) {
-		// 	renderer->camera.setPosition(renderer->camera.getPosition() + vec3(5.f, 0.f, 0.f));
-		// }
+			registry.remove_all_components_of(e);
+			inAGame = false;
+		}
+
+		auto rightDist = abs(registry.motions.get(e).position.x - renderer->camera.getCameraRight().x);
+		auto leftDist = abs(registry.motions.get(e).position.x - renderer->camera.getPosition().x);
+		if (rightDist < 400.f && renderer->camera.getCameraRight().x < 2 * renderer->getScreenWidth()) {
+			renderer->camera.setPosition(renderer->camera.getPosition() + vec3(1.5f, 0.f, 0.f));
+		}
+		else if (leftDist < 400.f && renderer->camera.getPosition().x > 0.f) {
+			renderer->camera.setPosition(renderer->camera.getPosition() + vec3(-1.5f, 0.f, 0.f));
+		}
 
 		// if (player1_team.size() == 0) {
 		// 	restart_current_match();
 		// }
+	}
 
 	for (int i = 0; i < npcai_team.size(); i++) {
 		auto e = npcai_team[i];
@@ -274,25 +280,17 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 
 	//Only allowed to move on specified turn
 	if (game_state.turn_possesion == PLAYER1 && inAGame) {
-		if (registry.cats.has(curr_selected_char)) {
-			Motion& catMotion = registry.motions.get(curr_selected_char);
-			Rigidbody& rb = registry.rigidBodies.get(curr_selected_char);
+		Motion& catMotion = registry.motions.get(curr_selected_char);
+		Rigidbody& rb = registry.rigidBodies.get(curr_selected_char);
 
-			float current_speed = 150.0f;
-			float gravity_force = 2.5;
+		float current_speed = 150.0f;
+		float gravity_force = 2.5;
 
-			if (action == GLFW_PRESS) {
-				if (key == GLFW_KEY_W) {
-					if (catMotion.velocity.y == gravity_force) {
-						catMotion.velocity.y = -gravity_force * current_speed;
-						rb.collision_normal.y = 0;
-						player_mode = PLAYER_MODE::MOVING;
-						ui.hide_crosshair();
-					}
-				}
-				if (key == GLFW_KEY_D) {
-					catMotion.velocity.x = current_speed;
-					AnimationSystem::animate_cat_walk(curr_selected_char);
+		if (action == GLFW_PRESS) {
+			if (key == GLFW_KEY_W) {
+				if (catMotion.velocity.y == gravity_force) {
+					catMotion.velocity.y = -gravity_force * current_speed;
+					rb.collision_normal.y = 0;
 					player_mode = PLAYER_MODE::MOVING;
 					ui.hide_crosshair();
 				}

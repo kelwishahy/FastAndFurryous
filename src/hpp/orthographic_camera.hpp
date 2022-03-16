@@ -16,8 +16,15 @@ public:
 
 	void setPosition(glm::vec3 position) { this->position = position; updateViewMatrix(); }
 	void setRotation(float angle) { this->rotationAngle = angle; updateViewMatrix(); }
+
+	glm::vec3 getCameraRight() const { return glm::vec3(position.x + right, position.y, position.z); }
+
 private:
 	void updateViewMatrix();
+	float left;
+	float right;
+	float bottom;
+	float top;
 
 	glm::mat4 projectionMatrix;
 	glm::mat4 viewMatrix;
