@@ -141,6 +141,7 @@ struct Tile {
 
 struct Health {
 	int hp = 100;
+	bool selected = false;
 };
 
 struct AI {
@@ -261,11 +262,11 @@ struct UIElement {
 };
 
 struct Cat {
-	
+
 };
 
 struct Dog {
-	
+
 };
 
 struct HealthBox {

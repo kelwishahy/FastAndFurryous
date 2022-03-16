@@ -145,7 +145,7 @@ void WorldSystem::on_key(int button, int action, int mods) {
 
 void WorldSystem::on_mouse_click(int button, int action, int mods) {
 	if (action == GLFW_PRESS) {
-		printf("hello");
+		// printf("hello");
 		check_for_button_presses();
 	}
 }

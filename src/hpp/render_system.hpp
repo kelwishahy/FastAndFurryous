@@ -122,13 +122,13 @@ public:
 	// Draw a quad with an optional texture
 	void drawQuad(RenderRequest& request, std::string shaderInputs[], int numInputs);
 
-	void animateSprite(RenderRequest& request, Entity& entity, float elapsed_ms);
+	void animateSprite(RenderRequest& request, Entity& entity);
 
 	// Draw a tilemap
-	void drawTiles(const glm::mat4& projectionMatrix);
+	void drawTiles();
 
 	// Draw the background texture image
-	void drawBackground(RenderRequest& request, glm::mat4& projectionMatrix, float layer);
+	void drawBackground(RenderRequest& request, float layer);
 
 	// Draw any text entities
 	void drawText(Entity e);
@@ -147,6 +147,7 @@ public:
 	void setTileMap(const Map& gameMap) { this->gameMap = gameMap; }
 
 private:
+	AnimationSystem animation_system;
 	GLFWwindow* window;
 	int screenWidth;
 	int screenHeight;
@@ -164,21 +165,11 @@ private:
 	std::vector<glm::vec3> quad;
 	const std::vector<uint16_t> quadIndices = { 2, 0, 3, 2, 1, 0 };
 
-	// Initialize the off screen render buffer
-	// which is used as an intermediate render target
-	bool initRenderBuffer();
-
 	// Load vertex data into the vertex buffers
 	void initRenderData();
 
 	//Load font stuff
 	void initFonts();
-
-	// Bind the given vertex and index buffer objects
-	template <class T>
-	void bindVBOandIBO(GEOMETRY_BUFFER_IDS oid, std::vector<T> vertices, std::vector<uint16_t> indices);
-
-	void loadMeshes();
 
 	// Apply matrix transformations
 	// position is generally motion.position
@@ -186,13 +177,20 @@ private:
 	glm::mat4 transform(glm::vec2 position, glm::vec2 scale, float depth, float angle);
 
 	// The last step of the draw function
-	void renderToScreen(glm::mat4& transformationMatrix, glm::mat4& projectionMatrix);
+	void renderToScreen(glm::mat4 transformationMatrix);
 
-	// Generate a 4x4 orthographic projection matrix
-	// that scales with window size
-	glm::mat4 createProjectionMatrix();
+	// Bind the given vertex and index buffer objects
+	template <class T>
+	void bindVBOandIBO(GEOMETRY_BUFFER_IDS oid, std::vector<T> vertices, std::vector<uint16_t> indices) {
 
-	AnimationSystem animation_system;
+		// Vertex buffer
+		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffers[(uint)oid]);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices[0]) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
+		glHasError();
 
+		// Index buffer
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffers[(uint)oid]);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices[0]) * indices.size(), indices.data(), GL_STATIC_DRAW);
+		glHasError();
+	}
 };
-
