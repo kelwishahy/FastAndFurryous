@@ -478,8 +478,22 @@ Entity createCrosshair(Entity origin, bool iscat) {
 
 Entity createHealthCounter(Entity origin, int health) {
 
+	vec3 color = registry.cats.has(origin) ? vec3{ 0.862f, 0.525f, 0.517f } : vec3{ 0.039, 0.454, 1 };
 
+	auto entity = Entity();
 
-	return Entity();
+	HealthBox& healthbox = registry.healthboxes.emplace(entity);
+	healthbox.parent = origin;
+	healthbox.text = createText({ 0.0f,0.0f }, 0.7f, color, std::to_string(health));
+
+	Motion& motion = registry.motions.emplace(entity);
+	motion.scale = { 100.0f, 100.0f };
+
+	registry.renderRequests.insert(entity,
+		{ TEXTURE_IDS::HEALTH_SQUARE,
+		SHADER_PROGRAM_IDS::TEXTURE,
+		GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
+
+	return entity;
 
 }

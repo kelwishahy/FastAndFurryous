@@ -35,6 +35,7 @@ public:
 	ComponentContainer<UIElement> uiElements;
 	ComponentContainer<Cat> cats;
 	ComponentContainer<Dog> dogs;
+	ComponentContainer<HealthBox> healthboxes;
 
 	ECSRegistry() {
 		registry_list.push_back(&ais);
@@ -61,6 +62,7 @@ public:
 		registry_list.push_back(&uiElements);
 		registry_list.push_back(&cats);
 		registry_list.push_back(&dogs);
+		registry_list.push_back(&healthboxes);
 	}
 
 	void clear_all_components() {

@@ -240,6 +240,11 @@ struct Dog {
 	
 };
 
+struct HealthBox {
+	Entity parent;
+	Entity text;
+};
+
 // Render components ----------------------------------------------------------
 
 struct TEXTURE_ANIM_CONSTANTS {

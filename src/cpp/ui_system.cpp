@@ -35,11 +35,28 @@ void UISystem::step(float elapsed_ms) {
 			anchor_motion.angle = registry.weapons.get(anchor.parent).aim_angle;
 			break;
 			}
-		case UI_ELEMENT::HEALTH_DISPLAY: {
-
-			}
 			default:
 				break;
+		}
+
+	}
+	for (Entity e : registry.healthboxes.entities) {
+
+		Entity parent = registry.healthboxes.get(e).parent;
+
+		if (!registry.health.has(parent)) {
+			registry.remove_all_components_of(registry.healthboxes.get(e).text);
+			registry.remove_all_components_of(e);
+		}
+		else {
+			HealthBox healthbox = registry.healthboxes.get(e);
+			Motion& box = registry.motions.get(e);
+			Motion& text = registry.motions.get(healthbox.text);
+			box.position = registry.motions.get(healthbox.parent).position + vec2(10.0f, -80.0f); //hard coded
+			text.position = registry.motions.get(healthbox.parent).position + vec2(-9.0f, -98.0f); //hard coded
+
+			Text& text_val = registry.texts.get(healthbox.text);
+			text_val.text = std::to_string(registry.health.get(healthbox.parent).hp);
 		}
 
 	}
