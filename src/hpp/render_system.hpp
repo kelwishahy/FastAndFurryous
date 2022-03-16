@@ -56,7 +56,6 @@ class RenderSystem {
 		"dog_hurt.png",
 		"dog_hurt_face.png",
 		"dog_dead.png",
-		"empty.png",
 		//
 		"stone.png",
 		"background.png",

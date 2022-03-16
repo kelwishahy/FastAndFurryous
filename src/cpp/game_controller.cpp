@@ -264,18 +264,12 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 					ui.hide_crosshair();
 				}
 			}
-
 			if (key == GLFW_KEY_D) {
 				catMotion.velocity.x = current_speed;
 				AnimationSystem::animate_cat_walk(curr_selected_char);
 				player_mode = PLAYER_MODE::MOVING;
 				ui.hide_crosshair();
 			}
-			else {
-				AnimationSystem::animate_dog_walk(curr_selected_char);
-			}
-		}
-
 			if (key == GLFW_KEY_A) {
 				catMotion.velocity.x = -current_speed;
 				AnimationSystem::animate_cat_walk(curr_selected_char);
@@ -283,6 +277,7 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 				ui.hide_crosshair();
 			}
 		}
+		
 
 
 		if (action == GLFW_RELEASE) {

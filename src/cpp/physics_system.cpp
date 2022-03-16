@@ -346,9 +346,11 @@ void  PhysicsSystem::applyForce(Entity e, glm::vec2 force) {
 
 void PhysicsSystem::transformAnchoredEntities() {
 
-	for (Entity e : registry.anchors.entities) {
+	for (int i = 0; i < registry.anchors.components.size(); i++) {
 
-		AnchoredEntities anchor = registry.anchors.get(e);
+
+		AnchoredEntities anchor = registry.anchors.components[i];
+		Entity e = registry.anchors.entities[i];
 
 		Motion& child_motion = registry.motions.get(anchor.child);
 		Motion anchor_motion = registry.motions.get(e);

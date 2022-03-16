@@ -28,22 +28,23 @@ Entity createCat(RenderSystem* renderer, vec2 pos) {
 	auto backArm = Entity();
 
 	//---Head animation subentity---- putting this in front so that head gets rendered ontop of body
-	AnimationExtra& headbone = registry.animExtras.emplace(head);
-	headbone.parent = entity;
-	//This is hardcoded and theres not much we can do to change that
-	headbone.offset_from_parent = { 9.5f, -41.0f };
-	headbone.tag = "cat_head";
+	AnchoredEntities& head_anchor = registry.anchors.emplace_with_duplicates(entity);
+	head_anchor.child = head;
+	head_anchor.normal_distance = { 9.5f, -41.0f };
+	head_anchor.tag = "animation";
+	head_anchor.original_distance = { 9.5f, -41.0f };
+
 
 	Motion& headmotion = registry.motions.emplace(head);
-	headmotion.position = pos + headbone.offset_from_parent;
+	headmotion.position = pos + head_anchor.normal_distance;
 	headmotion.scale = { 64.f, 64.f * 0.72803f}; //Look at the dimensions of the sprite sheet to get the right ratio
 
 	Animation& headanim = registry.animations.emplace(head);
 	headanim.animation_states_constants.insert({ TEXTURE_IDS::CAT_FRONT_BLINK, CAT_FRONT_BLINK_CONSTANTS });
 	headanim.animation_states_constants.insert({ TEXTURE_IDS::CAT_SIDE_BLINK, CAT_SIDE_BLINK_CONSTANTS });
 	headanim.animation_states_constants.insert({ TEXTURE_IDS::CAT_HURT_FACE, CAT_HURT_FACE_CONSTANTS });
-	headanim.animation_states_constants.insert({ TEXTURE_IDS::EMPTY, CAT_HURT_FACE_CONSTANTS });
 	headanim.anim_state = TEXTURE_IDS::CAT_FRONT_BLINK;
+	headanim.name = "cat_head";
 
 	registry.renderRequests.insert(
 		head,
@@ -52,20 +53,21 @@ Entity createCat(RenderSystem* renderer, vec2 pos) {
 			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
 
 	//---Front arm animation subentity---- putting this in front so that front arm gets rendered ontop of body
-	AnimationExtra& frontArmBone = registry.animExtras.emplace(frontArm);
-	frontArmBone.parent = entity;
-	frontArmBone.offset_from_parent = { 4.5f, +11.0f };
-	frontArmBone.tag = "cat_frontArm";
+	AnchoredEntities& front_arm_anchor = registry.anchors.emplace_with_duplicates(entity);
+	front_arm_anchor.child = frontArm;
+	front_arm_anchor.normal_distance = { 4.5f, 11.0f };
+	front_arm_anchor.tag = "animation";
+	front_arm_anchor.original_distance = { 4.5f, 11.0f };
+
 
 	Motion& frontArmMotion = registry.motions.emplace(frontArm);
-	frontArmMotion.position = pos + frontArmBone.offset_from_parent;
-	frontArmMotion.scale = { 64.f / 3, 138.f / 3 };
+	frontArmMotion.position = pos + front_arm_anchor.normal_distance;
+	frontArmMotion.scale = { 54.f / 3, 128.f / 3 };
 
 	Animation& frontArmAnim = registry.animations.emplace(frontArm);
 	frontArmAnim.animation_states_constants.insert({ TEXTURE_IDS::CAT_FRONT_ARM, STABILIZED_CONSTANTS });
-	frontArmAnim.animation_states_constants.insert({ TEXTURE_IDS::EMPTY, STABILIZED_CONSTANTS });
 	frontArmAnim.anim_state = TEXTURE_IDS::CAT_FRONT_ARM;
-
+	frontArmAnim.name = "cat_front_arm";
 	registry.renderRequests.insert(
 		frontArm,
 		{ TEXTURE_IDS::CAT_FRONT_ARM,
@@ -73,25 +75,27 @@ Entity createCat(RenderSystem* renderer, vec2 pos) {
 			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
 
 	//---Back arm animation subentity---- putting this in back so that front arm gets rendered on back of body
-	AnimationExtra& backArmBone = registry.animExtras.emplace(backArm);
-	backArmBone.parent = entity;
-	backArmBone.offset_from_parent = { +34.5f, +11.0f };
-	backArmBone.tag = "cat_backArm";
+	/*AnchoredEntities& back_arm_anchor = registry.anchors.emplace_with_duplicates(entity);
+	back_arm_anchor.child = backArm;
+	back_arm_anchor.normal_distance = { +34.5f, 11.0f };
+	back_arm_anchor.tag = "animation";
+	back_arm_anchor.original_distance = { +34.5f, 11.0f };
+
 
 	Motion& backArmMotion = registry.motions.emplace(backArm);
-	backArmMotion.position = pos + backArmBone.offset_from_parent;
+	backArmMotion.position = pos + back_arm_anchor.normal_distance;
 	backArmMotion.scale = { 64.f / 3, 138.f / 3 };
 
 	Animation& backArmAnim = registry.animations.emplace(backArm);
 	backArmAnim.animation_states_constants.insert({ TEXTURE_IDS::CAT_BACK_ARM, STABILIZED_CONSTANTS });
-	backArmAnim.animation_states_constants.insert({ TEXTURE_IDS::EMPTY, STABILIZED_CONSTANTS });
 	backArmAnim.anim_state = TEXTURE_IDS::CAT_BACK_ARM;
+	backArmAnim.name = "cat_back_arm";
 
 	registry.renderRequests.insert(
 		backArm,
 		{ TEXTURE_IDS::CAT_BACK_ARM,
 			SHADER_PROGRAM_IDS::ANIMATION,
-			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
+			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });*/
 	//----------------------------------------------
 
 	registry.cats.emplace(entity);
@@ -129,6 +133,7 @@ Entity createCat(RenderSystem* renderer, vec2 pos) {
 	anim.animation_states_constants.insert({ TEXTURE_IDS::CAT_HURT, CAT_HURT_CONSTANTS });
 	anim.animation_states_constants.insert({ TEXTURE_IDS::CAT_DEAD, STABILIZED_CONSTANTS });
 	anim.anim_state = TEXTURE_IDS::CAT_FRONT_IDLE;
+	anim.name = "cat_body";
 
 	return entity;
 }
@@ -141,22 +146,21 @@ Entity createDog(RenderSystem* renderer, vec2 pos) {
 	auto backArm = Entity();
 
 	//---Head animation subentity---- putting this in front so that head gets rendered ontop of body
-	AnimationExtra& headbone = registry.animExtras.emplace(head);
-	headbone.parent = entity;
-	//This is hardcoded and theres not much we can do to change that
-	headbone.offset_from_parent = { 9.5f, -51.0f };
-	headbone.tag = "dog_head";
+	AnchoredEntities& head_anchor = registry.anchors.emplace_with_duplicates(entity);
+	head_anchor.child = head;
+	head_anchor.normal_distance = { 9.5f, -51.0f };
+
 
 	Motion& headmotion = registry.motions.emplace(head);
-	headmotion.position = pos + headbone.offset_from_parent;
+	headmotion.position = pos + head_anchor.normal_distance;
 	headmotion.scale = { 64.f, 64.f * 0.72803f }; //Look at the dimensions of the sprite sheet to get the right ratio
 
 	Animation& headanim = registry.animations.emplace(head);
 	headanim.animation_states_constants.insert({ TEXTURE_IDS::DOG_FRONT_BLINK, CAT_FRONT_BLINK_CONSTANTS });
 	headanim.animation_states_constants.insert({ TEXTURE_IDS::DOG_SIDE_BLINK, CAT_SIDE_BLINK_CONSTANTS });
 	headanim.animation_states_constants.insert({ TEXTURE_IDS::DOG_HURT_FACE, CAT_HURT_FACE_CONSTANTS });
-	headanim.animation_states_constants.insert({ TEXTURE_IDS::EMPTY, CAT_HURT_FACE_CONSTANTS });
 	headanim.anim_state = TEXTURE_IDS::DOG_FRONT_BLINK;
+	headanim.name = "dog_head";
 
 	registry.renderRequests.insert(
 		head,
@@ -165,18 +169,18 @@ Entity createDog(RenderSystem* renderer, vec2 pos) {
 			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
 
 	//---Front arm animation subentity---- putting this in front so that front arm gets rendered ontop of body
-	AnimationExtra& frontArmBone = registry.animExtras.emplace(frontArm);
-	frontArmBone.parent = entity;
-	frontArmBone.offset_from_parent = { 0.0f, 0.0f };
-	frontArmBone.tag = "dog_frontArm";
+
+	AnchoredEntities& front_arm_anchor = registry.anchors.emplace_with_duplicates(entity);
+	front_arm_anchor.child = frontArm;
+	front_arm_anchor.normal_distance = { 4.5f, 11.0f };
+
 
 	Motion& frontArmMotion = registry.motions.emplace(frontArm);
-	frontArmMotion.position = pos + frontArmBone.offset_from_parent;
+	frontArmMotion.position = pos + front_arm_anchor.normal_distance;
 	frontArmMotion.scale = { 64.f / 3, 138.f / 3 };
 
 	Animation& frontArmAnim = registry.animations.emplace(frontArm);
 	frontArmAnim.animation_states_constants.insert({ TEXTURE_IDS::DOG_FRONT_ARM, STABILIZED_CONSTANTS });
-	frontArmAnim.animation_states_constants.insert({ TEXTURE_IDS::EMPTY, STABILIZED_CONSTANTS });
 	frontArmAnim.anim_state = TEXTURE_IDS::DOG_FRONT_ARM;
 
 	registry.renderRequests.insert(
@@ -186,25 +190,24 @@ Entity createDog(RenderSystem* renderer, vec2 pos) {
 			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
 
 	//---Back arm animation subentity---- putting this in back so that front arm gets rendered on back of body
-	AnimationExtra& backArmBone = registry.animExtras.emplace(backArm);
-	backArmBone.parent = entity;
-	backArmBone.offset_from_parent = { +30.0f, 0.0f };
-	backArmBone.tag = "dog_backArm";
+	//AnchoredEntities& back_arm_anchor = registry.anchors.emplace_with_duplicates(entity);
+	//back_arm_anchor.child = backArm;
+	//back_arm_anchor.normal_distance = { 4.5f, 11.0f };
+	////backArmBone.offset_from_parent = { +30.0f, 0.0f };
 
-	Motion& backArmMotion = registry.motions.emplace(backArm);
-	backArmMotion.position = pos + backArmBone.offset_from_parent;
-	backArmMotion.scale = { 64.f / 3, 138.f / 3 };
 
-	Animation& backArmAnim = registry.animations.emplace(backArm);
-	backArmAnim.animation_states_constants.insert({ TEXTURE_IDS::DOG_BACK_ARM, STABILIZED_CONSTANTS });
-	backArmAnim.animation_states_constants.insert({ TEXTURE_IDS::EMPTY, STABILIZED_CONSTANTS });
-	backArmAnim.anim_state = TEXTURE_IDS::DOG_BACK_ARM;
+	//Motion& backArmMotion = registry.motions.emplace(backArm);
+	//backArmMotion.position = pos + back_arm_anchor.normal_distance;
+	//backArmMotion.scale = { 64.f / 3, 138.f / 3 };
 
-	registry.renderRequests.insert(
-		backArm,
-		{ TEXTURE_IDS::DOG_BACK_ARM,
-			SHADER_PROGRAM_IDS::ANIMATION,
-			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
+	//Animation& backArmAnim = registry.animations.emplace(backArm);
+	//backArmAnim.animation_states_constants.insert({ TEXTURE_IDS::DOG_BACK_ARM, STABILIZED_CONSTANTS });
+	//backArmAnim.anim_state = TEXTURE_IDS::DOG_BACK_ARM;
+	//registry.renderRequests.insert(
+	//	backArm,
+	//	{ TEXTURE_IDS::DOG_BACK_ARM,
+	//		SHADER_PROGRAM_IDS::ANIMATION,
+	//		GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
 	//----------------------------------------------
 
 	// Add health component
@@ -225,8 +228,7 @@ Entity createDog(RenderSystem* renderer, vec2 pos) {
 	calculateBoxVerticesAndSetTriangles(motion.position, motion.scale, bc);
 	bc.transformed_required = true;
 
-	auto& player = registry.players.emplace(entity);
-	player.team = PLAYER_1_TEAM;
+
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_IDS::DOG_FRONT_IDLE,
@@ -242,6 +244,7 @@ Entity createDog(RenderSystem* renderer, vec2 pos) {
 	anim.animation_states_constants.insert({ TEXTURE_IDS::DOG_HURT, CAT_HURT_CONSTANTS });
 	anim.animation_states_constants.insert({ TEXTURE_IDS::DOG_DEAD, STABILIZED_CONSTANTS });
 	anim.anim_state = TEXTURE_IDS::DOG_FRONT_IDLE;
+	anim.name = "dog_body";
 
 	return entity;
 }

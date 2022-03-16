@@ -47,7 +47,6 @@ enum class TEXTURE_IDS {
 	DOG_HURT,
 	DOG_HURT_FACE,
 	DOG_DEAD,
-	EMPTY,
 	//
 	STONE,
 	BACKGROUND,
@@ -224,6 +223,8 @@ struct Clickable {
 struct AnchoredEntities {
 	glm::vec2 normal_distance = {0.0f, 0.0f};
 	Entity child;
+	std::string tag; //optional, tag the type of entity you are attaching
+	glm::vec2 original_distance = { 0.0f, 0.0f }; //optional, hacking in more stuff...
 };
 
 struct UIElement {
@@ -281,6 +282,7 @@ struct MenuItem {
 };
 
 struct Animation {
+	std::string name;
 	int frame = 0;
 	float frame_counter_ms = 100;
 	bool facingLeft = false;
@@ -290,11 +292,6 @@ struct Animation {
 	std::unordered_map<TEXTURE_IDS, TEXTURE_ANIM_CONSTANTS> animation_states_constants;
 };
 
-struct AnimationExtra {
-	std::string tag;   //This is scuffed but we can just name the extra anim for now
-	Entity parent;
-	glm::vec2 offset_from_parent;
-};
 
 struct Text {
 	std::string text;
