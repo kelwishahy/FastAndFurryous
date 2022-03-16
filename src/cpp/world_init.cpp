@@ -484,15 +484,10 @@ Entity createHealthCounter(Entity origin, int health) {
 
 	HealthBox& healthbox = registry.healthboxes.emplace(entity);
 	healthbox.parent = origin;
-	healthbox.text = createText({ 0.0f,0.0f }, 0.7f, color, std::to_string(health));
+	healthbox.text = createText({ 0.0f,0.0f }, 1.0f, color, std::to_string(health));
 
 	Motion& motion = registry.motions.emplace(entity);
 	motion.scale = { 100.0f, 100.0f };
-
-	registry.renderRequests.insert(entity,
-		{ TEXTURE_IDS::HEALTH_SQUARE,
-		SHADER_PROGRAM_IDS::TEXTURE,
-		GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
 
 	return entity;
 
