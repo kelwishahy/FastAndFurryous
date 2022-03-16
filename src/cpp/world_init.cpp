@@ -20,23 +20,40 @@ void calculateBoxVerticesAndSetTriangles(vec2 pos, vec2 scale, Boxcollider& box)
 	box.vertices.push_back(pos + vec2{ left, down }); //downleft
 }
 
+void remove_anchors(Entity e) {
+	for (int i = 0; i < registry.anchors.size(); i++) {
+		AnchoredEntities anchor = registry.anchors.components[i];
+		Entity anchor_e = registry.anchors.entities[i];
+		if (anchor.parent == e) {
+			registry.remove_all_components_of(anchor.child);
+			registry.remove_all_components_of(anchor_e);
+			i--;
+		}
+	}
+}
+
 Entity createCat(RenderSystem* renderer, vec2 pos) {
 
 	auto head = Entity();
+	auto head_anchor = Entity();
 	auto entity = Entity();
 	auto frontArm = Entity();
-	auto backArm = Entity();
+	auto frontArm_anchor = Entity();
 
 	//---Head animation subentity---- putting this in front so that head gets rendered ontop of body
-	AnchoredEntities& head_anchor = registry.anchors.emplace_with_duplicates(entity);
-	head_anchor.child = head;
-	head_anchor.normal_distance = { 9.5f, -41.0f };
-	head_anchor.tag = "animation";
-	head_anchor.original_distance = { 9.5f, -41.0f };
+	Motion& h_anchor_motion = registry.motions.emplace(head_anchor);
+	//h_anchor_motion.position = motion.position;
+
+	AnchoredEntities& h_anchor = registry.anchors.emplace(head_anchor);
+	h_anchor.child = head;
+	h_anchor.normal_distance = { 9.5f, -41.0f };
+	h_anchor.tag = "animation";
+	h_anchor.original_distance = { 9.5f, -41.0f };
+	h_anchor.parent = entity;
 
 
 	Motion& headmotion = registry.motions.emplace(head);
-	headmotion.position = pos + head_anchor.normal_distance;
+	headmotion.position = pos + h_anchor.normal_distance;
 	headmotion.scale = { 64.f, 64.f * 0.72803f}; //Look at the dimensions of the sprite sheet to get the right ratio
 
 	Animation& headanim = registry.animations.emplace(head);
@@ -53,15 +70,18 @@ Entity createCat(RenderSystem* renderer, vec2 pos) {
 			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
 
 	//---Front arm animation subentity---- putting this in front so that front arm gets rendered ontop of body
-	AnchoredEntities& front_arm_anchor = registry.anchors.emplace_with_duplicates(entity);
-	front_arm_anchor.child = frontArm;
-	front_arm_anchor.normal_distance = { 4.5f, 11.0f };
-	front_arm_anchor.tag = "animation";
-	front_arm_anchor.original_distance = { 4.5f, 11.0f };
+	Motion& farm_anchor_motion = registry.motions.emplace(frontArm_anchor);
+
+	AnchoredEntities& farm_anchor = registry.anchors.emplace(frontArm_anchor);
+	farm_anchor.child = frontArm;
+	farm_anchor.normal_distance = { 4.5f, 11.0f };
+	farm_anchor.tag = "animation";
+	farm_anchor.original_distance = { 4.5f, 11.0f };
+	farm_anchor.parent = entity;
 
 
 	Motion& frontArmMotion = registry.motions.emplace(frontArm);
-	frontArmMotion.position = pos + front_arm_anchor.normal_distance;
+	frontArmMotion.position = pos + farm_anchor.normal_distance;
 	frontArmMotion.scale = { 54.f / 3, 128.f / 3 };
 
 	Animation& frontArmAnim = registry.animations.emplace(frontArm);
@@ -74,37 +94,7 @@ Entity createCat(RenderSystem* renderer, vec2 pos) {
 			SHADER_PROGRAM_IDS::ANIMATION,
 			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
 
-	//---Back arm animation subentity---- putting this in back so that front arm gets rendered on back of body
-	/*AnchoredEntities& back_arm_anchor = registry.anchors.emplace_with_duplicates(entity);
-	back_arm_anchor.child = backArm;
-	back_arm_anchor.normal_distance = { +34.5f, 11.0f };
-	back_arm_anchor.tag = "animation";
-	back_arm_anchor.original_distance = { +34.5f, 11.0f };
-
-
-	Motion& backArmMotion = registry.motions.emplace(backArm);
-	backArmMotion.position = pos + back_arm_anchor.normal_distance;
-	backArmMotion.scale = { 64.f / 3, 138.f / 3 };
-
-	Animation& backArmAnim = registry.animations.emplace(backArm);
-	backArmAnim.animation_states_constants.insert({ TEXTURE_IDS::CAT_BACK_ARM, STABILIZED_CONSTANTS });
-	backArmAnim.anim_state = TEXTURE_IDS::CAT_BACK_ARM;
-	backArmAnim.name = "cat_back_arm";
-
-	registry.renderRequests.insert(
-		backArm,
-		{ TEXTURE_IDS::CAT_BACK_ARM,
-			SHADER_PROGRAM_IDS::ANIMATION,
-			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });*/
-	//----------------------------------------------
-
 	registry.cats.emplace(entity);
-
-	// Add health component
-	Health& health = registry.health.emplace(entity);
-
-	//Make player a rigidbody
-	Rigidbody& rb = registry.rigidBodies.emplace(entity);
 
 	// Setting initial motion values
 	Motion& motion = registry.motions.emplace(entity);
@@ -113,6 +103,12 @@ Entity createCat(RenderSystem* renderer, vec2 pos) {
 	motion.velocity = { 0.f, 0.f };
 	float scale = ceil((64.f / defaultResolution.x) * renderer->getScreenWidth());
 	motion.scale = { scale, scale * 1.655f }; //Look at the dimensions of the sprite sheet to get the right ratio
+
+	// Add health component
+	Health& health = registry.health.emplace(entity);
+
+	//Make player a rigidbody
+	Rigidbody& rb = registry.rigidBodies.emplace(entity);
 
 	Boxcollider& bc = registry.boxColliders.emplace(entity);
 	calculateBoxVerticesAndSetTriangles(motion.position, motion.scale, bc);
@@ -462,11 +458,12 @@ Entity createCrosshair(Entity origin, bool iscat) {
 	AnchoredEntities& anchor = registry.anchors.emplace(entity);
 	anchor.normal_distance = { 200.0f, 200.0f };
 	anchor.child = crosshair_sub;
+	anchor.parent = origin;
 
 	//Sub entity
 	Motion& cross_hair_motion = registry.motions.emplace(crosshair_sub);
 	cross_hair_motion.position = motion.position + anchor.normal_distance;
-	cross_hair_motion.scale = { 50.0f, 50.0f };
+	cross_hair_motion.scale = { 70.0f, 70.0f };
 
 	registry.renderRequests.insert(
 		crosshair_sub,
@@ -481,24 +478,8 @@ Entity createCrosshair(Entity origin, bool iscat) {
 
 Entity createHealthCounter(Entity origin, int health) {
 
-	vec3 color = registry.cats.has(origin) ? vec3{0.862f, 0.525f, 0.517f} : vec3{ 0.039, 0.454, 1 };
 
-	auto entity = Entity();
 
-	Motion& motion = registry.motions.emplace(entity);
-	motion.scale = vec2(100.0f, 100.0f);
-
-	registry.uiElements.insert(entity, { UI_ELEMENT::HEALTH_DISPLAY });
-
-	AnchoredEntities& anchor = registry.anchors.emplace(entity);
-	anchor.normal_distance = { -17.0f,-18.0f };
-	anchor.child = createText(motion.position, 0.7f, color, std::to_string(health));
-
-	registry.renderRequests.insert(entity,
-		{ TEXTURE_IDS::HEALTH_SQUARE,
-		SHADER_PROGRAM_IDS::TEXTURE,
-		GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
-
-	return entity;
+	return Entity();
 
 }

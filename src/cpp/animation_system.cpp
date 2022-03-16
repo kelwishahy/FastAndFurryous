@@ -23,14 +23,14 @@ void AnimationSystem::step(float elapsed_ms) {
 
 	for (int i = 0; i < registry.anchors.components.size(); i++) {
 		AnchoredEntities anchor = registry.anchors.components[i];
-		Entity e = registry.anchors.entities[i];
+		//Entity e = registry.anchors.entities[i];
 
 
 		//so everything swaps sides properly 
 		if (anchor.tag == "animation") {
-			assert(registry.animations.has(e));
+			assert(registry.animations.has(anchor.parent));
 			assert(registry.animations.has(anchor.child));
-			Animation parent_anim = registry.animations.get(e);
+			Animation parent_anim = registry.animations.get(anchor.parent);
 			Animation& anchored_anim = registry.animations.get(anchor.child);
 			anchored_anim.facingLeft = parent_anim.facingLeft;
 			update_anim_orientation();

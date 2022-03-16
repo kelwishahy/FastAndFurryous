@@ -221,6 +221,7 @@ struct Clickable {
 };
 
 struct AnchoredEntities {
+	Entity parent; //just for setting the transform and removing after done
 	glm::vec2 normal_distance = {0.0f, 0.0f};
 	Entity child;
 	std::string tag; //optional, tag the type of entity you are attaching

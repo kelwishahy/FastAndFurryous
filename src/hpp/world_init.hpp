@@ -32,3 +32,5 @@ Entity createText(glm::vec2 pos, float scale, glm::vec3 color, std::string text)
 Entity createCrosshair(Entity origin, bool iscat);
 
 Entity createHealthCounter(Entity origin, int health);
+
+void remove_anchors(Entity e);
