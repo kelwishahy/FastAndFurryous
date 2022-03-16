@@ -157,12 +157,15 @@ void RenderSystem::drawQuad(RenderRequest& request, std::string shaderInputs[], 
 
 void RenderSystem::animateSprite(RenderRequest& request, Entity& entity) {
 	Animation& animation = registry.animations.get(entity);
+
+	// Is the current player selected to move?
 	bool selected;
-	if (registry.health.has(entity)) {
-		selected = registry.health.get(entity).selected;
+	if (registry.selected.has(entity)) {
+		selected = registry.selected.get(entity).isSelected;
 	} else {
 		selected = true;
 	}
+
 	TEXTURE_ANIM_CONSTANTS constants = animation.animation_states_constants.at(animation.anim_state);
 
 	// Updating the texture coordinates for use with the animation sprite sheets

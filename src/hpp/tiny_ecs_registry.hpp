@@ -39,30 +39,34 @@ public:
 
 	ECSRegistry() {
 		registry_list.push_back(&ais);
+		registry_list.push_back(&anchors);
+		registry_list.push_back(&animations);
+		registry_list.push_back(&animExtras);
 		registry_list.push_back(&backgrounds);
 		registry_list.push_back(&boxColliders);
+		registry_list.push_back(&buttons);
+		registry_list.push_back(&cats);
 		registry_list.push_back(&circleColliders);
 		registry_list.push_back(&collisions);
 		registry_list.push_back(&colors);
+		registry_list.push_back(&dogs);
 		registry_list.push_back(&health);
+		registry_list.push_back(&menus);
 		registry_list.push_back(&meshPtrs);
 		registry_list.push_back(&motions);
+		registry_list.push_back(&parentEntities);
+		registry_list.push_back(&projectiles);
 		registry_list.push_back(&rayCasts);
 		registry_list.push_back(&renderRequests);
 		registry_list.push_back(&rigidBodies);
+		registry_list.push_back(&selected);
 		registry_list.push_back(&terrains);
-		registry_list.push_back(&tiles);
-		registry_list.push_back(&weapons);
-		registry_list.push_back(&projectiles);
-		registry_list.push_back(&animations);
-		registry_list.push_back(&menus);
-		registry_list.push_back(&buttons);
 		registry_list.push_back(&texts);
-		registry_list.push_back(&parentEntities);
 		registry_list.push_back(&uiElements);
-		registry_list.push_back(&cats);
-		registry_list.push_back(&dogs);
 		registry_list.push_back(&healthboxes);
+		registry_list.push_back(&tiles);
+		registry_list.push_back(&uiElements);
+		registry_list.push_back(&weapons);
 	}
 
 	void clear_all_components() {

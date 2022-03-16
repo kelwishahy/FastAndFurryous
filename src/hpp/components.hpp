@@ -139,6 +139,10 @@ struct Tile {
 	glm::vec2 position;
 };
 
+struct Selected {
+	bool isSelected = true;
+};
+
 struct Health {
 	int hp = 100;
 	bool selected = false;

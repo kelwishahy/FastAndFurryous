@@ -67,6 +67,18 @@ void GameController::step(float elapsed_ms) {
 	if (game_state.turn_possesion == PLAYER1) {
 		registry.remove_all_components_of(turnIndicator);
 		turnIndicator = createText(turnPosition, 2.0f, redColor , "PLAYER 1'S TURN");
+
+	if (game_state.turn_possesion == PLAYER1) {
+		for (Entity e : player1_team) {
+			auto& selected = registry.selected.get(e).isSelected;
+			selected = true;
+		}
+
+		for (Entity e : npcai_team) {
+			auto& selected = registry.selected.get(e).isSelected;
+			selected = false;
+		}
+
 	} else if (game_state.turn_possesion == PLAYER2) {
 		registry.remove_all_components_of(turnIndicator);
 		turnIndicator = createText(turnPosition, 2.0f, blueColor, "PLAYER 2'S TURN");
@@ -76,6 +88,16 @@ void GameController::step(float elapsed_ms) {
 	} else if (game_state.turn_possesion == NPCAI_TURN) {
 		registry.remove_all_components_of(turnIndicator);
 		turnIndicator = createText(turnPosition, 2.0f, darkGreenColor, "COMPUTER'S TURN");
+
+		for (Entity e : player1_team) {
+			auto& selected = registry.selected.get(e).isSelected;
+			selected = false;
+		}
+		
+		for (Entity e : npcai_team) {
+			auto& selected = registry.selected.get(e).isSelected;
+			selected = true;
+		}
 	}
 
 	// change the animation type depending on the velocity
@@ -269,15 +291,6 @@ void GameController::handle_collisions() {
 
 // On key callback
 void GameController::on_player_key(int key, int, int action, int mod) {
-
-	// if (action == GLFW_REPEAT && key == GLFW_KEY_L) {
-	// 	renderer->camera.setPosition(renderer->camera.getPosition() + vec3(1.f, 0.f, 0.f ));
-	// 	auto pos = renderer->camera.getPosition();
-	// 	printf("Camera pos = %f %f %f\n", pos.x, pos.y, pos.z);
-	// } else if (action == GLFW_PRESS && key == GLFW_KEY_K) {
-	// 	// renderer->camera.setPosition(renderer->camera.getPosition() + vec3(-10.f, 0.f, 0.f));
-	// }
-
 	//Only allowed to move on specified turn
 	if (game_state.turn_possesion == PLAYER1 && inAGame) {
 		Motion& catMotion = registry.motions.get(curr_selected_char);

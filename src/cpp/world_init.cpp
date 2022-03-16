@@ -40,6 +40,17 @@ Entity createCat(RenderSystem* renderer, vec2 pos) {
 
 	ChildEntities& children = registry.parentEntities.emplace(entity);
 
+	/* Each cat - related entity needs the "selected" component.
+	 * This value of this component is passed to the fragment shader and is
+	 * used in rendering.
+	 */
+	registry.selected.emplace(head);
+	registry.selected.emplace(entity);
+
+	//---Head animation subentity---- putting this in front so that head gets rendered ontop of body
+	// Motion& h_anchor_motion = registry.motions.emplace(head_anchor);
+	//h_anchor_motion.position = motion.position;
+
 	//---Head animation subentity---- putting this in front so that head gets rendered ontop of body
 	int index = 0;
 	children.child_data_map.emplace(index, head);
@@ -280,6 +291,9 @@ Entity createTile(float tileScale, vec2 tilePosition, int numTilesInARow) {
 
 Entity createAI(RenderSystem* renderer, vec2 pos) {
 	const auto entity = Entity();
+
+	// registry.selected.emplace(head);
+	registry.selected.emplace(entity);
 
 	// Add health component
 	Health& health = registry.health.emplace(entity);
