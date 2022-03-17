@@ -9,7 +9,6 @@
 
 GameController::GameController() {
 	inAGame = false;
-	//ShootingSystem shooting_system(renderer);
 }
 
 GameController::~GameController() {
@@ -17,10 +16,10 @@ GameController::~GameController() {
 }
 
 //initialize stuff here
-void GameController::init(RenderSystem* renderer, GLFWwindow* window) {
-	//Set renderer
-	this->renderer = renderer;
+void GameController::init(GLFWwindow* window, MapSystem::Map& map, OrthographicCamera& camera) {
 	this->window = window;
+	this->gameMap = map;
+	this->camera = camera;
 
 	//Init game metadata
 	game_state.turn_number += 1;
@@ -40,7 +39,6 @@ void GameController::init(RenderSystem* renderer, GLFWwindow* window) {
 	inAGame = true;
 	player_mode = PLAYER_MODE::MOVING;
 
-	this->shooting_system.init(renderer);
 	this->timePerTurnMs = 20000.0;
 
 	ai.init(shooting_system);
@@ -124,13 +122,13 @@ void GameController::step(float elapsed_ms) {
 			inAGame = false;
 		}
 
-		auto rightDist = abs(registry.motions.get(e).position.x - renderer->camera.getCameraRight().x);
-		auto leftDist = abs(registry.motions.get(e).position.x - renderer->camera.getPosition().x);
-		if (rightDist < 400.f && renderer->camera.getCameraRight().x < 2 * renderer->getScreenWidth()) {
-			renderer->camera.setPosition(renderer->camera.getPosition() + vec3(1.5f, 0.f, 0.f));
+		auto rightDist = abs(registry.motions.get(e).position.x - camera.getCameraRight().x);
+		auto leftDist = abs(registry.motions.get(e).position.x - camera.getPosition().x);
+		if (rightDist < 400.f && camera.getCameraRight().x < 2 * screenResolution.x) {
+			camera.setPosition(camera.getPosition() + vec3(1.5f, 0.f, 0.f));
 		}
-		else if (leftDist < 400.f && renderer->camera.getPosition().x > 0.f) {
-			renderer->camera.setPosition(renderer->camera.getPosition() + vec3(-1.5f, 0.f, 0.f));
+		else if (leftDist < 400.f && camera.getPosition().x > 0.f) {
+			camera.setPosition(camera.getPosition() + vec3(-1.5f, 0.f, 0.f));
 		}
 
 		// if (player1_team.size() == 0) {
@@ -172,25 +170,16 @@ void GameController::decrementTurnTime(float elapsed_ms) {
 
 
 void GameController::build_map() {
-	const int width = renderer->getScreenWidth();
-	const int height = renderer->getScreenHeight();
-
-	// Move the walls off screen
-	// Floor
-	// createWall({ width / 2, height + 10 }, width, 10);
+	const int width = screenResolution.x;
+	const int height = screenResolution.y;
 	
-	// //Left Wall
+	//Left Wall
 	createWall({ -10, height / 2 }, 10, height - 10);
-	//
-	// //Right Wall
-	createWall({ 2 * width + 10, height / 2 }, 10, height);
-	//
-	// //Ceiling
-	// createWall({ width / 2, -10 }, width, 10);
 
-	this->gameMap = Map();
-	gameMap.init(renderer->getScreenWidth());
-	renderer->setTileMap(gameMap);
+	//Right Wall
+	createWall({ 2 * width + 10, height / 2 }, 10, height);
+
+	gameMap.build();
 }
 
 void GameController::init_player_teams() {
@@ -200,13 +189,13 @@ void GameController::init_player_teams() {
 		assert(false);
 	}
 
-	const int width = renderer->getScreenWidth();
-	const int height = renderer->getScreenHeight();
+	const int width = screenResolution.x;
+	const int height = screenResolution.y;
 
 	// Init the player team
 	// If our game gets more complex I'd probably abstract this out an have an Entity hierarchy -Fred
 	for (int i = 0; i < numPlayersInTeam; i++) {
-		Entity player_cat = createCat(renderer, { width / 2 - 200, height - 400 });
+		Entity player_cat = createCat({ width / 2 - 200, height - 400 });
 		player1_team.push_back(player_cat);
 		curr_selected_char = player_cat;
 	}
@@ -214,8 +203,8 @@ void GameController::init_player_teams() {
 	// Init npcai team
 	// NOTE: We should add some kind of bool to check if we should init a specific team,
 	// and then add the contents of this loop to the loop above
-	Entity ai_cat0 = createAI(renderer, { width - 400,300 });
-	Entity ai_cat1 = createAI(renderer, { width - 200,300 });
+	Entity ai_cat0 = createAI({ width - 400,300 });
+	Entity ai_cat1 = createAI({ width - 200,300 });
 	npcai_team.push_back(ai_cat0);
 	npcai_team.push_back(ai_cat1);
 
@@ -241,6 +230,13 @@ void GameController::next_turn() {
 		game_state.turn_possesion = TURN_CODE::PLAYER1;
 	} else if (teams[game_state.turn_possesion].empty()) {
 		game_state.turn_number -= 1;
+
+		// Player stops moving
+		for (Entity e : player1_team) {
+			auto& motion = registry.motions.get(e);
+			motion.velocity.x = 0;
+		}
+
 		next_turn();
 	}
 }
@@ -293,17 +289,25 @@ void GameController::handle_collisions() {
 void GameController::on_player_key(int key, int, int action, int mod) {
 	//Only allowed to move on specified turn
 	if (game_state.turn_possesion == PLAYER1 && inAGame) {
-		Motion& catMotion = registry.motions.get(curr_selected_char);
-		Rigidbody& rb = registry.rigidBodies.get(curr_selected_char);
+		if (registry.cats.has(curr_selected_char)) {
+			Motion& catMotion = registry.motions.get(curr_selected_char);
+			Rigidbody& rb = registry.rigidBodies.get(curr_selected_char);
 
-		float current_speed = 150.0f;
-		float gravity_force = 2.5;
+			float current_speed = 150.0f;
+			float gravity_force = 2.5;
 
-		if (action == GLFW_PRESS) {
-			if (key == GLFW_KEY_W) {
-				if (catMotion.velocity.y == gravity_force) {
-					catMotion.velocity.y = -gravity_force * current_speed;
-					rb.collision_normal.y = 0;
+			if (action == GLFW_PRESS) {
+				if (key == GLFW_KEY_W) {
+					if (catMotion.velocity.y == gravity_force) {
+						catMotion.velocity.y = -gravity_force * current_speed;
+						rb.collision_normal.y = 0;
+						player_mode = PLAYER_MODE::MOVING;
+						ui.hide_crosshair();
+					}
+				}
+				if (key == GLFW_KEY_D) {
+					catMotion.velocity.x = current_speed;
+					AnimationSystem::animate_cat_walk(curr_selected_char);
 					player_mode = PLAYER_MODE::MOVING;
 					ui.hide_crosshair();
 				}

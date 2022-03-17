@@ -11,11 +11,12 @@
 #include "hpp/ai_system.hpp"
 
 using namespace glm;
+vec2 screenResolution;
 
-void RenderSystem::draw(float elapsed_ms) {
-
+void RenderSystem::draw(float elapsed_ms, OrthographicCamera& orthoCamera, MapSystem::Map& map) {
+	this->camera = orthoCamera;
+	setTileMap(map);
 	animation_system.step(elapsed_ms);
-
 	glViewport(0, 0, screenWidth, screenHeight);
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -32,13 +33,33 @@ void RenderSystem::draw(float elapsed_ms) {
 		RenderRequest request = registry.renderRequests.get(entity);
 
 		if (registry.backgrounds.has(entity)) {
-			drawBackground(request, -0.5);
+			float pos = screenWidth;
+			float depth;
+			switch(request.texture) {
+			case TEXTURE_IDS::INDUSTRIAL_BG:
+				depth = -0.9f;
+				break;
+			case TEXTURE_IDS::INDUSTRIAL_FAR_BUILDINGS:
+				depth = -0.8f;
+				pos -= camera.getPosition().x / 10.f;
+				break;
+			case TEXTURE_IDS::INDUSTRIAL_BUILDINGS:
+				depth = -0.7f;
+				pos -= camera.getPosition().x / 5.f;
+				break;
+			case TEXTURE_IDS::INDUSTRIAL_FOREGROUND:
+				depth = -0.6f;
+				break;
+			default:
+				depth = -0.5f;
+			}
+			drawBackground(request, depth, { pos, screenHeight / 2 }, { 2 * screenWidth, screenHeight });
 			continue;
 		}
 
 		if (registry.menus.has(entity)) {
 			MenuItem& menu = registry.menus.get(entity);
-			drawBackground(request, menu.layer);
+			drawBackground(request, menu.layer, {screenWidth / 2, screenHeight / 2}, {screenWidth, screenHeight});
 			continue;
 		}
 
@@ -299,8 +320,8 @@ void RenderSystem::drawTiles() {
 	bindVBOandIBO(GEOMETRY_BUFFER_IDS::TEXTURED_QUAD, texturedQuad, quadIndices);
 }
 
-void RenderSystem::drawBackground(RenderRequest& request, float layer) {
-	mat4 transformationMatrix = transform({ screenWidth / 2, screenHeight / 2 }, { screenWidth, screenHeight }, layer, 0);
+void RenderSystem::drawBackground(RenderRequest& request, float layer, vec2 position, vec2 scale) {
+	mat4 transformationMatrix = transform(position, scale, layer, 0);
 	std::string shaderInputs[] = { "position", "texCoord" };
 	drawQuad(request, shaderInputs, 2);
 	renderToScreen(transformationMatrix);
@@ -433,6 +454,7 @@ bool RenderSystem::init() {
 	glfwSetWindowAspectRatio(window, 16, 9);
 	glfwGetFramebufferSize(window, &this->screenWidth, &this->screenHeight);
 	printf("Screen size: %d, %d\n", this->screenWidth, this->screenHeight);
+	screenResolution = {screenWidth, screenHeight};
 
 	if (window == NULL) {
 		std::cout << "Failed to create GLFW window" << std::endl;
@@ -481,8 +503,6 @@ bool RenderSystem::init() {
 	initRenderData();
 
 	initFonts();
-
-	camera = OrthographicCamera(0.f, screenWidth, screenHeight, 0.f);
 
 	return true;
 }

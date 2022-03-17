@@ -54,7 +54,11 @@ public:
 
 	glm::vec2 mouse_pos;
 
-	GameController getCurrentGame() { return this->current_game; }
+	GameController& getCurrentGame() { return this->current_game; }
+
+	MapSystem& getMapSystem() { return this->mapSystem; }
+
+	OrthographicCamera camera;
 
 private:
 	// restart level it was in the private 
@@ -77,4 +81,6 @@ private:
 
 	// OpenGL window handle
 	GLFWwindow* window;
+
+	MapSystem mapSystem;
 };

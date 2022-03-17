@@ -1,14 +1,11 @@
 #pragma once
 
 // internal
-#include "common.hpp"
 #include "tiny_ecs.hpp"
 #include "map.hpp"
 
 // stlib
 #include <vector>
-
-#include <hpp/render_system.hpp>
 
 #include "ai_system.hpp"
 
@@ -25,7 +22,7 @@ public:
 	// Releases all associated resources
 	~GameController();
 
-	void init(RenderSystem* renderer, GLFWwindow* window);
+	void init(GLFWwindow* window, MapSystem::Map& map, OrthographicCamera& camera);
 
 	// Steps the game ahead by ms milliseconds
 	void step(float elapsed_ms);
@@ -37,7 +34,8 @@ public:
 
 	GLFWwindow* window;
 
-	Map getGameMap() { return gameMap; }
+	MapSystem::Map& getGameMap() { return gameMap; }
+	OrthographicCamera& getCamera() { return camera; }
 
 	//Turn System stuff
 	enum TURN_CODE {
@@ -58,8 +56,8 @@ public:
 
 
 private:
-	RenderSystem* renderer;
-
+	OrthographicCamera camera;
+	MapSystem::Map gameMap;
 	// restart level it was in the private 
 	void restart_current_match();
 
@@ -83,7 +81,7 @@ private:
 	std::vector<Entity> ai_team;
 	std::vector<Entity> npcai_team;
 	std::vector<std::vector<Entity>> teams;
-	Map gameMap;
+	
 
 	enum class PLAYER_MODE {
 		MOVING,

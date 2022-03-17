@@ -44,7 +44,9 @@ int main() {
 		world.step(elapsed_ms);
 		physics.step(elapsed_ms);
 
-		renderer.draw(elapsed_ms);
+		auto& map = world.getCurrentGame().getGameMap();
+		auto& camera = world.camera;
+		renderer.draw(elapsed_ms, camera, map);
 		glfwSwapBuffers(window);
 	}
 

@@ -16,6 +16,7 @@
 #include "components.hpp"
 #include "map.hpp"
 #include "animation_system.hpp"
+#include "common.hpp"
 #include "hpp/orthographic_camera.hpp"
 
 class RenderSystem {
@@ -77,7 +78,12 @@ class RenderSystem {
 		"level3.png",
 		"cat_crosshair.png",
 		"dog_crosshair.png",
-		"health_square.png"
+		"health_square.png",
+		// Industrial parallax background
+		"industrial/bg.png",
+		"industrial/far-buildings.png",
+		"industrial/buildings.png",
+		"industrial/skill-foreground.png"
 	};
 
 	std::array<GLuint, textureCount> textures; // OpenGL texture names
@@ -117,7 +123,7 @@ public:
 	OrthographicCamera camera;
 
 	// Draw to the screen using shaderProgram
-	void draw(float elapsed_ms);
+	void draw(float elapsed_ms, OrthographicCamera& orthoCamera, MapSystem::Map& map);
 
 	// Draw a quad with an optional texture
 	void drawQuad(RenderRequest& request, std::string shaderInputs[], int numInputs);
@@ -128,7 +134,7 @@ public:
 	void drawTiles();
 
 	// Draw the background texture image
-	void drawBackground(RenderRequest& request, float layer);
+	void drawBackground(RenderRequest& request, float layer, glm::vec2 position, glm::vec2 scale);
 
 	// Draw any text entities
 	void drawText(Entity e);
@@ -139,12 +145,10 @@ public:
 	// Return the GLFW window associated with this renderer
 	GLFWwindow* getWindow() { return window; }
 
-	Mesh& getMesh(GEOMETRY_BUFFER_IDS id) { return meshes[(int)id]; }
-
 	int getScreenWidth() { return this->screenWidth; }
 	int getScreenHeight() { return this->screenHeight; }
 
-	void setTileMap(const Map& gameMap) { this->gameMap = gameMap; }
+	void setTileMap(const MapSystem::Map& gameMap) { this->gameMap = gameMap; }
 
 private:
 	AnimationSystem animation_system;
@@ -155,7 +159,7 @@ private:
 	GLuint frameBuffer;
 	GLuint renderBufferColour;
 	GLuint renderBufferDepth;
-	Map gameMap;
+	MapSystem::Map gameMap;
 	std::map<char, Glyph> glyphs;
 	std::map<char, Glyph> italic_glyphs;
 	std::map<char, Glyph> bold_glyphs;

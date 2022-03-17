@@ -31,3 +31,6 @@ struct Transform {
 
 // Default screen resolution
 constexpr glm::vec2 defaultResolution = glm::vec2(1920.f, 1080.f);
+
+// Global screen resolution
+extern glm::vec2 screenResolution;

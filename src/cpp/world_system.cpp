@@ -5,8 +5,6 @@
 
 // stlib
 #include <cassert>
-#include <sstream>
-#include <iostream>
 
 #include "..\hpp\tiny_ecs_registry.hpp"
 #include <hpp/physics_system.hpp>
@@ -40,35 +38,20 @@ namespace {
 void WorldSystem::init(RenderSystem* renderer, GLFWwindow* window) {
 	this->renderer = renderer;
 	this->window = window;
+	this->camera = OrthographicCamera(0.f, screenResolution.x, screenResolution.y, 0.f);
+	this->mapSystem = MapSystem();
+	this->mapSystem.init();
 
 	init_main_menu();
 	audio.play_music(MUSIC_LIST::IN_GAME_BACKGROUND);
 
 	set_user_input_callbacks();
 
-	//creates a wall on the left side of the screen
-	printf("window height is: %i px, window width is: %i px\n", renderer->getScreenHeight(), renderer->getScreenWidth());
-
-	//restart_game();
+	printf("window height is: %f px, window width is: %f px\n", screenResolution.x, screenResolution.y);
 }
 
 // Update our game world
 bool WorldSystem::step(float elapsed_ms_since_last_update) {
-
-	// Remove entities that leave the screen on the left side
-	// Iterate backwards to be able to remove without unterfering with the next object to visit
-	// (the containers exchange the last element with the current)
-	//for (int i = (int)motions_registry.components.size() - 1; i >= 0; --i) {
-	//	Motion& motion = motions_registry.components[i];
-	//	if (motion.position.x + abs(motion.scale.x) < 0.f) {
-	//		if (!registry.players.has(motions_registry.entities[i])) // don't remove the player
-	//			registry.remove_all_components_of(motions_registry.entities[i]);
-	//	}
-	//}
-	//
-
-	// Removing out of screen entities
-	auto& motions_registry = registry.motions;
 	if (current_game.inAGame) {
 		current_game.step(elapsed_ms_since_last_update);
 	}
@@ -78,23 +61,11 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
 // Reset the world state to its initial state
 void WorldSystem::restart_game() {
-	// Debugging for memory/component leaks
-	//registry.list_all_components();
-	//printf("Restarting\n");
-
-	//// Reset the game speed
-	//current_speed = 1.f;
-
-	//// Remove all entities that we created
-	//// All that have a motion, we could also iterate over all bug, eagles, ... but that would be more cumbersome
 	while (registry.motions.entities.size() > 0)
 		registry.remove_all_components_of(registry.motions.entities.back());
 
-	//Load Title screen
-	//Character Select
-
-	//INITIALIZE Current game
-	current_game.init(renderer, window);
+	//Initialize current game
+	current_game.init(window, mapSystem.getMap(MAPS::INDUSTRIAL), camera);
 }
 
 void WorldSystem::handle_collisions() {

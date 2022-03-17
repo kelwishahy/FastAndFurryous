@@ -3,9 +3,6 @@
 #include "tiny_ecs.hpp"
 #include <unordered_map>
 
-// stlib
-#include <vector>
-
 enum MUSIC_LIST {
 	IN_GAME_BACKGROUND
 };
@@ -73,7 +70,6 @@ public:
 
 	void play_sfx(SOUND_EFFECTS sound) {
 		Mix_PlayChannel(-1, sound_effects.at(sound), 0);
-		fprintf(stderr, "play sound fx");
 	}
 
 };

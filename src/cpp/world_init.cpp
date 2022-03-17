@@ -1,9 +1,7 @@
 #include "..\hpp\world_init.hpp"
 #include "..\hpp\tiny_ecs_registry.hpp"
-
-#include "hpp/common.hpp"
-
 #include "hpp/ANIMATION_CONSTANTS.hpp"
+#include "hpp/common.hpp"
 #include "hpp/physics_system.hpp"
 
 using namespace glm;
@@ -32,8 +30,7 @@ void remove_children(Entity e) {
 
 }
 
-Entity createCat(RenderSystem* renderer, vec2 pos) {
-
+Entity createCat(vec2 pos) {
 	auto head = Entity();
 	auto frontArm = Entity();
 	const auto entity = Entity();
@@ -104,7 +101,7 @@ Entity createCat(RenderSystem* renderer, vec2 pos) {
 	motion.position = pos;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	float scale = ceil((64.f / defaultResolution.x) * renderer->getScreenWidth());
+	float scale = ceil((64.f / defaultResolution.x) * screenResolution.x);
 	motion.scale = { scale, scale * 1.655f }; //Look at the dimensions of the sprite sheet to get the right ratio
 
 	// Add health component
@@ -137,7 +134,7 @@ Entity createCat(RenderSystem* renderer, vec2 pos) {
 	return entity;
 }
 
-Entity createDog(RenderSystem* renderer, vec2 pos) {
+Entity createDog(vec2 pos) {
 
 	auto head = Entity();
 	const auto entity = Entity();
@@ -224,7 +221,7 @@ Entity createDog(RenderSystem* renderer, vec2 pos) {
 	motion.position = pos;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	float scale = ceil((64.f / defaultResolution.x) * renderer->getScreenWidth());
+	float scale = ceil((64.f / defaultResolution.x) * screenResolution.x);
 	motion.scale = { scale, scale * 1.125f }; //Look at the dimensions of the sprite sheet to get the right ratio
 
 	Boxcollider& bc = registry.boxColliders.emplace(entity);
@@ -275,12 +272,6 @@ Entity createWall(vec2 pos, float width, float height) {
 	calculateBoxVerticesAndSetTriangles(motion.position, motion.scale, bc);
 	bc.transformed_required = true;
 
-	// registry.renderRequests.insert(
-	// 	entity,
-	// 	{ TEXTURE_IDS::TOTAL,
-	// 		SHADER_PROGRAM_IDS::WALL,
-	// 		GEOMETRY_BUFFER_IDS::QUAD });
-
 	return entity;
 }
 
@@ -289,7 +280,7 @@ Entity createTile(float tileScale, vec2 tilePosition, int numTilesInARow) {
 	return createWall(position, tileScale * numTilesInARow, tileScale);
 }
 
-Entity createAI(RenderSystem* renderer, vec2 pos) {
+Entity createAI(vec2 pos) {
 	const auto entity = Entity();
 
 	// registry.selected.emplace(head);
@@ -306,7 +297,7 @@ Entity createAI(RenderSystem* renderer, vec2 pos) {
 	motion.position = pos;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	float scale = ceil((64.f / defaultResolution.x) * renderer->getScreenWidth());
+	float scale = ceil((64.f / defaultResolution.x) * screenResolution.x);
 	motion.scale = { scale, scale };
 
 	Boxcollider& bc = registry.boxColliders.emplace(entity);
@@ -330,7 +321,7 @@ Entity createAI(RenderSystem* renderer, vec2 pos) {
 	return entity;
 }
 
-Entity createProjectile(RenderSystem* renderer, Entity originE, vec2 force) {
+Entity createProjectile(Entity originE, vec2 force) {
 
 	const auto entity = Entity();
 
@@ -339,7 +330,7 @@ Entity createProjectile(RenderSystem* renderer, Entity originE, vec2 force) {
 	motion.position = registry.motions.get(originE).position;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	float scale = ceil((10.f / defaultResolution.x) * renderer->getScreenWidth());
+	float scale = ceil((10.f / defaultResolution.x) * screenResolution.x);
 	motion.scale = { scale, scale };
 
 	Boxcollider& bc = registry.boxColliders.emplace(entity);

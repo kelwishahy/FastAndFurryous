@@ -12,8 +12,6 @@ public:
 	ShootingSystem();
 	~ShootingSystem();
 
-	void init(RenderSystem* renderer);
-
 	void step(float elapsed_time);
 
 	//Calculate the coefficients for Cubic interpolation
@@ -44,8 +42,6 @@ private:
 
 	float pi = 3.14159;
 	float pio2 = 1.57079;
-
-	RenderSystem* renderer;
 
 	void calculate_trajectory(Entity e);
 

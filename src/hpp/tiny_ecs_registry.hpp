@@ -36,12 +36,12 @@ public:
 	ComponentContainer<Cat> cats;
 	ComponentContainer<Dog> dogs;
 	ComponentContainer<HealthBox> healthboxes;
+	ComponentContainer<Selected> selected;
 
 	ECSRegistry() {
 		registry_list.push_back(&ais);
 		registry_list.push_back(&anchors);
 		registry_list.push_back(&animations);
-		registry_list.push_back(&animExtras);
 		registry_list.push_back(&backgrounds);
 		registry_list.push_back(&boxColliders);
 		registry_list.push_back(&buttons);

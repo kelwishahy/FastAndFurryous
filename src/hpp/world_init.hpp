@@ -2,13 +2,12 @@
 
 #include "tiny_ecs.hpp"
 #include "render_system.hpp"
-#include <glm/vec2.hpp>				// vec2
 
 // Player entities
-Entity createCat(RenderSystem* renderer, glm::vec2 pos);
+Entity createCat(glm::vec2 pos);
 
 // Player entities
-Entity createDog(RenderSystem* renderer, glm::vec2 pos);
+Entity createDog(glm::vec2 pos);
 
 // solid terrain
 Entity createWall(glm::vec2 pos, float width, float height);
@@ -17,10 +16,10 @@ Entity createWall(glm::vec2 pos, float width, float height);
 Entity createTile(float tileScale, glm::vec2 tilePosition, int numTilesInARow);
 
 // AI
-Entity createAI(RenderSystem* renderer, glm::vec2 pos);
+Entity createAI(glm::vec2 pos);
 
 //Projectile
-Entity createProjectile(RenderSystem* renderer, Entity originE, glm::vec2 force);
+Entity createProjectile(Entity originE, glm::vec2 force);
 
 //Specify a menu
 Entity createMenu(MENU_TYPES menu, float layer);
