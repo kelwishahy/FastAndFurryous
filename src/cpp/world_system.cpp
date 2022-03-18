@@ -306,17 +306,17 @@ void WorldSystem::play_startscreen(std::vector<std::function<void()>> callbacks)
 	std::vector<std::function<void()>> onClick;
 	createMenu(MENU_TYPES::START, 0.75);
 
-	vec2 pos1 = {(defaultResolution.x - 300.f) / defaultResolution.x * renderer->getScreenWidth(), (400.f / defaultResolution.y) * renderer->getScreenHeight() };
+	vec2 pos1 = {(defaultResolution.x - 480.f) / defaultResolution.x * renderer->getScreenWidth(), (400.f / defaultResolution.y) * renderer->getScreenHeight() };
 	vec2 scale = { (400.f / defaultResolution.x) * renderer->getScreenWidth(), (80.f / defaultResolution.y) * renderer->getScreenHeight() };
 	createButton(pos1, scale,TEXTURE_IDS::BUTTON1, onClick);
 
-	vec2 pos2 = {(defaultResolution.x - 300.f) / defaultResolution.x * renderer->getScreenWidth(), (500.f / defaultResolution.y) * renderer->getScreenHeight() };
+	vec2 pos2 = {(defaultResolution.x - 480.f) / defaultResolution.x * renderer->getScreenWidth(), (500.f / defaultResolution.y) * renderer->getScreenHeight() };
 	createButton(pos2, scale,TEXTURE_IDS::BUTTON2, onClick);
 
-	vec2 pos3 = {(defaultResolution.x - 300.f) / defaultResolution.x * renderer->getScreenWidth(), (600.f / defaultResolution.y) * renderer->getScreenHeight() };
+	vec2 pos3 = {(defaultResolution.x - 480.f) / defaultResolution.x * renderer->getScreenWidth(), (600.f / defaultResolution.y) * renderer->getScreenHeight() };
 	createButton(pos3, scale,TEXTURE_IDS::BUTTON3, onClick);
 
-	vec2 pos4 = {(defaultResolution.x - 300.f) / defaultResolution.x * renderer->getScreenWidth(), (600.f / defaultResolution.y) * renderer->getScreenHeight() };
+	vec2 pos4 = {(defaultResolution.x - 480.f) / defaultResolution.x * renderer->getScreenWidth(), (700.f / defaultResolution.y) * renderer->getScreenHeight() };
 	createButton(pos4, scale,TEXTURE_IDS::BUTTON4, onClick);
 
 }
