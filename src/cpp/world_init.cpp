@@ -45,10 +45,6 @@ Entity createCat(vec2 pos) {
 	registry.selected.emplace(entity);
 
 	//---Head animation subentity---- putting this in front so that head gets rendered ontop of body
-	// Motion& h_anchor_motion = registry.motions.emplace(head_anchor);
-	//h_anchor_motion.position = motion.position;
-
-	//---Head animation subentity---- putting this in front so that head gets rendered ontop of body
 	int index = 0;
 	children.child_data_map.emplace(index, head);
 	children.normal_dists.emplace(index, vec2( 9.5f, -41.0f ));
@@ -102,7 +98,8 @@ Entity createCat(vec2 pos) {
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
 	float scale = ceil((64.f / defaultResolution.x) * screenResolution.x);
-	motion.scale = { scale, scale * 1.655f }; //Look at the dimensions of the sprite sheet to get the right ratio
+	// motion.scale = { scale, scale * 1.655f }; //Look at the dimensions of the sprite sheet to get the right ratio
+	motion.scale = scaleToScreenResolution({ scale, scale * 1.655f }); //Look at the dimensions of the sprite sheet to get the right ratio
 
 	// Add health component
 	Health& health = registry.health.emplace(entity);

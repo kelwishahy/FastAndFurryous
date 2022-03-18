@@ -20,7 +20,6 @@ void GameController::init(GLFWwindow* window, MapSystem::Map& map, OrthographicC
 	this->window = window;
 	this->gameMap = map;
 	this->camera = &camera;
-	printf("Camera memory address in game controller init: %p\n", &camera);
 
 	//Init game metadata
 	game_state.turn_number += 1;

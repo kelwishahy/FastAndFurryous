@@ -25,7 +25,8 @@ MapSystem::Map::Map(MAPS name) {
 void MapSystem::Map::build() {
 	this->mapHeight = 18;
 	this->mapWidth = 60;
-	this->tileScale = ceil((defaultResolution.x / 30.f));
+	// this->tileScale = ceil((defaultResolution.x / 30.f) / defaultResolution.x * screenResolution.x);
+	this->tileScale = ceil(scaleToScreenResolution({ (defaultResolution.x / 30.f), (defaultResolution.x / 30.f) }).x);
 	printf("Tiles are %fx%f for map %d\n", tileScale, tileScale, (int)this->name);
 
 	readMapFromFile();
