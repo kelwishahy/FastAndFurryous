@@ -368,9 +368,22 @@ Entity createMenu(MENU_TYPES menu, float layer) {
 					GEOMETRY_BUFFER_IDS::TEXTURED_QUAD };
 	}
 
-	//selectscreen
+	// character select screen
 	if (menu == MENU_TYPES::SELECT) {
 		request = { TEXTURE_IDS::SELECT_MENU,
+					SHADER_PROGRAM_IDS::TEXTURE,
+					GEOMETRY_BUFFER_IDS::TEXTURED_QUAD };
+	}
+
+	// option screen
+	if (menu == MENU_TYPES::OPTIONS) {
+		request = { TEXTURE_IDS::OPTIONS_MENU,
+					SHADER_PROGRAM_IDS::TEXTURE,
+					GEOMETRY_BUFFER_IDS::TEXTURED_QUAD };
+	}
+	// level screen
+	if (menu == MENU_TYPES::LEVELS) {
+		request = { TEXTURE_IDS::LEVELS_MENU,
 					SHADER_PROGRAM_IDS::TEXTURE,
 					GEOMETRY_BUFFER_IDS::TEXTURED_QUAD };
 	}

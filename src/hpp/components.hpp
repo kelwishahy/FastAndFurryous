@@ -49,13 +49,29 @@ enum class TEXTURE_IDS {
 	DOG_DEAD,
 	//
 	STONE,
+	// All Screens
 	BACKGROUND,
 	START_MENU,
-	//selectscreen
 	SELECT_MENU,
+	OPTIONS_MENU,
+	LEVELS_MENU,
+	// Start Menu Buttons
 	BUTTON1,
+	BUTTON2,
+	BUTTON3,
+	BUTTON4,
+	// Select Menu Buttons
 	BUTTONC,
+	BUTTOND,
+	// Tutorial Menu 
 	HOWTOMOVE,
+	// Option Menu Buttons
+	BUTTONR,
+	BUTTONL,
+	// Level Menu Buttons
+	BUTTONL1,
+	BUTTONL2,
+	BUTTONL3,
 	CAT_CROSSHAIR,
 	DOG_CROSSHAIR,
 	HEALTH_SQUARE,
@@ -92,8 +108,9 @@ enum TILE_TYPES {
 
 enum MENU_TYPES {
 	START,
-	//selectscreen
-	SELECT
+	SELECT,
+	OPTIONS,
+	LEVELS
 };
 
 enum TEAM {
