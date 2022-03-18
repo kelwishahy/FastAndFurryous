@@ -1,7 +1,6 @@
 #pragma once
 #include "hpp/tiny_ecs.hpp"
 #include "hpp/common.hpp"
-#include <hpp/render_system.hpp>
 
 using namespace glm;
 

@@ -8,11 +8,12 @@
 #include <vector>
 
 #include "ai_system.hpp"
-
-using namespace glm;
+#include "orthographic_camera.hpp"
 
 #include <hpp/Game_Mechanics/shooting_system.hpp>
 #include <hpp/ui_system.hpp>
+
+#include "GLFW/glfw3.h"
 
 class GameController
 {
@@ -35,7 +36,7 @@ public:
 	GLFWwindow* window;
 
 	MapSystem::Map& getGameMap() { return gameMap; }
-	OrthographicCamera& getCamera() { return camera; }
+	OrthographicCamera& getCamera() { return *camera; }
 
 	//Turn System stuff
 	enum TURN_CODE {
@@ -56,7 +57,7 @@ public:
 
 
 private:
-	OrthographicCamera camera;
+	OrthographicCamera* camera;
 	MapSystem::Map gameMap;
 	// restart level it was in the private 
 	void restart_current_match();
@@ -105,5 +106,4 @@ private:
 
 	uint numPlayersInTeam;
 	float timePerTurnMs;
-
 };

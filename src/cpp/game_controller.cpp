@@ -19,7 +19,8 @@ GameController::~GameController() {
 void GameController::init(GLFWwindow* window, MapSystem::Map& map, OrthographicCamera& camera) {
 	this->window = window;
 	this->gameMap = map;
-	this->camera = camera;
+	this->camera = &camera;
+	printf("Camera memory address in game controller init: %p\n", &camera);
 
 	//Init game metadata
 	game_state.turn_number += 1;
@@ -122,13 +123,12 @@ void GameController::step(float elapsed_ms) {
 			inAGame = false;
 		}
 
-		auto rightDist = abs(registry.motions.get(e).position.x - camera.getCameraRight().x);
-		auto leftDist = abs(registry.motions.get(e).position.x - camera.getPosition().x);
-		if (rightDist < 400.f && camera.getCameraRight().x < 2 * screenResolution.x) {
-			camera.setPosition(camera.getPosition() + vec3(1.5f, 0.f, 0.f));
-		}
-		else if (leftDist < 400.f && camera.getPosition().x > 0.f) {
-			camera.setPosition(camera.getPosition() + vec3(-1.5f, 0.f, 0.f));
+		auto rightDist = abs(registry.motions.get(e).position.x - camera->getCameraRight().x);
+		auto leftDist = abs(registry.motions.get(e).position.x - camera->getPosition().x);
+		if (rightDist < 400.f && camera->getCameraRight().x < 2 * screenResolution.x) {
+			camera->setPosition(camera->getPosition() + vec3(1.5f, 0.f, 0.f));
+		} else if (leftDist < 400.f && camera->getPosition().x > 0.f) {
+			camera->setPosition(camera->getPosition() + vec3(-1.5f, 0.f, 0.f));
 		}
 
 		// if (player1_team.size() == 0) {

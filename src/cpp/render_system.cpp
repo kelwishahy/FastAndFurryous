@@ -13,9 +13,9 @@
 using namespace glm;
 vec2 screenResolution;
 
-void RenderSystem::draw(float elapsed_ms, OrthographicCamera& orthoCamera, MapSystem::Map& map) {
-	this->camera = orthoCamera;
-	setTileMap(map);
+void RenderSystem::draw(float elapsed_ms, WorldSystem& world) {
+	this->camera = &world.camera;
+	setTileMap(world.getCurrentGame().getGameMap());
 	animation_system.step(elapsed_ms);
 	glViewport(0, 0, screenWidth, screenHeight);
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -41,11 +41,11 @@ void RenderSystem::draw(float elapsed_ms, OrthographicCamera& orthoCamera, MapSy
 				break;
 			case TEXTURE_IDS::INDUSTRIAL_FAR_BUILDINGS:
 				depth = -0.8f;
-				pos -= camera.getPosition().x / 10.f;
+				pos -= camera->getPosition().x / 10.f;
 				break;
 			case TEXTURE_IDS::INDUSTRIAL_BUILDINGS:
 				depth = -0.7f;
-				pos -= camera.getPosition().x / 5.f;
+				pos -= camera->getPosition().x / 5.f;
 				break;
 			case TEXTURE_IDS::INDUSTRIAL_FOREGROUND:
 				depth = -0.6f;
@@ -122,7 +122,7 @@ void RenderSystem::renderToScreen(mat4 transformationMatrix) {
 	GLuint transform_loc = glGetUniformLocation(currProgram, "transform");
 	glUniformMatrix4fv(transform_loc, 1, GL_FALSE, (float*)&transformationMatrix);
 
-	auto proj = camera.getViewProjectionMatrix(); // Passing in the camera's viewProjectionMatrix
+	auto proj = camera->getViewProjectionMatrix(); // Passing in the camera's viewProjectionMatrix
 	GLuint projection_loc = glGetUniformLocation(currProgram, "projection");
 	glUniformMatrix4fv(projection_loc, 1, GL_FALSE, (float*)&proj);
 	glHasError();
@@ -301,7 +301,7 @@ void RenderSystem::drawTiles() {
 				GLuint transform_loc = glGetUniformLocation(currProgram, "transform");
 				glUniformMatrix4fv(transform_loc, 1, GL_FALSE, (float*)&transformationMatrix);
 				
-				auto proj = camera.getViewProjectionMatrix(); // Passing in the camera's viewProjectionMatrix
+				auto proj = camera->getViewProjectionMatrix(); // Passing in the camera's viewProjectionMatrix
 				GLuint projection_loc = glGetUniformLocation(currProgram, "projection");
 				glUniformMatrix4fv(projection_loc, 1, GL_FALSE, (float*)&proj);
 				glHasError();

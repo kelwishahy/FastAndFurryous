@@ -1,17 +1,14 @@
 #pragma once
 
 // internal
-#include "common.hpp"
 #include "tiny_ecs.hpp"
 
 // stlib
 #include <vector>
 #include <random>
-
-#include "render_system.hpp"
 #include "game_controller.hpp"
-
-//#include "render_system.hpp"
+#include <glm/vec2.hpp>
+#include "orthographic_camera.hpp"
 
 // Container for all our entities and game logic. Individual rendering / update is
 // deferred to the relative update() methods
@@ -23,7 +20,7 @@ public:
 	// Releases all associated resources
 	~WorldSystem();
 
-	void init(RenderSystem* renderer, GLFWwindow* window);
+	void init(GLFWwindow* window);
 
 	// Steps the game ahead by ms milliseconds
 	bool step(float elapsed_ms);
@@ -36,7 +33,7 @@ public:
 
 	// Input callback functions
 	void on_key(int button, int action, int mods);
-	void on_mouse_move(vec2 pos);
+	void on_mouse_move(glm::vec2 pos);
 	void on_mouse_click(int button, int action, int mods);
 	void set_user_input_callbacks();
 
@@ -66,7 +63,6 @@ private:
 
 	void init_main_menu();
 
-	RenderSystem* renderer;
 	Entity player_cat;
 	float current_speed;
 

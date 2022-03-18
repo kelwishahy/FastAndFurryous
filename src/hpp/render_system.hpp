@@ -17,6 +17,7 @@
 #include "map.hpp"
 #include "animation_system.hpp"
 #include "common.hpp"
+#include "world_system.hpp"
 #include "hpp/orthographic_camera.hpp"
 
 class RenderSystem {
@@ -115,15 +116,12 @@ class RenderSystem {
 	const GLfloat CAT_JUMP_FRAME_WIDTH = 0.111f;
 	float CAT_JUMP_FRAME_TIME = 100;
 
-
 public:
 	RenderSystem () {};
 	~RenderSystem () {};
 
-	OrthographicCamera camera;
-
 	// Draw to the screen using shaderProgram
-	void draw(float elapsed_ms, OrthographicCamera& orthoCamera, MapSystem::Map& map);
+	void draw(float elapsed_ms, WorldSystem& world);
 
 	// Draw a quad with an optional texture
 	void drawQuad(RenderRequest& request, std::string shaderInputs[], int numInputs);
@@ -153,6 +151,7 @@ public:
 private:
 	AnimationSystem animation_system;
 	GLFWwindow* window;
+	OrthographicCamera* camera;
 	int screenWidth;
 	int screenHeight;
 	GLuint vao;
