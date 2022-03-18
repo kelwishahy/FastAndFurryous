@@ -1,4 +1,5 @@
 #pragma once
+#include <map>
 #include <hpp/tiny_ecs.hpp>
 #include <vector>
 #include <unordered_map>
@@ -220,12 +221,22 @@ struct Clickable {
 	std::vector<std::function<void()>> callbacks;
 };
 
-struct AnchoredEntities {
-	Entity parent; //just for setting the transform and removing after done
-	glm::vec2 normal_distance = {0.0f, 0.0f};
-	Entity child;
-	std::string tag; //optional, tag the type of entity you are attaching
-	glm::vec2 original_distance = { 0.0f, 0.0f }; //optional, hacking in more stuff...
+struct ChildEntities {
+	std::map<int, Entity> child_data_map; //unfortunately putting Entity first causes an error
+	std::unordered_map<int, glm::vec2> normal_dists;
+	std::unordered_map<int, std::string> tags; //optional
+	std::unordered_map<int, glm::vec2>  original_dists; //opational, this me hackig stuff in
+	void remove_child(Entity e) {
+		for (int i = 0; i < child_data_map.size(); i++) {
+			if (child_data_map.at(i) == e) {
+				normal_dists.erase(i);
+				tags.erase(i);
+				original_dists.erase(i);
+				child_data_map.erase(i);
+				i--;
+			}
+		}
+	}
 };
 
 struct UIElement {

@@ -35,7 +35,7 @@ private:
 
 	void moveBackEntity(Entity e, glm::vec2 normal, float depth);
 
-	void transformAnchoredEntities();
+	void transformChildedEntities();
 
 	const float GRAVITY_CONST = 2.5f;
 	const float TERMINAL_VELOCITY = 500.0f;

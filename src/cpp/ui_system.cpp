@@ -29,10 +29,17 @@ void UISystem::step(float elapsed_ms) {
 
 		switch (ui.element_type) {
 			case UI_ELEMENT::CROSSHAIR: {
-			AnchoredEntities& anchor = registry.anchors.get(e);
-			assert(registry.weapons.has(anchor.parent));
-			Motion& anchor_motion = registry.motions.get(e);
-			anchor_motion.angle = registry.weapons.get(anchor.parent).aim_angle;
+				for (int i = 0; i < registry.parentEntities.components.size(); i++) {
+					Entity parent = registry.parentEntities.entities[i];
+					ChildEntities& children = registry.parentEntities.components[i];
+					for (int j = 0; j < children.child_data_map.size(); j++) {
+						if (children.child_data_map.at(j) == e) {
+							assert(registry.weapons.has(parent));
+							Motion& child_motion = registry.motions.get(e);
+							child_motion.angle = registry.weapons.get(parent).aim_angle;
+						}
+					}
+				}
 			break;
 			}
 			default:
@@ -73,10 +80,21 @@ void UISystem::show_crosshair(Entity e) {
 }
 
 void UISystem::hide_crosshair() {
-	if (registry.anchors.has(crosshair_marker)) {
-		AnchoredEntities& anchor = registry.anchors.get(crosshair_marker);
-		registry.remove_all_components_of(anchor.child);
-		registry.remove_all_components_of(crosshair_marker);
+	if (registry.parentEntities.has(crosshair_marker)) {
+		ChildEntities& children = registry.parentEntities.get(crosshair_marker); //shoudl be a character entity i.e cat/dog
+		for (int i = 0; i < children.child_data_map.size(); i++) {
+			if (children.tags.at(i) == "crosshair") { //there should be a tag in the character for crosshair
+				for (Entity e : registry.parentEntities.entities) {
+					if (e == children.child_data_map.at(i)) {
+						ChildEntities& crosshair_children = registry.parentEntities.get(e); //the child of the child
+						registry.remove_all_components_of(crosshair_children.child_data_map[0]); //erase the actual physical crosshair
+						registry.remove_all_components_of(children.child_data_map.at(i)); //erase the crosshair child
+						children.remove_child(children.child_data_map.at(i)); //update the ChildEntities
+					}
+				}
+			}
+		}
+		//registry.remove_all_components_of(crosshair_marker);
 	}
 
 }

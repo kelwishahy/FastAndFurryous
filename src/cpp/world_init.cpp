@@ -21,39 +21,33 @@ void calculateBoxVerticesAndSetTriangles(vec2 pos, vec2 scale, Boxcollider& box)
 }
 
 void remove_anchors(Entity e) {
-	for (int i = 0; i < registry.anchors.size(); i++) {
-		AnchoredEntities anchor = registry.anchors.components[i];
-		Entity anchor_e = registry.anchors.entities[i];
-		if (anchor.parent == e) {
-			registry.remove_all_components_of(anchor.child);
-			registry.remove_all_components_of(anchor_e);
-			i--;
-		}
+	ChildEntities children = registry.parentEntities.get(e);
+
+	for (auto pair = children.child_data_map.begin(); pair!=children.child_data_map.end(); ++pair) {
+		remove_anchors(pair->second);
+		registry.remove_all_components_of(pair->second);
 	}
+
 }
 
 Entity createCat(RenderSystem* renderer, vec2 pos) {
 
 	auto head = Entity();
-	auto head_anchor = Entity();
-	auto entity = Entity();
 	auto frontArm = Entity();
-	auto frontArm_anchor = Entity();
+	auto entity = Entity();
+
+	ChildEntities& children = registry.parentEntities.emplace(entity);
 
 	//---Head animation subentity---- putting this in front so that head gets rendered ontop of body
-	Motion& h_anchor_motion = registry.motions.emplace(head_anchor);
-	//h_anchor_motion.position = motion.position;
-
-	AnchoredEntities& h_anchor = registry.anchors.emplace(head_anchor);
-	h_anchor.child = head;
-	h_anchor.normal_distance = { 9.5f, -41.0f };
-	h_anchor.tag = "animation";
-	h_anchor.original_distance = { 9.5f, -41.0f };
-	h_anchor.parent = entity;
+	int index = 0;
+	children.child_data_map.emplace(index, head);
+	children.normal_dists.emplace(index, vec2( 9.5f, -41.0f ));
+	children.tags.emplace(index, "animation");
+	children.original_dists.emplace(index, vec2(9.5f, -41.0f));
 
 
 	Motion& headmotion = registry.motions.emplace(head);
-	headmotion.position = pos + h_anchor.normal_distance;
+	headmotion.position = pos + children.normal_dists.at(0);
 	headmotion.scale = { 64.f, 64.f * 0.72803f}; //Look at the dimensions of the sprite sheet to get the right ratio
 
 	Animation& headanim = registry.animations.emplace(head);
@@ -70,18 +64,14 @@ Entity createCat(RenderSystem* renderer, vec2 pos) {
 			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
 
 	//---Front arm animation subentity---- putting this in front so that front arm gets rendered ontop of body
-	Motion& farm_anchor_motion = registry.motions.emplace(frontArm_anchor);
-
-	AnchoredEntities& farm_anchor = registry.anchors.emplace(frontArm_anchor);
-	farm_anchor.child = frontArm;
-	farm_anchor.normal_distance = { 4.5f, 11.0f };
-	farm_anchor.tag = "animation";
-	farm_anchor.original_distance = { 4.5f, 11.0f };
-	farm_anchor.parent = entity;
-
+	index = 1;
+	children.child_data_map.emplace(index, frontArm);
+	children.normal_dists.emplace(index, vec2(4.5f, 11.0f));
+	children.tags.emplace(index, "animation");
+	children.original_dists.emplace(index, vec2(4.5f, 11.0f));
 
 	Motion& frontArmMotion = registry.motions.emplace(frontArm);
-	frontArmMotion.position = pos + farm_anchor.normal_distance;
+	frontArmMotion.position = pos + children.normal_dists.at(1);
 	frontArmMotion.scale = { 54.f / 3, 128.f / 3 };
 
 	Animation& frontArmAnim = registry.animations.emplace(frontArm);
@@ -141,14 +131,17 @@ Entity createDog(RenderSystem* renderer, vec2 pos) {
 	auto frontArm = Entity();
 	auto backArm = Entity();
 
+	ChildEntities& children = registry.parentEntities.emplace(entity);
 	//---Head animation subentity---- putting this in front so that head gets rendered ontop of body
-	AnchoredEntities& head_anchor = registry.anchors.emplace_with_duplicates(entity);
-	head_anchor.child = head;
-	head_anchor.normal_distance = { 9.5f, -51.0f };
+	int index = 0;
+	children.child_data_map.emplace(index, head );
+	children.normal_dists.emplace(index, vec2(9.5f, -51.0f));
+	children.tags.emplace(index, "animation");
+	children.original_dists.emplace(index, vec2(9.5f, -51.0f));
 
 
 	Motion& headmotion = registry.motions.emplace(head);
-	headmotion.position = pos + head_anchor.normal_distance;
+	headmotion.position = pos + children.normal_dists.at(0);
 	headmotion.scale = { 64.f, 64.f * 0.72803f }; //Look at the dimensions of the sprite sheet to get the right ratio
 
 	Animation& headanim = registry.animations.emplace(head);
@@ -165,14 +158,15 @@ Entity createDog(RenderSystem* renderer, vec2 pos) {
 			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
 
 	//---Front arm animation subentity---- putting this in front so that front arm gets rendered ontop of body
-
-	AnchoredEntities& front_arm_anchor = registry.anchors.emplace_with_duplicates(entity);
-	front_arm_anchor.child = frontArm;
-	front_arm_anchor.normal_distance = { 4.5f, 11.0f };
+	index = 1;
+	children.child_data_map.emplace(index, frontArm);
+	children.normal_dists.emplace(index, vec2(4.5f, 11.0f));
+	children.tags.emplace(index, "animation");
+	children.original_dists.emplace(index, vec2(4.5f, 11.0f));
 
 
 	Motion& frontArmMotion = registry.motions.emplace(frontArm);
-	frontArmMotion.position = pos + front_arm_anchor.normal_distance;
+	frontArmMotion.position = pos + children.normal_dists.at(1);
 	frontArmMotion.scale = { 64.f / 3, 138.f / 3 };
 
 	Animation& frontArmAnim = registry.animations.emplace(frontArm);
@@ -446,6 +440,12 @@ Entity createCrosshair(Entity origin, bool iscat) {
 	auto entity = Entity();
 	auto crosshair_sub = Entity();
 
+	if (!registry.parentEntities.has(origin)) {
+		registry.parentEntities.emplace(origin);
+	}
+
+	ChildEntities& children = registry.parentEntities.get(origin);
+
 	// Main entity
 	Motion& motion = registry.motions.emplace(entity);
 	motion.position = registry.motions.get(origin).position;
@@ -455,14 +455,19 @@ Entity createCrosshair(Entity origin, bool iscat) {
 		entity, { UI_ELEMENT::CROSSHAIR }
 	);
 
-	AnchoredEntities& anchor = registry.anchors.emplace(entity);
-	anchor.normal_distance = { 200.0f, 200.0f };
-	anchor.child = crosshair_sub;
-	anchor.parent = origin;
+	int index = children.child_data_map.size();
+	children.child_data_map.insert({ index, entity });
+	children.normal_dists.insert({ index, vec2(0.0f, 0.0f) });
+	children.tags.insert({ index, "crosshair" });
 
+
+	ChildEntities& crosshair = registry.parentEntities.emplace(entity);
+	crosshair.child_data_map.emplace(0,crosshair_sub);
+	crosshair.normal_dists.insert({ 0, vec2(200.0f, -200.0f) });
+	crosshair.tags.insert({ 0, "crosshair" });
 	//Sub entity
 	Motion& cross_hair_motion = registry.motions.emplace(crosshair_sub);
-	cross_hair_motion.position = motion.position + anchor.normal_distance;
+	cross_hair_motion.position = motion.position + crosshair.normal_dists.at(0);
 	cross_hair_motion.scale = { 70.0f, 70.0f };
 
 	registry.renderRequests.insert(
@@ -472,7 +477,7 @@ Entity createCrosshair(Entity origin, bool iscat) {
 				GEOMETRY_BUFFER_IDS::TEXTURED_QUAD }
 	);
 
-	return entity;
+	return origin;
 
 }
 
