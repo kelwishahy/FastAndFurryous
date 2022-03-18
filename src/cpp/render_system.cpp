@@ -31,7 +31,10 @@ void RenderSystem::draw(float elapsed_ms, WorldSystem& world) {
 			continue;
 
 		RenderRequest request = registry.renderRequests.get(entity);
-
+		vec2 playerPos = { 0.f, 0.f };
+		if (registry.motions.has(world.getCurrentGame().getSelectedCharacter())) {
+			playerPos = registry.motions.get(world.getCurrentGame().getSelectedCharacter()).position;
+		}
 		if (registry.backgrounds.has(entity)) {
 			float pos = screenWidth;
 			float depth;
@@ -41,11 +44,11 @@ void RenderSystem::draw(float elapsed_ms, WorldSystem& world) {
 				break;
 			case TEXTURE_IDS::INDUSTRIAL_FAR_BUILDINGS:
 				depth = -0.8f;
-				pos -= camera->getPosition().x / 10.f;
+				pos -= playerPos.x / 60.f;
 				break;
 			case TEXTURE_IDS::INDUSTRIAL_BUILDINGS:
 				depth = -0.7f;
-				pos -= camera->getPosition().x / 5.f;
+				pos -= playerPos.x / 30.f;
 				break;
 			case TEXTURE_IDS::INDUSTRIAL_FOREGROUND:
 				depth = -0.6f;

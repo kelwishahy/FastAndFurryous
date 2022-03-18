@@ -55,6 +55,8 @@ public:
 
 	TURN_CODE getTurnCode() { return (TURN_CODE)this->game_state.turn_possesion; }
 
+	// Return the current selected character
+	Entity& getSelectedCharacter() { return curr_selected_char; }
 
 private:
 	OrthographicCamera* camera;
