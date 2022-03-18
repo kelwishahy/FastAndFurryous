@@ -103,6 +103,7 @@ void GameController::step(float elapsed_ms) {
 		auto e = npcai_team[i];
 		if (registry.health.get(e).hp == 0) {
 			npcai_team.erase(npcai_team.begin() + i);
+			remove_children(e);
 			registry.remove_all_components_of(e);
 		}
 
@@ -281,7 +282,7 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 				}
 				if (key == GLFW_KEY_N) {
 					ui.hide_crosshair();
-					remove_anchors(curr_selected_char);
+					remove_children(curr_selected_char);
 					registry.remove_all_components_of(curr_selected_char);
 				}
 			}

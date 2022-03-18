@@ -9,10 +9,10 @@
 using namespace glm;
 
 void calculateBoxVerticesAndSetTriangles(vec2 pos, vec2 scale, Boxcollider& box) {
-	float left = -scale.x / 2;
-	float right = scale.x / 2;
-	float up = -scale.y / 2;
-	float down = scale.y / 2;
+	const float left = -scale.x / 2;
+	const float right = scale.x / 2;
+	const float up = -scale.y / 2;
+	const float down = scale.y / 2;
 
 	box.vertices.push_back(pos + vec2{ left, up }); //topleft
 	box.vertices.push_back(pos + vec2{ right, up }); //topright
@@ -20,12 +20,14 @@ void calculateBoxVerticesAndSetTriangles(vec2 pos, vec2 scale, Boxcollider& box)
 	box.vertices.push_back(pos + vec2{ left, down }); //downleft
 }
 
-void remove_anchors(Entity e) {
-	ChildEntities children = registry.parentEntities.get(e);
+void remove_children(Entity e) {
+	if (registry.parentEntities.has(e)) {
+		const ChildEntities children = registry.parentEntities.get(e);
 
-	for (auto pair = children.child_data_map.begin(); pair!=children.child_data_map.end(); ++pair) {
-		remove_anchors(pair->second);
-		registry.remove_all_components_of(pair->second);
+		for (const auto& pair : children.child_data_map) {
+			remove_children(pair.second);
+			registry.remove_all_components_of(pair.second);
+		}
 	}
 
 }
@@ -34,7 +36,7 @@ Entity createCat(RenderSystem* renderer, vec2 pos) {
 
 	auto head = Entity();
 	auto frontArm = Entity();
-	auto entity = Entity();
+	const auto entity = Entity();
 
 	ChildEntities& children = registry.parentEntities.emplace(entity);
 
@@ -127,7 +129,7 @@ Entity createCat(RenderSystem* renderer, vec2 pos) {
 Entity createDog(RenderSystem* renderer, vec2 pos) {
 
 	auto head = Entity();
-	auto entity = Entity();
+	const auto entity = Entity();
 	auto frontArm = Entity();
 	auto backArm = Entity();
 
@@ -241,7 +243,7 @@ Entity createDog(RenderSystem* renderer, vec2 pos) {
 
 
 Entity createWall(vec2 pos, float width, float height) {
-	auto entity = Entity();
+	const auto entity = Entity();
 
 	// Setting initial motion values
 	Motion& motion = registry.motions.emplace(entity);
@@ -272,12 +274,12 @@ Entity createWall(vec2 pos, float width, float height) {
 }
 
 Entity createTile(float tileScale, vec2 tilePosition, int numTilesInARow) {
-	vec2 position = { ((tilePosition.y + 1) * tileScale) + ((tileScale * numTilesInARow) / 2.0), tilePosition.x * tileScale + (tileScale / 2.0)};
+	const vec2 position = { ((tilePosition.y + 1) * tileScale) + ((tileScale * numTilesInARow) / 2.0), tilePosition.x * tileScale + (tileScale / 2.0)};
 	return createWall(position, tileScale * numTilesInARow, tileScale);
 }
 
 Entity createAI(RenderSystem* renderer, vec2 pos) {
-	auto entity = Entity();
+	const auto entity = Entity();
 
 	// Add health component
 	Health& health = registry.health.emplace(entity);
@@ -316,7 +318,7 @@ Entity createAI(RenderSystem* renderer, vec2 pos) {
 
 Entity createProjectile(RenderSystem* renderer, Entity originE, vec2 force) {
 
-	auto entity = Entity();
+	const auto entity = Entity();
 
 	// Setting initial motion values
 	Motion& motion = registry.motions.emplace(entity);
@@ -351,7 +353,7 @@ Entity createProjectile(RenderSystem* renderer, Entity originE, vec2 force) {
 
 Entity createMenu(MENU_TYPES menu, float layer) {
 
-	auto entity = Entity();
+	const auto entity = Entity();
 
 	MenuItem& menu_comp =  registry.menus.emplace(entity);
 	RenderRequest request;
@@ -381,15 +383,15 @@ Entity createMenu(MENU_TYPES menu, float layer) {
 
 Entity createButton(vec2 pos, vec2 scale, TEXTURE_IDS tex_id, std::vector<std::function<void()>> callbacks) {
 
-	auto entity = Entity();
+	const auto entity = Entity();
 
 	Clickable& button = registry.buttons.emplace(entity);
 	button.callbacks = callbacks;
 
-	float left = -scale.x / 2;
-	float right = scale.x / 2;
-	float up = -scale.y / 2;
-	float down = scale.y / 2;
+	const float left = -scale.x / 2;
+	const float right = scale.x / 2;
+	const float up = -scale.y / 2;
+	const float down = scale.y / 2;
 
 	button.vertecies.push_back(pos + vec2{ left, up }); //topleft
 	button.vertecies.push_back(pos + vec2{ right, up }); //topright
@@ -413,7 +415,7 @@ Entity createButton(vec2 pos, vec2 scale, TEXTURE_IDS tex_id, std::vector<std::f
 }
 
 Entity createText(vec2 pos, float scale, glm::vec3 color, std::string text) {
-	auto entity = Entity();
+	const auto entity = Entity();
 
 	// Setting initial motion values
 	Motion& motion = registry.motions.emplace(entity);
@@ -483,9 +485,9 @@ Entity createCrosshair(Entity origin, bool iscat) {
 
 Entity createHealthCounter(Entity origin, int health) {
 
-	vec3 color = registry.cats.has(origin) ? vec3{ 0.862f, 0.525f, 0.517f } : vec3{ 0.039, 0.454, 1 };
+	const vec3 color = registry.cats.has(origin) ? vec3{ 0.862f, 0.525f, 0.517f } : vec3{ 0.039, 0.454, 1 };
 
-	auto entity = Entity();
+	const auto entity = Entity();
 
 	HealthBox& healthbox = registry.healthboxes.emplace(entity);
 	healthbox.parent = origin;
