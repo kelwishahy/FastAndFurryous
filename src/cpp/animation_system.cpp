@@ -21,23 +21,22 @@ void AnimationSystem::init() {
 
 void AnimationSystem::step(float elapsed_ms) {
 
-	for (int i = 0; i < registry.anchors.components.size(); i++) {
-		AnchoredEntities anchor = registry.anchors.components[i];
-		//Entity e = registry.anchors.entities[i];
+	for (int i = 0; i < registry.parentEntities.components.size(); i++) {
+		ChildEntities& children = registry.parentEntities.components[i];
+		Entity e = registry.parentEntities.entities[i];
 
 
-		//so everything swaps sides properly 
-		if (anchor.tag == "animation") {
-			assert(registry.animations.has(anchor.parent));
-			assert(registry.animations.has(anchor.child));
-			Animation parent_anim = registry.animations.get(anchor.parent);
-			Animation& anchored_anim = registry.animations.get(anchor.child);
-			anchored_anim.facingLeft = parent_anim.facingLeft;
-			update_anim_orientation();
+		//so everything swaps sides properly
+		for (int j = 0; j < children.child_data_map.size(); j++) {
+			Entity child = children.child_data_map.at(j);
+			if (registry.animations.has(e) && registry.animations.has(child)) {
+				Animation parent_anim = registry.animations.get(e);
+				Animation& anchored_anim = registry.animations.get(child);
+				anchored_anim.facingLeft = parent_anim.facingLeft;
+			}
 		}
-
-
 	}
+	update_anim_orientation();
 
 	//Animate sprites
 	for (Entity e : registry.animations.entities) {
@@ -206,19 +205,26 @@ void AnimationSystem::animate_dog_dead(Entity e) {
 //
 void AnimationSystem::update_anim_orientation() {
 	//Mirroring the anchors
-	for (int i = 0; i < registry.anchors.components.size(); i++) {
-		AnchoredEntities& anchor = registry.anchors.components[i];
-		if (registry.animations.has(anchor.child)) {
-			Animation child = registry.animations.get(anchor.child);
-			if (child.name == "cat_head" || child.name == "cat_front_arm" || child.name == "cat_back_arm") {
-				if (child.facingLeft == true) {
-					anchor.normal_distance.x = -anchor.original_distance.x;
-				}
-				else {
-					anchor.normal_distance.x = anchor.original_distance.x;
+	for (int i = 0; i < registry.animations.components.size(); i++) {
+		Entity e = registry.animations.entities[i];
+		if (registry.parentEntities.has(e)) {
+			bool orientation = registry.animations.get(e).facingLeft;
+			ChildEntities& children = registry.parentEntities.get(e);
+			for (int j = 0; j < children.child_data_map.size(); j++) {
+				if (registry.animations.has(children.child_data_map.at(j))) {
+					Animation child = registry.animations.get(children.child_data_map.at(j));
+					if (child.name == "cat_head" || child.name == "cat_front_arm" || child.name == "cat_back_arm") {
+						if (child.facingLeft == true) {
+							children.normal_dists[j].x = -children.original_dists[j].x;
+						}
+						else {
+							children.normal_dists[j].x = children.original_dists[j].x;
+						}
+					}
 				}
 			}
 		}
+
 	}
 }
 

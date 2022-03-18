@@ -31,7 +31,7 @@ public:
 	ComponentContainer<MenuItem> menus;
 	ComponentContainer<Clickable> buttons;
 	ComponentContainer<Text> texts;
-	ComponentContainer<AnchoredEntities> anchors;
+	ComponentContainer<ChildEntities> parentEntities;
 	ComponentContainer<UIElement> uiElements;
 	ComponentContainer<Cat> cats;
 	ComponentContainer<Dog> dogs;
@@ -58,7 +58,7 @@ public:
 		registry_list.push_back(&menus);
 		registry_list.push_back(&buttons);
 		registry_list.push_back(&texts);
-		registry_list.push_back(&anchors);
+		registry_list.push_back(&parentEntities);
 		registry_list.push_back(&uiElements);
 		registry_list.push_back(&cats);
 		registry_list.push_back(&dogs);

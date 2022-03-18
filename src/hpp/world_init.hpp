@@ -33,4 +33,4 @@ Entity createCrosshair(Entity origin, bool iscat);
 
 Entity createHealthCounter(Entity origin, int health);
 
-void remove_anchors(Entity e);
+void remove_children(Entity e);
