@@ -59,18 +59,23 @@ void GameController::step(float elapsed_ms) {
 
 	handle_collisions();
 
+	vec3 redColor = { 1.0, 0.0f, 0.0f };
+	vec3 blueColor = { 0.0, 0.0f, 1.0f };
+	vec3 darkGreenColor = { 0.0f, 0.4f, 0.0f };
+	vec2 turnPosition = { 1000.0f, 30.0f };
+
 	if (game_state.turn_possesion == PLAYER1) {
 		registry.remove_all_components_of(turnIndicator);
-		turnIndicator = createText({ 1000.0f, 30.0f }, 2.0f, { 0.972f, 0.229f, 0.586f }, "PLAYER 1'S TURN");
+		turnIndicator = createText(turnPosition, 2.0f, redColor , "PLAYER 1'S TURN");
 	} else if (game_state.turn_possesion == PLAYER2) {
 		registry.remove_all_components_of(turnIndicator);
-		turnIndicator = createText({ 1000.0f, 30.0f }, 2.0f, { 0.972f, 0.229f, 0.586f }, "PLAYER 2'S TURN");
+		turnIndicator = createText(turnPosition, 2.0f, blueColor, "PLAYER 2'S TURN");
 	} else if (game_state.turn_possesion == AI) {
 		registry.remove_all_components_of(turnIndicator);
-		turnIndicator = createText({ 1000.0f, 30.0f }, 2.0f, { 0.972f, 0.229f, 0.586f }, "COMPUTER'S TURN");
+		turnIndicator = createText(turnPosition, 2.0f, darkGreenColor, "COMPUTER'S TURN");
 	} else if (game_state.turn_possesion == NPCAI_TURN) {
 		registry.remove_all_components_of(turnIndicator);
-		turnIndicator = createText({ 1000.0f, 30.0f }, 2.0f, { 0.972f, 0.229f, 0.586f }, "COMPUTER'S TURN");
+		turnIndicator = createText(turnPosition, 2.0f, darkGreenColor, "COMPUTER'S TURN");
 	}
 
 	// change the animation type depending on the velocity
