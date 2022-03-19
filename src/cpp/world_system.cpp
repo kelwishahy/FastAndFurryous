@@ -38,9 +38,12 @@ namespace {
 void WorldSystem::init(GLFWwindow* window) {
 	this->window = window;
 	this->camera = OrthographicCamera(0.f, screenResolution.x, screenResolution.y, 0.f);
-	printf("Camera memory address in world init: %p\n", &camera);
+
 	this->mapSystem = MapSystem();
 	this->mapSystem.init();
+
+	this->textManager = TextManager();
+	textManager.initFonts();
 
 	init_main_menu();
 	audio.play_music(MUSIC_LIST::IN_GAME_BACKGROUND);
@@ -65,7 +68,7 @@ void WorldSystem::restart_game() {
 		registry.remove_all_components_of(registry.motions.entities.back());
 
 	//Initialize current game
-	current_game.init(window, mapSystem.getMap(MAPS::INDUSTRIAL), camera);
+	current_game.init(window, mapSystem.getMap(MAPS::INDUSTRIAL), camera, textManager);
 }
 
 void WorldSystem::handle_collisions() {

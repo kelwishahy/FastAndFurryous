@@ -26,10 +26,10 @@ Entity createMenu(MENU_TYPES menu, float layer);
 
 Entity createButton(glm::vec2 pos, glm::vec2 scale, TEXTURE_IDS tex_id, std::vector<std::function<void()>> callbacks);
 
-Entity createText(glm::vec2 pos, float scale, glm::vec3 color, std::string text);
+Entity createText(TextManager& textManager, std::string text, glm::vec2 pos, float scale, glm::vec3 color);
 
 Entity createCrosshair(Entity origin, bool iscat);
 
-Entity createHealthCounter(Entity origin, int health);
+Entity createHealthCounter(Entity origin, int health, TextManager& textManager);
 
 void remove_children(Entity e);

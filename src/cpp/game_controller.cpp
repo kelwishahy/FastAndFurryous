@@ -16,10 +16,11 @@ GameController::~GameController() {
 }
 
 //initialize stuff here
-void GameController::init(GLFWwindow* window, MapSystem::Map& map, OrthographicCamera& camera) {
+void GameController::init(GLFWwindow* window, MapSystem::Map& map, OrthographicCamera& camera, TextManager& textManager) {
 	this->window = window;
 	this->gameMap = map;
 	this->camera = &camera;
+	this->textManager = textManager;
 
 	//Init game metadata
 	game_state.turn_number += 1;
@@ -45,13 +46,12 @@ void GameController::init(GLFWwindow* window, MapSystem::Map& map, OrthographicC
 
 	//TEST TEXT
 	ai.init(shooting_system);
-	ui.init();
+	ui.init(textManager);
 }
 
 void GameController::step(float elapsed_ms) {
 	//While a game is happening make sure the players are controlling from here
 	glfwSetWindowUserPointer(window, this);
-	//While a game is happening make sure the players are controlling from here
 	shooting_system.step(elapsed_ms);
 	ui.step(elapsed_ms);
 
@@ -60,12 +60,11 @@ void GameController::step(float elapsed_ms) {
 	vec3 redColor = { 1.0, 0.0f, 0.0f };
 	vec3 blueColor = { 0.0, 0.0f, 1.0f };
 	vec3 darkGreenColor = { 0.0f, 0.4f, 0.0f };
-	vec2 turnPosition = scaleToScreenResolution({ defaultResolution.x / 2.f - 300.f,  30.0f });
+	vec2 turnPosition = scaleToScreenResolution({ 2 * defaultResolution.x /4.f + camera->getPosition().x,  30.0f });
 
 	if (game_state.turn_possesion == PLAYER1) {
 		registry.remove_all_components_of(turnIndicator);
-		turnIndicator = createText(turnPosition, 2.0f, redColor, "PLAYER 1'S TURN");
-
+		turnIndicator = createText(textManager, "PLAYER 1'S TURN", turnPosition, scaleToScreenResolution({ 2.0f, 2.f }).x, redColor);
 		for (Entity e : player1_team) {
 			auto& selected = registry.selected.get(e).isSelected;
 			selected = true;
@@ -97,13 +96,13 @@ void GameController::step(float elapsed_ms) {
 
 	} else if (game_state.turn_possesion == PLAYER2) {
 		registry.remove_all_components_of(turnIndicator);
-		turnIndicator = createText(turnPosition, 2.0f, blueColor, "PLAYER 2'S TURN");
+		turnIndicator = createText(textManager, "PLAYER 2'S TURN", turnPosition, 2.0f, blueColor);
 	} else if (game_state.turn_possesion == AI) {
 		registry.remove_all_components_of(turnIndicator);
-		turnIndicator = createText(turnPosition, 2.0f, darkGreenColor, "COMPUTER'S TURN");
+		turnIndicator = createText(textManager, "COMPUTER'S TURN", turnPosition, 2.0f, darkGreenColor);
 	} else if (game_state.turn_possesion == NPCAI_TURN) {
 		registry.remove_all_components_of(turnIndicator);
-		turnIndicator = createText(turnPosition, 2.0f, darkGreenColor, "COMPUTER'S TURN");
+		turnIndicator = createText(textManager, "COMPUTER'S TURN", turnPosition, 2.0f, darkGreenColor);
 
 		for (Entity e : player1_team) {
 			auto& selected = registry.selected.get(e).isSelected;
@@ -201,7 +200,7 @@ void GameController::decrementTurnTime(float elapsed_ms) {
 	} else {
 		timePerTurnMs -= elapsed_ms;
 	}
-	timeIndicator = createText({ 1100.0f, 110.0f }, 1.5f, { 0.172f, 0.929f, 0.286f }, std::to_string(timePerTurnSec) + " seconds left!");
+	timeIndicator = createText(textManager, std::to_string(timePerTurnSec) + " seconds left!", scaleToScreenResolution({ 2 * defaultResolution.x / 4.f + camera->getPosition().x, 110.0f }), scaleToScreenResolution({ 1.5f, 1.5f }).x, { 0.172f, 0.929f, 0.286f });
 }
 
 

@@ -9,6 +9,7 @@
 #include "game_controller.hpp"
 #include <glm/vec2.hpp>
 #include "orthographic_camera.hpp"
+#include "text_manager.hpp"
 
 // Container for all our entities and game logic. Individual rendering / update is
 // deferred to the relative update() methods
@@ -57,6 +58,8 @@ public:
 
 	OrthographicCamera camera;
 
+	TextManager& getTextManager() { return this->textManager; }
+
 private:
 	// restart level it was in the private 
 	void restart_game();
@@ -79,4 +82,6 @@ private:
 	GLFWwindow* window;
 
 	MapSystem mapSystem;
+
+	TextManager textManager;
 };

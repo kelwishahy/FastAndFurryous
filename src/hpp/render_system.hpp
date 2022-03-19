@@ -94,13 +94,6 @@ class RenderSystem {
 	std::array<GLuint, geometryCount> vertexBuffers;
 	std::array<GLuint, geometryCount> indexBuffers;
 
-	// Meshes
-	const std::vector < std::pair<GEOMETRY_BUFFER_IDS, std::string>> meshPaths = {
-		// specify meshes of all assets here
-	};
-
-	std::array<Mesh, geometryCount> meshes;
-
 	// CAT IDLE
 	const int CAT_IDLE_FRAMES = 9;
 	const GLfloat CAT_IDLE_FRAME_WIDTH = 0.111f;
@@ -135,7 +128,7 @@ public:
 	void drawBackground(RenderRequest& request, float layer, glm::vec2 position, glm::vec2 scale);
 
 	// Draw any text entities
-	void drawText(Entity e);
+	void drawText(TextManager& textManager, Entity e);
 
 	// Initialize GLFW window and context
 	bool init();
@@ -170,9 +163,6 @@ private:
 
 	// Load vertex data into the vertex buffers
 	void initRenderData();
-
-	//Load font stuff
-	void initFonts();
 
 	// Apply matrix transformations
 	// position is generally motion.position

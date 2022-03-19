@@ -13,6 +13,7 @@
 #include <hpp/Game_Mechanics/shooting_system.hpp>
 #include <hpp/ui_system.hpp>
 
+#include "text_manager.hpp"
 #include "GLFW/glfw3.h"
 
 class GameController
@@ -23,7 +24,7 @@ public:
 	// Releases all associated resources
 	~GameController();
 
-	void init(GLFWwindow* window, MapSystem::Map& map, OrthographicCamera& camera);
+	void init(GLFWwindow* window, MapSystem::Map& map, OrthographicCamera& camera, TextManager& textManager);
 
 	// Steps the game ahead by ms milliseconds
 	void step(float elapsed_ms);
@@ -61,6 +62,7 @@ public:
 private:
 	OrthographicCamera* camera;
 	MapSystem::Map gameMap;
+	TextManager textManager;
 	// restart level it was in the private 
 	void restart_current_match();
 
