@@ -60,13 +60,12 @@ void GameController::step(float elapsed_ms) {
 	vec3 redColor = { 1.0, 0.0f, 0.0f };
 	vec3 blueColor = { 0.0, 0.0f, 1.0f };
 	vec3 darkGreenColor = { 0.0f, 0.4f, 0.0f };
-	vec2 turnPosition = { 1000.0f, 30.0f };
+	vec2 turnPosition = scaleToScreenResolution({ defaultResolution.x / 2.f - 300.f,  30.0f });
 
 	if (game_state.turn_possesion == PLAYER1) {
 		registry.remove_all_components_of(turnIndicator);
-		turnIndicator = createText(turnPosition, 2.0f, redColor , "PLAYER 1'S TURN");
+		turnIndicator = createText(turnPosition, 2.0f, redColor, "PLAYER 1'S TURN");
 
-	if (game_state.turn_possesion == PLAYER1) {
 		for (Entity e : player1_team) {
 			auto& selected = registry.selected.get(e).isSelected;
 			selected = true;

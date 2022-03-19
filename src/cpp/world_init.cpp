@@ -437,7 +437,7 @@ Entity createText(vec2 pos, float scale, glm::vec3 color, std::string text) {
 	motion.position = pos;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	motion.scale = { scale, scale };
+	motion.scale = scaleToScreenResolution({ scale, scale });
 
 	Text& textfield = registry.texts.emplace(entity);
 	textfield.text = text;
