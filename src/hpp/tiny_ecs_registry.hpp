@@ -40,7 +40,6 @@ public:
 
 	ECSRegistry() {
 		registry_list.push_back(&ais);
-		registry_list.push_back(&anchors);
 		registry_list.push_back(&animations);
 		registry_list.push_back(&backgrounds);
 		registry_list.push_back(&boxColliders);

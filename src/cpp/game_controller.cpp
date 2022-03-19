@@ -70,11 +70,30 @@ void GameController::step(float elapsed_ms) {
 		for (Entity e : player1_team) {
 			auto& selected = registry.selected.get(e).isSelected;
 			selected = true;
+
+			if (registry.parentEntities.has(e)) {
+				auto& children = registry.parentEntities.get(e);
+				for (auto& child : children.child_data_map) {
+					if (registry.selected.has(child.second)) {
+						auto& sel = registry.selected.get(child.second).isSelected;
+						sel = true;
+					}
+				}
+			}
 		}
 
 		for (Entity e : npcai_team) {
 			auto& selected = registry.selected.get(e).isSelected;
 			selected = false;
+			if (registry.parentEntities.has(e)) {
+				auto& children = registry.parentEntities.get(e);
+				for (auto& child : children.child_data_map) {
+					if (registry.selected.has(child.second)) {
+						auto& sel = registry.selected.get(child.second).isSelected;
+						sel = false;
+					}
+				}
+			}
 		}
 
 	} else if (game_state.turn_possesion == PLAYER2) {
@@ -90,11 +109,30 @@ void GameController::step(float elapsed_ms) {
 		for (Entity e : player1_team) {
 			auto& selected = registry.selected.get(e).isSelected;
 			selected = false;
+
+			if (registry.parentEntities.has(e)) {
+				auto& children = registry.parentEntities.get(e);
+				for (auto& child : children.child_data_map) {
+					if (registry.selected.has(child.second)) {
+						auto& sel = registry.selected.get(child.second).isSelected;
+						sel = false;
+					}
+				}
+			}
 		}
 		
 		for (Entity e : npcai_team) {
 			auto& selected = registry.selected.get(e).isSelected;
 			selected = true;
+			if (registry.parentEntities.has(e)) {
+				auto& children = registry.parentEntities.get(e);
+				for (auto& child : children.child_data_map) {
+					if (registry.selected.has(child.second)) {
+						auto& sel = registry.selected.get(child.second).isSelected;
+						sel = true;
+					}
+				}
+			}
 		}
 	}
 

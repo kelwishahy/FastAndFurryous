@@ -31,6 +31,7 @@ void RenderSystem::draw(float elapsed_ms, WorldSystem& world) {
 			continue;
 
 		RenderRequest request = registry.renderRequests.get(entity);
+
 		vec2 playerPos = { 0.f, 0.f };
 		if (registry.motions.has(world.getCurrentGame().getSelectedCharacter())) {
 			playerPos = registry.motions.get(world.getCurrentGame().getSelectedCharacter()).position;

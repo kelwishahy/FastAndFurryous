@@ -42,19 +42,20 @@ Entity createCat(vec2 pos) {
 	 * used in rendering.
 	 */
 	registry.selected.emplace(head);
+	registry.selected.emplace(frontArm);
 	registry.selected.emplace(entity);
 
 	//---Head animation subentity---- putting this in front so that head gets rendered ontop of body
 	int index = 0;
 	children.child_data_map.emplace(index, head);
-	children.normal_dists.emplace(index, vec2( 9.5f, -41.0f ));
+	children.normal_dists.emplace(index, scaleToScreenResolution(vec2( 9.5f, -41.0f )));
 	children.tags.emplace(index, "animation");
-	children.original_dists.emplace(index, vec2(9.5f, -41.0f));
+	children.original_dists.emplace(index, scaleToScreenResolution(vec2(9.5f, -41.0f)));
 
 
 	Motion& headmotion = registry.motions.emplace(head);
 	headmotion.position = pos + children.normal_dists.at(0);
-	headmotion.scale = { 64.f, 64.f * 0.72803f}; //Look at the dimensions of the sprite sheet to get the right ratio
+	headmotion.scale = scaleToScreenResolution({ 64.f, 64.f * 0.72803f}); //Look at the dimensions of the sprite sheet to get the right ratio
 
 	Animation& headanim = registry.animations.emplace(head);
 	headanim.animation_states_constants.insert({ TEXTURE_IDS::CAT_FRONT_BLINK, CAT_FRONT_BLINK_CONSTANTS });
@@ -72,13 +73,13 @@ Entity createCat(vec2 pos) {
 	//---Front arm animation subentity---- putting this in front so that front arm gets rendered ontop of body
 	index = 1;
 	children.child_data_map.emplace(index, frontArm);
-	children.normal_dists.emplace(index, vec2(4.5f, 11.0f));
+	children.normal_dists.emplace(index, scaleToScreenResolution(vec2(4.5f, 11.0f)));
 	children.tags.emplace(index, "animation");
-	children.original_dists.emplace(index, vec2(4.5f, 11.0f));
+	children.original_dists.emplace(index, scaleToScreenResolution(vec2(4.5f, 11.0f)));
 
 	Motion& frontArmMotion = registry.motions.emplace(frontArm);
 	frontArmMotion.position = pos + children.normal_dists.at(1);
-	frontArmMotion.scale = { 54.f / 3, 128.f / 3 };
+	frontArmMotion.scale = scaleToScreenResolution({ 54.f / 3, 128.f / 3 });
 
 	Animation& frontArmAnim = registry.animations.emplace(frontArm);
 	frontArmAnim.animation_states_constants.insert({ TEXTURE_IDS::CAT_FRONT_ARM, STABILIZED_CONSTANTS });
@@ -98,7 +99,6 @@ Entity createCat(vec2 pos) {
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
 	float scale = ceil((64.f / defaultResolution.x) * screenResolution.x);
-	// motion.scale = { scale, scale * 1.655f }; //Look at the dimensions of the sprite sheet to get the right ratio
 	motion.scale = scaleToScreenResolution({ scale, scale * 1.655f }); //Look at the dimensions of the sprite sheet to get the right ratio
 
 	// Add health component
