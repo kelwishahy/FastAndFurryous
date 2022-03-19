@@ -314,7 +314,7 @@ void RenderSystem::drawText(Entity e) {
 	RenderRequest rr = registry.renderRequests.get(e);
 
 	Motion motion = registry.motions.get(e);
-	Text fonttext = registry.texts.get(e);
+	Text& fonttext = registry.texts.get(e);
 
 	//we need to do this we're dynamically creating geometry in this function
 	glGenBuffers(1, &fontvbo);
@@ -401,6 +401,8 @@ void RenderSystem::drawText(Entity e) {
 			acc += (ch.advance >> 6) * motion.scale.x; // bitshift by 6 to get value in pixels (2^6 = 64)
 		}
 	}
+	fonttext.scale.x = acc - motion.position.x; // set x scale
+	fonttext.scale.y = glyphs[65].size.y * motion.scale.y; // set y scale
 	//glBindVertexArray(0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 

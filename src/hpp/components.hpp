@@ -330,6 +330,7 @@ struct Animation {
 struct Text {
 	std::string text;
 	glm::vec3 color;
+	glm::vec2 scale;
 };
 
 struct Glyph {
