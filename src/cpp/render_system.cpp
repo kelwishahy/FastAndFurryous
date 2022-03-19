@@ -402,7 +402,7 @@ void RenderSystem::drawText(Entity e) {
 		}
 	}
 	fonttext.scale.x = acc - motion.position.x; // set x scale
-	fonttext.scale.y = glyphs[65].size.y * motion.scale.y; // set y scale
+	fonttext.scale.y = captialsize * motion.scale.y; // set y scale
 	//glBindVertexArray(0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
