@@ -116,10 +116,18 @@ void WorldSystem::init_main_menu() {
 	createMenu(MENU_TYPES::START, 0.75);
 	std::vector<std::function<void()>> onClick;
 	onClick.push_back(testCallback);
-	vec2 pos = {(defaultResolution.x - 300.f) / defaultResolution.x * renderer->getScreenWidth(), (400.f / defaultResolution.y) * renderer->getScreenHeight() };
+	vec2 pos1 = {(defaultResolution.x - 480.f) / defaultResolution.x * renderer->getScreenWidth(), (400.f / defaultResolution.y) * renderer->getScreenHeight() };
 	vec2 scale = { (400.f / defaultResolution.x) * renderer->getScreenWidth(), (80.f / defaultResolution.y) * renderer->getScreenHeight() };
-	createButton(pos, scale,TEXTURE_IDS::BUTTON1, onClick);
+	createButton(pos1, scale,TEXTURE_IDS::BUTTON1, onClick);
 
+	vec2 pos2 = {(defaultResolution.x - 480.f) / defaultResolution.x * renderer->getScreenWidth(), (500.f / defaultResolution.y) * renderer->getScreenHeight() };
+	createButton(pos2, scale,TEXTURE_IDS::BUTTON2, onClick);
+
+	vec2 pos3 = {(defaultResolution.x - 480.f) / defaultResolution.x * renderer->getScreenWidth(), (600.f / defaultResolution.y) * renderer->getScreenHeight() };
+	createButton(pos3, scale,TEXTURE_IDS::BUTTON3, onClick);
+
+	vec2 pos4 = {(defaultResolution.x - 480.f) / defaultResolution.x * renderer->getScreenWidth(), (700.f / defaultResolution.y) * renderer->getScreenHeight() };
+	createButton(pos4, scale,TEXTURE_IDS::BUTTON4, onClick);
 }
 
 // Should the game be over ?
@@ -150,7 +158,20 @@ void WorldSystem::check_for_button_presses() {
 		Clickable button = registry.buttons.get(e);
 		if (mouse_pos.x > button.vertecies[0].x && mouse_pos.x < button.vertecies[1].x && mouse_pos.y > button.vertecies[0].y && mouse_pos.y < button.vertecies[3].y) {
 			
+		
 			if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTON1) {
+				for (Entity e : registry.menus.entities) {
+					registry.remove_all_components_of(e);
+				}
+				for (Entity e : registry.buttons.entities) {
+					registry.remove_all_components_of(e);
+				}
+				play_levels(button.callbacks);
+				
+				break;
+			}
+			
+			else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTON3) {
 
 				for (Entity e : registry.menus.entities) {
 					registry.remove_all_components_of(e);
@@ -158,21 +179,69 @@ void WorldSystem::check_for_button_presses() {
 				for (Entity e : registry.buttons.entities) {
 					registry.remove_all_components_of(e);
 				}
+
 				play_tutorial(button.callbacks);
+				
+				break;
 				/*for (auto callback : button.callbacks) {
 					callback();
 				}*/
 			}
+			
+			else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTON4) {
+
+				for (Entity e : registry.menus.entities) {
+					registry.remove_all_components_of(e);
+				}
+				for (Entity e : registry.buttons.entities) {
+					registry.remove_all_components_of(e);
+				}
+				
+				//if (glfwWindowShouldClose(window);
+				//glfwCloseWindow(window);
+				break;
+				/*for (auto callback : button.callbacks) {
+					callback();
+				}*/
+			}
+			
+			else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTON2) {
+				for (Entity e : registry.menus.entities){
+					registry.remove_all_components_of(e);
+				}
+				for (Entity e : registry.buttons.entities) {
+					registry.remove_all_components_of(e);
+				}
+				play_select(button.callbacks);
+				
+				break;
+			}
+		
 			else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::HOWTOMOVE) {
-				//selectscreen
+				
 				// registry.remove_all_components_of(e);
 				// restart_game();
 				for (Entity e : registry.buttons.entities) {
 					registry.remove_all_components_of(e);
 				}
-				play_select(button.callbacks);
+				play_startscreen(button.callbacks);
+				
+				break;
 			}
-			else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONC) {
+			
+			else if ((registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONC) || (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTOND)) {
+				for (Entity e : registry.menus.entities) {
+					registry.remove_all_components_of(e);
+				}
+				for (Entity e : registry.buttons.entities) {
+					registry.remove_all_components_of(e);
+				}
+				play_options(button.callbacks);
+				
+				break;
+			}
+			
+			else if ((registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONR) || (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONL)) {
 				for (Entity e : registry.menus.entities) {
 					registry.remove_all_components_of(e);
 				}
@@ -180,6 +249,20 @@ void WorldSystem::check_for_button_presses() {
 					registry.remove_all_components_of(e);
 				}
 				restart_game();
+				
+				break;
+			}
+			
+			else if ((registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONL1) || (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONL2) || (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONL3)) {
+				for (Entity e : registry.menus.entities) {
+					registry.remove_all_components_of(e);
+				}
+				for (Entity e : registry.buttons.entities) {
+					registry.remove_all_components_of(e);
+				}
+				restart_game();
+				
+				break;
 			}
 		}
 	}
@@ -206,12 +289,73 @@ void WorldSystem::set_user_input_callbacks() {
 void WorldSystem::play_tutorial(std::vector<std::function<void()>> callbacks) {
 	createButton(vec2{ renderer->getScreenWidth() / 2, renderer->getScreenHeight() / 2 }, vec2{ renderer->getScreenWidth(), renderer->getScreenHeight() },TEXTURE_IDS::HOWTOMOVE, callbacks);
 }
-//selectscreen
+
 void WorldSystem::play_select(std::vector<std::function<void()>> callbacks) {
 	std::vector<std::function<void()>> onClick;
 	createMenu(MENU_TYPES::SELECT, 0.75);
-	vec2 pos = { (defaultResolution.x / 4.f) / defaultResolution.x * renderer->getScreenWidth(), (defaultResolution.y / 2.0) / defaultResolution.y * renderer->getScreenHeight() };
+	vec2 pos_cat = { (defaultResolution.x / 4.f) / defaultResolution.x * renderer->getScreenWidth(), (defaultResolution.y / 2.0) / defaultResolution.y * renderer->getScreenHeight() };
 	vec2 scale = { (500.f / defaultResolution.x) * renderer->getScreenWidth(), (500.f / defaultResolution.y) * renderer->getScreenHeight() };
-	createButton(pos, scale,TEXTURE_IDS::BUTTONC, onClick);
+	createButton(pos_cat, scale,TEXTURE_IDS::BUTTONC, onClick);
 	
+	vec2 pos_dog = { (3.1f * defaultResolution.x / 4.f) / defaultResolution.x * renderer->getScreenWidth(), (defaultResolution.y / 2.0) / defaultResolution.y * renderer->getScreenHeight() };
+	createButton(pos_dog, scale,TEXTURE_IDS::BUTTOND, onClick);
+}
+
+void WorldSystem::play_startscreen(std::vector<std::function<void()>> callbacks) {
+	//createButton(vec2{ renderer->getScreenWidth() / 2, renderer->getScreenHeight() / 2 }, vec2{ renderer->getScreenWidth(), renderer->getScreenHeight() }, TEXTURE_IDS::HOWTOMOVE, callbacks);
+	std::vector<std::function<void()>> onClick;
+	createMenu(MENU_TYPES::START, 0.75);
+
+	vec2 pos1 = {(defaultResolution.x - 480.f) / defaultResolution.x * renderer->getScreenWidth(), (400.f / defaultResolution.y) * renderer->getScreenHeight() };
+	vec2 scale = { (400.f / defaultResolution.x) * renderer->getScreenWidth(), (80.f / defaultResolution.y) * renderer->getScreenHeight() };
+	createButton(pos1, scale,TEXTURE_IDS::BUTTON1, onClick);
+
+	vec2 pos2 = {(defaultResolution.x - 480.f) / defaultResolution.x * renderer->getScreenWidth(), (500.f / defaultResolution.y) * renderer->getScreenHeight() };
+	createButton(pos2, scale,TEXTURE_IDS::BUTTON2, onClick);
+
+	vec2 pos3 = {(defaultResolution.x - 480.f) / defaultResolution.x * renderer->getScreenWidth(), (600.f / defaultResolution.y) * renderer->getScreenHeight() };
+	createButton(pos3, scale,TEXTURE_IDS::BUTTON3, onClick);
+
+	vec2 pos4 = {(defaultResolution.x - 480.f) / defaultResolution.x * renderer->getScreenWidth(), (700.f / defaultResolution.y) * renderer->getScreenHeight() };
+	createButton(pos4, scale,TEXTURE_IDS::BUTTON4, onClick);
+
+}
+
+
+
+void WorldSystem::play_options(std::vector<std::function<void()>> callbacks) {
+		//createButton(vec2{ renderer->getScreenWidth() / 2, renderer->getScreenHeight() / 2 }, vec2{ renderer->getScreenWidth(), renderer->getScreenHeight() }, TEXTURE_IDS::HOWTOMOVE, callbacks);
+	std::vector<std::function<void()>> onClick;
+	createMenu(MENU_TYPES::OPTIONS, 0.75);
+
+	vec2 pos1 = {(defaultResolution.x - 980.f) / defaultResolution.x * renderer->getScreenWidth(), (335.f / defaultResolution.y) * renderer->getScreenHeight() };
+	vec2 scale = { (1200.f / defaultResolution.x) * renderer->getScreenWidth(), (800.f / defaultResolution.y) * renderer->getScreenHeight() };
+	createButton(pos1, scale,TEXTURE_IDS::BUTTONL, onClick);
+
+	vec2 pos2 = {(defaultResolution.x - 900.f) / defaultResolution.x * renderer->getScreenWidth(), (335.f / defaultResolution.y) * renderer->getScreenHeight() };
+	createButton(pos2, scale,TEXTURE_IDS::BUTTONR, onClick);
+		
+	vec2 pos3 = {(defaultResolution.x - 980.f) / defaultResolution.x * renderer->getScreenWidth(), (550.f / defaultResolution.y) * renderer->getScreenHeight() };
+	createButton(pos3, scale,TEXTURE_IDS::BUTTONL, onClick);
+
+	vec2 pos4 = {(defaultResolution.x - 900.f) / defaultResolution.x * renderer->getScreenWidth(), (550.f / defaultResolution.y) * renderer->getScreenHeight() };
+	createButton(pos4, scale,TEXTURE_IDS::BUTTONR, onClick);
+}
+
+
+void WorldSystem::play_levels(std::vector<std::function<void()>> callbacks) {
+		//createButton(vec2{ renderer->getScreenWidth() / 2, renderer->getScreenHeight() / 2 }, vec2{ renderer->getScreenWidth(), renderer->getScreenHeight() }, TEXTURE_IDS::HOWTOMOVE, callbacks);
+	std::vector<std::function<void()>> onClick;
+	createMenu(MENU_TYPES::LEVELS, 0.75);
+
+	vec2 pos1 = {(defaultResolution.x - 1100.f) / defaultResolution.x * renderer->getScreenWidth(), (500.f / defaultResolution.y) * renderer->getScreenHeight() };
+	vec2 scale = { (1200.f / defaultResolution.x) * renderer->getScreenWidth(), (800.f / defaultResolution.y) * renderer->getScreenHeight() };
+	createButton(pos1, scale,TEXTURE_IDS::BUTTONL1, onClick);
+
+	vec2 pos2 = {(defaultResolution.x - 800.f) / defaultResolution.x * renderer->getScreenWidth(), (500.f / defaultResolution.y) * renderer->getScreenHeight() };
+	createButton(pos2, scale,TEXTURE_IDS::BUTTONL2, onClick);
+
+	vec2 pos3 = {(defaultResolution.x - 500.f) / defaultResolution.x * renderer->getScreenWidth(), (500.f / defaultResolution.y) * renderer->getScreenHeight() };
+	createButton(pos3, scale,TEXTURE_IDS::BUTTONL3, onClick);
+
 }

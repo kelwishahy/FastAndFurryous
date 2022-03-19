@@ -16,8 +16,7 @@ void UISystem::init() {
 		Health entity_health = registry.health.get(e);
 
 		Entity health = createHealthCounter(e, entity_health.hp);
-		std::pair<Entity, Entity> pair = { health, e };
-		health_map.push_back(pair);
+
 	}
 
 }
@@ -30,42 +29,45 @@ void UISystem::step(float elapsed_ms) {
 
 		switch (ui.element_type) {
 			case UI_ELEMENT::CROSSHAIR: {
-			assert(registry.weapons.has(crosshair_marker.second));
-			Motion& anchor_motion = registry.motions.get(crosshair_marker.first);
-			anchor_motion.angle = registry.weapons.get(crosshair_marker.second).aim_angle;
+				for (int i = 0; i < registry.parentEntities.components.size(); i++) {
+					Entity parent = registry.parentEntities.entities[i];
+					ChildEntities& children = registry.parentEntities.components[i];
+					for (int j = 0; j < children.child_data_map.size(); j++) {
+						if (children.child_data_map.at(j) == e) {
+							assert(registry.weapons.has(parent));
+							Motion& child_motion = registry.motions.get(e);
+							child_motion.angle = registry.weapons.get(parent).aim_angle;
+						}
+					}
+				}
 			break;
-			}
-		case UI_ELEMENT::HEALTH_DISPLAY: {
-			//if ur gonna do something specific to health do it here
 			}
 			default:
 				break;
 		}
 
 	}
+	for (Entity e : registry.healthboxes.entities) {
 
-	//EVERY update loop update all UI health values
-	for (int i = 0; i < health_map.size(); i++) {
-		//Check if character died
-		std::pair<Entity, Entity> pair = health_map[i];
-		Entity child = registry.anchors.get(pair.first).child;
-		if (!registry.health.has(pair.second)) {
-			registry.remove_all_components_of(child);
-			registry.remove_all_components_of(pair.first);
-			health_map.erase(health_map.begin()+i);
-			continue;
+		Entity parent = registry.healthboxes.get(e).parent;
+
+		if (!registry.health.has(parent)) {
+			registry.remove_all_components_of(registry.healthboxes.get(e).text);
+			registry.remove_all_components_of(e);
+		}
+		else {
+			HealthBox healthbox = registry.healthboxes.get(e);
+			Motion& box = registry.motions.get(e);
+			Motion& text = registry.motions.get(healthbox.text);
+			box.position = registry.motions.get(healthbox.parent).position + vec2(10.0f, -80.0f); //hard coded
+			text.position = registry.motions.get(healthbox.parent).position + vec2(-9.0f, -98.0f); //hard coded
+
+			Text& text_val = registry.texts.get(healthbox.text);
+			text_val.text = std::to_string(registry.health.get(healthbox.parent).hp);
 		}
 
-
-		Health health = registry.health.get(pair.second);
-		assert(registry.texts.has(registry.anchors.get(pair.first).child));
-		Text& text = registry.texts.get(registry.anchors.get(pair.first).child);
-		text.text = std::to_string(health.hp);
-
-		Motion& health_bar = registry.motions.get(pair.first);
-		assert(registry.motions.has(pair.second));
-		health_bar.position = registry.motions.get(pair.second).position + vec2{0.0f, -100.0f};
 	}
+
 
 }
 
@@ -73,18 +75,26 @@ void UISystem::show_crosshair(Entity e) {
 
 	Motion entity_motion = registry.motions.get(e);
 	Entity crosshair = createCrosshair(e, registry.cats.has(e));
-
-	crosshair_marker.first = crosshair;
-	crosshair_marker.second = e;
-
-	crosshair_obj.first = crosshair;
-	crosshair_obj.second = registry.anchors.get(crosshair).child;
+	crosshair_marker = crosshair;
 
 }
 
 void UISystem::hide_crosshair() {
-
-	registry.remove_all_components_of(crosshair_obj.second);
-	registry.remove_all_components_of(crosshair_marker.first);
+	if (registry.parentEntities.has(crosshair_marker)) {
+		ChildEntities& children = registry.parentEntities.get(crosshair_marker); //shoudl be a character entity i.e cat/dog
+		for (int i = 0; i < children.child_data_map.size(); i++) {
+			if (children.tags.at(i) == "crosshair") { //there should be a tag in the character for crosshair
+				for (Entity e : registry.parentEntities.entities) {
+					if (e == children.child_data_map.at(i)) {
+						ChildEntities& crosshair_children = registry.parentEntities.get(e); //the child of the child
+						registry.remove_all_components_of(crosshair_children.child_data_map[0]); //erase the actual physical crosshair
+						registry.remove_all_components_of(children.child_data_map.at(i)); //erase the crosshair child
+						children.remove_child(children.child_data_map.at(i)); //update the ChildEntities
+					}
+				}
+			}
+		}
+		//registry.remove_all_components_of(crosshair_marker);
+	}
 
 }

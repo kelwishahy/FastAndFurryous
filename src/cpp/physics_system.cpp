@@ -301,7 +301,7 @@ void PhysicsSystem::fixed_update() {
 	//1/60th of a second
 	applyMotions(FIXED_UPDATE_STEP);
 
-	transformAnchoredEntities();
+	transformChildedEntities();
 
 	transformBoxColliders();
 
@@ -310,8 +310,8 @@ void PhysicsSystem::fixed_update() {
 
 	// you may need the following quantities to compute wall positions
 	(float)renderer->getScreenWidth(); (float)renderer->getScreenHeight();
-}
 
+}
 
 //translation is the distance to be moved
 void PhysicsSystem::translatePos(Entity e, vec2 translation) {
@@ -343,21 +343,21 @@ void  PhysicsSystem::applyForce(Entity e, glm::vec2 force) {
 	rb.force_accumulator += force;
 
 }
+void PhysicsSystem::transformChildedEntities() {
 
-void PhysicsSystem::transformAnchoredEntities() {
+	for (Entity e : registry.parentEntities.entities) {
 
-	for (int i = 0; i < registry.anchors.components.size(); i++) {
+		ChildEntities children = registry.parentEntities.get(e);
 
-
-		AnchoredEntities anchor = registry.anchors.components[i];
-		Entity e = registry.anchors.entities[i];
-
-		Motion& child_motion = registry.motions.get(anchor.child);
-		Motion anchor_motion = registry.motions.get(e);
-		if (anchor_motion.angle != 0.0f) {
-			child_motion.position = anchor_motion.position + vec2{ cos(anchor_motion.angle), -sin(anchor_motion.angle) } *anchor.normal_distance;
-		} else {
-			child_motion.position = anchor_motion.position + vec2{ 1.0f, 1.0f } *anchor.normal_distance;
+		for (int i = 0; i < children.child_data_map.size(); i++) {
+			Motion& child_motion = registry.motions.get(children.child_data_map.at(i));
+			Motion anchor_motion = registry.motions.get(e);
+			if (anchor_motion.angle > 0.0f) {
+				child_motion.position = anchor_motion.position + vec2{ cos(anchor_motion.angle), sin(anchor_motion.angle) } * children.normal_dists.at(i);
+			}
+			else {
+				child_motion.position = anchor_motion.position + children.normal_dists.at(i);
+			}
 		}
 
 	}
