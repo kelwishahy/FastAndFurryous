@@ -1,10 +1,5 @@
 #pragma once
-
-#include "hpp/common.hpp"
-#include "hpp/components.hpp"
-#include "hpp/tiny_ecs_registry.hpp"
-#include <utility>
-#include <vector>
+#include "text_manager.hpp"
 
 class UISystem
 {
@@ -16,7 +11,7 @@ public:
 
 	void step(float elapsed_ms);
 
-	void init();
+	void init(TextManager& textManager);
 
 	void show_crosshair(Entity e);
 	void hide_crosshair();

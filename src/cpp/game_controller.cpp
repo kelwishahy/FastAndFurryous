@@ -9,7 +9,6 @@
 
 GameController::GameController() {
 	inAGame = false;
-	//ShootingSystem shooting_system(renderer);
 }
 
 GameController::~GameController() {
@@ -17,10 +16,11 @@ GameController::~GameController() {
 }
 
 //initialize stuff here
-void GameController::init(RenderSystem* renderer, GLFWwindow* window) {
-	//Set renderer
-	this->renderer = renderer;
+void GameController::init(GLFWwindow* window, MapSystem::Map& map, OrthographicCamera& camera, TextManager& textManager) {
 	this->window = window;
+	this->gameMap = map;
+	this->camera = &camera;
+	this->textManager = textManager;
 
 	//Init game metadata
 	game_state.turn_number += 1;
@@ -40,20 +40,18 @@ void GameController::init(RenderSystem* renderer, GLFWwindow* window) {
 	inAGame = true;
 	player_mode = PLAYER_MODE::MOVING;
 
-	this->shooting_system.init(renderer);
 	this->timePerTurnMs = 20000.0;
 
 	ai.init(shooting_system);
 
 	//TEST TEXT
 	ai.init(shooting_system);
-	ui.init();
+	ui.init(textManager);
 }
 
 void GameController::step(float elapsed_ms) {
 	//While a game is happening make sure the players are controlling from here
 	glfwSetWindowUserPointer(window, this);
-	//While a game is happening make sure the players are controlling from here
 	shooting_system.step(elapsed_ms);
 	ui.step(elapsed_ms);
 
@@ -62,20 +60,78 @@ void GameController::step(float elapsed_ms) {
 	vec3 redColor = { 1.0, 0.0f, 0.0f };
 	vec3 blueColor = { 0.0, 0.0f, 1.0f };
 	vec3 darkGreenColor = { 0.0f, 0.4f, 0.0f };
-	vec2 turnPosition = { 1000.0f, 30.0f };
+	vec2 turnPosition = scaleToScreenResolution({ 2 * defaultResolution.x /4.f + camera->getPosition().x,  30.0f });
 
 	if (game_state.turn_possesion == PLAYER1) {
 		registry.remove_all_components_of(turnIndicator);
-		turnIndicator = createText(turnPosition, 2.0f, redColor , "PLAYER 1'S TURN");
+		turnIndicator = createText(textManager, "PLAYER 1'S TURN", turnPosition, scaleToScreenResolution({ 2.0f, 2.f }).x, redColor);
+		for (Entity e : player1_team) {
+			auto& selected = registry.selected.get(e).isSelected;
+			selected = true;
+
+			if (registry.parentEntities.has(e)) {
+				auto& children = registry.parentEntities.get(e);
+				for (auto& child : children.child_data_map) {
+					if (registry.selected.has(child.second)) {
+						auto& sel = registry.selected.get(child.second).isSelected;
+						sel = true;
+					}
+				}
+			}
+		}
+
+		for (Entity e : npcai_team) {
+			auto& selected = registry.selected.get(e).isSelected;
+			selected = false;
+			if (registry.parentEntities.has(e)) {
+				auto& children = registry.parentEntities.get(e);
+				for (auto& child : children.child_data_map) {
+					if (registry.selected.has(child.second)) {
+						auto& sel = registry.selected.get(child.second).isSelected;
+						sel = false;
+					}
+				}
+			}
+		}
+
 	} else if (game_state.turn_possesion == PLAYER2) {
 		registry.remove_all_components_of(turnIndicator);
-		turnIndicator = createText(turnPosition, 2.0f, blueColor, "PLAYER 2'S TURN");
+		turnIndicator = createText(textManager, "PLAYER 2'S TURN", turnPosition, 2.0f, blueColor);
 	} else if (game_state.turn_possesion == AI) {
 		registry.remove_all_components_of(turnIndicator);
-		turnIndicator = createText(turnPosition, 2.0f, darkGreenColor, "COMPUTER'S TURN");
+		turnIndicator = createText(textManager, "COMPUTER'S TURN", turnPosition, 2.0f, darkGreenColor);
 	} else if (game_state.turn_possesion == NPCAI_TURN) {
 		registry.remove_all_components_of(turnIndicator);
-		turnIndicator = createText(turnPosition, 2.0f, darkGreenColor, "COMPUTER'S TURN");
+		turnIndicator = createText(textManager, "COMPUTER'S TURN", turnPosition, 2.0f, darkGreenColor);
+
+		for (Entity e : player1_team) {
+			auto& selected = registry.selected.get(e).isSelected;
+			selected = false;
+
+			if (registry.parentEntities.has(e)) {
+				auto& children = registry.parentEntities.get(e);
+				for (auto& child : children.child_data_map) {
+					if (registry.selected.has(child.second)) {
+						auto& sel = registry.selected.get(child.second).isSelected;
+						sel = false;
+					}
+				}
+			}
+		}
+		
+		for (Entity e : npcai_team) {
+			auto& selected = registry.selected.get(e).isSelected;
+			selected = true;
+			if (registry.parentEntities.has(e)) {
+				auto& children = registry.parentEntities.get(e);
+				for (auto& child : children.child_data_map) {
+					if (registry.selected.has(child.second)) {
+						auto& sel = registry.selected.get(child.second).isSelected;
+						sel = true;
+					}
+				}
+			}
+		}
 	}
 
 	// change the animation type depending on the velocity
@@ -93,19 +149,27 @@ void GameController::step(float elapsed_ms) {
 		}
 	}
 
-	//for (int i = 0; i < player1_team.size(); i++) {
-	//	auto e = player1_team[i];
-	//	if (registry.health.get(e).hp == 0) {
-	//		player1_team.erase(player1_team.begin() + i);
-	//		
-	//		registry.remove_all_components_of(e);
-	//		inAGame = false;
-	//	}
+	for (int i = 0; i < player1_team.size(); i++) {
+		auto e = player1_team[i];
+		if (registry.health.get(e).hp == 0) {
+			player1_team.erase(player1_team.begin() + i);
 
-	//	// if (player1_team.size() == 0) {
-	//	// 	restart_current_match();
-	//	// }
-	//}
+			registry.remove_all_components_of(e);
+			inAGame = false;
+		}
+
+		auto rightDist = abs(registry.motions.get(e).position.x - camera->getCameraRight().x);
+		auto leftDist = abs(registry.motions.get(e).position.x - camera->getPosition().x);
+		if (rightDist < 400.f && camera->getCameraRight().x < 2 * screenResolution.x) {
+			camera->setPosition(camera->getPosition() + vec3(1.5f, 0.f, 0.f));
+		} else if (leftDist < 400.f && camera->getPosition().x > 0.f) {
+			camera->setPosition(camera->getPosition() + vec3(-1.5f, 0.f, 0.f));
+		}
+
+		// if (player1_team.size() == 0) {
+		// 	restart_current_match();
+		// }
+	}
 
 	for (int i = 0; i < npcai_team.size(); i++) {
 		auto e = npcai_team[i];
@@ -136,30 +200,21 @@ void GameController::decrementTurnTime(float elapsed_ms) {
 	} else {
 		timePerTurnMs -= elapsed_ms;
 	}
-	timeIndicator = createText({ 1100.0f, 110.0f }, 1.5f, { 0.172f, 0.929f, 0.286f }, std::to_string(timePerTurnSec) + " seconds left!");
+	timeIndicator = createText(textManager, std::to_string(timePerTurnSec) + " seconds left!", scaleToScreenResolution({ 2 * defaultResolution.x / 4.f + camera->getPosition().x, 110.0f }), scaleToScreenResolution({ 1.5f, 1.5f }).x, { 0.172f, 0.929f, 0.286f });
 }
 
 
 void GameController::build_map() {
-	const int width = renderer->getScreenWidth();
-	const int height = renderer->getScreenHeight();
-
-	// Move the walls off screen
-	// Floor
-	// createWall({ width / 2, height + 10 }, width, 10);
+	const int width = screenResolution.x;
+	const int height = screenResolution.y;
 	
-	// //Left Wall
+	//Left Wall
 	createWall({ -10, height / 2 }, 10, height - 10);
-	//
-	// //Right Wall
-	createWall({ width + 10, height / 2 }, 10, height);
-	//
-	// //Ceiling
-	createWall({ width / 2, -10 }, width, 10);
 
-	this->gameMap = Map();
-	gameMap.init(renderer->getScreenWidth());
-	renderer->setTileMap(gameMap);
+	//Right Wall
+	createWall({ 2 * width + 10, height / 2 }, 10, height);
+
+	gameMap.build();
 }
 
 void GameController::init_player_teams() {
@@ -169,13 +224,13 @@ void GameController::init_player_teams() {
 		assert(false);
 	}
 
-	const int width = renderer->getScreenWidth();
-	const int height = renderer->getScreenHeight();
+	const int width = screenResolution.x;
+	const int height = screenResolution.y;
 
 	// Init the player team
 	// If our game gets more complex I'd probably abstract this out an have an Entity hierarchy -Fred
 	for (int i = 0; i < numPlayersInTeam; i++) {
-		Entity player_cat = createCat(renderer, { width / 2 - 200, height - 400 });
+		Entity player_cat = createCat({ width / 2 - 200, height - 400 });
 		player1_team.push_back(player_cat);
 		curr_selected_char = player_cat;
 	}
@@ -183,8 +238,8 @@ void GameController::init_player_teams() {
 	// Init npcai team
 	// NOTE: We should add some kind of bool to check if we should init a specific team,
 	// and then add the contents of this loop to the loop above
-	Entity ai_cat0 = createAI(renderer, { width - 400,300 });
-	Entity ai_cat1 = createAI(renderer, { width - 200,300 });
+	Entity ai_cat0 = createAI({ width - 400,300 });
+	Entity ai_cat1 = createAI({ width - 200,300 });
 	npcai_team.push_back(ai_cat0);
 	npcai_team.push_back(ai_cat1);
 
@@ -210,6 +265,13 @@ void GameController::next_turn() {
 		game_state.turn_possesion = TURN_CODE::PLAYER1;
 	} else if (teams[game_state.turn_possesion].empty()) {
 		game_state.turn_number -= 1;
+
+		// Player stops moving
+		for (Entity e : player1_team) {
+			auto& motion = registry.motions.get(e);
+			motion.velocity.x = 0;
+		}
+
 		next_turn();
 	}
 }
@@ -260,7 +322,6 @@ void GameController::handle_collisions() {
 
 // On key callback
 void GameController::on_player_key(int key, int, int action, int mod) {
-
 	//Only allowed to move on specified turn
 	if (game_state.turn_possesion == PLAYER1 && inAGame) {
 		if (registry.cats.has(curr_selected_char)) {

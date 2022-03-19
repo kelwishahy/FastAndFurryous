@@ -1,9 +1,7 @@
 #include "..\hpp\world_init.hpp"
 #include "..\hpp\tiny_ecs_registry.hpp"
-
-#include "hpp/common.hpp"
-
 #include "hpp/ANIMATION_CONSTANTS.hpp"
+#include "hpp/common.hpp"
 #include "hpp/physics_system.hpp"
 
 using namespace glm;
@@ -32,25 +30,32 @@ void remove_children(Entity e) {
 
 }
 
-Entity createCat(RenderSystem* renderer, vec2 pos) {
-
+Entity createCat(vec2 pos) {
 	auto head = Entity();
 	auto frontArm = Entity();
 	const auto entity = Entity();
 
 	ChildEntities& children = registry.parentEntities.emplace(entity);
 
+	/* Each cat - related entity needs the "selected" component.
+	 * This value of this component is passed to the fragment shader and is
+	 * used in rendering.
+	 */
+	registry.selected.emplace(head);
+	registry.selected.emplace(frontArm);
+	registry.selected.emplace(entity);
+
 	//---Head animation subentity---- putting this in front so that head gets rendered ontop of body
 	int index = 0;
 	children.child_data_map.emplace(index, head);
-	children.normal_dists.emplace(index, vec2( 9.5f, -41.0f ));
+	children.normal_dists.emplace(index, scaleToScreenResolution(vec2( 9.5f, -41.0f )));
 	children.tags.emplace(index, "animation");
-	children.original_dists.emplace(index, vec2(9.5f, -41.0f));
+	children.original_dists.emplace(index, scaleToScreenResolution(vec2(9.5f, -41.0f)));
 
 
 	Motion& headmotion = registry.motions.emplace(head);
 	headmotion.position = pos + children.normal_dists.at(0);
-	headmotion.scale = { 64.f, 64.f * 0.72803f}; //Look at the dimensions of the sprite sheet to get the right ratio
+	headmotion.scale = scaleToScreenResolution({ 64.f, 64.f * 0.72803f}); //Look at the dimensions of the sprite sheet to get the right ratio
 
 	Animation& headanim = registry.animations.emplace(head);
 	headanim.animation_states_constants.insert({ TEXTURE_IDS::CAT_FRONT_BLINK, CAT_FRONT_BLINK_CONSTANTS });
@@ -68,13 +73,13 @@ Entity createCat(RenderSystem* renderer, vec2 pos) {
 	//---Front arm animation subentity---- putting this in front so that front arm gets rendered ontop of body
 	index = 1;
 	children.child_data_map.emplace(index, frontArm);
-	children.normal_dists.emplace(index, vec2(4.5f, 11.0f));
+	children.normal_dists.emplace(index, scaleToScreenResolution(vec2(4.5f, 11.0f)));
 	children.tags.emplace(index, "animation");
-	children.original_dists.emplace(index, vec2(4.5f, 11.0f));
+	children.original_dists.emplace(index, scaleToScreenResolution(vec2(4.5f, 11.0f)));
 
 	Motion& frontArmMotion = registry.motions.emplace(frontArm);
 	frontArmMotion.position = pos + children.normal_dists.at(1);
-	frontArmMotion.scale = { 54.f / 3, 128.f / 3 };
+	frontArmMotion.scale = scaleToScreenResolution({ 54.f / 3, 128.f / 3 });
 
 	Animation& frontArmAnim = registry.animations.emplace(frontArm);
 	frontArmAnim.animation_states_constants.insert({ TEXTURE_IDS::CAT_FRONT_ARM, STABILIZED_CONSTANTS });
@@ -93,8 +98,8 @@ Entity createCat(RenderSystem* renderer, vec2 pos) {
 	motion.position = pos;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	float scale = ceil((64.f / defaultResolution.x) * renderer->getScreenWidth());
-	motion.scale = { scale, scale * 1.655f }; //Look at the dimensions of the sprite sheet to get the right ratio
+	float scale = ceil((64.f / defaultResolution.x) * screenResolution.x);
+	motion.scale = scaleToScreenResolution({ scale, scale * 1.655f }); //Look at the dimensions of the sprite sheet to get the right ratio
 
 	// Add health component
 	Health& health = registry.health.emplace(entity);
@@ -126,7 +131,7 @@ Entity createCat(RenderSystem* renderer, vec2 pos) {
 	return entity;
 }
 
-Entity createDog(RenderSystem* renderer, vec2 pos) {
+Entity createDog(vec2 pos) {
 
 	auto head = Entity();
 	const auto entity = Entity();
@@ -213,7 +218,7 @@ Entity createDog(RenderSystem* renderer, vec2 pos) {
 	motion.position = pos;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	float scale = ceil((64.f / defaultResolution.x) * renderer->getScreenWidth());
+	float scale = ceil((64.f / defaultResolution.x) * screenResolution.x);
 	motion.scale = { scale, scale * 1.125f }; //Look at the dimensions of the sprite sheet to get the right ratio
 
 	Boxcollider& bc = registry.boxColliders.emplace(entity);
@@ -264,12 +269,6 @@ Entity createWall(vec2 pos, float width, float height) {
 	calculateBoxVerticesAndSetTriangles(motion.position, motion.scale, bc);
 	bc.transformed_required = true;
 
-	// registry.renderRequests.insert(
-	// 	entity,
-	// 	{ TEXTURE_IDS::TOTAL,
-	// 		SHADER_PROGRAM_IDS::WALL,
-	// 		GEOMETRY_BUFFER_IDS::QUAD });
-
 	return entity;
 }
 
@@ -278,8 +277,11 @@ Entity createTile(float tileScale, vec2 tilePosition, int numTilesInARow) {
 	return createWall(position, tileScale * numTilesInARow, tileScale);
 }
 
-Entity createAI(RenderSystem* renderer, vec2 pos) {
+Entity createAI(vec2 pos) {
 	const auto entity = Entity();
+
+	// registry.selected.emplace(head);
+	registry.selected.emplace(entity);
 
 	// Add health component
 	Health& health = registry.health.emplace(entity);
@@ -292,7 +294,7 @@ Entity createAI(RenderSystem* renderer, vec2 pos) {
 	motion.position = pos;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	float scale = ceil((64.f / defaultResolution.x) * renderer->getScreenWidth());
+	float scale = ceil((64.f / defaultResolution.x) * screenResolution.x);
 	motion.scale = { scale, scale };
 
 	Boxcollider& bc = registry.boxColliders.emplace(entity);
@@ -316,7 +318,7 @@ Entity createAI(RenderSystem* renderer, vec2 pos) {
 	return entity;
 }
 
-Entity createProjectile(RenderSystem* renderer, Entity originE, vec2 force) {
+Entity createProjectile(Entity originE, vec2 force) {
 
 	const auto entity = Entity();
 
@@ -325,7 +327,7 @@ Entity createProjectile(RenderSystem* renderer, Entity originE, vec2 force) {
 	motion.position = registry.motions.get(originE).position;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	float scale = ceil((10.f / defaultResolution.x) * renderer->getScreenWidth());
+	float scale = ceil((10.f / defaultResolution.x) * screenResolution.x);
 	motion.scale = { scale, scale };
 
 	Boxcollider& bc = registry.boxColliders.emplace(entity);
@@ -427,7 +429,7 @@ Entity createButton(vec2 pos, vec2 scale, TEXTURE_IDS tex_id, std::vector<std::f
 
 }
 
-Entity createText(vec2 pos, float scale, glm::vec3 color, std::string text) {
+Entity createText(::TextManager& textManager, std::string text, vec2 pos, float scale, glm::vec3 color) {
 	const auto entity = Entity();
 
 	// Setting initial motion values
@@ -435,7 +437,7 @@ Entity createText(vec2 pos, float scale, glm::vec3 color, std::string text) {
 	motion.position = pos;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	motion.scale = { scale, scale };
+	motion.scale = scaleToScreenResolution({ scale, scale });
 
 	Text& textfield = registry.texts.emplace(entity);
 	textfield.text = text;
@@ -446,6 +448,76 @@ Entity createText(vec2 pos, float scale, glm::vec3 color, std::string text) {
 		{	TEXTURE_IDS::TOTAL,
 			SHADER_PROGRAM_IDS::FONT,
 			GEOMETRY_BUFFER_IDS::TOTAL });
+
+	// Determine text size
+	bool isItalic = false;
+	bool isBold = false;
+
+	//this is capital 'A' for reference
+	float captialsize = textManager.getGlyphs()[65].size.y;
+
+	// iterate through all characters
+	std::string::const_iterator c;
+	float acc = motion.position.x;
+	for (c = textfield.text.begin(); c != textfield.text.end(); c++)
+	{
+		//'$' character
+		if (*c == 36) {
+			isBold = isBold ? false : true;
+			continue;
+		}
+		if (*c == 126) {
+			isItalic = isItalic ? false : true;
+			continue;
+		}
+
+		Glyph ch;
+		if (isItalic) {
+			assert(!textManager.getBoldGlyphs().empty());
+			ch = textManager.getItalicGlyphs()[*c];
+		}
+		else if (isBold) {
+			assert(!textManager.getBoldGlyphs().empty());
+			ch = textManager.getBoldGlyphs()[*c];
+		}
+		else {
+			assert(!textManager.getGlyphs().empty());
+			ch = textManager.getGlyphs()[*c];
+		}
+
+		float xpos = acc + ch.bearing.x * motion.scale.x;
+		float ypos = motion.position.y + (ch.size.y - ch.bearing.y) * motion.scale.y;
+
+		//We need to offset lower case letters because of our coordinate system (since 0,0 is top left)
+		if (!isupper((int)*c)) {
+			ypos += captialsize - ch.size.y;
+		}
+
+		float w = ch.size.x * motion.scale.x;
+		float h = ch.size.y * motion.scale.y;
+		// update VBO for each character
+		float vertices[6][4] = {
+			{ xpos,     ypos + h,   0.0f, 1.0f },
+			{ xpos,     ypos,       0.0f, 0.0f },
+			{ xpos + w, ypos,       1.0f, 0.0f },
+
+			{ xpos,     ypos + h,   0.0f, 1.0f },
+			{ xpos + w, ypos,       1.0f, 0.0f },
+			{ xpos + w, ypos + h,   1.0f, 1.0f }
+		};
+		
+		if (isItalic) {
+			acc += (ch.advance >> 6) * motion.scale.x + 3.0f;
+		}
+		else {
+			acc += (ch.advance >> 6) * motion.scale.x; // bitshift by 6 to get value in pixels (2^6 = 64)
+		}
+	}
+	textfield.scale.x = acc - motion.position.x; // set x scale
+	textfield.scale.y = captialsize * motion.scale.y; // set y scale
+
+	// center text to position
+	motion.position.x = pos.x - textfield.scale.x / 2.f;
 
 	return entity;
 }
@@ -496,7 +568,7 @@ Entity createCrosshair(Entity origin, bool iscat) {
 
 }
 
-Entity createHealthCounter(Entity origin, int health) {
+Entity createHealthCounter(Entity origin, int health, TextManager& textManager) {
 
 	const vec3 color = registry.cats.has(origin) ? vec3{ 0.862f, 0.525f, 0.517f } : vec3{ 0.039, 0.454, 1 };
 
@@ -504,7 +576,7 @@ Entity createHealthCounter(Entity origin, int health) {
 
 	HealthBox& healthbox = registry.healthboxes.emplace(entity);
 	healthbox.parent = origin;
-	healthbox.text = createText({ 0.0f,0.0f }, 1.0f, color, std::to_string(health));
+	healthbox.text = createText(textManager, std::to_string(health), { 0.0f,0.0f }, 1.0f, color);
 
 	Motion& motion = registry.motions.emplace(entity);
 	motion.scale = { 100.0f, 100.0f };

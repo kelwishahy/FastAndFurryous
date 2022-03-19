@@ -14,7 +14,6 @@
 // Component IDs
 ////////////////////////////////////////////////////////////////////////////////
 
-//TODO add AI to the list of IDs
 enum class SHADER_PROGRAM_IDS {
 	ANIMATION,
 	TEXTURE,
@@ -76,6 +75,10 @@ enum class TEXTURE_IDS {
 	CAT_CROSSHAIR,
 	DOG_CROSSHAIR,
 	HEALTH_SQUARE,
+	INDUSTRIAL_BG,
+	INDUSTRIAL_FAR_BUILDINGS,
+	INDUSTRIAL_BUILDINGS,
+	INDUSTRIAL_FOREGROUND,
 	TOTAL
 }; constexpr int textureCount = (int)TEXTURE_IDS::TOTAL;
 
@@ -121,13 +124,16 @@ enum TEAM {
 	NPC_AI_TEAM
 };
 
-// Game components ------------------------------------------------------------
-
 enum UI_ELEMENT {
 	CROSSHAIR,
 	HEALTH_DISPLAY,
 	NAME
 };
+
+enum class MAPS {
+	INDUSTRIAL,
+	TOTAL
+}; constexpr int mapCount = (int)MAPS::TOTAL;
 
 // Game components ------------------------------------------------------------
 struct Background {
@@ -137,6 +143,10 @@ struct Background {
 struct Tile {
 	TILE_TYPES type;
 	glm::vec2 position;
+};
+
+struct Selected {
+	bool isSelected = true;
 };
 
 struct Health {
@@ -261,11 +271,11 @@ struct UIElement {
 };
 
 struct Cat {
-	
+
 };
 
 struct Dog {
-	
+
 };
 
 struct HealthBox {

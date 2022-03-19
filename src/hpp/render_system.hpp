@@ -2,7 +2,6 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <../project_path.hpp>
 
 #include <array>
 #include <vector>
@@ -17,6 +16,9 @@
 #include "components.hpp"
 #include "map.hpp"
 #include "animation_system.hpp"
+#include "common.hpp"
+#include "world_system.hpp"
+#include "hpp/orthographic_camera.hpp"
 
 class RenderSystem {
 
@@ -77,7 +79,12 @@ class RenderSystem {
 		"level3.png",
 		"cat_crosshair.png",
 		"dog_crosshair.png",
-		"health_square.png"
+		"health_square.png",
+		// Industrial parallax background
+		"industrial/bg.png",
+		"industrial/far-buildings.png",
+		"industrial/buildings.png",
+		"industrial/skill-foreground.png"
 	};
 
 	std::array<GLuint, textureCount> textures; // OpenGL texture names
@@ -86,13 +93,6 @@ class RenderSystem {
 	// Vertex and index buffers
 	std::array<GLuint, geometryCount> vertexBuffers;
 	std::array<GLuint, geometryCount> indexBuffers;
-
-	// Meshes
-	const std::vector < std::pair<GEOMETRY_BUFFER_IDS, std::string>> meshPaths = {
-		// specify meshes of all assets here
-	};
-
-	std::array<Mesh, geometryCount> meshes;
 
 	// CAT IDLE
 	const int CAT_IDLE_FRAMES = 9;
@@ -109,27 +109,26 @@ class RenderSystem {
 	const GLfloat CAT_JUMP_FRAME_WIDTH = 0.111f;
 	float CAT_JUMP_FRAME_TIME = 100;
 
-
 public:
 	RenderSystem () {};
 	~RenderSystem () {};
 
 	// Draw to the screen using shaderProgram
-	void draw(float elapsed_ms);
+	void draw(float elapsed_ms, WorldSystem& world);
 
 	// Draw a quad with an optional texture
 	void drawQuad(RenderRequest& request, std::string shaderInputs[], int numInputs);
 
-	void animateSprite(RenderRequest& request, Entity& entity, float elapsed_ms);
+	void animateSprite(RenderRequest& request, Entity& entity);
 
 	// Draw a tilemap
-	void drawTiles(const glm::mat4& projectionMatrix);
+	void drawTiles();
 
 	// Draw the background texture image
-	void drawBackground(RenderRequest& request, glm::mat4& projectionMatrix, float layer);
+	void drawBackground(RenderRequest& request, float layer, glm::vec2 position, glm::vec2 scale);
 
 	// Draw any text entities
-	void drawText(Entity e);
+	void drawText(TextManager& textManager, Entity e);
 
 	// Initialize GLFW window and context
 	bool init();
@@ -137,22 +136,22 @@ public:
 	// Return the GLFW window associated with this renderer
 	GLFWwindow* getWindow() { return window; }
 
-	Mesh& getMesh(GEOMETRY_BUFFER_IDS id) { return meshes[(int)id]; }
-
 	int getScreenWidth() { return this->screenWidth; }
 	int getScreenHeight() { return this->screenHeight; }
 
-	void setTileMap(const Map& gameMap) { this->gameMap = gameMap; }
+	void setTileMap(const MapSystem::Map& gameMap) { this->gameMap = gameMap; }
 
 private:
+	AnimationSystem animation_system;
 	GLFWwindow* window;
+	OrthographicCamera* camera;
 	int screenWidth;
 	int screenHeight;
 	GLuint vao;
 	GLuint frameBuffer;
 	GLuint renderBufferColour;
 	GLuint renderBufferDepth;
-	Map gameMap;
+	MapSystem::Map gameMap;
 	std::map<char, Glyph> glyphs;
 	std::map<char, Glyph> italic_glyphs;
 	std::map<char, Glyph> bold_glyphs;
@@ -162,21 +161,8 @@ private:
 	std::vector<glm::vec3> quad;
 	const std::vector<uint16_t> quadIndices = { 2, 0, 3, 2, 1, 0 };
 
-	// Initialize the off screen render buffer
-	// which is used as an intermediate render target
-	bool initRenderBuffer();
-
 	// Load vertex data into the vertex buffers
 	void initRenderData();
-
-	//Load font stuff
-	void initFonts();
-
-	// Bind the given vertex and index buffer objects
-	template <class T>
-	void bindVBOandIBO(GEOMETRY_BUFFER_IDS oid, std::vector<T> vertices, std::vector<uint16_t> indices);
-
-	void loadMeshes();
 
 	// Apply matrix transformations
 	// position is generally motion.position
@@ -184,13 +170,20 @@ private:
 	glm::mat4 transform(glm::vec2 position, glm::vec2 scale, float depth, float angle);
 
 	// The last step of the draw function
-	void renderToScreen(glm::mat4& transformationMatrix, glm::mat4& projectionMatrix);
+	void renderToScreen(glm::mat4 transformationMatrix);
 
-	// Generate a 4x4 orthographic projection matrix
-	// that scales with window size
-	glm::mat4 createProjectionMatrix();
+	// Bind the given vertex and index buffer objects
+	template <class T>
+	void bindVBOandIBO(GEOMETRY_BUFFER_IDS oid, std::vector<T> vertices, std::vector<uint16_t> indices) {
 
-	AnimationSystem animation_system;
+		// Vertex buffer
+		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffers[(uint)oid]);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices[0]) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
+		glHasError();
 
+		// Index buffer
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffers[(uint)oid]);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices[0]) * indices.size(), indices.data(), GL_STATIC_DRAW);
+		glHasError();
+	}
 };
-

@@ -1,6 +1,5 @@
 #include <hpp/Game_Mechanics/health_system.hpp>
 #include <hpp/tiny_ecs_registry.hpp>
-#include <hpp/common.hpp>
 #include "hpp/audio_manager.hpp"
 
 void decreaseHealth(Entity entity, int amount) {
