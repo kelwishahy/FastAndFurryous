@@ -93,6 +93,10 @@ private:
 
 	GameState game_state;
 
+	Entity turnIndicator;
+
+	Entity timeIndicator;
+
 	Entity curr_selected_char;
 
 	ShootingSystem shooting_system;

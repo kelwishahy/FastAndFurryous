@@ -46,7 +46,6 @@ void GameController::init(RenderSystem* renderer, GLFWwindow* window) {
 	ai.init(shooting_system);
 
 	//TEST TEXT
-	createText({ 10.0f, 10.0f }, 1.0f, { 0.172f, 0.929f, 0.286f }, "~The quick brown fox~ $jumped over the lazy$ dog !., 1234567890");
 	ai.init(shooting_system);
 	ui.init();
 }
@@ -61,13 +60,17 @@ void GameController::step(float elapsed_ms) {
 	handle_collisions();
 
 	if (game_state.turn_possesion == PLAYER1) {
-		//DO STUFF
+		registry.remove_all_components_of(turnIndicator);
+		turnIndicator = createText({ 1000.0f, 30.0f }, 2.0f, { 0.972f, 0.229f, 0.586f }, "PLAYER 1'S TURN");
 	} else if (game_state.turn_possesion == PLAYER2) {
-		//DO STUFF
+		registry.remove_all_components_of(turnIndicator);
+		turnIndicator = createText({ 1000.0f, 30.0f }, 2.0f, { 0.972f, 0.229f, 0.586f }, "PLAYER 2'S TURN");
 	} else if (game_state.turn_possesion == AI) {
-		//DO STUFF
+		registry.remove_all_components_of(turnIndicator);
+		turnIndicator = createText({ 1000.0f, 30.0f }, 2.0f, { 0.972f, 0.229f, 0.586f }, "COMPUTER'S TURN");
 	} else if (game_state.turn_possesion == NPCAI_TURN) {
-		//DO STUFF
+		registry.remove_all_components_of(turnIndicator);
+		turnIndicator = createText({ 1000.0f, 30.0f }, 2.0f, { 0.972f, 0.229f, 0.586f }, "COMPUTER'S TURN");
 	}
 
 	// change the animation type depending on the velocity
@@ -120,12 +123,15 @@ void GameController::step(float elapsed_ms) {
 }
 
 void GameController::decrementTurnTime(float elapsed_ms) {
+	registry.remove_all_components_of(timeIndicator);
+	uint timePerTurnSec = uint(timePerTurnMs / 1000);
 	if (timePerTurnMs <= 0) {
 		next_turn();
 		timePerTurnMs = 20000.0;
 	} else {
 		timePerTurnMs -= elapsed_ms;
 	}
+	timeIndicator = createText({ 1100.0f, 110.0f }, 1.5f, { 0.172f, 0.929f, 0.286f }, std::to_string(timePerTurnSec) + " seconds left!");
 }
 
 
