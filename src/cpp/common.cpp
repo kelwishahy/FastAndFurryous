@@ -84,3 +84,9 @@ void APIENTRY glDebugOutput(GLenum source,
     } std::cout << "\n---------------" << std::endl;
     std::cout << std::endl;
 }
+
+glm::vec2 scaleToScreenResolution(glm::vec2 defaultScale) {
+    float x = (defaultScale.x / defaultResolution.x) * screenResolution.x;
+    float y = (defaultScale.y / defaultResolution.y) * screenResolution.y;
+    return { x, y };
+}

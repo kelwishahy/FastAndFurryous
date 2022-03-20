@@ -10,12 +10,12 @@ UISystem::~UISystem() {
 	
 }
 
-void UISystem::init() {
+void UISystem::init(TextManager& textManager) {
 
 	for (Entity e : registry.health.entities) {
 		Health entity_health = registry.health.get(e);
 
-		Entity health = createHealthCounter(e, entity_health.hp);
+		Entity health = createHealthCounter(e, entity_health.hp, textManager);
 
 	}
 

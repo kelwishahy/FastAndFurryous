@@ -1,5 +1,4 @@
 #pragma once
-#include "SDL_mixer.h"
 #include "hpp/tiny_ecs.hpp"
 
 // Decrease an entity's health to a minimum of 0

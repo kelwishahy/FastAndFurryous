@@ -1,7 +1,6 @@
 #pragma once
 #include "hpp/tiny_ecs.hpp"
 #include "hpp/common.hpp"
-#include <hpp/render_system.hpp>
 
 using namespace glm;
 
@@ -11,8 +10,6 @@ public:
 
 	ShootingSystem();
 	~ShootingSystem();
-
-	void init(RenderSystem* renderer);
 
 	void step(float elapsed_time);
 
@@ -44,8 +41,6 @@ private:
 
 	float pi = 3.14159;
 	float pio2 = 1.57079;
-
-	RenderSystem* renderer;
 
 	void calculate_trajectory(Entity e);
 

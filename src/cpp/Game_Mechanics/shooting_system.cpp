@@ -12,11 +12,6 @@ ShootingSystem::~ShootingSystem() {
 	//do something when this object is destroyed
 }
 
-//kinda wanna get rid of this if possible
-void ShootingSystem::init(RenderSystem* renderer) {
-	this->renderer = renderer;
-}
-
 void ShootingSystem::step(float elapsed_time) {
 	auto& projectileRegistry = registry.projectiles; 
 	for (uint i = 0; i < projectileRegistry.components.size(); i++) {
@@ -106,7 +101,7 @@ void ShootingSystem::shoot(Entity e) {
 		float xforce = cosf(weapon.aim_angle) * 40.0f;
 		float yforce = -sinf(weapon.aim_angle) * 45.0f;
 
-		createProjectile(renderer, e, { xforce, yforce });
+		createProjectile(e, { xforce, yforce });
 		audio.play_sfx(SOUND_EFFECTS::GUNSHOT);
 	}
 
