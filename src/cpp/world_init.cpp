@@ -1,15 +1,16 @@
 #include "..\hpp\world_init.hpp"
 #include "..\hpp\tiny_ecs_registry.hpp"
-#include "glm/detail/_noise.hpp"
-#include "glm/detail/_noise.hpp"
+#include "hpp/ANIMATION_CONSTANTS.hpp"
+#include "hpp/common.hpp"
+#include "hpp/physics_system.hpp"
 
 using namespace glm;
 
 void calculateBoxVerticesAndSetTriangles(vec2 pos, vec2 scale, Boxcollider& box) {
-	float left = -scale.x / 2;
-	float right = scale.x / 2;
-	float up = -scale.y / 2;
-	float down = scale.y / 2;
+	const float left = -scale.x / 2;
+	const float right = scale.x / 2;
+	const float up = -scale.y / 2;
+	const float down = scale.y / 2;
 
 	box.vertices.push_back(pos + vec2{ left, up }); //topleft
 	box.vertices.push_back(pos + vec2{ right, up }); //topright
@@ -17,8 +18,194 @@ void calculateBoxVerticesAndSetTriangles(vec2 pos, vec2 scale, Boxcollider& box)
 	box.vertices.push_back(pos + vec2{ left, down }); //downleft
 }
 
+void remove_children(Entity e) {
+	if (registry.parentEntities.has(e)) {
+		const ChildEntities children = registry.parentEntities.get(e);
+
+		for (const auto& pair : children.child_data_map) {
+			remove_children(pair.second);
+			registry.remove_all_components_of(pair.second);
+		}
+	}
+
+}
+
 Entity createCat(vec2 pos) {
-	auto entity = Entity();
+	auto head = Entity();
+	auto frontArm = Entity();
+	const auto entity = Entity();
+
+	ChildEntities& children = registry.parentEntities.emplace(entity);
+
+	/* Each cat - related entity needs the "selected" component.
+	 * This value of this component is passed to the fragment shader and is
+	 * used in rendering.
+	 */
+	registry.selected.emplace(head);
+	registry.selected.emplace(frontArm);
+	registry.selected.emplace(entity);
+
+	//---Head animation subentity---- putting this in front so that head gets rendered ontop of body
+	int index = 0;
+	children.child_data_map.emplace(index, head);
+	children.normal_dists.emplace(index, scaleToScreenResolution(vec2( 9.5f, -41.0f )));
+	children.tags.emplace(index, "animation");
+	children.original_dists.emplace(index, scaleToScreenResolution(vec2(9.5f, -41.0f)));
+
+
+	Motion& headmotion = registry.motions.emplace(head);
+	headmotion.position = pos + children.normal_dists.at(0);
+	headmotion.scale = scaleToScreenResolution({ 64.f, 64.f * 0.72803f}); //Look at the dimensions of the sprite sheet to get the right ratio
+
+	Animation& headanim = registry.animations.emplace(head);
+	headanim.animation_states_constants.insert({ TEXTURE_IDS::CAT_FRONT_BLINK, CAT_FRONT_BLINK_CONSTANTS });
+	headanim.animation_states_constants.insert({ TEXTURE_IDS::CAT_SIDE_BLINK, CAT_SIDE_BLINK_CONSTANTS });
+	headanim.animation_states_constants.insert({ TEXTURE_IDS::CAT_HURT_FACE, CAT_HURT_FACE_CONSTANTS });
+	headanim.anim_state = TEXTURE_IDS::CAT_FRONT_BLINK;
+	headanim.name = "cat_head";
+
+	registry.renderRequests.insert(
+		head,
+		{ TEXTURE_IDS::CAT_FRONT_BLINK,
+			SHADER_PROGRAM_IDS::ANIMATION,
+			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
+
+	//---Front arm animation subentity---- putting this in front so that front arm gets rendered ontop of body
+	index = 1;
+	children.child_data_map.emplace(index, frontArm);
+	children.normal_dists.emplace(index, scaleToScreenResolution(vec2(4.5f, 11.0f)));
+	children.tags.emplace(index, "animation");
+	children.original_dists.emplace(index, scaleToScreenResolution(vec2(4.5f, 11.0f)));
+
+	Motion& frontArmMotion = registry.motions.emplace(frontArm);
+	frontArmMotion.position = pos + children.normal_dists.at(1);
+	frontArmMotion.scale = scaleToScreenResolution({ 54.f / 3, 128.f / 3 });
+
+	Animation& frontArmAnim = registry.animations.emplace(frontArm);
+	frontArmAnim.animation_states_constants.insert({ TEXTURE_IDS::CAT_FRONT_ARM, STABILIZED_CONSTANTS });
+	frontArmAnim.anim_state = TEXTURE_IDS::CAT_FRONT_ARM;
+	frontArmAnim.name = "cat_front_arm";
+	registry.renderRequests.insert(
+		frontArm,
+		{ TEXTURE_IDS::CAT_FRONT_ARM,
+			SHADER_PROGRAM_IDS::ANIMATION,
+			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
+
+	registry.cats.emplace(entity);
+
+	// Setting initial motion values
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = pos;
+	motion.angle = 0.f;
+	motion.velocity = { 0.f, 0.f };
+	float scale = ceil((64.f / defaultResolution.x) * screenResolution.x);
+	motion.scale = scaleToScreenResolution({ scale, scale * 1.655f }); //Look at the dimensions of the sprite sheet to get the right ratio
+
+	// Add health component
+	Health& health = registry.health.emplace(entity);
+
+	//Make player a rigidbody
+	Rigidbody& rb = registry.rigidBodies.emplace(entity);
+
+	Boxcollider& bc = registry.boxColliders.emplace(entity);
+	calculateBoxVerticesAndSetTriangles(motion.position, motion.scale, bc);
+	bc.transformed_required = true;
+
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_IDS::CAT_FRONT_IDLE,
+			SHADER_PROGRAM_IDS::ANIMATION,
+			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
+
+	registry.weapons.insert(entity, Rifle());
+
+	Animation& anim = registry.animations.emplace(entity);
+	anim.animation_states_constants.insert({TEXTURE_IDS::CAT_FRONT_IDLE, CAT_IDLE_CONSTANTS});
+	anim.animation_states_constants.insert({TEXTURE_IDS::CAT_WALK, CAT_WALK_CONSTANTS });
+	anim.animation_states_constants.insert({ TEXTURE_IDS::CAT_JUMP, CAT_JUMP_CONSTANTS });
+	anim.animation_states_constants.insert({ TEXTURE_IDS::CAT_HURT, CAT_HURT_CONSTANTS });
+	anim.animation_states_constants.insert({ TEXTURE_IDS::CAT_DEAD, STABILIZED_CONSTANTS });
+	anim.anim_state = TEXTURE_IDS::CAT_FRONT_IDLE;
+	anim.name = "cat_body";
+
+	return entity;
+}
+
+Entity createDog(vec2 pos) {
+
+	auto head = Entity();
+	const auto entity = Entity();
+	auto frontArm = Entity();
+	auto backArm = Entity();
+
+	ChildEntities& children = registry.parentEntities.emplace(entity);
+	//---Head animation subentity---- putting this in front so that head gets rendered ontop of body
+	int index = 0;
+	children.child_data_map.emplace(index, head );
+	children.normal_dists.emplace(index, vec2(9.5f, -51.0f));
+	children.tags.emplace(index, "animation");
+	children.original_dists.emplace(index, vec2(9.5f, -51.0f));
+
+
+	Motion& headmotion = registry.motions.emplace(head);
+	headmotion.position = pos + children.normal_dists.at(0);
+	headmotion.scale = { 64.f, 64.f * 0.72803f }; //Look at the dimensions of the sprite sheet to get the right ratio
+
+	Animation& headanim = registry.animations.emplace(head);
+	headanim.animation_states_constants.insert({ TEXTURE_IDS::DOG_FRONT_BLINK, CAT_FRONT_BLINK_CONSTANTS });
+	headanim.animation_states_constants.insert({ TEXTURE_IDS::DOG_SIDE_BLINK, CAT_SIDE_BLINK_CONSTANTS });
+	headanim.animation_states_constants.insert({ TEXTURE_IDS::DOG_HURT_FACE, CAT_HURT_FACE_CONSTANTS });
+	headanim.anim_state = TEXTURE_IDS::DOG_FRONT_BLINK;
+	headanim.name = "dog_head";
+
+	registry.renderRequests.insert(
+		head,
+		{ TEXTURE_IDS::DOG_FRONT_BLINK,
+			SHADER_PROGRAM_IDS::ANIMATION,
+			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
+
+	//---Front arm animation subentity---- putting this in front so that front arm gets rendered ontop of body
+	index = 1;
+	children.child_data_map.emplace(index, frontArm);
+	children.normal_dists.emplace(index, vec2(4.5f, 11.0f));
+	children.tags.emplace(index, "animation");
+	children.original_dists.emplace(index, vec2(4.5f, 11.0f));
+
+
+	Motion& frontArmMotion = registry.motions.emplace(frontArm);
+	frontArmMotion.position = pos + children.normal_dists.at(1);
+	frontArmMotion.scale = { 64.f / 3, 138.f / 3 };
+
+	Animation& frontArmAnim = registry.animations.emplace(frontArm);
+	frontArmAnim.animation_states_constants.insert({ TEXTURE_IDS::DOG_FRONT_ARM, STABILIZED_CONSTANTS });
+	frontArmAnim.anim_state = TEXTURE_IDS::DOG_FRONT_ARM;
+
+	registry.renderRequests.insert(
+		frontArm,
+		{ TEXTURE_IDS::DOG_FRONT_ARM,
+			SHADER_PROGRAM_IDS::ANIMATION,
+			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
+
+	//---Back arm animation subentity---- putting this in back so that front arm gets rendered on back of body
+	//AnchoredEntities& back_arm_anchor = registry.anchors.emplace_with_duplicates(entity);
+	//back_arm_anchor.child = backArm;
+	//back_arm_anchor.normal_distance = { 4.5f, 11.0f };
+	////backArmBone.offset_from_parent = { +30.0f, 0.0f };
+
+
+	//Motion& backArmMotion = registry.motions.emplace(backArm);
+	//backArmMotion.position = pos + back_arm_anchor.normal_distance;
+	//backArmMotion.scale = { 64.f / 3, 138.f / 3 };
+
+	//Animation& backArmAnim = registry.animations.emplace(backArm);
+	//backArmAnim.animation_states_constants.insert({ TEXTURE_IDS::DOG_BACK_ARM, STABILIZED_CONSTANTS });
+	//backArmAnim.anim_state = TEXTURE_IDS::DOG_BACK_ARM;
+	//registry.renderRequests.insert(
+	//	backArm,
+	//	{ TEXTURE_IDS::DOG_BACK_ARM,
+	//		SHADER_PROGRAM_IDS::ANIMATION,
+	//		GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
+	//----------------------------------------------
 
 	// Add health component
 	Health& health = registry.health.emplace(entity);
@@ -31,29 +218,37 @@ Entity createCat(vec2 pos) {
 	motion.position = pos;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	motion.scale = { 64.f, 64.f };
+	float scale = ceil((64.f / defaultResolution.x) * screenResolution.x);
+	motion.scale = { scale, scale * 1.125f }; //Look at the dimensions of the sprite sheet to get the right ratio
 
 	Boxcollider& bc = registry.boxColliders.emplace(entity);
 	calculateBoxVerticesAndSetTriangles(motion.position, motion.scale, bc);
 	bc.transformed_required = true;
 
-	auto& player = registry.players.emplace(entity);
-	player.team = PLAYER_1_TEAM;
+
 	registry.renderRequests.insert(
 		entity,
-		{ TEXTURE_IDS::CAT_IDLE,
+		{ TEXTURE_IDS::DOG_FRONT_IDLE,
 			SHADER_PROGRAM_IDS::ANIMATION,
 			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
 
 	registry.weapons.insert(entity, Rifle());
 
-	registry.animations.emplace(entity);
+	Animation& anim = registry.animations.emplace(entity);
+	anim.animation_states_constants.insert({ TEXTURE_IDS::DOG_FRONT_IDLE, CAT_IDLE_CONSTANTS });
+	anim.animation_states_constants.insert({ TEXTURE_IDS::DOG_WALK, CAT_WALK_CONSTANTS });
+	anim.animation_states_constants.insert({ TEXTURE_IDS::DOG_JUMP, CAT_JUMP_CONSTANTS });
+	anim.animation_states_constants.insert({ TEXTURE_IDS::DOG_HURT, CAT_HURT_CONSTANTS });
+	anim.animation_states_constants.insert({ TEXTURE_IDS::DOG_DEAD, STABILIZED_CONSTANTS });
+	anim.anim_state = TEXTURE_IDS::DOG_FRONT_IDLE;
+	anim.name = "dog_body";
 
 	return entity;
 }
 
-Entity createWall(vec2 pos, int width, int height) {
-	auto entity = Entity();
+
+Entity createWall(vec2 pos, float width, float height) {
+	const auto entity = Entity();
 
 	// Setting initial motion values
 	Motion& motion = registry.motions.emplace(entity);
@@ -74,24 +269,19 @@ Entity createWall(vec2 pos, int width, int height) {
 	calculateBoxVerticesAndSetTriangles(motion.position, motion.scale, bc);
 	bc.transformed_required = true;
 
-	// registry.renderRequests.insert(
-	// 	entity,
-	// 	{ TEXTURE_IDS::TOTAL,
-	// 		SHADER_PROGRAM_IDS::WALL,
-	// 		GEOMETRY_BUFFER_IDS::QUAD });
-
 	return entity;
 }
 
 Entity createTile(float tileScale, vec2 tilePosition, int numTilesInARow) {
-	vec2 position = { ((tilePosition.y + 1) * tileScale) + ((tileScale * numTilesInARow) / 2.0), tilePosition.x * tileScale + (tileScale / 2.0)};
-	// if (tilePosition.y == 0.0)
-	// printf("\nTile position is {%f, %f}\n", position.x, position.y);
-	return createWall(position, (int)tileScale * numTilesInARow, (int)tileScale);
+	const vec2 position = { ((tilePosition.y + 1) * tileScale) + ((tileScale * numTilesInARow) / 2.0), tilePosition.x * tileScale + (tileScale / 2.0)};
+	return createWall(position, tileScale * numTilesInARow, tileScale);
 }
 
 Entity createAI(vec2 pos) {
-	auto entity = Entity();
+	const auto entity = Entity();
+
+	// registry.selected.emplace(head);
+	registry.selected.emplace(entity);
 
 	// Add health component
 	Health& health = registry.health.emplace(entity);
@@ -104,38 +294,41 @@ Entity createAI(vec2 pos) {
 	motion.position = pos;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	motion.scale = { 64.f, 64.f };
+	float scale = ceil((64.f / defaultResolution.x) * screenResolution.x);
+	motion.scale = { scale, scale };
 
 	Boxcollider& bc = registry.boxColliders.emplace(entity);
 	calculateBoxVerticesAndSetTriangles(motion.position, motion.scale, bc);
 	bc.transformed_required = true;
 
-	auto& player = registry.players.emplace(entity);
-	player.team = NPC_AI_TEAM;
 	registry.ais.emplace(entity);
-	registry.animations.emplace(entity);
 	registry.weapons.insert(entity, Rifle());
 	registry.renderRequests.insert(
 		entity,
-		{ TEXTURE_IDS::CAT_IDLE,
+		{ TEXTURE_IDS::CAT_FRONT_IDLE,
 			SHADER_PROGRAM_IDS::ANIMATION,
 			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
 
+	Animation& anim = registry.animations.emplace(entity);
+	anim.animation_states_constants.insert({ TEXTURE_IDS::CAT_FRONT_IDLE, CAT_IDLE_CONSTANTS });
+	anim.animation_states_constants.insert({ TEXTURE_IDS::CAT_WALK, CAT_WALK_CONSTANTS });
+	anim.anim_state = TEXTURE_IDS::CAT_FRONT_IDLE;
 	// Add a behaviour tree
 
 	return entity;
 }
 
-Entity createProjectile(RenderSystem* renderer, Entity originE, vec4 coefficientsX, vec4 coefficientsY, vec2 endtangent) {
+Entity createProjectile(Entity originE, vec2 force) {
 
-	auto entity = Entity();
+	const auto entity = Entity();
 
 	// Setting initial motion values
 	Motion& motion = registry.motions.emplace(entity);
 	motion.position = registry.motions.get(originE).position;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
-	motion.scale = { 10.0f, 10.0f };
+	float scale = ceil((10.f / defaultResolution.x) * screenResolution.x);
+	motion.scale = { scale, scale };
 
 	Boxcollider& bc = registry.boxColliders.emplace(entity);
 	calculateBoxVerticesAndSetTriangles(motion.position, motion.scale, bc);
@@ -150,16 +343,19 @@ Entity createProjectile(RenderSystem* renderer, Entity originE, vec4 coefficient
 
 	Projectile& projectile = registry.projectiles.emplace(entity);
 	projectile.origin = originE;
-	projectile.trajectoryAx = coefficientsX;
-	projectile.trajectoryAy = coefficientsY;
-	projectile.end_tangent = endtangent;
+
+	Rigidbody& rb = registry.rigidBodies.emplace(entity);
+	rb.type = KINEMATIC;
+
+	PhysicsSystem::applyForce(entity, force);
+
 
 	return entity;
 }
 
 Entity createMenu(MENU_TYPES menu, float layer) {
 
-	auto entity = Entity();
+	const auto entity = Entity();
 
 	MenuItem& menu_comp =  registry.menus.emplace(entity);
 	RenderRequest request;
@@ -170,9 +366,22 @@ Entity createMenu(MENU_TYPES menu, float layer) {
 					GEOMETRY_BUFFER_IDS::TEXTURED_QUAD };
 	}
 
-	//selectscreen
+	// character select screen
 	if (menu == MENU_TYPES::SELECT) {
 		request = { TEXTURE_IDS::SELECT_MENU,
+					SHADER_PROGRAM_IDS::TEXTURE,
+					GEOMETRY_BUFFER_IDS::TEXTURED_QUAD };
+	}
+
+	// option screen
+	if (menu == MENU_TYPES::OPTIONS) {
+		request = { TEXTURE_IDS::OPTIONS_MENU,
+					SHADER_PROGRAM_IDS::TEXTURE,
+					GEOMETRY_BUFFER_IDS::TEXTURED_QUAD };
+	}
+	// level screen
+	if (menu == MENU_TYPES::LEVELS) {
+		request = { TEXTURE_IDS::LEVELS_MENU,
 					SHADER_PROGRAM_IDS::TEXTURE,
 					GEOMETRY_BUFFER_IDS::TEXTURED_QUAD };
 	}
@@ -189,15 +398,15 @@ Entity createMenu(MENU_TYPES menu, float layer) {
 
 Entity createButton(vec2 pos, vec2 scale, TEXTURE_IDS tex_id, std::vector<std::function<void()>> callbacks) {
 
-	auto entity = Entity();
+	const auto entity = Entity();
 
 	Clickable& button = registry.buttons.emplace(entity);
 	button.callbacks = callbacks;
 
-	float left = -scale.x / 2;
-	float right = scale.x / 2;
-	float up = -scale.y / 2;
-	float down = scale.y / 2;
+	const float left = -scale.x / 2;
+	const float right = scale.x / 2;
+	const float up = -scale.y / 2;
+	const float down = scale.y / 2;
 
 	button.vertecies.push_back(pos + vec2{ left, up }); //topleft
 	button.vertecies.push_back(pos + vec2{ right, up }); //topright
@@ -215,6 +424,162 @@ Entity createButton(vec2 pos, vec2 scale, TEXTURE_IDS tex_id, std::vector<std::f
 	motion.scale = scale;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
+
+	return entity;
+
+}
+
+Entity createText(::TextManager& textManager, std::string text, vec2 pos, float scale, glm::vec3 color) {
+	const auto entity = Entity();
+
+	// Setting initial motion values
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = pos;
+	motion.angle = 0.f;
+	motion.velocity = { 0.f, 0.f };
+	motion.scale = scaleToScreenResolution({ scale, scale });
+
+	Text& textfield = registry.texts.emplace(entity);
+	textfield.text = text;
+	textfield.color = color;
+
+	registry.renderRequests.insert(
+		entity,
+		{	TEXTURE_IDS::TOTAL,
+			SHADER_PROGRAM_IDS::FONT,
+			GEOMETRY_BUFFER_IDS::TOTAL });
+
+	// Determine text size
+	bool isItalic = false;
+	bool isBold = false;
+
+	//this is capital 'A' for reference
+	float captialsize = textManager.getGlyphs()[65].size.y;
+
+	// iterate through all characters
+	std::string::const_iterator c;
+	float acc = motion.position.x;
+	for (c = textfield.text.begin(); c != textfield.text.end(); c++)
+	{
+		//'$' character
+		if (*c == 36) {
+			isBold = isBold ? false : true;
+			continue;
+		}
+		if (*c == 126) {
+			isItalic = isItalic ? false : true;
+			continue;
+		}
+
+		Glyph ch;
+		if (isItalic) {
+			assert(!textManager.getBoldGlyphs().empty());
+			ch = textManager.getItalicGlyphs()[*c];
+		}
+		else if (isBold) {
+			assert(!textManager.getBoldGlyphs().empty());
+			ch = textManager.getBoldGlyphs()[*c];
+		}
+		else {
+			assert(!textManager.getGlyphs().empty());
+			ch = textManager.getGlyphs()[*c];
+		}
+
+		float xpos = acc + ch.bearing.x * motion.scale.x;
+		float ypos = motion.position.y + (ch.size.y - ch.bearing.y) * motion.scale.y;
+
+		//We need to offset lower case letters because of our coordinate system (since 0,0 is top left)
+		if (!isupper((int)*c)) {
+			ypos += captialsize - ch.size.y;
+		}
+
+		float w = ch.size.x * motion.scale.x;
+		float h = ch.size.y * motion.scale.y;
+		// update VBO for each character
+		float vertices[6][4] = {
+			{ xpos,     ypos + h,   0.0f, 1.0f },
+			{ xpos,     ypos,       0.0f, 0.0f },
+			{ xpos + w, ypos,       1.0f, 0.0f },
+
+			{ xpos,     ypos + h,   0.0f, 1.0f },
+			{ xpos + w, ypos,       1.0f, 0.0f },
+			{ xpos + w, ypos + h,   1.0f, 1.0f }
+		};
+		
+		if (isItalic) {
+			acc += (ch.advance >> 6) * motion.scale.x + 3.0f;
+		}
+		else {
+			acc += (ch.advance >> 6) * motion.scale.x; // bitshift by 6 to get value in pixels (2^6 = 64)
+		}
+	}
+	textfield.scale.x = acc - motion.position.x; // set x scale
+	textfield.scale.y = captialsize * motion.scale.y; // set y scale
+
+	// center text to position
+	motion.position.x = pos.x - textfield.scale.x / 2.f;
+
+	return entity;
+}
+
+Entity createCrosshair(Entity origin, bool iscat) {
+
+	auto entity = Entity();
+	auto crosshair_sub = Entity();
+
+	if (!registry.parentEntities.has(origin)) {
+		registry.parentEntities.emplace(origin);
+	}
+
+	ChildEntities& children = registry.parentEntities.get(origin);
+
+	// Main entity
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = registry.motions.get(origin).position;
+	motion.scale = { 1.0f, 1.0f };
+
+	registry.uiElements.insert(
+		entity, { UI_ELEMENT::CROSSHAIR }
+	);
+
+	int index = children.child_data_map.size();
+	children.child_data_map.insert({ index, entity });
+	children.normal_dists.insert({ index, vec2(0.0f, 0.0f) });
+	children.tags.insert({ index, "crosshair" });
+
+
+	ChildEntities& crosshair = registry.parentEntities.emplace(entity);
+	crosshair.child_data_map.emplace(0,crosshair_sub);
+	crosshair.normal_dists.insert({ 0, vec2(200.0f, -200.0f) });
+	crosshair.tags.insert({ 0, "crosshair" });
+	//Sub entity
+	Motion& cross_hair_motion = registry.motions.emplace(crosshair_sub);
+	cross_hair_motion.position = motion.position + crosshair.normal_dists.at(0);
+	cross_hair_motion.scale = { 70.0f, 70.0f };
+
+	registry.renderRequests.insert(
+		crosshair_sub,
+		{ iscat ? TEXTURE_IDS::CAT_CROSSHAIR : TEXTURE_IDS::DOG_CROSSHAIR,
+				SHADER_PROGRAM_IDS::TEXTURE,
+				GEOMETRY_BUFFER_IDS::TEXTURED_QUAD }
+	);
+
+	return origin;
+
+}
+
+Entity createHealthCounter(Entity origin, int health, TextManager& textManager) {
+
+	const vec3 color = registry.cats.has(origin) ? vec3{ 0.862f, 0.525f, 0.517f } : vec3{ 0.039, 0.454, 1 };
+
+	const auto entity = Entity();
+
+	HealthBox& healthbox = registry.healthboxes.emplace(entity);
+	healthbox.parent = origin;
+	healthbox.text = createText(textManager, std::to_string(health), { 0.0f,0.0f }, 1.0f, color);
+
+	Motion& motion = registry.motions.emplace(entity);
+	motion.scale = { 100.0f, 100.0f };
 
 	return entity;
 

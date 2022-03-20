@@ -1,7 +1,6 @@
 #pragma once
 #include "hpp/tiny_ecs.hpp"
 #include "hpp/common.hpp"
-#include <hpp/render_system.hpp>
 
 using namespace glm;
 
@@ -12,8 +11,6 @@ public:
 	ShootingSystem();
 	~ShootingSystem();
 
-	void init(RenderSystem* renderer);
-
 	void step(float elapsed_time);
 
 	//Calculate the coefficients for Cubic interpolation
@@ -22,11 +19,11 @@ public:
 
 	//calculate the interpolated point
 	//deltaTime is normalized between 0 and 1, where 0 is the time at and 1 is the time at end
-	float calculate_point(vec4 A, float deltaTime);
+	static float calculate_point(vec4 A, float deltaTime);
 
-	void aimUp(Entity e);
+	void aimUp(Entity e, float aimrate);
 
-	void aimDown(Entity e);
+	void aimDown(Entity e, float amount);
 
 	void setAimLoc(Entity e);
 
@@ -45,7 +42,7 @@ private:
 	float pi = 3.14159;
 	float pio2 = 1.57079;
 
-	RenderSystem* renderer;
+	void calculate_trajectory(Entity e);
 
 	enum class SHOOT_ORIENTATION {
 		RIGHT,

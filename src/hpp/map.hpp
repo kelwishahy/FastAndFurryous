@@ -1,33 +1,34 @@
 #pragma once
 #include <vector>
+#include <array>
+#include "components.hpp"
 
-class Map {
+class MapSystem {
 public:
-	Map();
+	class Map {
+	public:
+		Map() {};
+		Map(MAPS name);
+		unsigned int getMapWidth() { return this->mapWidth; }
+		unsigned int getMapHeight() { return this->mapHeight; }
+		float getTileScale() { return this->tileScale; }
+		std::vector<std::vector<unsigned int>> getTileMap();
+		void build();
+	private:
+		MAPS name;
+		std::vector<std::vector<unsigned int>> tileMap;
+		unsigned int mapHeight;
+		unsigned int mapWidth;
+		float tileScale;
+		void readMapFromFile();
+	};
+	MapSystem(){};
 
-	~Map();
+	~MapSystem(){};
 
 	void init();
 
-	std::vector<std::vector<unsigned int>> getTileMap();
-
-	void updateTileMap();
-
-	unsigned int getMapWidth() { return this->mapWidth; }
-	unsigned int getMapHeight() { return this->mapHeight; }
-	float getTileScale() { return this->tileScale; }
-
+	Map& getMap(MAPS mapName) { return maps[(int)mapName]; }
 private:
-	/*
-	 * The game map is a 2d array of unsigned ints,
-	 * with each int referencing a specific tile type
-	 * (e.g. if gameMap[i][j] = 1, we render a stone tile)
-	 */
-	std::vector<std::vector<unsigned int>> tileMap;
-	void readMapFromFile();
-
-	// Dimensions of this game map
-	unsigned int mapHeight;
-	unsigned int mapWidth;
-	float tileScale;
+	std::array<Map, mapCount> maps;
 };

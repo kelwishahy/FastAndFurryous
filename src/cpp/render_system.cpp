@@ -7,29 +7,23 @@
 #include <hpp/tiny_ecs_registry.hpp>
 #include "glm/ext.hpp"
 #include <iostream>
-
-#include "hpp/ai_system.hpp"
+#include "../project_path.hpp"
 #include "hpp/ai_system.hpp"
 
 using namespace glm;
+vec2 screenResolution;
 
-RenderSystem::RenderSystem() {}
-
-// Destructor
-RenderSystem::~RenderSystem() {
-	glfwTerminate();
-}
-
-void RenderSystem::draw(float elapsed_ms) {
-	mat4 projectionMatrix = createProjectionMatrix();
-
-	glViewport(0, 0, this->screenWidth, this->screenHeight);
+void RenderSystem::draw(float elapsed_ms, WorldSystem& world) {
+	this->camera = &world.camera;
+	setTileMap(world.getCurrentGame().getGameMap());
+	animation_system.step(elapsed_ms);
+	glViewport(0, 0, screenWidth, screenHeight);
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
 
 	// Draw the map
-	drawTiles(projectionMatrix);
+	drawTiles();
 
 	for (Entity entity : registry.renderRequests.entities) {
 
@@ -38,76 +32,88 @@ void RenderSystem::draw(float elapsed_ms) {
 
 		RenderRequest request = registry.renderRequests.get(entity);
 
+		vec2 playerPos = { 0.f, 0.f };
+		if (registry.motions.has(world.getCurrentGame().getSelectedCharacter())) {
+			playerPos = registry.motions.get(world.getCurrentGame().getSelectedCharacter()).position;
+		}
 		if (registry.backgrounds.has(entity)) {
-			drawBackground(request, projectionMatrix, -0.5);
+			float pos = screenWidth;
+			float depth;
+			switch(request.texture) {
+			case TEXTURE_IDS::INDUSTRIAL_BG:
+				depth = -0.9f;
+				break;
+			case TEXTURE_IDS::INDUSTRIAL_FAR_BUILDINGS:
+				depth = -0.8f;
+				pos -= playerPos.x / 60.f;
+				break;
+			case TEXTURE_IDS::INDUSTRIAL_BUILDINGS:
+				depth = -0.7f;
+				pos -= playerPos.x / 30.f;
+				break;
+			case TEXTURE_IDS::INDUSTRIAL_FOREGROUND:
+				depth = -0.6f;
+				break;
+			default:
+				depth = -0.5f;
+			}
+			drawBackground(request, depth, { pos, screenHeight / 2 }, { 2 * screenWidth, screenHeight });
 			continue;
 		}
 
 		if (registry.menus.has(entity)) {
 			MenuItem& menu = registry.menus.get(entity);
-			drawBackground(request, projectionMatrix, menu.layer);
+			drawBackground(request, menu.layer, {screenWidth / 2, screenHeight / 2}, {screenWidth, screenHeight});
 			continue;
 		}
 
-		mat4 transformationMatrix;
+		if (registry.texts.has(entity)) {
+			drawText(world.getTextManager(), entity);
+			continue;
+		}
 
 		switch (request.geometry) {
 			case GEOMETRY_BUFFER_IDS::QUAD: {
-				 transformationMatrix = transform(registry.motions.get(entity), 0.f, true, true, false);
+				auto& motion = registry.motions.get(entity);
 				std::string shaderInputs[] = { "position" };
 				drawQuad(request, shaderInputs, 1);
-				renderToScreen(transformationMatrix, projectionMatrix);
+				renderToScreen(transform(motion.position, motion.scale, 0.f, 0));
 				break;
 			}
 
 			case GEOMETRY_BUFFER_IDS::TEXTURED_QUAD: {
 
 				// Animate player sprites
-				if (registry.players.has(entity)) {
-					animateSprite(request, entity, elapsed_ms);
+				if (registry.animations.has(entity)) {
+					animateSprite(request, entity);
 					continue;
 				}
 
 				// Draw a static textured quad
-				if (registry.buttons.has(entity)) {
-					transformationMatrix = transform(registry.motions.get(entity), 0.8f, true, true, false);
-				}
-				else {
-					transformationMatrix = transform(registry.motions.get(entity), 0.f, true, true, false);
-				}
+				auto& motion = registry.motions.get(entity);
 				std::string shaderInputs[] = { "position", "texCoord" };
 				drawQuad(request, shaderInputs, 2);
-				renderToScreen(transformationMatrix, projectionMatrix);
+
+				float depth = registry.buttons.has(entity) ? 0.8f : 0.0f;
+				renderToScreen(transform(motion.position, motion.scale, depth, 0));
 				break;
 			}
 
 			default:
 				continue;
-
 		}
 	}
 }
 
-glm::mat4 RenderSystem::transform(Motion& motion, float depth, bool translate, bool scale, bool rotate) {
+mat4 RenderSystem::transform(vec2 position, vec2 scale, float depth, float angle) {
 	Transform transform;
-
-	if (translate) {
-		transform.mat = glm::translate(transform.mat, vec3(motion.position, depth));
-	}
-
-	if (scale) {
-		transform.mat = glm::scale(transform.mat, vec3(motion.scale, depth));
-	}
-
-	if (rotate) {
-		printf("No rotations yet\n");
-	}
-	
+	transform.mat = glm::translate(transform.mat, vec3(position, depth));
+	transform.mat = glm::scale(transform.mat, vec3(scale, depth));
+	transform.mat = glm::rotate(transform.mat, angle, vec3(0.0f, 0.0f, 1.0f));
 	return transform.mat;
 }
 
-
-void RenderSystem::renderToScreen(mat4& transformationMatrix, mat4& projectionMatrix) {
+void RenderSystem::renderToScreen(mat4 transformationMatrix) {
 	GLint size = 0;
 	glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
 	glHasError();
@@ -119,15 +125,15 @@ void RenderSystem::renderToScreen(mat4& transformationMatrix, mat4& projectionMa
 	// Setting uniform values to the currently bound program
 	GLuint transform_loc = glGetUniformLocation(currProgram, "transform");
 	glUniformMatrix4fv(transform_loc, 1, GL_FALSE, (float*)&transformationMatrix);
+
+	auto proj = camera->getViewProjectionMatrix(); // Passing in the camera's viewProjectionMatrix
 	GLuint projection_loc = glGetUniformLocation(currProgram, "projection");
-	glUniformMatrix4fv(projection_loc, 1, GL_FALSE, (float*)&projectionMatrix);
+	glUniformMatrix4fv(projection_loc, 1, GL_FALSE, (float*)&proj);
 	glHasError();
 
 	glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_SHORT, nullptr);
 	glHasError();
 }
-
-
 
 void RenderSystem::drawQuad(RenderRequest& request, std::string shaderInputs[], int numInputs) {
 	const GLuint vbo = vertexBuffers[(GLuint)request.geometry];
@@ -174,85 +180,25 @@ void RenderSystem::drawQuad(RenderRequest& request, std::string shaderInputs[], 
 
 }
 
-void RenderSystem::animateSprite(RenderRequest& request, Entity& entity, float elapsed_ms) {
-	mat4 projection = createProjectionMatrix();
-
-	// Frames for animation
-	GLint curr_frame = 0;
-	GLfloat frame_width = 0;
-	int numFrames = 0;
-	int timePerFrame = 0;
-
+void RenderSystem::animateSprite(RenderRequest& request, Entity& entity) {
 	Animation& animation = registry.animations.get(entity);
-	// Decrement the frame counter
-	float *counter = &animation.frame_counter_ms;
 
-	*counter -= elapsed_ms;
+	// Is the current player selected to move?
+	bool selected;
+	if (registry.selected.has(entity)) {
+		selected = registry.selected.get(entity).isSelected;
+	} else {
+		selected = true;
+	}
 
-	// Get the type of animation (IDLE, WALKING)
-	int animationType = animation.animation_type;
-
-	// Get the type of character (CAT, DOG)
-	int characterType = animation.character;
-
-	// Get if character is facing left or not
-	bool facingLeft = animation.facingLeft;
-
-	// Get frame
-	int& frame = animation.frame;
-
-	TEXTURE_IDS& curr_texture = registry.renderRequests.get(entity).texture;
+	TEXTURE_ANIM_CONSTANTS constants = animation.animation_states_constants.at(animation.anim_state);
 
 	// Updating the texture coordinates for use with the animation sprite sheets
-	texturedQuad[0].texCoord = { 0.111f, 1.0f }; // top right
-	texturedQuad[1].texCoord = { 0.111f, 0.0f }; // bottom right
+	texturedQuad[0].texCoord = { constants.FRAME_TEXTURE_WIDTH, 1.0f }; // top right
+	texturedQuad[1].texCoord = { constants.FRAME_TEXTURE_WIDTH, 0.0f }; // bottom right
 	texturedQuad[2].texCoord = { 0.0f, 0.0f }; // bottom left
 	texturedQuad[3].texCoord = { 0.0f, 1.0f }; // top left
 	bindVBOandIBO(GEOMETRY_BUFFER_IDS::TEXTURED_QUAD, texturedQuad, quadIndices);
-
-	switch (characterType) {
-		case CAT: {
-			switch (animationType) {
-				case IDLE: {
-					curr_texture = TEXTURE_IDS::CAT_IDLE;
-					numFrames = CAT_IDLE_FRAMES;
-					frame_width = CAT_IDLE_FRAME_WIDTH;
-					timePerFrame = CAT_IDLE_FRAME_TIME;
-					break;
-				}
-
-				case WALKING: {
-					curr_texture = TEXTURE_IDS::CAT_WALK;
-					numFrames = CAT_WALK_FRAMES;
-					frame_width = CAT_WALK_FRAME_WIDTH;
-					timePerFrame = CAT_WALK_FRAME_TIME;
-					break;
-				}
-
-				case JUMPING: {
-					curr_texture = TEXTURE_IDS::CAT_JUMP;
-					numFrames = CAT_JUMP_FRAMES;
-					frame_width = CAT_JUMP_FRAME_WIDTH;
-					timePerFrame = CAT_JUMP_FRAME_TIME;
-					break;
-				}
-
-				default: break;
-			}
-		}
-	}
-
-	if (*counter <= 0) {
-		curr_frame = frame;
-		curr_frame += 1;
-		frame = curr_frame % numFrames;
-
-		// Reset frame timer
-		*counter = timePerFrame;
-	} else {
-		curr_frame = frame;
-	}
-
 	
 	std::string shaderInputs[] = { "position", "texCoord" };
 	drawQuad(request, shaderInputs, 2);
@@ -268,13 +214,15 @@ void RenderSystem::animateSprite(RenderRequest& request, Entity& entity, float e
 	GLint frame_uloc = glGetUniformLocation(shaderProgram, "currentFrame");
 	GLfloat frame_width_uloc = glGetUniformLocation(shaderProgram, "frameWidth");
 	GLint facing_left_uloc = glGetUniformLocation(shaderProgram, "facingLeft");
-	glUniform1i(frame_uloc, curr_frame);
-	glUniform1f(frame_width_uloc, frame_width);
-	glUniform1i(facing_left_uloc, facingLeft);
+	GLboolean selectedLoc = glGetUniformLocation(shaderProgram, "selected");
+	glUniform1i(frame_uloc, animation.curr_frame);
+	glUniform1f(frame_width_uloc, constants.FRAME_TEXTURE_WIDTH);
+	glUniform1i(facing_left_uloc, animation.facingLeft);
+	glUniform1i(selectedLoc, selected);
 
 	// Render to the screen
-	mat4 transformationMatrix = transform(registry.motions.get(entity), 0.5f, true, true, false);
-	renderToScreen(transformationMatrix, projection);
+	auto& motion = registry.motions.get(entity);
+	renderToScreen(transform(motion.position, motion.scale, 0.5f, 0));
 
 	// Resetting the texture coordinates after use
 	texturedQuad[0].texCoord = { 1.f, 1.f }; // top right
@@ -285,8 +233,7 @@ void RenderSystem::animateSprite(RenderRequest& request, Entity& entity, float e
 
 }
 
-void RenderSystem::drawTiles(const mat4& projectionMatrix) {
-	const mat4& projection = projectionMatrix;
+void RenderSystem::drawTiles() {
 	const auto& tileMap = gameMap.getTileMap();
 	const int& mapWidth = gameMap.getMapWidth();
 	const int& mapHeight = gameMap.getMapHeight();
@@ -346,18 +293,21 @@ void RenderSystem::drawTiles(const mat4& projectionMatrix) {
 				const GLsizei numIndices = size / sizeof(uint16_t);
 
 				/* MATRIX TRANSFORMATIONS */
-				Transform transform;
-				transform.mat = translate(transform.mat, vec3((0.5 + j) * scaleFactor, (0.5 + i) * scaleFactor, 0.0f));
-				transform.mat = scale(transform.mat, vec3(scaleFactor, scaleFactor, 0.f));
+				mat4 transformationMatrix = transform(
+					{ (0.5 + j) * scaleFactor, (0.5 + i) * scaleFactor }, 
+					{ scaleFactor, scaleFactor }, 
+					0.f, 0);
 
 				GLint currProgram;
 				glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
 
 				// Setting uniform values to the currently bound program
 				GLuint transform_loc = glGetUniformLocation(currProgram, "transform");
-				glUniformMatrix4fv(transform_loc, 1, GL_FALSE, (float*)&transform.mat);
+				glUniformMatrix4fv(transform_loc, 1, GL_FALSE, (float*)&transformationMatrix);
+				
+				auto proj = camera->getViewProjectionMatrix(); // Passing in the camera's viewProjectionMatrix
 				GLuint projection_loc = glGetUniformLocation(currProgram, "projection");
-				glUniformMatrix4fv(projection_loc, 1, GL_FALSE, (float*)&projection);
+				glUniformMatrix4fv(projection_loc, 1, GL_FALSE, (float*)&proj);
 				glHasError();
 
 				glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_SHORT, nullptr);
@@ -374,17 +324,121 @@ void RenderSystem::drawTiles(const mat4& projectionMatrix) {
 	bindVBOandIBO(GEOMETRY_BUFFER_IDS::TEXTURED_QUAD, texturedQuad, quadIndices);
 }
 
-void RenderSystem::drawBackground(RenderRequest& request, mat4& projectionMatrix, float layer) {
-	Transform transform;
-	transform.mat = translate(transform.mat, vec3(screenWidth/2, screenHeight/2, layer));
-	transform.mat = scale(transform.mat, vec3(screenWidth, screenHeight, layer));
-
+void RenderSystem::drawBackground(RenderRequest& request, float layer, vec2 position, vec2 scale) {
+	mat4 transformationMatrix = transform(position, scale, layer, 0);
 	std::string shaderInputs[] = { "position", "texCoord" };
 	drawQuad(request, shaderInputs, 2);
-	renderToScreen(transform.mat, projectionMatrix);
+	renderToScreen(transformationMatrix);
 }
 
+void RenderSystem::drawText(TextManager& textManager, Entity e) {
+	bool isItalic = false;
+	bool isBold = false;
 
+	GLuint fontvbo;
+
+	Motion motion = registry.motions.get(e);
+	Text& fonttext = registry.texts.get(e);
+
+	//we need to do this we're dynamically creating geometry in this function
+	glGenBuffers(1, &fontvbo);
+	glBindBuffer(GL_ARRAY_BUFFER, fontvbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	// set shaders
+	const GLuint shaderProgram = shaders[(GLuint)SHADER_PROGRAM_IDS::FONT];
+	glUseProgram(shaderProgram);
+	glHasError();
+
+	glUniform3f(glGetUniformLocation(shaderProgram, "textColor"), fonttext.color.x, fonttext.color.y, fonttext.color.z);
+	glActiveTexture(GL_TEXTURE0);
+
+	//this is capital 'A' for reference
+	float captialsize = textManager.getGlyphs()[65].size.y;
+
+	// iterate through all characters
+	std::string::const_iterator c;
+	float acc = motion.position.x;
+	for (c = fonttext.text.begin(); c != fonttext.text.end(); c++)
+	{
+		//'$' character
+		if (*c == 36) {
+			isBold = isBold ? false : true;
+			continue;
+		}
+		if (*c == 126) {
+			isItalic = isItalic? false : true;
+			continue;
+		}
+
+		Glyph ch;
+		if (isItalic) {
+			assert(!textManager.getBoldGlyphs().empty());
+			ch = textManager.getItalicGlyphs()[*c];
+		}
+		else if (isBold) {
+			assert(!textManager.getBoldGlyphs().empty());
+			ch = textManager.getBoldGlyphs()[*c];
+		}
+		else {
+			assert(!textManager.getGlyphs().empty());
+			ch = textManager.getGlyphs()[*c];
+		}
+
+		float xpos = acc + ch.bearing.x * motion.scale.x;
+		float ypos = motion.position.y + (ch.size.y - ch.bearing.y) * motion.scale.y;
+
+		//We need to offset lower case letters because of our coordinate system (since 0,0 is top left)
+		if (!isupper((int)*c)) {
+			ypos += captialsize - ch.size.y;
+		}
+
+		float w = ch.size.x * motion.scale.x;
+		float h = ch.size.y * motion.scale.y;
+		// update VBO for each character
+		float vertices[6][4] = {
+			{ xpos,     ypos + h,   0.0f, 1.0f },
+			{ xpos,     ypos,       0.0f, 0.0f },
+			{ xpos + w, ypos,       1.0f, 0.0f },
+
+			{ xpos,     ypos + h,   0.0f, 1.0f },
+			{ xpos + w, ypos,       1.0f, 0.0f },
+			{ xpos + w, ypos + h,   1.0f, 1.0f }
+		};
+		// render glyph texture over quad
+		glBindTexture(GL_TEXTURE_2D, ch.textureID);
+		// update content of VBO memory
+		glBindBuffer(GL_ARRAY_BUFFER, fontvbo);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		// render quad
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+		// now advance cursors for next glyph (note that advance is number of 1/64 pixels)
+		// the isItalic prevents glitching since italics are slanted but the quads are not
+		if (isItalic) {
+			acc += (ch.advance >> 6) * motion.scale.x + 3.0f;
+		}
+		else {
+			acc += (ch.advance >> 6) * motion.scale.x; // bitshift by 6 to get value in pixels (2^6 = 64)
+		}
+	}
+	fonttext.scale.x = acc - motion.position.x; // set x scale
+	fonttext.scale.y = captialsize * motion.scale.y; // set y scale
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	//Custom projection matrix
+	auto m = registry.motions.get(e);
+	m.position = {m.position.x / defaultResolution.x * screenWidth, m.position.y / defaultResolution.y * screenHeight};
+	m.scale = { m.scale.x / defaultResolution.x * screenWidth, m.scale.y / defaultResolution.y * screenHeight };
+	renderToScreen(transform(m.position, m.scale, 1.0f, 0));
+}
+
+/*
+ * INITIALIZATION FUNCTIONS
+ */
 bool RenderSystem::init() {
 	// Create window & context
 	glfwInit();
@@ -398,11 +452,11 @@ bool RenderSystem::init() {
 	glfwWindowHint(GLFW_MAXIMIZED, GL_TRUE); // Make the window full screen
 
 	// NOTE: The width & height here are unimportant as the window will be maximized on creation
-	this->window = glfwCreateWindow(1000, 800, "Fast and the Furry-ous", NULL, NULL);
+	this->window = glfwCreateWindow(1600, 900, "Fast and the Furry-ous", NULL, NULL);
 	glfwSetWindowAspectRatio(window, 16, 9);
-	glfwGetWindowSize(window, &this->screenWidth, &this->screenHeight);
-
+	glfwGetFramebufferSize(window, &this->screenWidth, &this->screenHeight);
 	printf("Screen size: %d, %d\n", this->screenWidth, this->screenHeight);
+	screenResolution = {screenWidth, screenHeight};
 
 	if (window == NULL) {
 		std::cout << "Failed to create GLFW window" << std::endl;
@@ -436,19 +490,10 @@ bool RenderSystem::init() {
 	}
 	//----------------------------------------------------------------------------------
 
-	// Create and bind custom frame buffer
-	//frameBuffer = 0;
-	//glGenFramebuffers(1, &frameBuffer);
-	//glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
-	//glHasError();
-
 	// Create vertex array object
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
 	glHasError();
-
-	// Initialize the render buffer
-	//initRenderBuffer();
 
 	// Load shaders
 	ShaderManager::loadShaders(shaderPaths, shaders);
@@ -456,35 +501,10 @@ bool RenderSystem::init() {
 	// Load textures
 	TextureManager::loadTextures(texturePaths, textures, textureDimensions);
 
-	// Load meshes
-	//loadMeshes();
-
 	//Load vertex data
 	initRenderData();
 
-	return true;
-}
-
-bool RenderSystem::initRenderBuffer() {
-	int width, height;
-	glfwGetFramebufferSize(window, &width, &height);  
-
-	glGenTextures(1, &renderBufferColour);
-	glBindTexture(GL_TEXTURE_2D, renderBufferColour);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glHasError();
-
-	glGenRenderbuffers(1, &renderBufferDepth);
-	glBindRenderbuffer(GL_RENDERBUFFER, renderBufferDepth);
-	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, renderBufferColour, 0);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, renderBufferDepth);
-	glHasError();
-
-	// Make sure framebuffer is complete
-	assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
+	// initFonts();
 
 	return true;
 }
@@ -496,8 +516,6 @@ void RenderSystem::initRenderData() {
 
 	// Create index buffers
 	glGenBuffers((GLsizei)indexBuffers.size(), indexBuffers.data());
-
-	// set vertex data
 
 	// Every object in this game is essentially a textured quad (square),
 	// so we can just define one quad geometry that all objects can use
@@ -521,61 +539,4 @@ void RenderSystem::initRenderData() {
 
 	bindVBOandIBO(GEOMETRY_BUFFER_IDS::QUAD, quad, quadIndices);
 	bindVBOandIBO(GEOMETRY_BUFFER_IDS::TEXTURED_QUAD, texturedQuad, quadIndices);
-}
-
-template <class T>
-void RenderSystem::bindVBOandIBO(GEOMETRY_BUFFER_IDS oid, std::vector<T> vertices, std::vector<uint16_t> indices) {
-
-	// Vertex buffer
-	glBindBuffer(GL_ARRAY_BUFFER, vertexBuffers[(uint)oid]);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices[0]) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
-	glHasError();
-
-	// Index buffer
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffers[(uint)oid]);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices[0]) * indices.size(), indices.data(), GL_STATIC_DRAW);
-	glHasError();
-}
-
-void RenderSystem::loadMeshes() {
-	for (uint i = 0; i < meshPaths.size(); i++) {
-		// Initialize meshes
-		GEOMETRY_BUFFER_IDS geoIndex = meshPaths[i].first;
-		std::string name = meshPaths[i].second;
-
-		// Load mesh from .obj file
-		Mesh::loadMeshFromObj(name,
-			meshes[(int)geoIndex].vertices,
-			meshes[(int)geoIndex].vertexIndices,
-			meshes[(int)geoIndex].originalSize);
-
-		// Bind the vertex and index buffer objects
-		bindVBOandIBO(geoIndex,
-			meshes[(int)geoIndex].vertices,
-			meshes[(int)geoIndex].vertexIndices);
-	}
-}
-
-mat4 RenderSystem::createProjectionMatrix() {
-	constexpr float left = 0.f;
-	constexpr float top = 0.f;
-	float right = (float)this->screenWidth;
-	float bottom = (float)this->screenHeight;
-	constexpr float far = 1.f;
-	constexpr float near = -1.f;
-
-	const float sx = 2.f / (right - left);
-	const float sy = 2.f / (top - bottom);
-	const float tx = -(right + left) / (right - left);
-	const float ty = -(top + bottom) / (top - bottom);
-	const float zNear = -2.f / (far - near);
-	const float zFar = -(far + near) / (far - near);
-
-	mat4 projectionMatrix = {
-		{sx, 0.f, 0.f, tx},
-		{0.f, sy, 0.f, ty},
-		{0.f, 0.f, zNear, zFar},
-		{0.f, 0.f, 0.f, 1.f}};
-
-	return transpose(projectionMatrix);
 }

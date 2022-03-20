@@ -1,23 +1,20 @@
 #pragma once
 
 // internal
-#include "common.hpp"
 #include "tiny_ecs.hpp"
 #include "map.hpp"
 
 // stlib
 #include <vector>
-#include <random>
-
-#include <hpp/render_system.hpp>
 
 #include "ai_system.hpp"
+#include "orthographic_camera.hpp"
 
-using namespace glm;
-
-#include <glm/vec2.hpp>	
-#include <hpp/tiny_ecs_registry.hpp>
 #include <hpp/Game_Mechanics/shooting_system.hpp>
+#include <hpp/ui_system.hpp>
+
+#include "text_manager.hpp"
+#include "GLFW/glfw3.h"
 
 class GameController
 {
@@ -27,7 +24,7 @@ public:
 	// Releases all associated resources
 	~GameController();
 
-	void init(RenderSystem* renderer, GLFWwindow* window);
+	void init(GLFWwindow* window, MapSystem::Map& map, OrthographicCamera& camera, TextManager& textManager);
 
 	// Steps the game ahead by ms milliseconds
 	void step(float elapsed_ms);
@@ -39,7 +36,8 @@ public:
 
 	GLFWwindow* window;
 
-	Map getGameMap() { return gameMap; }
+	MapSystem::Map& getGameMap() { return gameMap; }
+	OrthographicCamera& getCamera() { return *camera; }
 
 	//Turn System stuff
 	enum TURN_CODE {
@@ -58,10 +56,13 @@ public:
 
 	TURN_CODE getTurnCode() { return (TURN_CODE)this->game_state.turn_possesion; }
 
+	// Return the current selected character
+	Entity& getSelectedCharacter() { return curr_selected_char; }
 
 private:
-	RenderSystem* renderer;
-
+	OrthographicCamera* camera;
+	MapSystem::Map gameMap;
+	TextManager textManager;
 	// restart level it was in the private 
 	void restart_current_match();
 
@@ -70,7 +71,9 @@ private:
 	void init_player_teams();
 
 	void on_player_key(int key, int, int action, int mod);
-	void GameController::on_mouse_move(glm::vec2 mouse_pos);
+	void on_mouse_move(glm::vec2 mouse_pos);
+	void on_mouse_click(int button, int action, int mods);
+	void set_user_input_callbacks();
 
 	void next_turn();
 
@@ -83,7 +86,7 @@ private:
 	std::vector<Entity> ai_team;
 	std::vector<Entity> npcai_team;
 	std::vector<std::vector<Entity>> teams;
-	Map gameMap;
+	
 
 	enum class PLAYER_MODE {
 		MOVING,
@@ -93,13 +96,18 @@ private:
 
 	GameState game_state;
 
+	Entity turnIndicator;
+
+	Entity timeIndicator;
+
 	Entity curr_selected_char;
 
 	ShootingSystem shooting_system;
 
 	AISystem ai;
 
+	UISystem ui;
+
 	uint numPlayersInTeam;
 	float timePerTurnMs;
-
 };

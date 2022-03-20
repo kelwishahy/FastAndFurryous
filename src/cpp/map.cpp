@@ -3,37 +3,47 @@
 #include <hpp/world_init.hpp>
 #include <fstream>
 #include <../ext/project_path.hpp>
+#include "hpp/common.hpp"
 #include "hpp/tiny_ecs_registry.hpp"
+
 using namespace std;
 
-Map::Map() {
-
+void MapSystem::init() {
+	for (int i = 0; i < (int)MAPS::TOTAL; i++) {
+		maps[i] = Map(MAPS(i));
+	}
 }
 
-Map::~Map() {
-	
+std::vector<std::vector<unsigned>> MapSystem::Map::getTileMap() {
+	return tileMap;
 }
 
-void Map::init() {
-	// Create a default game map
+MapSystem::Map::Map(MAPS name) {
+	this->name = name;
+}
+
+void MapSystem::Map::build() {
 	this->mapHeight = 18;
-	this->mapWidth = 30;
-	this->tileScale = 64.f;
+	this->mapWidth = 60;
+	// this->tileScale = ceil((defaultResolution.x / 30.f) / defaultResolution.x * screenResolution.x);
+	this->tileScale = ceil(scaleToScreenResolution({ (defaultResolution.x / 30.f), (defaultResolution.x / 30.f) }).x);
+	printf("Tiles are %fx%f for map %d\n", tileScale, tileScale, (int)this->name);
 
 	readMapFromFile();
 
 	// Iterate through rows
-	for (int y = mapHeight - 1; y >= 0 ; y--) {
+	for (int y = mapHeight - 1; y >= 0; y--) {
 		int consecutiveTileCount = 1;
 
 		// Iterate through columns
 		for (int x = 0; x < mapWidth; x++) {
 			if (tileMap[y][x] != 0) { // Is the current tile occupied?
 				// YES - this tile is occupied
-				if (y > 0 && tileMap[y-1][x] != 0) { // Is the tile above this one occupied?
+				if (y > 0 && tileMap[y - 1][x] != 0) { // Is the tile above this one occupied?
 					// YES - the tile above is occupied
 					continue;
-				} else {
+				}
+				else {
 					// NO - the tile above is not occupied
 					while (x < mapWidth - 1 && tileMap[y][x + 1] != 0) { // Is the tile to the right occupied?
 						// YES - the tile to the right is occupied
@@ -46,27 +56,60 @@ void Map::init() {
 					createTile(tileScale, { y, x - consecutiveTileCount }, consecutiveTileCount);
 					consecutiveTileCount = 1;
 				}
-				
+
 			}
 			// NO - this tile is not occupied
 		}
 	}
-
 
 	// Set the background image
 	auto ent = Entity();
 	registry.backgrounds.emplace(ent);
 	registry.renderRequests.insert(
 		ent,
-		{ TEXTURE_IDS::BACKGROUND,
+		{ TEXTURE_IDS::INDUSTRIAL_BG,
+			SHADER_PROGRAM_IDS::TEXTURE,
+			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
+
+	auto ent2 = Entity();
+	registry.backgrounds.emplace(ent2);
+	registry.renderRequests.insert(
+		ent2,
+		{ TEXTURE_IDS::INDUSTRIAL_FAR_BUILDINGS,
+			SHADER_PROGRAM_IDS::TEXTURE,
+			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
+
+	auto ent3 = Entity();
+	registry.backgrounds.emplace(ent3);
+	registry.renderRequests.insert(
+		ent3,
+		{ TEXTURE_IDS::INDUSTRIAL_BUILDINGS,
+			SHADER_PROGRAM_IDS::TEXTURE,
+			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
+
+	auto ent4 = Entity();
+	registry.backgrounds.emplace(ent4);
+	registry.renderRequests.insert(
+		ent4,
+		{ TEXTURE_IDS::INDUSTRIAL_FOREGROUND,
 			SHADER_PROGRAM_IDS::TEXTURE,
 			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
 }
 
-void Map::readMapFromFile() {
-	const string mapName = "map1.txt";
+
+void MapSystem::Map::readMapFromFile() {
+	string fileName;
+	switch (name) {
+	case MAPS::INDUSTRIAL: {
+		fileName = "map1.txt";
+	}
+	default: {
+		fileName = "map1.txt";
+	}
+	}
+
 	ifstream infile;
-	infile.open(std::string(PROJECT_SOURCE_DIR) + "assets/maps/" + mapName);
+	infile.open(std::string(PROJECT_SOURCE_DIR) + "assets/maps/" + fileName);
 
 	if (!infile) {
 		std::cerr << "Unable to open file\n" << std::endl;
@@ -85,21 +128,4 @@ void Map::readMapFromFile() {
 	}
 
 	infile.close();
-
-	// cout << "\n";
-	// for (int y = 0; y < mapHeight; y++) {
-	// 	for (int x = 0; x < mapWidth; x++) {
-	// 		cout << tileMap[y][x] << " ";
-	// 	}
-	// 	cout << endl;
-	// }
-}
-
-
-std::vector<std::vector<unsigned int>> Map::getTileMap() {
-	return tileMap;
-}
-
-void Map::updateTileMap() {
-	(void)tileMap;
 }

@@ -56,8 +56,8 @@ bool circle_collision(const Motion& motion, const Motion& motion2) {
 
 void project_vertices(std::vector<vec2> box_vertices, vec2 axis, OUT float& min, OUT float& max) {
 
-	min = 99999999;
-	max = -99999999;
+	min = 99999999.0f;
+	max = -99999999.0f;
 
 	for (uint i = 0; i < box_vertices.size(); i++) {
 
@@ -260,7 +260,10 @@ void PhysicsSystem :: applyMotions(float elapsed_ms) {
 			if (registry.rigidBodies.has(entity)) {
 				Rigidbody& rb = registry.rigidBodies.get(entity);
 				if (rb.type == KINEMATIC) {
-					//TODO
+					//we are applying gravity forces here
+					applyForce(entity, GRAVITY_FORCE);
+					//sum of Forces + inv(mass) + deltaTime
+					motion.velocity = rb.force_accumulator * (1.0f / rb.mass) * elapsed_ms;
 				}
 				if (rb.type == STATIC) {
 					motion.velocity = vec2{ 0,0 };
@@ -281,9 +284,24 @@ void PhysicsSystem :: applyMotions(float elapsed_ms) {
 
 void PhysicsSystem::step(float elapsed_ms)
 {
+	fixed_update_accumulator += elapsed_ms - FIXED_UPDATE_STEP;
+	//printf("accumulator: %f\n", fixed_update_accumulator);
+
+	fixed_update();
+	if (fixed_update_accumulator >= FIXED_UPDATE_STEP) {
+		fixed_update();
+		fixed_update_accumulator = 0.0f;
+		printf("extra is being called fixed step\n");
+	}
+}
+
+void PhysicsSystem::fixed_update() {
 	transformBoxColliders();
 
-	applyMotions(elapsed_ms);
+	//1/60th of a second
+	applyMotions(FIXED_UPDATE_STEP);
+
+	transformChildedEntities();
 
 	transformBoxColliders();
 
@@ -314,4 +332,34 @@ void PhysicsSystem::moveBackEntity(Entity e, vec2 normal, float depth) {
 	Rigidbody& rb = registry.rigidBodies.get(e);
 	rb.collision_depth = depth;
 	rb.collision_normal = normal;
+}
+
+void  PhysicsSystem::applyForce(Entity e, glm::vec2 force) {
+
+	assert(registry.motions.has(e));
+	assert(registry.rigidBodies.has(e));
+
+	Rigidbody& rb = registry.rigidBodies.get(e);
+	rb.force_accumulator += force;
+
+}
+void PhysicsSystem::transformChildedEntities() {
+
+	for (Entity e : registry.parentEntities.entities) {
+
+		ChildEntities children = registry.parentEntities.get(e);
+
+		for (int i = 0; i < children.child_data_map.size(); i++) {
+			Motion& child_motion = registry.motions.get(children.child_data_map.at(i));
+			Motion anchor_motion = registry.motions.get(e);
+			if (anchor_motion.angle > 0.0f) {
+				child_motion.position = anchor_motion.position + vec2{ cos(anchor_motion.angle), sin(anchor_motion.angle) } * children.normal_dists.at(i);
+			}
+			else {
+				child_motion.position = anchor_motion.position + children.normal_dists.at(i);
+			}
+		}
+
+	}
+
 }

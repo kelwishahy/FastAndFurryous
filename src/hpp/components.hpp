@@ -1,4 +1,5 @@
 #pragma once
+#include <map>
 #include <hpp/tiny_ecs.hpp>
 #include <vector>
 #include <unordered_map>
@@ -6,43 +7,78 @@
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
+#include <string>
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // Component IDs
 ////////////////////////////////////////////////////////////////////////////////
 
-enum CharacterType {
-	CAT = 1,
-	DOG = 2,
-};
-
-enum AnimationType {
-	IDLE = 1,
-	WALKING = 2,
-	JUMPING = 3
-};
-
-//TODO add AI to the list of IDs
 enum class SHADER_PROGRAM_IDS {
 	ANIMATION,
 	TEXTURE,
 	WALL,
 	AI,
+	FONT,
 	TOTAL
 }; constexpr int shaderProgramCount = (int)SHADER_PROGRAM_IDS::TOTAL;
 
 enum class TEXTURE_IDS {
-	CAT_IDLE,
+	//Cat textures
+	CAT_SIDE_IDLE,
+	CAT_FRONT_IDLE,
 	CAT_WALK,
 	CAT_JUMP,
+	CAT_SIDE_BLINK,
+	CAT_FRONT_BLINK,
+	CAT_FRONT_ARM,
+	CAT_BACK_ARM,
+	CAT_HURT_FACE,
+	CAT_HURT,
+	CAT_DEAD,
+	// Dog Textures
+	DOG_FRONT_BLINK,
+	DOG_SIDE_BLINK,
+	DOG_FRONT_IDLE,
+	DOG_FRONT_ARM,
+	DOG_BACK_ARM,
+	DOG_WALK,
+	DOG_JUMP,
+	DOG_HURT,
+	DOG_HURT_FACE,
+	DOG_DEAD,
+	//
 	STONE,
+	// All Screens
 	BACKGROUND,
 	START_MENU,
-	//selectscreen
 	SELECT_MENU,
+	OPTIONS_MENU,
+	LEVELS_MENU,
+	// Start Menu Buttons
 	BUTTON1,
+	BUTTON2,
+	BUTTON3,
+	BUTTON4,
+	// Select Menu Buttons
 	BUTTONC,
+	BUTTOND,
+	// Tutorial Menu 
 	HOWTOMOVE,
+	// Option Menu Buttons
+	BUTTONR,
+	BUTTONL,
+	// Level Menu Buttons
+	BUTTONL1,
+	BUTTONL2,
+	BUTTONL3,
+	CAT_CROSSHAIR,
+	DOG_CROSSHAIR,
+	HEALTH_SQUARE,
+	INDUSTRIAL_BG,
+	INDUSTRIAL_FAR_BUILDINGS,
+	INDUSTRIAL_BUILDINGS,
+	INDUSTRIAL_FOREGROUND,
 	TOTAL
 }; constexpr int textureCount = (int)TEXTURE_IDS::TOTAL;
 
@@ -76,8 +112,9 @@ enum TILE_TYPES {
 
 enum MENU_TYPES {
 	START,
-	//selectscreen
-	SELECT
+	SELECT,
+	OPTIONS,
+	LEVELS
 };
 
 enum TEAM {
@@ -87,12 +124,18 @@ enum TEAM {
 	NPC_AI_TEAM
 };
 
-// Game components ------------------------------------------------------------
-
-struct Player {
-	TEAM team;
+enum UI_ELEMENT {
+	CROSSHAIR,
+	HEALTH_DISPLAY,
+	NAME
 };
 
+enum class MAPS {
+	INDUSTRIAL,
+	TOTAL
+}; constexpr int mapCount = (int)MAPS::TOTAL;
+
+// Game components ------------------------------------------------------------
 struct Background {
 	
 };
@@ -100,6 +143,10 @@ struct Background {
 struct Tile {
 	TILE_TYPES type;
 	glm::vec2 position;
+};
+
+struct Selected {
+	bool isSelected = true;
 };
 
 struct Health {
@@ -140,6 +187,7 @@ struct Rigidbody {
 	float mass = 1;
 	float collision_depth;
 	glm::vec2 collision_normal;
+	glm::vec2 force_accumulator;
 };
 
 struct RayCast {
@@ -152,17 +200,17 @@ struct WeaponBase {
 	float aim_angle;
 	float distance;
 	float area;
-	float aim_loc_x;
+	//float aim_loc_x;
 	float damage;
 	WEAPON_TYPES type;
 };
 
 struct Rifle : WeaponBase {
 	Rifle() { 
-		// pi/2
-		MAX_ANGLE = 1.4f;
-		//0
-		MIN_ANGLE = 0.0f;
+		//a little less than pi/2
+		MAX_ANGLE = 1.2f;
+		//a little more than 0
+		MIN_ANGLE = 0.2f;
 		// pi/4
 		// aim_angle = 0.7854f;
 		aim_angle = MIN_ANGLE;
@@ -181,11 +229,11 @@ struct Shotgun : WeaponBase {
 
 struct Projectile {
 	Entity origin;
-	glm::vec4 trajectoryAx;
+	/*glm::vec4 trajectoryAx;
 	glm::vec4 trajectoryAy;
-	float delta_time = 0;
-	float hit_radius;
-	glm::vec2 end_tangent;
+	float delta_time = 0;*/
+	//float hit_radius;
+	//glm::vec2 end_tangent;
 };
 
 // Stucture to store collision information
@@ -200,7 +248,48 @@ struct Clickable {
 	std::vector<std::function<void()>> callbacks;
 };
 
+struct ChildEntities {
+	std::map<int, Entity> child_data_map; //unfortunately putting Entity first causes an error
+	std::unordered_map<int, glm::vec2> normal_dists;
+	std::unordered_map<int, std::string> tags; //optional
+	std::unordered_map<int, glm::vec2>  original_dists; //opational, this me hackig stuff in
+	void remove_child(Entity e) {
+		for (int i = 0; i < child_data_map.size(); i++) {
+			if (child_data_map.at(i) == e) {
+				normal_dists.erase(i);
+				tags.erase(i);
+				original_dists.erase(i);
+				child_data_map.erase(i);
+				i--;
+			}
+		}
+	}
+};
+
+struct UIElement {
+	UI_ELEMENT element_type;
+};
+
+struct Cat {
+
+};
+
+struct Dog {
+
+};
+
+struct HealthBox {
+	Entity parent;
+	Entity text;
+};
+
 // Render components ----------------------------------------------------------
+
+struct TEXTURE_ANIM_CONSTANTS {
+	int NUM_FRAMES;
+	float FRAME_TEXTURE_WIDTH;
+	float TOTAL_FRAME_TIME;
+};
 
 // Single vertex vuffer element for textured sprites
 struct TexturedVertex {
@@ -237,11 +326,28 @@ struct MenuItem {
 };
 
 struct Animation {
-	int character = 1;
+	std::string name;
 	int frame = 0;
-	int animation_type = IDLE;
 	float frame_counter_ms = 100;
 	bool facingLeft = false;
+	int curr_frame = 0;
+	TEXTURE_IDS anim_state = TEXTURE_IDS::TOTAL;
+	//map of TEXTUREID to animation constants for shaders
+	std::unordered_map<TEXTURE_IDS, TEXTURE_ANIM_CONSTANTS> animation_states_constants;
+};
+
+
+struct Text {
+	std::string text;
+	glm::vec3 color;
+	glm::vec2 scale;
+};
+
+struct Glyph {
+	unsigned int textureID;  // ID handle of the glyph texture
+	glm::ivec2   size;       // Size of glyph
+	glm::ivec2   bearing;    // Offset from baseline to left/top of glyph
+	unsigned int advance;    // Offset to advance to next glyph
 };
 
 // Debug components ------------------------------------------------------------

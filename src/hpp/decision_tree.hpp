@@ -126,7 +126,7 @@ class Shoot : public Node {
 		blackboard->motion->velocity.x = 0;
 		blackboard->motion->velocity.y = -2.5;
 		for (int i = 0; i < 7; i++) {
-			blackboard->shootingSystem->aimDown(*blackboard->entity);
+			blackboard->shootingSystem->aimDown(*blackboard->entity, 0.05f);
 		}
 		blackboard->shootingSystem->shoot(*blackboard->entity);
 		return true;
