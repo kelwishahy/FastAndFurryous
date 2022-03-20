@@ -302,17 +302,17 @@ void WorldSystem::play_options(std::vector<std::function<void()>> callbacks) {
 	std::vector<std::function<void()>> onClick;
 	createMenu(MENU_TYPES::OPTIONS, 0.75);
 
-	vec2 pos1 = {(defaultResolution.x - 980.f) / defaultResolution.x * screenResolution.x, (335.f / defaultResolution.y) * screenResolution.y };
-	vec2 scale = { (1200.f / defaultResolution.x) * screenResolution.x, (800.f / defaultResolution.y) * screenResolution.y };
+	vec2 pos1 = {(defaultResolution.x - 980.f) / defaultResolution.x * screenResolution.x, (450.f / defaultResolution.y) * screenResolution.y };
+	vec2 scale = { (100.f / defaultResolution.x) * screenResolution.x, (100.f / defaultResolution.y) * screenResolution.y };
 	createButton(pos1, scale,TEXTURE_IDS::BUTTONL, onClick);
 
-	vec2 pos2 = {(defaultResolution.x - 900.f) / defaultResolution.x * screenResolution.x, (335.f / defaultResolution.y) * screenResolution.y };
+	vec2 pos2 = {(defaultResolution.x - 730.f) / defaultResolution.x * screenResolution.x, (450.f / defaultResolution.y) * screenResolution.y };
 	createButton(pos2, scale,TEXTURE_IDS::BUTTONR, onClick);
 		
-	vec2 pos3 = {(defaultResolution.x - 980.f) / defaultResolution.x * screenResolution.x, (550.f / defaultResolution.y) * screenResolution.y };
+	vec2 pos3 = {(defaultResolution.x - 980.f) / defaultResolution.x * screenResolution.x, (670.f / defaultResolution.y) * screenResolution.y };
 	createButton(pos3, scale,TEXTURE_IDS::BUTTONL, onClick);
 
-	vec2 pos4 = {(defaultResolution.x - 900.f) / defaultResolution.x * screenResolution.x, (550.f / defaultResolution.y) * screenResolution.y };
+	vec2 pos4 = {(defaultResolution.x - 730.f) / defaultResolution.x * screenResolution.x, (670.f / defaultResolution.y) * screenResolution.y };
 	createButton(pos4, scale,TEXTURE_IDS::BUTTONR, onClick);
 }
 
@@ -322,14 +322,14 @@ void WorldSystem::play_levels(std::vector<std::function<void()>> callbacks) {
 	std::vector<std::function<void()>> onClick;
 	createMenu(MENU_TYPES::LEVELS, 0.75);
 
-	vec2 pos1 = {(defaultResolution.x - 1100.f) / defaultResolution.x * screenResolution.x, (500.f / defaultResolution.y) * screenResolution.y };
-	vec2 scale = { (1200.f / defaultResolution.x) * screenResolution.x, (800.f / defaultResolution.y) * screenResolution.y };
+	vec2 pos1 = {(defaultResolution.x - 1400.f) / defaultResolution.x * screenResolution.x, (400.f / defaultResolution.y) * screenResolution.y };
+	vec2 scale = { (100.f / defaultResolution.x) * screenResolution.x, (100 / defaultResolution.y) * screenResolution.y };
 	createButton(pos1, scale,TEXTURE_IDS::BUTTONL1, onClick);
 
-	vec2 pos2 = {(defaultResolution.x - 800.f) / defaultResolution.x * screenResolution.x, (500.f / defaultResolution.y) * screenResolution.y };
+	vec2 pos2 = {(defaultResolution.x - 1000.f) / defaultResolution.x * screenResolution.x, (400.f / defaultResolution.y) * screenResolution.y };
 	createButton(pos2, scale,TEXTURE_IDS::BUTTONL2, onClick);
 
-	vec2 pos3 = {(defaultResolution.x - 500.f) / defaultResolution.x * screenResolution.x, (500.f / defaultResolution.y) * screenResolution.y };
+	vec2 pos3 = {(defaultResolution.x - 600.f) / defaultResolution.x * screenResolution.x, (400.f / defaultResolution.y) * screenResolution.y };
 	createButton(pos3, scale,TEXTURE_IDS::BUTTONL3, onClick);
 
 }
