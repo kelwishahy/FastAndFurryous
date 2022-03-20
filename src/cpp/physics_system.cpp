@@ -350,13 +350,16 @@ void PhysicsSystem::transformChildedEntities() {
 		ChildEntities children = registry.parentEntities.get(e);
 
 		for (int i = 0; i < children.child_data_map.size(); i++) {
-			Motion& child_motion = registry.motions.get(children.child_data_map.at(i));
-			Motion anchor_motion = registry.motions.get(e);
-			if (anchor_motion.angle > 0.0f) {
-				child_motion.position = anchor_motion.position + vec2{ cos(anchor_motion.angle), sin(anchor_motion.angle) } * children.normal_dists.at(i);
-			}
-			else {
-				child_motion.position = anchor_motion.position + children.normal_dists.at(i);
+			Entity child = children.child_data_map.at(i);
+			if (registry.motions.has(children.child_data_map.at(i))) {
+				Motion& child_motion = registry.motions.get(children.child_data_map.at(i));
+				Motion anchor_motion = registry.motions.get(e);
+				if (anchor_motion.angle > 0.0f) {
+					child_motion.position = anchor_motion.position + vec2{ cos(anchor_motion.angle), sin(anchor_motion.angle) } *children.normal_dists.at(i);
+				}
+				else {
+					child_motion.position = anchor_motion.position + children.normal_dists.at(i);
+				}
 			}
 		}
 

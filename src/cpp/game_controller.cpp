@@ -177,7 +177,7 @@ void GameController::init_player_teams() {
 	// Init the player team
 	// If our game gets more complex I'd probably abstract this out an have an Entity hierarchy -Fred
 	for (int i = 0; i < numPlayersInTeam; i++) {
-		Entity player_cat = createDog(renderer, { width / 2 - 200, height - 400 });
+		Entity player_cat = createCat(renderer, { width / 2 - 200, height - 400 });
 		player1_team.push_back(player_cat);
 		curr_selected_char = player_cat;
 	}
@@ -266,7 +266,7 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 
 	//Only allowed to move on specified turn
 	if (game_state.turn_possesion == PLAYER1 && inAGame) {
-		if (registry.dogs.has(curr_selected_char)) {
+		if (registry.cats.has(curr_selected_char)) {
 			Motion& catMotion = registry.motions.get(curr_selected_char);
 			Rigidbody& rb = registry.rigidBodies.get(curr_selected_char);
 
@@ -280,21 +280,21 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 						rb.collision_normal.y = 0;
 						player_mode = PLAYER_MODE::MOVING;
 						AnimationSystem::animate_cat_jump(curr_selected_char);
-						AnimationSystem::animate_dog_jump(curr_selected_char);
+						//AnimationSystem::animate_dog_jump(curr_selected_char);
 						ui.hide_crosshair();
 					}
 				}
 				if (key == GLFW_KEY_D) {
 					catMotion.velocity.x = current_speed;
 					AnimationSystem::animate_cat_walk(curr_selected_char);
-					AnimationSystem::animate_dog_walk(curr_selected_char);
+					//AnimationSystem::animate_dog_walk(curr_selected_char);
 					player_mode = PLAYER_MODE::MOVING;
 					ui.hide_crosshair();
 				}
 				if (key == GLFW_KEY_A) {
 					catMotion.velocity.x = -current_speed;
 					AnimationSystem::animate_cat_walk(curr_selected_char);
-					AnimationSystem::animate_dog_walk(curr_selected_char);
+					//AnimationSystem::animate_dog_walk(curr_selected_char);
 					player_mode = PLAYER_MODE::MOVING;
 					ui.hide_crosshair();
 				}
@@ -311,14 +311,14 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 				if (key == GLFW_KEY_A && catMotion.velocity.x < 0) {
 					catMotion.velocity.x = 0.0f;
 					AnimationSystem::animate_cat_idle(curr_selected_char);
-					AnimationSystem::animate_dog_idle(curr_selected_char);
+					//AnimationSystem::animate_dog_idle(curr_selected_char);
 					player_mode = PLAYER_MODE::SHOOTING;
 					ui.show_crosshair(curr_selected_char);
 				}
 				if (key == GLFW_KEY_D && catMotion.velocity.x > 0) {
 					catMotion.velocity.x = 0.0f;
 					AnimationSystem::animate_cat_idle(curr_selected_char);
-					AnimationSystem::animate_dog_idle(curr_selected_char);
+					//AnimationSystem::animate_dog_idle(curr_selected_char);
 					player_mode = PLAYER_MODE::SHOOTING;
 					ui.show_crosshair(curr_selected_char);
 				}

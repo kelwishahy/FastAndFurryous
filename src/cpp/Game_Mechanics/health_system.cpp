@@ -9,11 +9,11 @@ void decreaseHealth(Entity entity, int amount, Entity hurtEntity) {
 	health = (health - amount >= 0) ? health - amount : 0;
 	if (health == 0) {
 		AnimationSystem::animate_cat_dead(hurtEntity);
-		AnimationSystem::animate_dog_dead(hurtEntity);
+		//AnimationSystem::animate_dog_dead(hurtEntity);
 	}
 	else {
 		AnimationSystem::animate_cat_hurt(hurtEntity);
-		AnimationSystem::animate_dog_hurt(hurtEntity);
+		//AnimationSystem::animate_dog_hurt(hurtEntity);
 	}
 	audio.play_sfx(SOUND_EFFECTS::CAT_SCREAM);
 }

@@ -129,7 +129,9 @@ void AnimationSystem::animate_cat_hurt(Entity e) {
 }
 
 void AnimationSystem::animate_cat_dead(Entity e) {
-
+	remove_children(e);
+	change_animation(e, TEXTURE_IDS::CAT_DEAD);
+	registry.cats.remove(e);
 }
 
 void AnimationSystem::animate_dog_idle(Entity e) {
@@ -142,8 +144,6 @@ void AnimationSystem::animate_dog_idle(Entity e) {
 		if (extra.name == "dog_head") {
 			//Animate the head
 			change_animation(rig, TEXTURE_IDS::DOG_FRONT_BLINK);
-			// change position of the head if looking left
-
 		}
 
 	}
@@ -161,12 +161,6 @@ void AnimationSystem::animate_dog_walk(Entity e) {
 		if (extra.name == "dog_head") {
 			//Animate the head
 			change_animation(rig, TEXTURE_IDS::DOG_SIDE_BLINK);
-			if (extra.facingLeft) {
-				ChildEntities& children = registry.parentEntities.get(e);
-				Entity headEntity = children.child_data_map.at(0); 
-				Motion& dogHeadMotion = registry.motions.get(headEntity);
-				dogHeadMotion.position = { -20.5f, -51.0f }; // not sure why this is not modifying
-			}
 		}
 	}
 }
@@ -181,7 +175,6 @@ void AnimationSystem::animate_dog_jump(Entity e) {
 		if (extra.name == "dog_head") {
 			//Animate the head
 			change_animation(rig, TEXTURE_IDS::DOG_FRONT_BLINK);
-			// change position of the head if looking left
 		}
 
 	}
@@ -197,7 +190,6 @@ void AnimationSystem::animate_dog_hurt(Entity e) {
 		if (extra.name == "dog_head") {
 			//Animate the head
 			change_animation(rig, TEXTURE_IDS::DOG_HURT_FACE);
-			// change position of the head if looking left
 		}
 
 	}
@@ -205,9 +197,9 @@ void AnimationSystem::animate_dog_hurt(Entity e) {
 
 void AnimationSystem::animate_dog_dead(Entity e) {
 	
-	// remove_children should remove the components of the child as well, not sure why it doesn't work.
 	remove_children(e);
 	change_animation(e, TEXTURE_IDS::DOG_DEAD);
+	registry.dogs.remove(e);
 }
 //
 void AnimationSystem::update_anim_orientation() {
@@ -227,11 +219,17 @@ void AnimationSystem::update_anim_orientation() {
 						else {
 							children.normal_dists[j].x = children.original_dists[j].x;
 						}
+					} else if (child.name == "dog_head" || child.name == "dog_front_arm" || child.name == "dog_back_arm") {
+						if (child.facingLeft == true) {
+							children.normal_dists[j].x = -children.original_dists[j].x;
+						}
+						else {
+							children.normal_dists[j].x = children.original_dists[j].x;
+						}
 					}
 				}
 			}
 		}
-
 	}
 }
 
