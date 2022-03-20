@@ -400,7 +400,7 @@ Entity createButton(vec2 pos, vec2 scale, TEXTURE_IDS tex_id, std::vector<std::f
 
 }
 
-Entity createText(::TextManager& textManager, std::string text, vec2 pos, float scale, glm::vec3 color) {
+Entity createText(TextManager& textManager, std::string text, vec2 pos, float scale, glm::vec3 color) {
 	const auto entity = Entity();
 
 	// Setting initial motion values
