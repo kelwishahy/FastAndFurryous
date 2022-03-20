@@ -2,7 +2,6 @@
 #include <hpp/render_system.hpp>
 #include <hpp/physics_system.hpp>
 #include <hpp/world_system.hpp>
-#include <hpp/ai_system.hpp>
 
 // stlib
 #include <chrono>

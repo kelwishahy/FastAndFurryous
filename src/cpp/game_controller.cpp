@@ -49,6 +49,8 @@ void GameController::init(GLFWwindow* window, MapSystem::Map& map, OrthographicC
 	ui.init(textManager);
 
 	turnIndicatorScale = scaleToScreenResolution({ 2.0f, 2.f }).x;
+	turnIndicator = createText(textManager, "", turnPosition, turnIndicatorScale, redColor);
+
 	timerScale = scaleToScreenResolution({ 1.5f, 1.5f }).x;
 	timeIndicator = createText(textManager, "", scaleToScreenResolution({ 2 * defaultResolution.x / 4.f + camera.getPosition().x, 110.0f }), timerScale, { 0.172f, 0.929f, 0.286f });
 }
@@ -62,9 +64,15 @@ void GameController::step(float elapsed_ms) {
 	handle_collisions();
 
 	turnPosition = scaleToScreenResolution({ 2 * defaultResolution.x / 4.f + camera.getPosition().x,  30.0f });
+	auto& turnIndicatorText = registry.texts.get(turnIndicator);
+	auto& turnIndicatorPosition = registry.motions.get(turnIndicator).position;
+
 	if (game_state.turn_possesion == PLAYER1) {
-		registry.remove_all_components_of(turnIndicator);
-		turnIndicator = createText(textManager, "PLAYER 1'S TURN", turnPosition, turnIndicatorScale, redColor);
+		turnIndicatorText.text = "PLAYER 1'S TURN";
+		turnIndicatorPosition = turnPosition;
+		turnIndicatorPosition.x = turnIndicatorPosition.x - turnIndicatorText.scale.x / 2.f;
+		turnIndicatorText.color = redColor;
+
 		for (Entity e : player1_team) {
 			auto& selected = registry.selected.get(e).isSelected;
 			selected = true;
@@ -95,14 +103,18 @@ void GameController::step(float elapsed_ms) {
 		}
 
 	} else if (game_state.turn_possesion == PLAYER2) {
-		registry.remove_all_components_of(turnIndicator);
-		turnIndicator = createText(textManager, "PLAYER 2'S TURN", turnPosition, turnIndicatorScale, blueColor);
+		turnIndicatorText.text = "PLAYER 2'S TURN";
+		turnIndicatorPosition = turnPosition;
+		turnIndicatorPosition.x = turnIndicatorPosition.x - turnIndicatorText.scale.x / 2.f;
 	} else if (game_state.turn_possesion == AI) {
-		registry.remove_all_components_of(turnIndicator);
-		turnIndicator = createText(textManager, "COMPUTER'S TURN", turnPosition, turnIndicatorScale, darkGreenColor);
+		turnIndicatorText.text = "COMPUTER'S TURN";
+		turnIndicatorPosition = turnPosition;
+		turnIndicatorPosition.x = turnIndicatorPosition.x - turnIndicatorText.scale.x / 2.f;
 	} else if (game_state.turn_possesion == NPCAI_TURN) {
-		registry.remove_all_components_of(turnIndicator);
-		turnIndicator = createText(textManager, "COMPUTER'S TURN", turnPosition, turnIndicatorScale, darkGreenColor);
+		turnIndicatorText.text = "COMPUTER'S TURN";
+		turnIndicatorPosition = turnPosition;
+		turnIndicatorPosition.x = turnIndicatorPosition.x - turnIndicatorText.scale.x / 2.f;
+		turnIndicatorText.color = darkGreenColor;
 
 		for (Entity e : player1_team) {
 			auto& selected = registry.selected.get(e).isSelected;
