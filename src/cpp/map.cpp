@@ -62,50 +62,86 @@ void MapSystem::Map::build() {
 		}
 	}
 
-	// Set the background image
-	auto ent = Entity();
-	registry.backgrounds.emplace(ent);
-	registry.renderRequests.insert(
-		ent,
-		{ TEXTURE_IDS::INDUSTRIAL_BG,
-			SHADER_PROGRAM_IDS::TEXTURE,
-			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
+	switch (name) {
+		case MAPS::INDUSTRIAL: {
+			// Set the background image
+			auto ent = Entity();
+			registry.backgrounds.emplace(ent);
+			registry.renderRequests.insert(
+				ent,
+				{ TEXTURE_IDS::INDUSTRIAL_BG,
+					SHADER_PROGRAM_IDS::TEXTURE,
+					GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
 
-	auto ent2 = Entity();
-	registry.backgrounds.emplace(ent2);
-	registry.renderRequests.insert(
-		ent2,
-		{ TEXTURE_IDS::INDUSTRIAL_FAR_BUILDINGS,
-			SHADER_PROGRAM_IDS::TEXTURE,
-			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
+			auto ent2 = Entity();
+			registry.backgrounds.emplace(ent2);
+			registry.renderRequests.insert(
+				ent2,
+				{ TEXTURE_IDS::INDUSTRIAL_FAR_BUILDINGS,
+					SHADER_PROGRAM_IDS::TEXTURE,
+					GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
 
-	auto ent3 = Entity();
-	registry.backgrounds.emplace(ent3);
-	registry.renderRequests.insert(
-		ent3,
-		{ TEXTURE_IDS::INDUSTRIAL_BUILDINGS,
-			SHADER_PROGRAM_IDS::TEXTURE,
-			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
+			auto ent3 = Entity();
+			registry.backgrounds.emplace(ent3);
+			registry.renderRequests.insert(
+				ent3,
+				{ TEXTURE_IDS::INDUSTRIAL_BUILDINGS,
+					SHADER_PROGRAM_IDS::TEXTURE,
+					GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
 
-	auto ent4 = Entity();
-	registry.backgrounds.emplace(ent4);
-	registry.renderRequests.insert(
-		ent4,
-		{ TEXTURE_IDS::INDUSTRIAL_FOREGROUND,
-			SHADER_PROGRAM_IDS::TEXTURE,
-			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
+			auto ent4 = Entity();
+			registry.backgrounds.emplace(ent4);
+			registry.renderRequests.insert(
+				ent4,
+				{ TEXTURE_IDS::INDUSTRIAL_FOREGROUND,
+					SHADER_PROGRAM_IDS::TEXTURE,
+					GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
+			break;
+		}
+		case MAPS::FOREST: {
+			auto ent = Entity();
+			registry.backgrounds.emplace(ent);
+			registry.renderRequests.insert(
+				ent,
+				{ TEXTURE_IDS::FOREST,
+					SHADER_PROGRAM_IDS::TEXTURE,
+					GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
+			break;
+		}
+		case MAPS::SPACE: {
+			auto ent = Entity();
+			registry.backgrounds.emplace(ent);
+			registry.renderRequests.insert(
+				ent,
+				{ TEXTURE_IDS::SPACE,
+					SHADER_PROGRAM_IDS::TEXTURE,
+					GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
+			break;
+		}
+		default: {
+		}
+	}
 }
 
 
 void MapSystem::Map::readMapFromFile() {
 	string fileName;
 	switch (name) {
-	case MAPS::INDUSTRIAL: {
-		fileName = "map1.txt";
-	}
-	default: {
-		fileName = "map1.txt";
-	}
+		case MAPS::INDUSTRIAL: {
+			fileName = "map1.txt";
+			break;
+		}
+		case MAPS::FOREST: {
+			fileName = "map2.txt";
+			break;
+		}
+		case MAPS::SPACE: {
+			fileName = "map3.txt";
+			break;
+		}
+		default: {
+			fileName = "map1.txt";
+		}
 	}
 
 	ifstream infile;

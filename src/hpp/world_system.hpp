@@ -62,7 +62,7 @@ public:
 
 private:
 	// restart level it was in the private 
-	void restart_game();
+	void restart_game(MAPS maps);
 
 	void init_main_menu();
 
