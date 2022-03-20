@@ -1,10 +1,12 @@
 #pragma once
 
+#include "ANIMATION_CONSTANTS.hpp"
+#include "ANIMATION_CONSTANTS.hpp"
 #include "components.hpp"
 #include "render_system.hpp"
 
 // Player entities
-Entity createCat(glm::vec2 pos);
+Entity createCat(::WEAPON_TYPES weapon, ::TEAM alignment, glm::vec2 pos, int health);
 
 // Player entities
 Entity createDog(glm::vec2 pos);

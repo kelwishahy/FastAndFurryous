@@ -18,7 +18,7 @@ void calculateBoxVerticesAndSetTriangles(vec2 pos, vec2 scale, Boxcollider& box)
 	box.vertices.push_back(pos + vec2{ left, down }); //downleft
 }
 
-Entity createCat(vec2 pos) {
+Entity createCat(WEAPON_TYPES weapon, TEAM alignment, vec2 pos, int health) {
 	auto head = Entity();
 	auto frontArm = Entity();
 	const auto entity = Entity();
@@ -105,7 +105,9 @@ Entity createCat(vec2 pos) {
 			SHADER_PROGRAM_IDS::ANIMATION,
 			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
 
-	registry.weapons.insert(entity, Rifle());
+	if (weapon == WEAPON_TYPES::RIFLE) {
+		registry.weapons.insert(entity, Rifle());
+	}
 
 	Animation& anim = registry.animations.emplace(entity);
 	anim.animation_states_constants.insert({TEXTURE_IDS::CAT_FRONT_IDLE, CAT_IDLE_CONSTANTS});
