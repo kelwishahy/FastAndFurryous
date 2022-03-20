@@ -6,6 +6,8 @@
 
 #include <glm/vec2.hpp>	
 #include <hpp/tiny_ecs_registry.hpp>
+#include <hpp/world_init.hpp>
+
 
 GameController::GameController() {
 	inAGame = false;
@@ -175,7 +177,7 @@ void GameController::init_player_teams() {
 	// Init the player team
 	// If our game gets more complex I'd probably abstract this out an have an Entity hierarchy -Fred
 	for (int i = 0; i < numPlayersInTeam; i++) {
-		Entity player_cat = createCat(renderer, { width / 2 - 200, height - 400 });
+		Entity player_cat = createDog(renderer, { width / 2 - 200, height - 400 });
 		player1_team.push_back(player_cat);
 		curr_selected_char = player_cat;
 	}
@@ -236,8 +238,9 @@ void GameController::handle_collisions() {
 						if (e == entity_other) 
 							entity_other_isonteam = true;
 					}
-					if (origin_isonteam && !entity_other_isonteam)
-						decreaseHealth(entity_other, registry.weapons.get(pj.origin).damage);
+					if (origin_isonteam && !entity_other_isonteam) {
+						decreaseHealth(entity_other, registry.weapons.get(pj.origin).damage, curr_selected_char);
+					}
 				}
 				registry.remove_all_components_of(entity);
 			}
@@ -263,7 +266,7 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 
 	//Only allowed to move on specified turn
 	if (game_state.turn_possesion == PLAYER1 && inAGame) {
-		if (registry.cats.has(curr_selected_char)) {
+		if (registry.dogs.has(curr_selected_char)) {
 			Motion& catMotion = registry.motions.get(curr_selected_char);
 			Rigidbody& rb = registry.rigidBodies.get(curr_selected_char);
 
@@ -276,18 +279,22 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 						catMotion.velocity.y = -gravity_force * current_speed;
 						rb.collision_normal.y = 0;
 						player_mode = PLAYER_MODE::MOVING;
+						AnimationSystem::animate_cat_jump(curr_selected_char);
+						AnimationSystem::animate_dog_jump(curr_selected_char);
 						ui.hide_crosshair();
 					}
 				}
 				if (key == GLFW_KEY_D) {
 					catMotion.velocity.x = current_speed;
 					AnimationSystem::animate_cat_walk(curr_selected_char);
+					AnimationSystem::animate_dog_walk(curr_selected_char);
 					player_mode = PLAYER_MODE::MOVING;
 					ui.hide_crosshair();
 				}
 				if (key == GLFW_KEY_A) {
 					catMotion.velocity.x = -current_speed;
 					AnimationSystem::animate_cat_walk(curr_selected_char);
+					AnimationSystem::animate_dog_walk(curr_selected_char);
 					player_mode = PLAYER_MODE::MOVING;
 					ui.hide_crosshair();
 				}
@@ -304,12 +311,14 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 				if (key == GLFW_KEY_A && catMotion.velocity.x < 0) {
 					catMotion.velocity.x = 0.0f;
 					AnimationSystem::animate_cat_idle(curr_selected_char);
+					AnimationSystem::animate_dog_idle(curr_selected_char);
 					player_mode = PLAYER_MODE::SHOOTING;
 					ui.show_crosshair(curr_selected_char);
 				}
 				if (key == GLFW_KEY_D && catMotion.velocity.x > 0) {
 					catMotion.velocity.x = 0.0f;
 					AnimationSystem::animate_cat_idle(curr_selected_char);
+					AnimationSystem::animate_dog_idle(curr_selected_char);
 					player_mode = PLAYER_MODE::SHOOTING;
 					ui.show_crosshair(curr_selected_char);
 				}

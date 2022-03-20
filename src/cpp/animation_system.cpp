@@ -109,9 +109,7 @@ void AnimationSystem::animate_cat_jump(Entity e) {
 		if (extra.name == "cat_head") {
 			//Animate the head
 			change_animation(rig, TEXTURE_IDS::CAT_FRONT_BLINK);
-			// change position of the head if looking left
 		}
-
 	}
 }
 
@@ -125,7 +123,6 @@ void AnimationSystem::animate_cat_hurt(Entity e) {
 		if (extra.name == "cat_head") {
 			//Animate the head
 			change_animation(rig, TEXTURE_IDS::CAT_HURT_FACE);
-			// change position of the head if looking left
 		}
 
 	}
@@ -144,8 +141,9 @@ void AnimationSystem::animate_dog_idle(Entity e) {
 		Animation& extra = registry.animations.get(rig);
 		if (extra.name == "dog_head") {
 			//Animate the head
-			change_animation(rig, TEXTURE_IDS::DOG_HURT_FACE);
+			change_animation(rig, TEXTURE_IDS::DOG_FRONT_BLINK);
 			// change position of the head if looking left
+
 		}
 
 	}
@@ -163,6 +161,12 @@ void AnimationSystem::animate_dog_walk(Entity e) {
 		if (extra.name == "dog_head") {
 			//Animate the head
 			change_animation(rig, TEXTURE_IDS::DOG_SIDE_BLINK);
+			if (extra.facingLeft) {
+				ChildEntities& children = registry.parentEntities.get(e);
+				Entity headEntity = children.child_data_map.at(0); 
+				Motion& dogHeadMotion = registry.motions.get(headEntity);
+				dogHeadMotion.position = { -20.5f, -51.0f }; // not sure why this is not modifying
+			}
 		}
 	}
 }
@@ -200,7 +204,10 @@ void AnimationSystem::animate_dog_hurt(Entity e) {
 }
 
 void AnimationSystem::animate_dog_dead(Entity e) {
-
+	
+	// remove_children should remove the components of the child as well, not sure why it doesn't work.
+	remove_children(e);
+	change_animation(e, TEXTURE_IDS::DOG_DEAD);
 }
 //
 void AnimationSystem::update_anim_orientation() {

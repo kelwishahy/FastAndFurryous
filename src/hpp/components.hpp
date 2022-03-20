@@ -352,3 +352,5 @@ extern Debug debugging;
 struct DebugComponent {
 	// Note, an empty struct has size 1
 };
+
+void remove_children(Entity e);
