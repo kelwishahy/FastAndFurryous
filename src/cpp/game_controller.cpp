@@ -6,6 +6,8 @@
 
 #include <glm/vec2.hpp>	
 #include <hpp/tiny_ecs_registry.hpp>
+#include <hpp/world_init.hpp>
+
 
 GameController::GameController() {
 	inAGame = false;
@@ -47,6 +49,12 @@ void GameController::init(GLFWwindow* window, MapSystem::Map& map, OrthographicC
 	//TEST TEXT
 	ai.init(shooting_system);
 	ui.init(textManager);
+
+	turnIndicatorScale = scaleToScreenResolution({ 2.0f, 2.f }).x;
+	turnIndicator = createText(textManager, "", turnPosition, turnIndicatorScale, redColor);
+
+	timerScale = scaleToScreenResolution({ 1.5f, 1.5f }).x;
+	timeIndicator = createText(textManager, "", scaleToScreenResolution({ 2 * defaultResolution.x / 4.f + this->camera->getPosition().x, 110.0f }), timerScale, { 0.172f, 0.929f, 0.286f });
 }
 
 void GameController::step(float elapsed_ms) {
@@ -57,14 +65,16 @@ void GameController::step(float elapsed_ms) {
 
 	handle_collisions();
 
-	vec3 redColor = { 1.0, 0.0f, 0.0f };
-	vec3 blueColor = { 0.0, 0.0f, 1.0f };
-	vec3 darkGreenColor = { 0.0f, 0.4f, 0.0f };
-	vec2 turnPosition = scaleToScreenResolution({ 2 * defaultResolution.x /4.f + camera->getPosition().x,  30.0f });
+	turnPosition = scaleToScreenResolution({ 2 * defaultResolution.x / 4.f + camera->getPosition().x,  30.0f });
+	auto& turnIndicatorText = registry.texts.get(turnIndicator);
+	auto& turnIndicatorPosition = registry.motions.get(turnIndicator).position;
 
 	if (game_state.turn_possesion == PLAYER1) {
-		registry.remove_all_components_of(turnIndicator);
-		turnIndicator = createText(textManager, "PLAYER 1'S TURN", turnPosition, scaleToScreenResolution({ 2.0f, 2.f }).x, redColor);
+		turnIndicatorText.text = "PLAYER 1'S TURN";
+		turnIndicatorPosition = turnPosition;
+		turnIndicatorPosition.x = turnIndicatorPosition.x - turnIndicatorText.scale.x / 2.f;
+		turnIndicatorText.color = redColor;
+
 		for (Entity e : player1_team) {
 			auto& selected = registry.selected.get(e).isSelected;
 			selected = true;
@@ -95,14 +105,18 @@ void GameController::step(float elapsed_ms) {
 		}
 
 	} else if (game_state.turn_possesion == PLAYER2) {
-		registry.remove_all_components_of(turnIndicator);
-		turnIndicator = createText(textManager, "PLAYER 2'S TURN", turnPosition, 2.0f, blueColor);
+		turnIndicatorText.text = "PLAYER 2'S TURN";
+		turnIndicatorPosition = turnPosition;
+		turnIndicatorPosition.x = turnIndicatorPosition.x - turnIndicatorText.scale.x / 2.f;
 	} else if (game_state.turn_possesion == AI) {
-		registry.remove_all_components_of(turnIndicator);
-		turnIndicator = createText(textManager, "COMPUTER'S TURN", turnPosition, 2.0f, darkGreenColor);
+		turnIndicatorText.text = "COMPUTER'S TURN";
+		turnIndicatorPosition = turnPosition;
+		turnIndicatorPosition.x = turnIndicatorPosition.x - turnIndicatorText.scale.x / 2.f;
 	} else if (game_state.turn_possesion == NPCAI_TURN) {
-		registry.remove_all_components_of(turnIndicator);
-		turnIndicator = createText(textManager, "COMPUTER'S TURN", turnPosition, 2.0f, darkGreenColor);
+		turnIndicatorText.text = "COMPUTER'S TURN";
+		turnIndicatorPosition = turnPosition;
+		turnIndicatorPosition.x = turnIndicatorPosition.x - turnIndicatorText.scale.x / 2.f;
+		turnIndicatorText.color = darkGreenColor;
 
 		for (Entity e : player1_team) {
 			auto& selected = registry.selected.get(e).isSelected;
@@ -192,7 +206,7 @@ void GameController::step(float elapsed_ms) {
 }
 
 void GameController::decrementTurnTime(float elapsed_ms) {
-	registry.remove_all_components_of(timeIndicator);
+	// registry.remove_all_components_of(timeIndicator);
 	uint timePerTurnSec = uint(timePerTurnMs / 1000);
 	if (timePerTurnMs <= 0) {
 		next_turn();
@@ -200,7 +214,11 @@ void GameController::decrementTurnTime(float elapsed_ms) {
 	} else {
 		timePerTurnMs -= elapsed_ms;
 	}
-	timeIndicator = createText(textManager, std::to_string(timePerTurnSec) + " seconds left!", scaleToScreenResolution({ 2 * defaultResolution.x / 4.f + camera->getPosition().x, 110.0f }), scaleToScreenResolution({ 1.5f, 1.5f }).x, { 0.172f, 0.929f, 0.286f });
+	auto& timerPosition = registry.motions.get(timeIndicator);
+	auto& timerText = registry.texts.get(timeIndicator);
+	timerText.text = std::to_string(timePerTurnSec) + " seconds left!";
+	timerPosition.position = scaleToScreenResolution({ 2 * defaultResolution.x / 4.f + camera->getPosition().x, 110.0f });
+	timerPosition.position.x = timerPosition.position.x - timerText.scale.x / 2.f;
 }
 
 
@@ -298,8 +316,9 @@ void GameController::handle_collisions() {
 						if (e == entity_other) 
 							entity_other_isonteam = true;
 					}
-					if (origin_isonteam && !entity_other_isonteam)
-						decreaseHealth(entity_other, registry.weapons.get(pj.origin).damage);
+					if (origin_isonteam && !entity_other_isonteam) {
+						decreaseHealth(entity_other, registry.weapons.get(pj.origin).damage, curr_selected_char);
+					}
 				}
 				registry.remove_all_components_of(entity);
 			}
@@ -337,18 +356,22 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 						catMotion.velocity.y = -gravity_force * current_speed;
 						rb.collision_normal.y = 0;
 						player_mode = PLAYER_MODE::MOVING;
+						AnimationSystem::animate_cat_jump(curr_selected_char);
+						//AnimationSystem::animate_dog_jump(curr_selected_char);
 						ui.hide_crosshair();
 					}
 				}
 				if (key == GLFW_KEY_D) {
 					catMotion.velocity.x = current_speed;
 					AnimationSystem::animate_cat_walk(curr_selected_char);
+					//AnimationSystem::animate_dog_walk(curr_selected_char);
 					player_mode = PLAYER_MODE::MOVING;
 					ui.hide_crosshair();
 				}
 				if (key == GLFW_KEY_A) {
 					catMotion.velocity.x = -current_speed;
 					AnimationSystem::animate_cat_walk(curr_selected_char);
+					//AnimationSystem::animate_dog_walk(curr_selected_char);
 					player_mode = PLAYER_MODE::MOVING;
 					ui.hide_crosshair();
 				}
@@ -365,12 +388,14 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 				if (key == GLFW_KEY_A && catMotion.velocity.x < 0) {
 					catMotion.velocity.x = 0.0f;
 					AnimationSystem::animate_cat_idle(curr_selected_char);
+					//AnimationSystem::animate_dog_idle(curr_selected_char);
 					player_mode = PLAYER_MODE::SHOOTING;
 					ui.show_crosshair(curr_selected_char);
 				}
 				if (key == GLFW_KEY_D && catMotion.velocity.x > 0) {
 					catMotion.velocity.x = 0.0f;
 					AnimationSystem::animate_cat_idle(curr_selected_char);
+					//AnimationSystem::animate_dog_idle(curr_selected_char);
 					player_mode = PLAYER_MODE::SHOOTING;
 					ui.show_crosshair(curr_selected_char);
 				}

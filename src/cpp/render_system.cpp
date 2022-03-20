@@ -7,14 +7,13 @@
 #include <hpp/tiny_ecs_registry.hpp>
 #include "glm/ext.hpp"
 #include <iostream>
-#include "../project_path.hpp"
 #include "hpp/ai_system.hpp"
 
 using namespace glm;
 vec2 screenResolution;
 
 void RenderSystem::draw(float elapsed_ms, WorldSystem& world) {
-	this->camera = &world.camera;
+	this->camera = &world.getCamera();
 	setTileMap(world.getCurrentGame().getGameMap());
 	animation_system.step(elapsed_ms);
 	glViewport(0, 0, screenWidth, screenHeight);

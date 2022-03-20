@@ -1,5 +1,6 @@
 #include "../hpp/components.hpp"
 #include "../hpp/render_system.hpp" // for gl_has_errors
+#include <hpp/tiny_ecs_registry.hpp>
 
 // stlib
 #include <iostream>
@@ -115,4 +116,16 @@ bool Mesh::loadMeshFromObj(std::string obj_path, std::vector<ColoredVertex>& out
 		pos.position = ((pos.position - min_position) / size3d) - glm::vec3(0.5f, 0.5f, 0.5f);
 
 	return true;
+}
+
+void remove_children(Entity e) {
+	if (registry.parentEntities.has(e)) {
+		const ChildEntities children = registry.parentEntities.get(e);
+
+		for (const auto& pair : children.child_data_map) {
+			remove_children(pair.second);
+			registry.remove_all_components_of(pair.second);
+		}
+	}
+
 }

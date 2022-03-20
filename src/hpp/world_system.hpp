@@ -56,7 +56,7 @@ public:
 
 	MapSystem& getMapSystem() { return this->mapSystem; }
 
-	OrthographicCamera camera;
+	OrthographicCamera& getCamera() { return this->camera; }
 
 	TextManager& getTextManager() { return this->textManager; }
 
@@ -84,4 +84,6 @@ private:
 	MapSystem mapSystem;
 
 	TextManager textManager;
+
+	OrthographicCamera camera;
 };

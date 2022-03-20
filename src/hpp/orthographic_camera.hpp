@@ -30,6 +30,6 @@ private:
 	glm::mat4 viewMatrix;
 	glm::mat4 viewProjectionMatrix;
 
-	glm::vec3 position;
+	glm::vec3 position = {0.f, 0.f, 0.f};
 	float rotationAngle = 0.f;
 };

@@ -96,10 +96,6 @@ private:
 
 	GameState game_state;
 
-	Entity turnIndicator;
-
-	Entity timeIndicator;
-
 	Entity curr_selected_char;
 
 	ShootingSystem shooting_system;
@@ -110,4 +106,15 @@ private:
 
 	uint numPlayersInTeam;
 	float timePerTurnMs;
+
+	// Turn indicators & turn timer
+	Entity timeIndicator;
+	float timerScale;
+
+	Entity turnIndicator;
+	float turnIndicatorScale;
+	glm::vec3 redColor = { 1.0, 0.0f, 0.0f };
+	glm::vec3 blueColor = { 0.0, 0.0f, 1.0f };
+	glm::vec3 darkGreenColor = { 0.0f, 0.4f, 0.0f };
+	glm::vec2 turnPosition;
 };
