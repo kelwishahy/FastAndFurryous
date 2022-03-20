@@ -1,4 +1,4 @@
-#include "hpp/common.hpp"
+#pragma once
 #include "hpp/components.hpp"
 
 TEXTURE_ANIM_CONSTANTS CAT_WALK_CONSTANTS{

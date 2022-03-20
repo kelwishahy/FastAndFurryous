@@ -261,6 +261,7 @@ void PhysicsSystem :: applyMotions(float elapsed_ms) {
 				Rigidbody& rb = registry.rigidBodies.get(entity);
 				if (rb.type == KINEMATIC) {
 					//we are applying gravity forces here
+
 					applyForce(entity, GRAVITY_FORCE);
 					//sum of Forces + inv(mass) + deltaTime
 					motion.velocity = rb.force_accumulator * (1.0f / rb.mass) * elapsed_ms;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "tiny_ecs.hpp"
+#include "components.hpp"
 #include "render_system.hpp"
 
 // Player entities
