@@ -68,7 +68,7 @@ void WorldSystem::restart_game() {
 		registry.remove_all_components_of(registry.motions.entities.back());
 
 	//Initialize current game
-	current_game.init(window, mapSystem.getMap(MAPS::INDUSTRIAL), camera, textManager);
+	current_game.init(window, mapSystem.getMap(MAPS::INDUSTRIAL), camera, textManager,);
 }
 
 void WorldSystem::handle_collisions() {

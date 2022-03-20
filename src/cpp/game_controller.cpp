@@ -6,7 +6,6 @@
 
 #include <glm/vec2.hpp>	
 #include <hpp/tiny_ecs_registry.hpp>
-#include <hpp/world_init.hpp>
 
 
 GameController::GameController() {
@@ -18,11 +17,12 @@ GameController::~GameController() {
 }
 
 //initialize stuff here
-void GameController::init(GLFWwindow* window, MapSystem::Map& map, OrthographicCamera& camera, TextManager& textManager) {
+void GameController::init(GLFWwindow* window, MapSystem::Map& map, OrthographicCamera& camera, TextManager& textManager, Game game) {
 	this->window = window;
 	this->gameMap = map;
 	this->camera = &camera;
 	this->textManager = textManager;
+	this->game_data = game;
 
 	//Init game metadata
 	game_state.turn_number += 1;
@@ -32,22 +32,19 @@ void GameController::init(GLFWwindow* window, MapSystem::Map& map, OrthographicC
 	build_map();
 
 	//Building the teams via json
-	numPlayersInTeam = 1; // Default number of players for each team
 	init_player_teams();
 
 	//Setting player key callback
 	//glfwSetWindowUserPointer(window, this);
 	set_user_input_callbacks();
 
+	timePerTurnMs = game_data.getTimer();
+
 	inAGame = true;
 	player_mode = PLAYER_MODE::MOVING;
 
-	this->timePerTurnMs = 20000.0;
-
 	ai.init(shooting_system);
 
-	//TEST TEXT
-	ai.init(shooting_system);
 	ui.init(textManager);
 
 	turnIndicatorScale = scaleToScreenResolution({ 2.0f, 2.f }).x;
@@ -237,29 +234,21 @@ void GameController::build_map() {
 
 void GameController::init_player_teams() {
 
-	if (numPlayersInTeam < 1) {
-		printf("CRITICAL ERROR: NO TEAMS CAN BE INITIALIZED");
-		assert(false);
+	for (Game::Character character : game_data.getCharacters()) {
+		Entity e = character.animal == ANIMAL::CAT ? createCat(character.weapon, character.starting_pos, character.health) : createDog(character.weapon, character.starting_pos, character.health);
+
+		if (character.alignment == TEAM::PLAYER_1_TEAM) {
+			player1_team.push_back(e);
+		} else if (character.alignment == TEAM::PLAYER_2_TEAM) {
+			player2_team.push_back(e);
+		} else if (character.alignment == TEAM::AI_TEAM) {
+			registry.ais.emplace(e);
+			ai_team.push_back(e);
+		} else {
+			registry.ais.emplace(e);
+			npcai_team.push_back(e);
+		}
 	}
-
-	const int width = screenResolution.x;
-	const int height = screenResolution.y;
-
-	// Init the player team
-	// If our game gets more complex I'd probably abstract this out an have an Entity hierarchy -Fred
-	for (int i = 0; i < numPlayersInTeam; i++) {
-		Entity player_cat = createCat({ width / 2 - 200, height - 400 });
-		player1_team.push_back(player_cat);
-		curr_selected_char = player_cat;
-	}
-
-	// Init npcai team
-	// NOTE: We should add some kind of bool to check if we should init a specific team,
-	// and then add the contents of this loop to the loop above
-	Entity ai_cat0 = createAI({ width - 400,300 });
-	Entity ai_cat1 = createAI({ width - 200,300 });
-	npcai_team.push_back(ai_cat0);
-	npcai_team.push_back(ai_cat1);
 
 	//This needs to be in order
 	teams.push_back(player1_team);

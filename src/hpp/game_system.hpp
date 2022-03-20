@@ -1,6 +1,5 @@
 #pragma once
 #include <vector>
-#include <array>
 #include "components.hpp"
 
 class Game {
@@ -8,16 +7,16 @@ class Game {
 public:
 
 	struct Character {
-		ANIMAL animal;
-		WEAPON_TYPES weapon;
-		TEAM alignment;
-		glm::vec2 starting_pos;
-		int health;
+		ANIMAL animal = ANIMAL::CAT;
+		WEAPON_TYPES weapon = WEAPON_TYPES::TOTAL;
+		TEAM alignment = TEAM::PLAYER_1_TEAM;
+		glm::vec2 starting_pos = vec2(0.0f,0.0f);
+		int health = -1;
 	};
 
-	Game() {};
+	Game() = default;
 
-	~Game() {};
+	~Game() = default;
 
 	void init();
 
@@ -34,6 +33,6 @@ public:
 private:
 
 	std::vector<Character> characters;
-	float timer;
+	float timer = 1.0f;
 
 };

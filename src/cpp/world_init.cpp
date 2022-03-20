@@ -18,7 +18,7 @@ void calculateBoxVerticesAndSetTriangles(vec2 pos, vec2 scale, Boxcollider& box)
 	box.vertices.push_back(pos + vec2{ left, down }); //downleft
 }
 
-Entity createCat(WEAPON_TYPES weapon, TEAM alignment, vec2 pos, int health) {
+Entity createCat(WEAPON_TYPES weapon, vec2 pos, int health) {
 	auto head = Entity();
 	auto frontArm = Entity();
 	const auto entity = Entity();
@@ -90,7 +90,8 @@ Entity createCat(WEAPON_TYPES weapon, TEAM alignment, vec2 pos, int health) {
 	motion.scale = scaleToScreenResolution({ scale, scale * 1.655f }); //Look at the dimensions of the sprite sheet to get the right ratio
 
 	// Add health component
-	Health& health = registry.health.emplace(entity);
+	Health& healthval = registry.health.emplace(entity);
+	healthval.hp = health;
 
 	//Make player a rigidbody
 	Rigidbody& rb = registry.rigidBodies.emplace(entity);
@@ -121,7 +122,7 @@ Entity createCat(WEAPON_TYPES weapon, TEAM alignment, vec2 pos, int health) {
 	return entity;
 }
 
-Entity createDog(vec2 pos) {
+Entity createDog(WEAPON_TYPES weapon, vec2 pos, int health) {
 
 	auto head = Entity();
 	const auto entity = Entity();
