@@ -19,7 +19,7 @@ GameController::~GameController() {
 void GameController::init(GLFWwindow* window, MapSystem::Map& map, OrthographicCamera& camera, TextManager& textManager) {
 	this->window = window;
 	this->gameMap = map;
-	this->camera = camera;
+	this->camera = &camera;
 	this->textManager = textManager;
 
 	//Init game metadata
@@ -52,7 +52,7 @@ void GameController::init(GLFWwindow* window, MapSystem::Map& map, OrthographicC
 	turnIndicator = createText(textManager, "", turnPosition, turnIndicatorScale, redColor);
 
 	timerScale = scaleToScreenResolution({ 1.5f, 1.5f }).x;
-	timeIndicator = createText(textManager, "", scaleToScreenResolution({ 2 * defaultResolution.x / 4.f + camera.getPosition().x, 110.0f }), timerScale, { 0.172f, 0.929f, 0.286f });
+	timeIndicator = createText(textManager, "", scaleToScreenResolution({ 2 * defaultResolution.x / 4.f + this->camera->getPosition().x, 110.0f }), timerScale, { 0.172f, 0.929f, 0.286f });
 }
 
 void GameController::step(float elapsed_ms) {
@@ -63,7 +63,7 @@ void GameController::step(float elapsed_ms) {
 
 	handle_collisions();
 
-	turnPosition = scaleToScreenResolution({ 2 * defaultResolution.x / 4.f + camera.getPosition().x,  30.0f });
+	turnPosition = scaleToScreenResolution({ 2 * defaultResolution.x / 4.f + camera->getPosition().x,  30.0f });
 	auto& turnIndicatorText = registry.texts.get(turnIndicator);
 	auto& turnIndicatorPosition = registry.motions.get(turnIndicator).position;
 
@@ -170,12 +170,12 @@ void GameController::step(float elapsed_ms) {
 			inAGame = false;
 		}
 
-		auto rightDist = abs(registry.motions.get(e).position.x - camera.getCameraRight().x);
-		auto leftDist = abs(registry.motions.get(e).position.x - camera.getPosition().x);
-		if (rightDist < 400.f && camera.getCameraRight().x < 2 * screenResolution.x) {
-			camera.setPosition(camera.getPosition() + vec3(1.5f, 0.f, 0.f));
-		} else if (leftDist < 400.f && camera.getPosition().x > 0.f) {
-			camera.setPosition(camera.getPosition() + vec3(-1.5f, 0.f, 0.f));
+		auto rightDist = abs(registry.motions.get(e).position.x - camera->getCameraRight().x);
+		auto leftDist = abs(registry.motions.get(e).position.x - camera->getPosition().x);
+		if (rightDist < 400.f && camera->getCameraRight().x < 2 * screenResolution.x) {
+			camera->setPosition(camera->getPosition() + vec3(1.5f, 0.f, 0.f));
+		} else if (leftDist < 400.f && camera->getPosition().x > 0.f) {
+			camera->setPosition(camera->getPosition() + vec3(-1.5f, 0.f, 0.f));
 		}
 
 		// if (player1_team.size() == 0) {
@@ -215,7 +215,7 @@ void GameController::decrementTurnTime(float elapsed_ms) {
 	auto& timerPosition = registry.motions.get(timeIndicator);
 	auto& timerText = registry.texts.get(timeIndicator);
 	timerText.text = std::to_string(timePerTurnSec) + " seconds left!";
-	timerPosition.position = scaleToScreenResolution({ 2 * defaultResolution.x / 4.f + camera.getPosition().x, 110.0f });
+	timerPosition.position = scaleToScreenResolution({ 2 * defaultResolution.x / 4.f + camera->getPosition().x, 110.0f });
 	timerPosition.position.x = timerPosition.position.x - timerText.scale.x / 2.f;
 }
 
