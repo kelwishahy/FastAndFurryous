@@ -18,18 +18,6 @@ void calculateBoxVerticesAndSetTriangles(vec2 pos, vec2 scale, Boxcollider& box)
 	box.vertices.push_back(pos + vec2{ left, down }); //downleft
 }
 
-void remove_children(Entity e) {
-	if (registry.parentEntities.has(e)) {
-		const ChildEntities children = registry.parentEntities.get(e);
-
-		for (const auto& pair : children.child_data_map) {
-			remove_children(pair.second);
-			registry.remove_all_components_of(pair.second);
-		}
-	}
-
-}
-
 Entity createCat(vec2 pos) {
 	auto head = Entity();
 	auto frontArm = Entity();
@@ -167,9 +155,9 @@ Entity createDog(vec2 pos) {
 	//---Front arm animation subentity---- putting this in front so that front arm gets rendered ontop of body
 	index = 1;
 	children.child_data_map.emplace(index, frontArm);
-	children.normal_dists.emplace(index, vec2(4.5f, 11.0f));
+	children.normal_dists.emplace(index, vec2(0.0f, 0.0f));
 	children.tags.emplace(index, "animation");
-	children.original_dists.emplace(index, vec2(4.5f, 11.0f));
+	children.original_dists.emplace(index, vec2(0.0f, 0.0f));
 
 
 	Motion& frontArmMotion = registry.motions.emplace(frontArm);
@@ -186,26 +174,9 @@ Entity createDog(vec2 pos) {
 			SHADER_PROGRAM_IDS::ANIMATION,
 			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
 
-	//---Back arm animation subentity---- putting this in back so that front arm gets rendered on back of body
-	//AnchoredEntities& back_arm_anchor = registry.anchors.emplace_with_duplicates(entity);
-	//back_arm_anchor.child = backArm;
-	//back_arm_anchor.normal_distance = { 4.5f, 11.0f };
-	////backArmBone.offset_from_parent = { +30.0f, 0.0f };
 
-
-	//Motion& backArmMotion = registry.motions.emplace(backArm);
-	//backArmMotion.position = pos + back_arm_anchor.normal_distance;
-	//backArmMotion.scale = { 64.f / 3, 138.f / 3 };
-
-	//Animation& backArmAnim = registry.animations.emplace(backArm);
-	//backArmAnim.animation_states_constants.insert({ TEXTURE_IDS::DOG_BACK_ARM, STABILIZED_CONSTANTS });
-	//backArmAnim.anim_state = TEXTURE_IDS::DOG_BACK_ARM;
-	//registry.renderRequests.insert(
-	//	backArm,
-	//	{ TEXTURE_IDS::DOG_BACK_ARM,
-	//		SHADER_PROGRAM_IDS::ANIMATION,
-	//		GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
 	//----------------------------------------------
+	registry.dogs.emplace(entity);
 
 	// Add health component
 	Health& health = registry.health.emplace(entity);

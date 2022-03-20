@@ -109,9 +109,7 @@ void AnimationSystem::animate_cat_jump(Entity e) {
 		if (extra.name == "cat_head") {
 			//Animate the head
 			change_animation(rig, TEXTURE_IDS::CAT_FRONT_BLINK);
-			// change position of the head if looking left
 		}
-
 	}
 }
 
@@ -125,14 +123,15 @@ void AnimationSystem::animate_cat_hurt(Entity e) {
 		if (extra.name == "cat_head") {
 			//Animate the head
 			change_animation(rig, TEXTURE_IDS::CAT_HURT_FACE);
-			// change position of the head if looking left
 		}
 
 	}
 }
 
 void AnimationSystem::animate_cat_dead(Entity e) {
-
+	remove_children(e);
+	change_animation(e, TEXTURE_IDS::CAT_DEAD);
+	registry.cats.remove(e);
 }
 
 void AnimationSystem::animate_dog_idle(Entity e) {
@@ -144,8 +143,7 @@ void AnimationSystem::animate_dog_idle(Entity e) {
 		Animation& extra = registry.animations.get(rig);
 		if (extra.name == "dog_head") {
 			//Animate the head
-			change_animation(rig, TEXTURE_IDS::DOG_HURT_FACE);
-			// change position of the head if looking left
+			change_animation(rig, TEXTURE_IDS::DOG_FRONT_BLINK);
 		}
 
 	}
@@ -177,7 +175,6 @@ void AnimationSystem::animate_dog_jump(Entity e) {
 		if (extra.name == "dog_head") {
 			//Animate the head
 			change_animation(rig, TEXTURE_IDS::DOG_FRONT_BLINK);
-			// change position of the head if looking left
 		}
 
 	}
@@ -193,14 +190,16 @@ void AnimationSystem::animate_dog_hurt(Entity e) {
 		if (extra.name == "dog_head") {
 			//Animate the head
 			change_animation(rig, TEXTURE_IDS::DOG_HURT_FACE);
-			// change position of the head if looking left
 		}
 
 	}
 }
 
 void AnimationSystem::animate_dog_dead(Entity e) {
-
+	
+	remove_children(e);
+	change_animation(e, TEXTURE_IDS::DOG_DEAD);
+	registry.dogs.remove(e);
 }
 //
 void AnimationSystem::update_anim_orientation() {
@@ -220,11 +219,17 @@ void AnimationSystem::update_anim_orientation() {
 						else {
 							children.normal_dists[j].x = children.original_dists[j].x;
 						}
+					} else if (child.name == "dog_head" || child.name == "dog_front_arm" || child.name == "dog_back_arm") {
+						if (child.facingLeft == true) {
+							children.normal_dists[j].x = -children.original_dists[j].x;
+						}
+						else {
+							children.normal_dists[j].x = children.original_dists[j].x;
+						}
 					}
 				}
 			}
 		}
-
 	}
 }
 
