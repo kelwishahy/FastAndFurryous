@@ -10,13 +10,13 @@ public:
 		ANIMAL animal = ANIMAL::CAT;
 		WEAPON_TYPES weapon = WEAPON_TYPES::TOTAL;
 		TEAM alignment = TEAM::PLAYER_1_TEAM;
-		glm::vec2 starting_pos = vec2(0.0f,0.0f);
+		glm::vec2 starting_pos = glm::vec2(0.0f,0.0f);
 		int health = -1;
 	};
 
-	Game() = default;
+	Game();
 
-	~Game() = default;
+	~Game();
 
 	void init();
 
@@ -24,7 +24,7 @@ public:
 	void addCat(WEAPON_TYPES weapon, TEAM alignment, glm::vec2 pos, int health);
 	void addDog(WEAPON_TYPES weapon, TEAM alignment, glm::vec2 pos, int health);
 
-	void setTimer(float timer);
+	void setTimer(float timeInMs);
 	float getTimer();
 
 	std::vector<Character> getCharacters();

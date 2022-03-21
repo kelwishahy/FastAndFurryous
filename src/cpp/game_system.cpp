@@ -28,16 +28,18 @@ void Game::addDog(WEAPON_TYPES weapon, TEAM alignment, glm::vec2 pos, int health
 	character.health = health;
 	character.alignment = alignment;
 	character.starting_pos = pos;
+
+	characters.push_back(character);
 }
 
-void Game::setTimer(float timer) {
-	this.timer = timer;
+void Game::setTimer(float timeInMs) {
+	timer = timeInMs;
 }
 
-void Game::getTimer() {
+float Game::getTimer() {
 	return timer;
 }
 
-std::vector<Character> Game::getCharacters() {
+std::vector<Game::Character> Game::getCharacters() {
 	return characters;
 }

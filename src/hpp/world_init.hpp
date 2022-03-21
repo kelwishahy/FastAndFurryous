@@ -1,11 +1,5 @@
 #pragma once
 
-#include "ANIMATION_CONSTANTS.hpp"
-#include "ANIMATION_CONSTANTS.hpp"
-#include "ANIMATION_CONSTANTS.hpp"
-#include "ANIMATION_CONSTANTS.hpp"
-#include "ANIMATION_CONSTANTS.hpp"
-#include "ANIMATION_CONSTANTS.hpp"
 #include "components.hpp"
 #include "render_system.hpp"
 
@@ -13,7 +7,7 @@
 Entity createCat(::WEAPON_TYPES weapon, glm::vec2 pos, int health);
 
 // Player entities
-Entity createDog(WEAPON_TYPES weapon, glm::vec2 pos, float health);
+Entity createDog(WEAPON_TYPES weapon, glm::vec2 pos, int health);
 
 // solid terrain
 Entity createWall(glm::vec2 pos, float width, float height);

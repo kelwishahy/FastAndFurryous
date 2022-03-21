@@ -182,7 +182,8 @@ Entity createDog(WEAPON_TYPES weapon, vec2 pos, int health) {
 	registry.dogs.emplace(entity);
 
 	// Add health component
-	Health& health = registry.health.emplace(entity);
+	Health& healthbar = registry.health.emplace(entity);
+	healthbar.hp = health;
 
 	//Make player a rigidbody
 	Rigidbody& rb = registry.rigidBodies.emplace(entity);
@@ -206,7 +207,9 @@ Entity createDog(WEAPON_TYPES weapon, vec2 pos, int health) {
 			SHADER_PROGRAM_IDS::ANIMATION,
 			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
 
-	registry.weapons.insert(entity, Rifle());
+	if (weapon == WEAPON_TYPES::RIFLE) {
+		registry.weapons.insert(entity, Rifle());
+	}
 
 	Animation& anim = registry.animations.emplace(entity);
 	anim.animation_states_constants.insert({ TEXTURE_IDS::DOG_FRONT_IDLE, CAT_IDLE_CONSTANTS });
