@@ -85,11 +85,18 @@ enum class TEXTURE_IDS {
 	HEALTH_SQUARE,
 	BUTTONGAME,
 	BUTTONCANCEL,
-	// Maps
+	/* Maps */
+
+	// Industrial
 	INDUSTRIAL_BG,
 	INDUSTRIAL_FAR_BUILDINGS,
 	INDUSTRIAL_BUILDINGS,
 	INDUSTRIAL_FOREGROUND,
+
+	// Night
+	NIGHT1,
+	NIGHT2,
+
 	FOREST,
 	SPACE,
 	TOTAL
@@ -148,8 +155,26 @@ enum class MAPS {
 	INDUSTRIAL,
 	FOREST,
 	SPACE,
+	NIGHT,
+	CITY,
 	TOTAL
 }; constexpr int mapCount = (int)MAPS::TOTAL;
+
+constexpr float LAYERS[4] = { -0.9f, -0.8f, -0.7f, -0.6f };
+
+enum class IndustrialBackground {
+	INDUSTRIAL_BG,
+	INDUSTRIAL_FAR_BUILDINGS,
+	INDUSTRIAL_BUILDINGS,
+	INDUSTRIAL_FOREGROUND,
+	TOTAL
+}; constexpr int IndustrialBackgroundLayers = (int)IndustrialBackground::TOTAL;
+
+enum class NightBackground {
+	NIGHT1,
+	NIGHT2,
+	TOTAL
+}; constexpr int NightBackgroundLayers = (int)NightBackground::TOTAL;
 
 enum class ANIMAL {
 	CAT,
@@ -157,7 +182,7 @@ enum class ANIMAL {
 };
 // Game components ------------------------------------------------------------
 struct Background {
-	
+	float layer = -0.5;
 };
 
 struct Tile {

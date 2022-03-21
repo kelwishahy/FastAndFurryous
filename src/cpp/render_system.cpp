@@ -31,30 +31,13 @@ void RenderSystem::draw(float elapsed_ms, WorldSystem& world) {
 
 		RenderRequest request = registry.renderRequests.get(entity);
 
-		vec2 playerPos = { 0.f, 0.f };
-		if (registry.motions.has(world.getCurrentGame().getSelectedCharacter())) {
-			playerPos = registry.motions.get(world.getCurrentGame().getSelectedCharacter()).position;
-		}
 		if (registry.backgrounds.has(entity)) {
 			float pos = screenWidth;
-			float depth;
-			switch(request.texture) {
-			case TEXTURE_IDS::INDUSTRIAL_BG:
-				depth = -0.9f;
-				break;
-			case TEXTURE_IDS::INDUSTRIAL_FAR_BUILDINGS:
-				depth = -0.8f;
-				pos -= playerPos.x / 60.f;
-				break;
-			case TEXTURE_IDS::INDUSTRIAL_BUILDINGS:
-				depth = -0.7f;
-				pos -= playerPos.x / 30.f;
-				break;
-			case TEXTURE_IDS::INDUSTRIAL_FOREGROUND:
-				depth = -0.6f;
-				break;
-			default:
-				depth = -0.5f;
+			float depth = registry.backgrounds.get(entity).layer;
+			if (depth == LAYERS[1]) {
+				pos -= camera->getPosition().x / 5.f;
+			} else if (depth == LAYERS[2]) {
+				pos -= camera->getPosition().x / 25.f;
 			}
 			drawBackground(request, depth, { pos, screenHeight / 2 }, { 2 * screenWidth, screenHeight });
 			continue;
@@ -324,8 +307,28 @@ void RenderSystem::drawTiles() {
 }
 
 void RenderSystem::drawBackground(RenderRequest& request, float layer, vec2 position, vec2 scale) {
-	mat4 transformationMatrix = transform(position, scale, layer, 0);
+	mat4 transformationMatrix = transform(scaleToScreenResolution(position), scaleToScreenResolution(scale), layer, 0);
 	std::string shaderInputs[] = { "position", "texCoord" };
+
+	switch(request.texture) {
+	case TEXTURE_IDS::INDUSTRIAL_BG:
+	case TEXTURE_IDS::INDUSTRIAL_FAR_BUILDINGS:
+	case TEXTURE_IDS::INDUSTRIAL_BUILDINGS:
+	case TEXTURE_IDS::INDUSTRIAL_FOREGROUND:
+		texturedQuad[0].texCoord = { 2.f, 1.f }; // top right
+		texturedQuad[1].texCoord = { 2.f, 0.f }; // bottom right
+		bindVBOandIBO(GEOMETRY_BUFFER_IDS::TEXTURED_QUAD, texturedQuad, quadIndices);
+		break;
+	case TEXTURE_IDS::NIGHT1:
+	case TEXTURE_IDS::NIGHT2:
+		texturedQuad[0].texCoord = { 3.f, 1.f }; // top right
+		texturedQuad[1].texCoord = { 3.f, 0.f }; // bottom right
+		bindVBOandIBO(GEOMETRY_BUFFER_IDS::TEXTURED_QUAD, texturedQuad, quadIndices);
+	
+	default:
+		break;
+	}
+
 	drawQuad(request, shaderInputs, 2);
 	renderToScreen(transformationMatrix);
 }

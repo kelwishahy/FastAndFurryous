@@ -68,7 +68,7 @@ void WorldSystem::restart_game(MAPS maps) {
 		registry.remove_all_components_of(registry.motions.entities.back());
 
 	//Initialize current game
-	current_game.init(window, mapSystem.getMap(MAPS::INDUSTRIAL), camera, textManager, level_one());
+	current_game.init(window, mapSystem.getMap(maps), camera, textManager, level_one());
 }
 
 void WorldSystem::handle_collisions() {
@@ -277,8 +277,7 @@ void WorldSystem::check_for_button_presses() {
 
 			else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONL2) {
 				remove_components();
-				restart_game(MAPS::FOREST);
-
+				restart_game(MAPS::NIGHT);
 				break;
 			}
 
