@@ -264,7 +264,7 @@ void GameController::change_selected_state(Entity e, bool state) {
 	selparent.isSelected = state;
 	std::vector<Entity> children = get_all_children(e);
 	for (Entity child : children) {
-		if (registry.renderRequests.has(child)) {
+		if (registry.selected.has(child)) {
 			Selected& sel = registry.selected.get(child); //unselect all children attached
 			sel.isSelected = state;
 		}

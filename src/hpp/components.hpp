@@ -48,6 +48,11 @@ enum class TEXTURE_IDS {
 	DOG_HURT_FACE,
 	DOG_DEAD,
 	//
+	//Gun Sprites
+	RIFLE,
+	AK_47,
+	AWP,
+	GRENADE_LAUNCHER,
 	STONE,
 	// All Screens
 	BACKGROUND,

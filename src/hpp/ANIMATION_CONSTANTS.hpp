@@ -7,6 +7,12 @@ TEXTURE_ANIM_CONSTANTS CAT_WALK_CONSTANTS{
 	100     //length of animation <---- tweak this one to change animation looks
 };
 
+TEXTURE_ANIM_CONSTANTS CAT_SIDE_IDLE_CONSTANTS{
+	2,
+	0.5f,
+	400.0f
+};
+
 TEXTURE_ANIM_CONSTANTS CAT_IDLE_CONSTANTS{
 	2,
 	0.5f,
