@@ -20,13 +20,10 @@ void calculateBoxVerticesAndSetTriangles(vec2 pos, vec2 scale, Boxcollider& box)
 
 Entity createCat(WEAPON_TYPES weapon, vec2 pos, int health) {
 	auto head = Entity();
-	auto frontArmAnchor = Entity();
 	auto frontArm = Entity();
-	auto gun = Entity();
 	const auto entity = Entity();
 
 	ChildEntities& children = registry.parentEntities.emplace(entity);
-	registry.cats.emplace(entity);
 
 	/* Each cat - related entity needs the "selected" component.
 	 * This value of this component is passed to the fragment shader and is
@@ -61,27 +58,15 @@ Entity createCat(WEAPON_TYPES weapon, vec2 pos, int health) {
 			SHADER_PROGRAM_IDS::ANIMATION,
 			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
 
-	//---Front arm anchor subentity---- putting this in front so that front arm gets rendered ontop of body
+	//---Front arm animation subentity---- putting this in front so that front arm gets rendered ontop of body
 	index = 1;
-	children.child_data_map.emplace(index, frontArmAnchor);
-	children.normal_dists.emplace(index, scaleToScreenResolution(vec2(4.5f, 9.0f)));
+	children.child_data_map.emplace(index, frontArm);
+	children.normal_dists.emplace(index, scaleToScreenResolution(vec2(4.5f, 11.0f)));
 	children.tags.emplace(index, "animation");
-	children.original_dists.emplace(index, scaleToScreenResolution(vec2(4.5f, 9.0f)));
-
-	Motion& frontArmAnchorMotion = registry.motions.emplace(frontArmAnchor);
-	frontArmAnchorMotion.position = pos + children.normal_dists.at(index);
-	//frontArmMotion.scale = scaleToScreenResolution({ 54.f / 3, 128.f / 3 });
-
-	ChildEntities& arm_children = registry.parentEntities.emplace(frontArmAnchor);
-
-	//arm of cat
-	arm_children.child_data_map.emplace(0, frontArm);
-	arm_children.normal_dists.emplace(0, scaleToScreenResolution(vec2(0.0f, 2.0f)));
-	arm_children.tags.emplace(0, "arm");
-	arm_children.original_dists.emplace(0, scaleToScreenResolution(vec2(0.0f, 2.0f)));
+	children.original_dists.emplace(index, scaleToScreenResolution(vec2(4.5f, 11.0f)));
 
 	Motion& frontArmMotion = registry.motions.emplace(frontArm);
-	frontArmMotion.position = frontArmAnchorMotion.position + arm_children.normal_dists.at(0);
+	frontArmMotion.position = pos + children.normal_dists.at(1);
 	frontArmMotion.scale = scaleToScreenResolution({ 54.f / 3, 128.f / 3 });
 
 	Animation& frontArmAnim = registry.animations.emplace(frontArm);
@@ -94,11 +79,8 @@ Entity createCat(WEAPON_TYPES weapon, vec2 pos, int health) {
 			SHADER_PROGRAM_IDS::ANIMATION,
 			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
 
-	arm_children.child_data_map.emplace(1, gun);
-	//Gun of cat
+	registry.cats.emplace(entity);
 
-
-	////////////////////
 	// Setting initial motion values
 	Motion& motion = registry.motions.emplace(entity);
 	motion.position = pos;
@@ -130,7 +112,6 @@ Entity createCat(WEAPON_TYPES weapon, vec2 pos, int health) {
 
 	Animation& anim = registry.animations.emplace(entity);
 	anim.animation_states_constants.insert({TEXTURE_IDS::CAT_FRONT_IDLE, CAT_IDLE_CONSTANTS});
-	anim.animation_states_constants.insert({ TEXTURE_IDS::CAT_SIDE_IDLE, CAT_SIDE_IDLE_CONSTANTS });
 	anim.animation_states_constants.insert({TEXTURE_IDS::CAT_WALK, CAT_WALK_CONSTANTS });
 	anim.animation_states_constants.insert({ TEXTURE_IDS::CAT_JUMP, CAT_JUMP_CONSTANTS });
 	anim.animation_states_constants.insert({ TEXTURE_IDS::CAT_HURT, CAT_HURT_CONSTANTS });
