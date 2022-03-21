@@ -50,6 +50,8 @@ public:
 
 	void play_levels(std::vector<std::function<void()>> callbacks);
 
+	void remove_components();
+
 	glm::vec2 mouse_pos;
 
 	GameController& getCurrentGame() { return this->current_game; }
