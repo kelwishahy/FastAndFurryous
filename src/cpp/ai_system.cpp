@@ -24,6 +24,11 @@ void AISystem::step(float elapsed_ms, int turn) {
 	}
 	if (blackboard->turn == TURN_CODE::NPCAI_TURN) {
 		checkJump();
+		if (calculateDistance(blackboard->prev_pos, blackboard->motion->position) > 200) {
+			blackboard->motion->velocity.x = 0.f;
+			blackboard->motion->velocity.y = 350.f;
+			blackboard->turn = TURN_CODE::PLAYER1_TURN;
+		}
 	}
 	//checkJump();
 
@@ -59,22 +64,24 @@ void AISystem::init(ShootingSystem& shootingSystem) {
 	//auto isNearEnemy = new IsNearEnemy;
 	auto isHurt = new IsHurt;
 	auto isshot = new Shot;
-
+	auto hpLower = new HpLower;
+	auto moveLeft = new MoveLeft;
+	auto moveRight = new MoveRight;
 	// Build the tree
 	decisionTree->addFalseConditionNode(endTurn); // If not ai turn, skip
 	decisionTree->addTrueConditionNode(moving); // If ai turn, check if moving
 
-	moving->addFalseConditionNode(move); // If not moving, move left
+	moving->addFalseConditionNode(hpLower); // If not moving, move left
 	moving->addTrueConditionNode(didTimeEnd); // If moving, check if the timer ended
 
 
 	//isshot->addFalseConditionNode(hpLower);
 	//isshot->addTrueConditionNode(endTurn);
 
-	//hpLower->addFalseConditionNode(charge);
-	//hpLower->addTrueConditionNode(runAway);
+	hpLower->addFalseConditionNode(moveLeft);
+	hpLower->addTrueConditionNode(moveRight);
 
-	move->addTrueConditionNode(isHurt);
+	//move->addTrueConditionNode(isHurt);
 
 
 	didTimeEnd->addFalseConditionNode(isHurt); // If time hasn't ended, check if hurt
@@ -158,12 +165,12 @@ void AISystem::checkJump()
 
 	if (motion.velocity.x > 0) {
 		if (blackboard->prev_pos.x >= motion.position.x) {
-			motion.velocity.y = -500.f;
+			motion.velocity.y = -800.f;
 		}
 	}
 	else if (motion.velocity.x < 0) {
 		if (blackboard->prev_pos.x <= motion.position.x) {
-			motion.velocity.y = -500.f;
+			motion.velocity.y = -800.f;
 		}
 	}
 }

@@ -118,11 +118,11 @@ class IsHurt : public Node {
 	}
 };
 
-//class HpLower : public Node {
-//	bool run() override {
-//		return (registry.health.get(*blackboard->entity).hp < registry.health.get(*blackboard->player).hp);
-//	}
-//};
+class HpLower : public Node {
+	bool run() override {
+		return blackboard->lowerhp;
+	}
+};
 
 class Shot : public Node {
 	bool run() override {
@@ -164,7 +164,10 @@ class RunAway : public Node {
 class Move : public Node {
 	bool run() override {
 		Motion& player_motion = registry.motions.get(*blackboard->player);
-
+		if (blackboard->shot) {
+			blackboard->motion->velocity.x = 0;
+			return true;
+		}
 		if (blackboard->lowerhp) {
 			//Motion& player_motion = registry.motions.get(*blackboard->player);
 			printf("move away \n");
