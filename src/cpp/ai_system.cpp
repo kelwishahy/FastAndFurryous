@@ -16,11 +16,15 @@ void AISystem::step(float elapsed_ms, int turn) {
 	timer -= elapsed_ms;
 	blackboard->timer = timer;
 
-	decideAction();
 	if (timer <= 0.f) {
 		timer = 3000.f;
 	}
-
+	if (blackboard->turn == TURN_CODE::PLAYER1_TURN) {
+		decideAction();
+	}
+	if (blackboard->turn == TURN_CODE::NPCAI_TURN) {
+		checkJump();
+	}
 	//checkJump();
 
 	decisionTree->traverse();
@@ -139,6 +143,8 @@ void AISystem::decideAction()
 	else {
 		blackboard->lowerhp = false;
 	}
+
+	blackboard->prev_pos = motion.position;
 }
 
 void AISystem::checkJump()
@@ -152,12 +158,12 @@ void AISystem::checkJump()
 
 	if (motion.velocity.x > 0) {
 		if (blackboard->prev_pos.x >= motion.position.x) {
-			motion.velocity.y = -50.f;
+			motion.velocity.y = -500.f;
 		}
 	}
 	else if (motion.velocity.x < 0) {
 		if (blackboard->prev_pos.x <= motion.position.x) {
-			motion.velocity.y = -50.f;
+			motion.velocity.y = -500.f;
 		}
 	}
 }
