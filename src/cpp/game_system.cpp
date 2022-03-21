@@ -18,6 +18,7 @@ void Game::addCat(WEAPON_TYPES weapon, TEAM alignment, glm::vec2 pos, int health
 	character.health = health;
 	character.alignment = alignment;
 	character.starting_pos = pos;
+	character.weapon = weapon;
 
 	characters.push_back(character);
 }
@@ -28,6 +29,7 @@ void Game::addDog(WEAPON_TYPES weapon, TEAM alignment, glm::vec2 pos, int health
 	character.health = health;
 	character.alignment = alignment;
 	character.starting_pos = pos;
+	character.weapon = weapon;
 
 	characters.push_back(character);
 }

@@ -145,19 +145,8 @@ void GameController::step(float elapsed_ms) {
 		}
 	}
 
-	// change the animation type depending on the velocity
-	for (Entity e : registry.animations.entities) {
-		Motion& catMotion = registry.motions.get(e);
-		Animation& catAnimation = registry.animations.get(e);
-
-		if (catMotion.velocity.x < 0) {
-				catAnimation.facingLeft = true;
-				shooting_system.setAimLoc(e);
-		}
-		if (catMotion.velocity.x > 0) {
-			catAnimation.facingLeft = false;
-			shooting_system.setAimLoc(e);
-		}
+	for (Entity e : teams[game_state.turn_possesion]) {
+		shooting_system.setAimLoc(e);
 	}
 
 	for (int i = 0; i < player1_team.size(); i++) {
@@ -190,9 +179,6 @@ void GameController::step(float elapsed_ms) {
 			registry.remove_all_components_of(e);
 		}
 
-		// if (npcai_team.size() == 0) {
-		// 	restart_current_match();
-		// }
 	}
 
 
@@ -255,6 +241,7 @@ void GameController::init_player_teams() {
 	teams.push_back(player2_team);
 	teams.push_back(ai_team);
 	teams.push_back(npcai_team);
+	curr_selected_char = player1_team[0];
 }
 
 void GameController::next_turn() {
@@ -326,6 +313,26 @@ void GameController::handle_collisions() {
 
 	// Remove all collisions from this simulation step
 	registry.collisions.clear();
+}
+
+void GameController::change_curr_selected_char(Entity e) {
+
+	curr_selected_char = e;
+}
+void GameController::change_to_next_char_on_team() {
+
+	//so scuffed lmao
+	bool next_char = false;
+
+	for (Entity e : teams[game_state.turn_possesion]) {
+		if (e == curr_selected_char) {
+			next_char = true;
+		}
+		if (next_char) {
+			change_curr_selected_char(e);
+		}
+	}
+
 }
 
 // On key callback
