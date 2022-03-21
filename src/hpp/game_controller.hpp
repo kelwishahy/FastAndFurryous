@@ -15,6 +15,7 @@
 
 #include "text_manager.hpp"
 #include "GLFW/glfw3.h"
+#include "game_system.hpp"
 
 class GameController
 {
@@ -24,7 +25,7 @@ public:
 	// Releases all associated resources
 	~GameController();
 
-	void init(GLFWwindow* window, MapSystem::Map& map, OrthographicCamera& camera, TextManager& textManager);
+	void init(GLFWwindow* window, MapSystem::Map& map, OrthographicCamera& camera, TextManager& textManager, Game game_data);
 
 	// Steps the game ahead by ms milliseconds
 	void step(float elapsed_ms);
@@ -63,6 +64,8 @@ private:
 	OrthographicCamera* camera;
 	MapSystem::Map gameMap;
 	TextManager textManager;
+	Game game_data;
+
 	// restart level it was in the private 
 	void restart_current_match();
 
@@ -86,6 +89,9 @@ private:
 	std::vector<Entity> ai_team;
 	std::vector<Entity> npcai_team;
 	std::vector<std::vector<Entity>> teams;
+
+	void change_curr_selected_char(Entity e);
+	void change_to_next_char_on_team();
 	
 
 	enum class PLAYER_MODE {
@@ -104,7 +110,6 @@ private:
 
 	UISystem ui;
 
-	uint numPlayersInTeam;
 	float timePerTurnMs;
 
 	// Turn indicators & turn timer

@@ -105,8 +105,9 @@ enum RB_TYPES {
 
 enum WEAPON_TYPES {
 	RIFLE = 0,
-	SHOTGUN = 1
-};
+	SHOTGUN = 1,
+	TOTAL //For no weaponed 
+}; constexpr int weaponCount = (int)WEAPON_TYPES::TOTAL;
 
 enum TILE_TYPES {
 	NONE,
@@ -140,6 +141,10 @@ enum class MAPS {
 	TOTAL
 }; constexpr int mapCount = (int)MAPS::TOTAL;
 
+enum class ANIMAL {
+	CAT,
+	DOG
+};
 // Game components ------------------------------------------------------------
 struct Background {
 	
@@ -270,6 +275,7 @@ struct ChildEntities {
 		}
 	}
 };
+void remove_children(Entity e);
 
 struct UIElement {
 	UI_ELEMENT element_type;

@@ -68,7 +68,7 @@ void WorldSystem::restart_game(MAPS maps) {
 		registry.remove_all_components_of(registry.motions.entities.back());
 
 	//Initialize current game
-	current_game.init(window, mapSystem.getMap(maps), camera, textManager);
+	current_game.init(window, mapSystem.getMap(MAPS::INDUSTRIAL), camera, textManager, level_one());
 }
 
 void WorldSystem::handle_collisions() {
@@ -357,4 +357,11 @@ void WorldSystem::play_levels(std::vector<std::function<void()>> callbacks) {
 	vec2 pos3 = {(defaultResolution.x - 600.f) / defaultResolution.x * screenResolution.x, (400.f / defaultResolution.y) * screenResolution.y };
 	createButton(pos3, scale,TEXTURE_IDS::BUTTONL3, onClick);
 
+}
+
+Game WorldSystem::level_one() {
+	Game level_one;
+	level_one.addCat(RIFLE, PLAYER_1_TEAM, { screenResolution.x / 2 - 200, screenResolution.y - 400 }, 100);
+
+	return level_one;
 }
