@@ -555,3 +555,43 @@ Entity createHealthCounter(Entity origin, int health, TextManager& textManager) 
 	return entity;
 
 }
+
+Entity createTimerCounter(int timer, TextManager& textManager) {
+	//Entity createTimerCounter(Entity e, int timer) {
+	//Entity createTimerCounter(Entity origin, int health) {
+
+		//vec3 color = registry.cats.has(origin) ? vec3{ 0.862f, 0.525f, 0.517f } : vec3{ 0.039, 0.454, 1 };
+
+	auto entity = Entity();
+
+	OptionTimer& timer0 = registry.timer.emplace(entity);
+
+
+	//startscreen16
+	timer0.timerC = timer;
+	//timer0.text = createText({ 1025.0f, 390.0f }, 2.0f, { 0.0f, 0.0f, 0.0f }, std::to_string(timer0.timerC));
+	createText(textManager, std::to_string(timer0.timerC), { 1060.0f, 390.0f }, 2.0f, { 0.0f, 0.0f, 0.0f });
+
+	//Motion& motion = registry.motions.emplace(entity);
+	//motion.scale = { 100.0f, 100.0f };
+
+	return entity;
+
+}
+
+//startscreen15
+Entity createPlayersCounter(int newplayers, TextManager& textManager) {
+
+
+	auto entity = Entity();
+	OptionPlayers& players = registry.players.emplace(entity);
+	players.playersN = newplayers;
+
+	//createText({ 1045.0f, 615.0f }, 2.0f, { 0.0f, 0.0f, 0.0f }, std::to_string(players.playersN));
+	createText(textManager, std::to_string(players.playersN), { 1050.0f, 615.0f }, 2.0f, { 0.0f, 0.0f, 0.0f });
+	return entity;
+
+}
+
+
+

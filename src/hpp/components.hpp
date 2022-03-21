@@ -66,8 +66,10 @@ enum class TEXTURE_IDS {
 	// Tutorial Menu 
 	HOWTOMOVE,
 	// Option Menu Buttons
-	BUTTONR,
-	BUTTONL,
+	BUTTONRA,
+	BUTTONLA,
+	BUTTONRB,
+	BUTTONLB,
 	// Level Menu Buttons
 	BUTTONL1,
 	BUTTONL2,
@@ -75,6 +77,8 @@ enum class TEXTURE_IDS {
 	CAT_CROSSHAIR,
 	DOG_CROSSHAIR,
 	HEALTH_SQUARE,
+	BUTTONGAME,
+	BUTTONCANCEL,
 	INDUSTRIAL_BG,
 	INDUSTRIAL_FAR_BUILDINGS,
 	INDUSTRIAL_BUILDINGS,
@@ -365,3 +369,11 @@ struct DebugComponent {
 };
 
 void remove_children(Entity e);
+
+struct OptionTimer {
+	int timerC;
+};
+
+struct OptionPlayers {
+	int playersN;
+};

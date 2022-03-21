@@ -46,7 +46,7 @@ public:
 
 	void play_startscreen(std::vector<std::function<void()>> callbacks);
 
-	void play_options(std::vector<std::function<void()>> callbacks);
+	void play_options(std::vector<std::function<void()>> callbacks, int newtimer, int newPlayers);
 
 	void play_levels(std::vector<std::function<void()>> callbacks);
 

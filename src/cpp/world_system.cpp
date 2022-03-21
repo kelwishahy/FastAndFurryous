@@ -9,8 +9,9 @@
 #include "..\hpp\tiny_ecs_registry.hpp"
 #include <hpp/physics_system.hpp>
 
-#include "hpp/audio_manager.hpp";
 
+#include "hpp/audio_manager.hpp";
+#include <hpp/options_system.hpp>
 //#include <hpp/game_controller.hpp>
 
 void testCallback() {
@@ -132,8 +133,8 @@ void WorldSystem::check_for_button_presses() {
 	for (Entity e : registry.buttons.entities) {
 		Clickable button = registry.buttons.get(e);
 		if (mouse_pos.x > button.vertecies[0].x && mouse_pos.x < button.vertecies[1].x && mouse_pos.y > button.vertecies[0].y && mouse_pos.y < button.vertecies[3].y) {
-			
-		
+
+
 			if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTON1) {
 				for (Entity e : registry.menus.entities) {
 					registry.remove_all_components_of(e);
@@ -142,10 +143,10 @@ void WorldSystem::check_for_button_presses() {
 					registry.remove_all_components_of(e);
 				}
 				play_levels(button.callbacks);
-				
+
 				break;
 			}
-			
+
 			else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTON3) {
 
 				for (Entity e : registry.menus.entities) {
@@ -156,13 +157,13 @@ void WorldSystem::check_for_button_presses() {
 				}
 
 				play_tutorial(button.callbacks);
-				
+
 				break;
 				/*for (auto callback : button.callbacks) {
 					callback();
 				}*/
 			}
-			
+
 			else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTON4) {
 
 				for (Entity e : registry.menus.entities) {
@@ -171,7 +172,7 @@ void WorldSystem::check_for_button_presses() {
 				for (Entity e : registry.buttons.entities) {
 					registry.remove_all_components_of(e);
 				}
-				
+
 				//if (glfwWindowShouldClose(window);
 				//glfwCloseWindow(window);
 				break;
@@ -179,31 +180,31 @@ void WorldSystem::check_for_button_presses() {
 					callback();
 				}*/
 			}
-			
+
 			else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTON2) {
-				for (Entity e : registry.menus.entities){
+				for (Entity e : registry.menus.entities) {
 					registry.remove_all_components_of(e);
 				}
 				for (Entity e : registry.buttons.entities) {
 					registry.remove_all_components_of(e);
 				}
 				play_select(button.callbacks);
-				
+
 				break;
 			}
-		
+
 			else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::HOWTOMOVE) {
-				
+
 				// registry.remove_all_components_of(e);
 				// restart_game();
 				for (Entity e : registry.buttons.entities) {
 					registry.remove_all_components_of(e);
 				}
 				play_startscreen(button.callbacks);
-				
+
 				break;
 			}
-			
+
 			else if ((registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONC) || (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTOND)) {
 				for (Entity e : registry.menus.entities) {
 					registry.remove_all_components_of(e);
@@ -211,23 +212,276 @@ void WorldSystem::check_for_button_presses() {
 				for (Entity e : registry.buttons.entities) {
 					registry.remove_all_components_of(e);
 				}
-				play_options(button.callbacks);
-				
+				//startscreen16
+				play_options(button.callbacks, 20, 3);
+
 				break;
 			}
-			
-			else if ((registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONR) || (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONL)) {
+			//startscreen14
+			else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONLA) {
+
+				/// <summary>
+				//startscreen16
+				/// </summary>
+				int newtimer;
+				for (Entity e : registry.timer.entities) {
+					OptionTimer timer = registry.timer.get(e);
+					newtimer = decreaseTimer(e, 5);
+					//createTimerCounter(e, timer.timerC);
+					//createTimerCounter(newtimer);
+					//break;
+				}
+
+				//startscreen17
+				int newplayers;
+				for (Entity e : registry.players.entities) {
+					OptionPlayers players = registry.players.get(e);
+					newplayers = players.playersN;			//createTimerCounter(e, timer.timerC);
+					//createTimerCounter(newtimer);
+					//break;
+				}
+
+
 				for (Entity e : registry.menus.entities) {
 					registry.remove_all_components_of(e);
 				}
 				for (Entity e : registry.buttons.entities) {
 					registry.remove_all_components_of(e);
 				}
-				restart_game();
-				
+
+
+				for (Entity e : registry.timer.entities) {
+					registry.remove_all_components_of(e);
+				}
+
+				for (Entity e : registry.texts.entities) {
+					registry.remove_all_components_of(e);
+				}
+				//startscreen16
+				play_options(button.callbacks, newtimer, newplayers);
+				/*
+				for (Entity e : registry.timer.entities) {
+					OptionTimer timer_count = registry.timer.get(e);
+					Entity timer = createTimerCounter(e, 20);
+				}
+				*/
+				//restart_game();
+
 				break;
 			}
+			//startscreen14
+			else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONRA) {
+
+				/// <summary>
+				//startscreen16
+				/// </summary>
+				int newtimer;
+				for (Entity e : registry.timer.entities) {
+					OptionTimer timer = registry.timer.get(e);
+					newtimer = increaseTimer(e, 5);
+				}
+
+
+				//startscreen17
+				int newplayers;
+				for (Entity e : registry.players.entities) {
+					OptionPlayers players = registry.players.get(e);
+					newplayers = players.playersN;			//createTimerCounter(e, timer.timerC);
+					//createTimerCounter(newtimer);
+					//break;
+				}
+
+
+				for (Entity e : registry.menus.entities) {
+					registry.remove_all_components_of(e);
+				}
+				for (Entity e : registry.buttons.entities) {
+					registry.remove_all_components_of(e);
+				}
+
+
+				for (Entity e : registry.timer.entities) {
+					registry.remove_all_components_of(e);
+				}
+
+				for (Entity e : registry.texts.entities) {
+					registry.remove_all_components_of(e);
+				}
+				//startscreen16
+				play_options(button.callbacks, newtimer, newplayers);
 			
+
+				break;
+			}
+			//startscreen17
+			else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONLB) {
+
+				//startscreen16
+				int newtimer;
+				for (Entity e : registry.timer.entities) {
+					OptionTimer timer = registry.timer.get(e);
+					newtimer = timer.timerC;
+				}
+
+				//startscreen17
+				int newplayers;
+				for (Entity e : registry.players.entities) {
+					OptionPlayers players = registry.players.get(e);
+					newplayers = decreasePlayers(e, 1);
+				}
+
+
+				for (Entity e : registry.menus.entities) {
+					registry.remove_all_components_of(e);
+				}
+				for (Entity e : registry.buttons.entities) {
+					registry.remove_all_components_of(e);
+				}
+
+
+				for (Entity e : registry.timer.entities) {
+					registry.remove_all_components_of(e);
+				}
+
+
+				//startscreen17
+				for (Entity e : registry.players.entities) {
+					registry.remove_all_components_of(e);
+				}
+
+
+				for (Entity e : registry.texts.entities) {
+					registry.remove_all_components_of(e);
+				}
+				//startscreen16
+				play_options(button.callbacks, newtimer, newplayers);
+				/*
+				for (Entity e : registry.timer.entities) {
+					OptionTimer timer_count = registry.timer.get(e);
+					Entity timer = createTimerCounter(e, 20);
+				}
+				*/
+				//restart_game();
+
+				break;
+			}
+			//startscreen17
+			else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONRB) {
+
+				//startscreen16
+				int newtimer;
+				for (Entity e : registry.timer.entities) {
+					OptionTimer timer = registry.timer.get(e);
+					newtimer = timer.timerC;
+				}
+
+				//startscreen17
+				int newplayers;
+				for (Entity e : registry.players.entities) {
+					OptionPlayers players = registry.players.get(e);
+					newplayers = increasePlayers(e, 1);
+					//newplayers = players.playersN;
+				}
+
+
+				for (Entity e : registry.menus.entities) {
+					registry.remove_all_components_of(e);
+				}
+				for (Entity e : registry.buttons.entities) {
+					registry.remove_all_components_of(e);
+				}
+
+
+				for (Entity e : registry.timer.entities) {
+					registry.remove_all_components_of(e);
+				}
+
+				//startscreen17
+				for (Entity e : registry.players.entities) {
+					registry.remove_all_components_of(e);
+				}
+
+				for (Entity e : registry.texts.entities) {
+					registry.remove_all_components_of(e);
+				}
+
+				//startscreen16
+				play_options(button.callbacks, newtimer, newplayers);
+				/*
+				for (Entity e : registry.timer.entities) {
+					OptionTimer timer_count = registry.timer.get(e);
+					Entity timer = createTimerCounter(e, 20);
+				}
+				*/
+				//restart_game();
+
+				break;
+			}
+			//startscreemn17
+			else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONGAME) {
+
+				/// <summary>
+				//startscreen16
+				/// </summary>
+
+
+				for (Entity e : registry.menus.entities) {
+					registry.remove_all_components_of(e);
+				}
+				for (Entity e : registry.buttons.entities) {
+					registry.remove_all_components_of(e);
+				}
+
+
+				for (Entity e : registry.timer.entities) {
+					registry.remove_all_components_of(e);
+				}
+				//startscreen17
+				for (Entity e : registry.players.entities) {
+					registry.remove_all_components_of(e);
+				}
+
+				for (Entity e : registry.texts.entities) {
+					registry.remove_all_components_of(e);
+				}
+				//startscreen17
+				//play_options(button.callbacks, newtimer, newplayers);
+				restart_game();
+
+				break;
+			}
+			//startscreemn17
+			else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONCANCEL) {
+
+				/// <summary>
+				//startscreen16
+				/// </summary>
+
+
+				for (Entity e : registry.menus.entities) {
+					registry.remove_all_components_of(e);
+				}
+				for (Entity e : registry.buttons.entities) {
+					registry.remove_all_components_of(e);
+				}
+
+
+				for (Entity e : registry.timer.entities) {
+					registry.remove_all_components_of(e);
+				}
+				//startscreen17
+				for (Entity e : registry.players.entities) {
+					registry.remove_all_components_of(e);
+				}
+
+				for (Entity e : registry.texts.entities) {
+					registry.remove_all_components_of(e);
+				}
+
+				play_options(button.callbacks, 20, 3);
+
+				break;
+			}
 			else if ((registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONL1) || (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONL2) || (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONL3)) {
 				for (Entity e : registry.menus.entities) {
 					registry.remove_all_components_of(e);
@@ -236,7 +490,7 @@ void WorldSystem::check_for_button_presses() {
 					registry.remove_all_components_of(e);
 				}
 				restart_game();
-				
+
 				break;
 			}
 		}
@@ -297,23 +551,45 @@ void WorldSystem::play_startscreen(std::vector<std::function<void()>> callbacks)
 
 }
 
-void WorldSystem::play_options(std::vector<std::function<void()>> callbacks) {
-		//createButton(vec2{ screenResolution.x / 2, screenResolution.y / 2 }, vec2{ screenResolution.x, screenResolution.y }, TEXTURE_IDS::HOWTOMOVE, callbacks);
+void WorldSystem::play_options(std::vector<std::function<void()>> callbacks, int newtimer, int newPlayers) {
+	//createButton(vec2{ screenResolution.x / 2, screenResolution.y / 2 }, vec2{ screenResolution.x, screenResolution.y }, TEXTURE_IDS::HOWTOMOVE, callbacks);
 	std::vector<std::function<void()>> onClick;
-	createMenu(MENU_TYPES::OPTIONS, 0.75);
+	createMenu(MENU_TYPES::OPTIONS, -0.5);
 
 	vec2 pos1 = {(defaultResolution.x - 980.f) / defaultResolution.x * screenResolution.x, (450.f / defaultResolution.y) * screenResolution.y };
 	vec2 scale = { (100.f / defaultResolution.x) * screenResolution.x, (100.f / defaultResolution.y) * screenResolution.y };
-	createButton(pos1, scale,TEXTURE_IDS::BUTTONL, onClick);
+	createButton(pos1, scale,TEXTURE_IDS::BUTTONLA, onClick);
 
 	vec2 pos2 = {(defaultResolution.x - 730.f) / defaultResolution.x * screenResolution.x, (450.f / defaultResolution.y) * screenResolution.y };
-	createButton(pos2, scale,TEXTURE_IDS::BUTTONR, onClick);
+	createButton(pos2, scale,TEXTURE_IDS::BUTTONRA, onClick);
 		
 	vec2 pos3 = {(defaultResolution.x - 980.f) / defaultResolution.x * screenResolution.x, (670.f / defaultResolution.y) * screenResolution.y };
-	createButton(pos3, scale,TEXTURE_IDS::BUTTONL, onClick);
+	createButton(pos3, scale,TEXTURE_IDS::BUTTONLB, onClick);
 
 	vec2 pos4 = {(defaultResolution.x - 730.f) / defaultResolution.x * screenResolution.x, (670.f / defaultResolution.y) * screenResolution.y };
-	createButton(pos4, scale,TEXTURE_IDS::BUTTONR, onClick);
+	createButton(pos4, scale,TEXTURE_IDS::BUTTONRB, onClick);
+
+
+
+	//startscreen17
+	//vec2 pos3 = {(defaultResolution.x - 980.f) / defaultResolution.x * renderer->getScreenWidth(), (550.f / defaultResolution.y) * renderer->getScreenHeight() };
+	vec2 pos5 = { (defaultResolution.x - 1520) / defaultResolution.x * screenResolution.x, (850.f / defaultResolution.y) * screenResolution.y };
+	createButton(pos5, scale, TEXTURE_IDS::BUTTONGAME, onClick);
+	//startscreen17
+	//vec2 pos4 = {(defaultResolution.x - 900.f) / defaultResolution.x * renderer->getScreenWidth(), (550.f / defaultResolution.y) * renderer->getScreenHeight() };
+	vec2 pos6 = { (defaultResolution.x - 300.f) / defaultResolution.x * screenResolution.x, (850.f / defaultResolution.y) * screenResolution.y };
+	createButton(pos6, scale, TEXTURE_IDS::BUTTONCANCEL, onClick);
+
+
+
+
+	createTimerCounter(newtimer, textManager);
+
+	//createText({ 1025.0f, 390.0f }, 2.0f, { 0.0f, 0.0f, 0.0f }, "20");
+	createPlayersCounter(newPlayers,textManager);
+
+	//createText({ 1045.0f, 615.0f }, 2.0f, { 0.0f, 0.0f, 0.0f }, "3");
+
 }
 
 

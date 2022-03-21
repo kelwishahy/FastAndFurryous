@@ -32,3 +32,7 @@ Entity createCrosshair(Entity origin, bool iscat);
 
 Entity createHealthCounter(Entity origin, int health, TextManager& textManager);
 
+Entity createTimerCounter(int newtimer, TextManager& textManager);
+
+Entity createPlayersCounter(int newplayers, TextManager& textManager);
+
