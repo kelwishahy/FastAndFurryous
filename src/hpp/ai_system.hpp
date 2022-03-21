@@ -9,7 +9,9 @@ class AISystem
 public:
 	void step(float elapsed_ms, int turn);
 	void init(ShootingSystem& shootingSystem);
-
+	double calculateDistance(vec2 v1, vec2 v2);
+	void decideAction();
+	void checkJump();
 private:
 	float jumpdelay;
 	float timer;
