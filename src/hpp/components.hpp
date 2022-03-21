@@ -79,10 +79,13 @@ enum class TEXTURE_IDS {
 	HEALTH_SQUARE,
 	BUTTONGAME,
 	BUTTONCANCEL,
+	// Maps
 	INDUSTRIAL_BG,
 	INDUSTRIAL_FAR_BUILDINGS,
 	INDUSTRIAL_BUILDINGS,
 	INDUSTRIAL_FOREGROUND,
+	FOREST,
+	SPACE,
 	TOTAL
 }; constexpr int textureCount = (int)TEXTURE_IDS::TOTAL;
 
@@ -106,8 +109,9 @@ enum RB_TYPES {
 
 enum WEAPON_TYPES {
 	RIFLE = 0,
-	SHOTGUN = 1
-};
+	SHOTGUN = 1,
+	TOTAL //For no weaponed 
+}; constexpr int weaponCount = (int)WEAPON_TYPES::TOTAL;
 
 enum TILE_TYPES {
 	NONE,
@@ -136,9 +140,15 @@ enum UI_ELEMENT {
 
 enum class MAPS {
 	INDUSTRIAL,
+	FOREST,
+	SPACE,
 	TOTAL
 }; constexpr int mapCount = (int)MAPS::TOTAL;
 
+enum class ANIMAL {
+	CAT,
+	DOG
+};
 // Game components ------------------------------------------------------------
 struct Background {
 	
@@ -269,6 +279,7 @@ struct ChildEntities {
 		}
 	}
 };
+void remove_children(Entity e);
 
 struct UIElement {
 	UI_ELEMENT element_type;

@@ -21,6 +21,19 @@ void AnimationSystem::init() {
 
 void AnimationSystem::step(float elapsed_ms) {
 
+	for (Entity e : registry.animations.entities) {
+		Motion& catMotion = registry.motions.get(e);
+		Animation& catAnimation = registry.animations.get(e);
+
+		if (catMotion.velocity.x < 0) {
+			catAnimation.facingLeft = true;
+		}
+		if (catMotion.velocity.x > 0) {
+			catAnimation.facingLeft = false;
+		}
+	}
+
+
 	for (int i = 0; i < registry.parentEntities.components.size(); i++) {
 		ChildEntities& children = registry.parentEntities.components[i];
 		Entity e = registry.parentEntities.entities[i];
@@ -212,21 +225,14 @@ void AnimationSystem::update_anim_orientation() {
 			for (int j = 0; j < children.child_data_map.size(); j++) {
 				if (registry.animations.has(children.child_data_map.at(j))) {
 					Animation child = registry.animations.get(children.child_data_map.at(j));
-					if (child.name == "cat_head" || child.name == "cat_front_arm" || child.name == "cat_back_arm") {
+					if (child.name == "cat_head" || child.name == "cat_front_arm" || child.name == "cat_back_arm" || child.name == "dog_head" || child.name == "dog_front_arm" || child.name == "dog_back_arm") {
 						if (child.facingLeft == true) {
 							children.normal_dists[j].x = -children.original_dists[j].x;
 						}
 						else {
 							children.normal_dists[j].x = children.original_dists[j].x;
 						}
-					} else if (child.name == "dog_head" || child.name == "dog_front_arm" || child.name == "dog_back_arm") {
-						if (child.facingLeft == true) {
-							children.normal_dists[j].x = -children.original_dists[j].x;
-						}
-						else {
-							children.normal_dists[j].x = children.original_dists[j].x;
-						}
-					}
+					} 
 				}
 			}
 		}

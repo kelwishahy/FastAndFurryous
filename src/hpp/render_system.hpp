@@ -88,7 +88,9 @@ class RenderSystem {
 		"industrial/bg.png",
 		"industrial/far-buildings.png",
 		"industrial/buildings.png",
-		"industrial/skill-foreground.png"
+		"industrial/skill-foreground.png",
+		"forest/forest.png",
+		"space/space.png"
 	};
 
 	std::array<GLuint, textureCount> textures; // OpenGL texture names

@@ -18,7 +18,7 @@ void calculateBoxVerticesAndSetTriangles(vec2 pos, vec2 scale, Boxcollider& box)
 	box.vertices.push_back(pos + vec2{ left, down }); //downleft
 }
 
-Entity createCat(vec2 pos) {
+Entity createCat(WEAPON_TYPES weapon, vec2 pos, int health) {
 	auto head = Entity();
 	auto frontArm = Entity();
 	const auto entity = Entity();
@@ -90,7 +90,8 @@ Entity createCat(vec2 pos) {
 	motion.scale = scaleToScreenResolution({ scale, scale * 1.655f }); //Look at the dimensions of the sprite sheet to get the right ratio
 
 	// Add health component
-	Health& health = registry.health.emplace(entity);
+	Health& healthval = registry.health.emplace(entity);
+	healthval.hp = health;
 
 	//Make player a rigidbody
 	Rigidbody& rb = registry.rigidBodies.emplace(entity);
@@ -105,7 +106,9 @@ Entity createCat(vec2 pos) {
 			SHADER_PROGRAM_IDS::ANIMATION,
 			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
 
-	registry.weapons.insert(entity, Rifle());
+	if (weapon == WEAPON_TYPES::RIFLE) {
+		registry.weapons.insert(entity, Rifle());
+	}
 
 	Animation& anim = registry.animations.emplace(entity);
 	anim.animation_states_constants.insert({TEXTURE_IDS::CAT_FRONT_IDLE, CAT_IDLE_CONSTANTS});
@@ -119,7 +122,7 @@ Entity createCat(vec2 pos) {
 	return entity;
 }
 
-Entity createDog(vec2 pos) {
+Entity createDog(WEAPON_TYPES weapon, vec2 pos, int health) {
 
 	auto head = Entity();
 	const auto entity = Entity();
@@ -179,7 +182,8 @@ Entity createDog(vec2 pos) {
 	registry.dogs.emplace(entity);
 
 	// Add health component
-	Health& health = registry.health.emplace(entity);
+	Health& healthbar = registry.health.emplace(entity);
+	healthbar.hp = health;
 
 	//Make player a rigidbody
 	Rigidbody& rb = registry.rigidBodies.emplace(entity);
@@ -203,7 +207,9 @@ Entity createDog(vec2 pos) {
 			SHADER_PROGRAM_IDS::ANIMATION,
 			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
 
-	registry.weapons.insert(entity, Rifle());
+	if (weapon == WEAPON_TYPES::RIFLE) {
+		registry.weapons.insert(entity, Rifle());
+	}
 
 	Animation& anim = registry.animations.emplace(entity);
 	anim.animation_states_constants.insert({ TEXTURE_IDS::DOG_FRONT_IDLE, CAT_IDLE_CONSTANTS });
@@ -556,29 +562,20 @@ Entity createHealthCounter(Entity origin, int health, TextManager& textManager) 
 }
 
 Entity createTimerCounter(int timer, TextManager& textManager) {
-	//Entity createTimerCounter(Entity e, int timer) {
-	//Entity createTimerCounter(Entity origin, int health) {
-
-		//vec3 color = registry.cats.has(origin) ? vec3{ 0.862f, 0.525f, 0.517f } : vec3{ 0.039, 0.454, 1 };
 
 	auto entity = Entity();
 
 	OptionTimer& timer0 = registry.timer.emplace(entity);
 
-
-	//startscreen16
 	timer0.timerC = timer;
 	//timer0.text = createText({ 1025.0f, 390.0f }, 2.0f, { 0.0f, 0.0f, 0.0f }, std::to_string(timer0.timerC));
 	createText(textManager, std::to_string(timer0.timerC), { 1060.0f, 390.0f }, 2.0f, { 0.0f, 0.0f, 0.0f });
-
-	//Motion& motion = registry.motions.emplace(entity);
-	//motion.scale = { 100.0f, 100.0f };
 
 	return entity;
 
 }
 
-//startscreen15
+
 Entity createPlayersCounter(int newplayers, TextManager& textManager) {
 
 
@@ -591,6 +588,3 @@ Entity createPlayersCounter(int newplayers, TextManager& textManager) {
 	return entity;
 
 }
-
-
-

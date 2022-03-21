@@ -52,6 +52,8 @@ public:
 
 	void remove_components();
 
+	Game level_one();
+
 	glm::vec2 mouse_pos;
 
 	GameController& getCurrentGame() { return this->current_game; }
@@ -64,7 +66,7 @@ public:
 
 private:
 	// restart level it was in the private 
-	void restart_game();
+	void restart_game(MAPS maps);
 
 	void init_main_menu();
 
