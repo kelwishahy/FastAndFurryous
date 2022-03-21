@@ -63,7 +63,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 }
 
 // Reset the world state to its initial state
-void WorldSystem::restart_game() {
+void WorldSystem::restart_game(MAPS maps) {
 	while (registry.motions.entities.size() > 0)
 		registry.remove_all_components_of(registry.motions.entities.back());
 
@@ -223,20 +223,45 @@ void WorldSystem::check_for_button_presses() {
 				for (Entity e : registry.buttons.entities) {
 					registry.remove_all_components_of(e);
 				}
-				restart_game();
+				// will change it depending on the chosen map for 2 player version
+				restart_game(MAPS::INDUSTRIAL);
 				
 				break;
 			}
 			
-			else if ((registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONL1) || (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONL2) || (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONL3)) {
+			else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONL1) {
 				for (Entity e : registry.menus.entities) {
 					registry.remove_all_components_of(e);
 				}
 				for (Entity e : registry.buttons.entities) {
 					registry.remove_all_components_of(e);
 				}
-				restart_game();
+				restart_game(MAPS::INDUSTRIAL);
 				
+				break;
+			}
+
+			else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONL2) {
+				for (Entity e : registry.menus.entities) {
+					registry.remove_all_components_of(e);
+				}
+				for (Entity e : registry.buttons.entities) {
+					registry.remove_all_components_of(e);
+				}
+				restart_game(MAPS::FOREST);
+
+				break;
+			}
+
+			else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONL3) {
+				for (Entity e : registry.menus.entities) {
+					registry.remove_all_components_of(e);
+				}
+				for (Entity e : registry.buttons.entities) {
+					registry.remove_all_components_of(e);
+				}
+				restart_game(MAPS::SPACE);
+
 				break;
 			}
 		}
