@@ -75,10 +75,13 @@ enum class TEXTURE_IDS {
 	CAT_CROSSHAIR,
 	DOG_CROSSHAIR,
 	HEALTH_SQUARE,
+	// Maps
 	INDUSTRIAL_BG,
 	INDUSTRIAL_FAR_BUILDINGS,
 	INDUSTRIAL_BUILDINGS,
 	INDUSTRIAL_FOREGROUND,
+	FOREST,
+	SPACE,
 	TOTAL
 }; constexpr int textureCount = (int)TEXTURE_IDS::TOTAL;
 
@@ -132,6 +135,8 @@ enum UI_ELEMENT {
 
 enum class MAPS {
 	INDUSTRIAL,
+	FOREST,
+	SPACE,
 	TOTAL
 }; constexpr int mapCount = (int)MAPS::TOTAL;
 
