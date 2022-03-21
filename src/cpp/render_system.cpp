@@ -39,7 +39,7 @@ void RenderSystem::draw(float elapsed_ms, WorldSystem& world) {
 			} else if (depth == LAYERS[2]) {
 				pos -= camera->getPosition().x / 25.f;
 			}
-			drawBackground(request, depth, { pos, screenHeight / 2 }, { 2 * screenWidth, screenHeight });
+			drawBackground(request, depth, scaleToScreenResolution({ pos, screenHeight / 2 }), scaleToScreenResolution({ 2 * screenWidth, screenHeight }));
 			continue;
 		}
 
@@ -307,7 +307,7 @@ void RenderSystem::drawTiles() {
 }
 
 void RenderSystem::drawBackground(RenderRequest& request, float layer, vec2 position, vec2 scale) {
-	mat4 transformationMatrix = transform(scaleToScreenResolution(position), scaleToScreenResolution(scale), layer, 0);
+	mat4 transformationMatrix = transform(position, scale, layer, 0);
 	std::string shaderInputs[] = { "position", "texCoord" };
 
 	switch(request.texture) {
