@@ -40,15 +40,15 @@ public:
 
 	void check_for_button_presses();
 
-	void play_tutorial(std::vector<std::function<void()>> callbacks);
+	void play_tutorial();
 
-	void play_select(std::vector<std::function<void()>> callbacks);
+	void play_select();
 
-	void play_startscreen(std::vector<std::function<void()>> callbacks);
+	void play_startscreen();
 
-	void play_options(std::vector<std::function<void()>> callbacks, int newtimer, int newPlayers);
+	void play_options(int newtimer, int newPlayers);
 
-	void play_levels(std::vector<std::function<void()>> callbacks);
+	void play_levels();
 
 	void remove_components();
 

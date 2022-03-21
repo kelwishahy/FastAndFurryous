@@ -367,12 +367,11 @@ Entity createMenu(MENU_TYPES menu, float layer) {
 	return entity;
 }
 
-Entity createButton(vec2 pos, vec2 scale, TEXTURE_IDS tex_id, std::vector<std::function<void()>> callbacks) {
+Entity createButton(vec2 pos, vec2 scale, TEXTURE_IDS tex_id) {
 
 	const auto entity = Entity();
 
 	Clickable& button = registry.buttons.emplace(entity);
-	button.callbacks = callbacks;
 
 	const float left = -scale.x / 2;
 	const float right = scale.x / 2;
