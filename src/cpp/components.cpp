@@ -1,10 +1,10 @@
 #include "../hpp/components.hpp"
-#include "../hpp/render_system.hpp" // for gl_has_errors
 #include <hpp/tiny_ecs_registry.hpp>
 
 // stlib
 #include <iostream>
 #include <sstream>
+#include <glm/gtx/extended_min_max.hpp>
 
 Debug debugging;
 float death_timer_counter_ms = 3000;
@@ -102,8 +102,8 @@ bool Mesh::loadMeshFromObj(std::string obj_path, std::vector<ColoredVertex>& out
 	glm::vec3 min_position = { 99999,99999,99999 };
 	for (ColoredVertex& pos : out_vertices)
 	{
-		max_position = glm::max(max_position, pos.position);
-		min_position = glm::min(min_position, pos.position);
+		max_position = max(max_position, pos.position);
+		min_position = min(min_position, pos.position);
 	}
 	if(abs(max_position.z - min_position.z)<0.001)
 		max_position.z = min_position.z+1; // don't scale z direction when everythin is on one plane
@@ -127,5 +127,24 @@ void remove_children(Entity e) {
 			registry.remove_all_components_of(pair.second);
 		}
 	}
+}
+
+std::vector<Entity> get_all_children(Entity e) {
+
+	std::vector<Entity> allchildren;
+
+	if (registry.parentEntities.has(e)) {
+		const ChildEntities children = registry.parentEntities.get(e);
+
+		for (auto pair : children.child_data_map) {
+			allchildren.push_back(pair.second);
+			for (Entity next_level_child : get_all_children(pair.second)) {
+				allchildren.push_back(next_level_child);
+			}
+		}
+
+	}
+
+	return allchildren;
 
 }

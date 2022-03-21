@@ -376,3 +376,4 @@ struct DebugComponent {
 };
 
 void remove_children(Entity e);
+std::vector<Entity> get_all_children(Entity e);

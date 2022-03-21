@@ -6,6 +6,7 @@
 
 #include <glm/vec2.hpp>	
 #include <hpp/tiny_ecs_registry.hpp>
+#include <hpp/components.hpp>
 
 
 GameController::GameController() {
@@ -71,36 +72,6 @@ void GameController::step(float elapsed_ms) {
 		turnIndicatorPosition = turnPosition;
 		turnIndicatorPosition.x = turnIndicatorPosition.x - turnIndicatorText.scale.x / 2.f;
 		turnIndicatorText.color = redColor;
-
-		for (Entity e : player1_team) {
-			auto& selected = registry.selected.get(e).isSelected;
-			selected = true;
-
-			if (registry.parentEntities.has(e)) {
-				auto& children = registry.parentEntities.get(e);
-				for (auto& child : children.child_data_map) {
-					if (registry.selected.has(child.second)) {
-						auto& sel = registry.selected.get(child.second).isSelected;
-						sel = true;
-					}
-				}
-			}
-		}
-
-		for (Entity e : npcai_team) {
-			auto& selected = registry.selected.get(e).isSelected;
-			selected = false;
-			if (registry.parentEntities.has(e)) {
-				auto& children = registry.parentEntities.get(e);
-				for (auto& child : children.child_data_map) {
-					if (registry.selected.has(child.second)) {
-						auto& sel = registry.selected.get(child.second).isSelected;
-						sel = false;
-					}
-				}
-			}
-		}
-
 	} else if (game_state.turn_possesion == PLAYER2) {
 		turnIndicatorText.text = "PLAYER 2'S TURN";
 		turnIndicatorPosition = turnPosition;
@@ -115,34 +86,7 @@ void GameController::step(float elapsed_ms) {
 		turnIndicatorPosition.x = turnIndicatorPosition.x - turnIndicatorText.scale.x / 2.f;
 		turnIndicatorText.color = darkGreenColor;
 
-		for (Entity e : player1_team) {
-			auto& selected = registry.selected.get(e).isSelected;
-			selected = false;
 
-			if (registry.parentEntities.has(e)) {
-				auto& children = registry.parentEntities.get(e);
-				for (auto& child : children.child_data_map) {
-					if (registry.selected.has(child.second)) {
-						auto& sel = registry.selected.get(child.second).isSelected;
-						sel = false;
-					}
-				}
-			}
-		}
-		
-		for (Entity e : npcai_team) {
-			auto& selected = registry.selected.get(e).isSelected;
-			selected = true;
-			if (registry.parentEntities.has(e)) {
-				auto& children = registry.parentEntities.get(e);
-				for (auto& child : children.child_data_map) {
-					if (registry.selected.has(child.second)) {
-						auto& sel = registry.selected.get(child.second).isSelected;
-						sel = true;
-					}
-				}
-			}
-		}
 	}
 
 	for (Entity e : teams[game_state.turn_possesion]) {
@@ -241,7 +185,7 @@ void GameController::init_player_teams() {
 	teams.push_back(player2_team);
 	teams.push_back(ai_team);
 	teams.push_back(npcai_team);
-	curr_selected_char = player1_team[0];
+	change_curr_selected_char(player1_team[0]);
 }
 
 void GameController::next_turn() {
@@ -265,9 +209,9 @@ void GameController::next_turn() {
 			auto& motion = registry.motions.get(e);
 			motion.velocity.x = 0;
 		}
-
 		next_turn();
 	}
+	change_curr_selected_char(teams[game_state.turn_possesion][0]); //supposed to be the first player on each team
 }
 
 void GameController::handle_collisions() {
@@ -315,9 +259,32 @@ void GameController::handle_collisions() {
 	registry.collisions.clear();
 }
 
+void GameController::change_selected_state(Entity e, bool state) {
+	Selected& selparent = registry.selected.get(e); //unselect parent
+	selparent.isSelected = state;
+	std::vector<Entity> children = get_all_children(e);
+	for (Entity child : children) {
+		if (registry.renderRequests.has(child)) {
+			Selected& sel = registry.selected.get(child); //unselect all children attached
+			sel.isSelected = state;
+		}
+	}
+}
+
 void GameController::change_curr_selected_char(Entity e) {
 
 	curr_selected_char = e;
+
+	for (std::vector<Entity> team : teams) {
+		for (Entity player : team) {
+			if (curr_selected_char != player && registry.renderRequests.has(player)) {
+				change_selected_state(player, false);
+			} else if (curr_selected_char == player) {
+				change_selected_state(player, true);
+			}
+		}
+	}
+
 }
 void GameController::change_to_next_char_on_team() {
 
