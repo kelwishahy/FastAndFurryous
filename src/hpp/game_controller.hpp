@@ -66,6 +66,11 @@ private:
 	TextManager textManager;
 	Game game_data;
 
+	glm::vec2 mousePosition;
+	float mouseDeadzone;
+	glm::vec2 mouseTriggerArea;
+	void moveCamera();
+
 	// restart level it was in the private 
 	void restart_current_match();
 

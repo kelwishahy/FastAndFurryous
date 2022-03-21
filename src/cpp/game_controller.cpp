@@ -24,6 +24,10 @@ void GameController::init(GLFWwindow* window, MapSystem::Map& map, OrthographicC
 	this->camera = &camera;
 	this->textManager = textManager;
 	this->game_data = game;
+	this->mousePosition = scaleToScreenResolution(defaultResolution/2.f);
+	this->mouseDeadzone = scaleToScreenResolution({ 250.f, 250.f }).x;
+	this->mouseTriggerArea = scaleToScreenResolution({ 300.f, 150.f });
+
 
 	//Init game metadata
 	game_state.turn_number += 1;
@@ -58,6 +62,10 @@ void GameController::init(GLFWwindow* window, MapSystem::Map& map, OrthographicC
 void GameController::step(float elapsed_ms) {
 	//While a game is happening make sure the players are controlling from here
 	glfwSetWindowUserPointer(window, this);
+
+	//Pan camera based on mouse position
+	moveCamera();
+
 	shooting_system.step(elapsed_ms);
 	ui.step(elapsed_ms);
 
@@ -102,13 +110,13 @@ void GameController::step(float elapsed_ms) {
 			inAGame = false;
 		}
 
-		auto rightDist = abs(registry.motions.get(e).position.x - camera->getCameraRight().x);
-		auto leftDist = abs(registry.motions.get(e).position.x - camera->getPosition().x);
-		if (rightDist < 400.f && camera->getCameraRight().x < 2 * screenResolution.x) {
-			camera->setPosition(camera->getPosition() + vec3(1.5f, 0.f, 0.f));
-		} else if (leftDist < 400.f && camera->getPosition().x > 0.f) {
-			camera->setPosition(camera->getPosition() + vec3(-1.5f, 0.f, 0.f));
-		}
+		// auto rightDist = abs(registry.motions.get(e).position.x - camera->getCameraRight().x);
+		// auto leftDist = abs(registry.motions.get(e).position.x - camera->getPosition().x);
+		// if (rightDist < 400.f && camera->getCameraRight().x < 2 * screenResolution.x) {
+		// 	camera->setPosition(camera->getPosition() + vec3(1.5f, 0.f, 0.f));
+		// } else if (leftDist < 400.f && camera->getPosition().x > 0.f) {
+		// 	camera->setPosition(camera->getPosition() + vec3(-1.5f, 0.f, 0.f));
+		// }
 
 		// if (player1_team.size() == 0) {
 		// 	restart_current_match();
@@ -131,6 +139,31 @@ void GameController::step(float elapsed_ms) {
 	decrementTurnTime(elapsed_ms);
 
 }
+
+void GameController::moveCamera() {
+	auto mousePos = mousePosition.x + camera->getPosition().x;
+	auto rightDist = abs(mousePos - camera->getCameraRight().x);
+	auto leftDist = abs(mousePos - camera->getPosition().x);
+
+	if (mousePosition.y > mouseDeadzone) {
+		if (camera->getCameraRight().x < 2 * screenResolution.x) {
+			if (rightDist < mouseTriggerArea.x && rightDist > mouseTriggerArea.y) {
+				camera->setPosition(camera->getPosition() + vec3(3.f, 0.f, 0.f));
+			} else if (rightDist < mouseTriggerArea.y) {
+				camera->setPosition(camera->getPosition() + vec3(6.f, 0.f, 0.f));
+			}
+		}
+
+		if (camera->getPosition().x > 0.f) {
+			if (leftDist < mouseTriggerArea.x && leftDist > mouseTriggerArea.y) {
+				camera->setPosition(camera->getPosition() + vec3(-3.f, 0.f, 0.f));
+			} else if (leftDist < mouseTriggerArea.y) {
+				camera->setPosition(camera->getPosition() + vec3(-6.f, 0.f, 0.f));
+			}
+		}
+	}
+}
+
 
 void GameController::decrementTurnTime(float elapsed_ms) {
 	// registry.remove_all_components_of(timeIndicator);
@@ -384,8 +417,7 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 }
 
 void GameController::on_mouse_move(vec2 mouse_pos) {
-	(void)mouse_pos;
-	// printf("now in game_controller");
+	this->mousePosition = mouse_pos;
 }
 
 void GameController::on_mouse_click(int button, int action, int mods) {
