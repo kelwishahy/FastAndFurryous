@@ -89,10 +89,6 @@ private:
 
 	void decrementTurnTime(float elapsed_ms);
 
-	std::vector<Entity> player1_team;
-	std::vector<Entity> player2_team;
-	std::vector<Entity> ai_team;
-	std::vector<Entity> npcai_team;
 	std::vector<std::vector<Entity>> teams;
 
 	void change_selected_state(Entity e, bool state);

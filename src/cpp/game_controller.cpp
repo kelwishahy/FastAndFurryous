@@ -102,13 +102,15 @@ void GameController::step(float elapsed_ms) {
 		shooting_system.setAimLoc(e);
 	}
 
-	for (int i = 0; i < player1_team.size(); i++) {
-		auto e = player1_team[i];
+	for (int i = 0; i < teams[TURN_CODE::PLAYER1].size(); i++) {
+		auto e = teams[TURN_CODE::PLAYER1][i];
 		if (registry.health.get(e).hp == 0) {
-			player1_team.erase(player1_team.begin() + i);
-
-			registry.remove_all_components_of(e);
-			inAGame = false;
+			teams[TURN_CODE::PLAYER1].erase(teams[TURN_CODE::PLAYER1].begin() + i);
+			remove_children(e);
+			registry.animations.remove(e);
+			registry.rigidBodies.remove(e);
+			registry.cats.remove(e);
+			AnimationSystem::animate_cat_dead(e);
 		}
 
 		// auto rightDist = abs(registry.motions.get(e).position.x - camera->getCameraRight().x);
@@ -124,10 +126,34 @@ void GameController::step(float elapsed_ms) {
 		// }
 	}
 
-	for (int i = 0; i < npcai_team.size(); i++) {
-		auto e = npcai_team[i];
+	for (int i = 0; i < teams[TURN_CODE::PLAYER2].size(); i++) {
+		auto e = teams[TURN_CODE::PLAYER2][i];
 		if (registry.health.get(e).hp == 0) {
-			npcai_team.erase(npcai_team.begin() + i);
+			teams[TURN_CODE::PLAYER2].erase(teams[TURN_CODE::PLAYER2].begin() + i);
+			remove_children(e);
+			registry.animations.remove(e);
+			registry.rigidBodies.remove(e);
+			registry.dogs.remove(e);
+			AnimationSystem::animate_dog_dead(e);
+		}
+
+		// auto rightDist = abs(registry.motions.get(e).position.x - camera->getCameraRight().x);
+		// auto leftDist = abs(registry.motions.get(e).position.x - camera->getPosition().x);
+		// if (rightDist < 400.f && camera->getCameraRight().x < 2 * screenResolution.x) {
+		// 	camera->setPosition(camera->getPosition() + vec3(1.5f, 0.f, 0.f));
+		// } else if (leftDist < 400.f && camera->getPosition().x > 0.f) {
+		// 	camera->setPosition(camera->getPosition() + vec3(-1.5f, 0.f, 0.f));
+		// }
+
+		// if (player1_team.size() == 0) {
+		// 	restart_current_match();
+		// }
+	}
+
+	for (int i = 0; i < teams[TURN_CODE::NPCAI].size(); i++) {
+		auto e = teams[TURN_CODE::NPCAI][i];
+		if (registry.health.get(e).hp == 0) {
+			teams[TURN_CODE::NPCAI].erase(teams[TURN_CODE::NPCAI].begin() + i);
 			remove_children(e);
 			registry.remove_all_components_of(e);
 		}
@@ -171,7 +197,7 @@ void GameController::decrementTurnTime(float elapsed_ms) {
 	uint timePerTurnSec = uint(timePerTurnMs / 1000);
 	if (timePerTurnMs <= 0) {
 		next_turn();
-		timePerTurnMs = 20000.0;
+		timePerTurnMs = game_data.getTimer();
 	} else {
 		timePerTurnMs -= elapsed_ms;
 	}
@@ -197,6 +223,10 @@ void GameController::build_map() {
 }
 
 void GameController::init_player_teams() {
+	std::vector<Entity> player1_team;
+	std::vector<Entity> player2_team;
+	std::vector<Entity> ai_team;
+	std::vector<Entity> npcai_team;
 
 	for (Game::Character character : game_data.getCharacters()) {
 		Entity e = character.animal == ANIMAL::CAT ? createCat(character.weapon, character.starting_pos, character.health) : createDog(character.weapon, character.starting_pos, character.health);
@@ -226,22 +256,22 @@ void GameController::next_turn() {
 	//Turn order will ALWAYS be PLAYER1 -> PLAYER2 -> ENEMY_AI -> (not implemented) AI
 	//IF THERE IS NO ONE ON A TEAM, THE GAME CONTROLLER WILL MOVE ON TO THE NEXT TURN
 
+	ui.hide_crosshair();
 	game_state.turn_possesion += 1;
 	game_state.turn_number += 1;
-	
-	for (Entity e : registry.projectiles.entities) {
-		registry.remove_all_components_of(e);
-	}
+	timePerTurnMs = game_data.getTimer();
 
 	if (game_state.turn_possesion == TURN_CODE::END) {
 		game_state.turn_possesion = TURN_CODE::PLAYER1;
 	} else if (teams[game_state.turn_possesion].empty()) {
 		game_state.turn_number -= 1;
 
-		// Player stops moving
-		for (Entity e : player1_team) {
-			auto& motion = registry.motions.get(e);
-			motion.velocity.x = 0;
+		// force players to stop moving
+		for (std::vector<Entity> team : teams) {
+			for (Entity e : team) {
+				auto& motion = registry.motions.get(e);
+				motion.velocity.x = 0;
+			}
 		}
 		next_turn();
 	}
@@ -325,12 +355,14 @@ void GameController::change_to_next_char_on_team() {
 	//so scuffed lmao
 	bool next_char = false;
 
-	for (Entity e : teams[game_state.turn_possesion]) {
-		if (e == curr_selected_char) {
-			next_char = true;
-		}
-		if (next_char) {
-			change_curr_selected_char(e);
+	for (int i = 0; i < teams[game_state.turn_possesion].size(); i++) {
+		if (teams[game_state.turn_possesion][i] == curr_selected_char) {
+			if (i + 1 == teams[game_state.turn_possesion].size()) {
+				change_curr_selected_char(teams[game_state.turn_possesion][0]);
+				break;
+			}
+			change_curr_selected_char(teams[game_state.turn_possesion][i + 1]);
+			break;
 		}
 	}
 
@@ -344,7 +376,7 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 			Motion& catMotion = registry.motions.get(curr_selected_char);
 			Rigidbody& rb = registry.rigidBodies.get(curr_selected_char);
 
-			float current_speed = 150.0f;
+			float current_speed = 90.0f;
 			float gravity_force = 2.5;
 
 			if (action == GLFW_PRESS) {
@@ -372,10 +404,8 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 					player_mode = PLAYER_MODE::MOVING;
 					ui.hide_crosshair();
 				}
-				if (key == GLFW_KEY_N) {
-					ui.hide_crosshair();
-					remove_children(curr_selected_char);
-					registry.remove_all_components_of(curr_selected_char);
+				if (key == GLFW_KEY_S) {
+					change_to_next_char_on_team();
 				}
 			}
 
@@ -400,17 +430,92 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 
 
 			if (action == GLFW_PRESS && key == GLFW_KEY_UP) {
-				shooting_system.aimUp(curr_selected_char, 0.05f);
+				shooting_system.aimUp(curr_selected_char, 0.025f);
 			}
 
 			if (action == GLFW_PRESS && key == GLFW_KEY_DOWN) {
-				shooting_system.aimDown(curr_selected_char, 0.05f);
+				shooting_system.aimDown(curr_selected_char, 0.025f);
 			}
 
 			if (action == GLFW_PRESS && key == GLFW_KEY_ENTER) {
 				// should only shoot when standing
 				if (catMotion.velocity.y == gravity_force && catMotion.velocity.x == 0.0) {
 					shooting_system.shoot(curr_selected_char);
+					next_turn();
+				}
+			}
+		}
+	} else if (game_state.turn_possesion == PLAYER2 && inAGame) {
+		if (registry.dogs.has(curr_selected_char)) {
+			Motion& catMotion = registry.motions.get(curr_selected_char);
+			Rigidbody& rb = registry.rigidBodies.get(curr_selected_char);
+
+			float current_speed = 90.0f;
+			float gravity_force = 2.5;
+
+			if (action == GLFW_PRESS) {
+				if (key == GLFW_KEY_I) {
+					if (catMotion.velocity.y == gravity_force) {
+						catMotion.velocity.y = -gravity_force * current_speed;
+						rb.collision_normal.y = 0;
+						player_mode = PLAYER_MODE::MOVING;
+						AnimationSystem::animate_dog_jump(curr_selected_char);
+						//AnimationSystem::animate_dog_jump(curr_selected_char);
+						ui.hide_crosshair();
+					}
+				}
+				if (key == GLFW_KEY_L) {
+					catMotion.velocity.x = current_speed;
+					AnimationSystem::animate_dog_walk(curr_selected_char);
+					//AnimationSystem::animate_dog_walk(curr_selected_char);
+					player_mode = PLAYER_MODE::MOVING;
+					ui.hide_crosshair();
+				}
+				if (key == GLFW_KEY_J) {
+					catMotion.velocity.x = -current_speed;
+					AnimationSystem::animate_dog_walk(curr_selected_char);
+					//AnimationSystem::animate_dog_walk(curr_selected_char);
+					player_mode = PLAYER_MODE::MOVING;
+					ui.hide_crosshair();
+				}
+				if (key == GLFW_KEY_K) {
+					change_to_next_char_on_team();
+				}
+			}
+
+
+
+			if (action == GLFW_RELEASE) {
+				if (key == GLFW_KEY_J && catMotion.velocity.x < 0) {
+					catMotion.velocity.x = 0.0f;
+					AnimationSystem::animate_dog_aim(curr_selected_char);
+					//AnimationSystem::animate_dog_idle(curr_selected_char);
+					player_mode = PLAYER_MODE::SHOOTING;
+					ui.show_crosshair(curr_selected_char);
+				}
+				if (key == GLFW_KEY_L && catMotion.velocity.x > 0) {
+					catMotion.velocity.x = 0.0f;
+					AnimationSystem::animate_dog_aim(curr_selected_char);
+					//AnimationSystem::animate_dog_idle(curr_selected_char);
+					player_mode = PLAYER_MODE::SHOOTING;
+					ui.show_crosshair(curr_selected_char);
+				}
+			}
+
+
+			if (action == GLFW_PRESS && key == GLFW_KEY_UP) {
+				shooting_system.aimUp(curr_selected_char, 0.025f);
+			}
+
+			if (action == GLFW_PRESS && key == GLFW_KEY_DOWN) {
+				shooting_system.aimDown(curr_selected_char, 0.025f);
+			}
+
+			if (action == GLFW_PRESS && key == GLFW_KEY_ENTER) {
+				// should only shoot when standing
+				if (catMotion.velocity.y == gravity_force && catMotion.velocity.x == 0.0) {
+					shooting_system.shoot(curr_selected_char);
+					next_turn();
 				}
 			}
 		}

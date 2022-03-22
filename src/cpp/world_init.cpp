@@ -113,12 +113,11 @@ Entity createCat(WEAPON_TYPES weapon, vec2 pos, int health) {
 	}
 
 	Animation& anim = registry.animations.emplace(entity);
-	anim.animation_states_constants.insert({TEXTURE_IDS::CAT_FRONT_IDLE, CAT_IDLE_CONSTANTS});
+	anim.animation_states_constants.insert({ TEXTURE_IDS::CAT_FRONT_IDLE, CAT_IDLE_CONSTANTS});
 	anim.animation_states_constants.insert({ TEXTURE_IDS::CAT_SIDE_IDLE, CAT_SIDE_IDLE_CONSTANTS });
-	anim.animation_states_constants.insert({TEXTURE_IDS::CAT_WALK, CAT_WALK_CONSTANTS });
+	anim.animation_states_constants.insert({ TEXTURE_IDS::CAT_WALK, CAT_WALK_CONSTANTS });
 	anim.animation_states_constants.insert({ TEXTURE_IDS::CAT_JUMP, CAT_JUMP_CONSTANTS });
 	anim.animation_states_constants.insert({ TEXTURE_IDS::CAT_HURT, CAT_HURT_CONSTANTS });
-	anim.animation_states_constants.insert({ TEXTURE_IDS::CAT_DEAD, STABILIZED_CONSTANTS });
 	anim.anim_state = TEXTURE_IDS::CAT_FRONT_IDLE;
 	anim.name = "cat_body";
 
@@ -130,9 +129,12 @@ Entity createDog(WEAPON_TYPES weapon, vec2 pos, int health) {
 	auto head = Entity();
 	const auto entity = Entity();
 	auto frontArm = Entity();
-	auto backArm = Entity();
 
 	ChildEntities& children = registry.parentEntities.emplace(entity);
+
+	registry.selected.emplace(head);
+	registry.selected.emplace(frontArm);
+	registry.selected.emplace(entity);
 	//---Head animation subentity---- putting this in front so that head gets rendered ontop of body
 	int index = 0;
 	children.child_data_map.emplace(index, head );
@@ -216,10 +218,10 @@ Entity createDog(WEAPON_TYPES weapon, vec2 pos, int health) {
 
 	Animation& anim = registry.animations.emplace(entity);
 	anim.animation_states_constants.insert({ TEXTURE_IDS::DOG_FRONT_IDLE, CAT_IDLE_CONSTANTS });
+	anim.animation_states_constants.insert({ TEXTURE_IDS::DOG_SIDE_IDLE, CAT_SIDE_IDLE_CONSTANTS });
 	anim.animation_states_constants.insert({ TEXTURE_IDS::DOG_WALK, CAT_WALK_CONSTANTS });
 	anim.animation_states_constants.insert({ TEXTURE_IDS::DOG_JUMP, CAT_JUMP_CONSTANTS });
 	anim.animation_states_constants.insert({ TEXTURE_IDS::DOG_HURT, CAT_HURT_CONSTANTS });
-	anim.animation_states_constants.insert({ TEXTURE_IDS::DOG_DEAD, STABILIZED_CONSTANTS });
 	anim.anim_state = TEXTURE_IDS::DOG_FRONT_IDLE;
 	anim.name = "dog_body";
 

@@ -417,9 +417,15 @@ Game WorldSystem::level_three() {
 
 Game WorldSystem::multiplayer() {
 	Game multiplayer;
-	multiplayer.addCat(RIFLE, PLAYER_1_TEAM, { screenResolution.x / 2 - 200, screenResolution.y - 400 }, 100);
+	multiplayer.addCat(RIFLE, PLAYER_1_TEAM, { screenResolution.x / 2 - 400, screenResolution.y - 800 }, 100);
 	multiplayer.addCat(RIFLE, PLAYER_1_TEAM, { screenResolution.x / 2 - 100, screenResolution.y - 400 }, 100);
-	multiplayer.addCat(RIFLE, PLAYER_1_TEAM, { screenResolution.x / 2 + 100, screenResolution.y - 400 }, 100);
+	multiplayer.addCat(RIFLE, PLAYER_1_TEAM, { screenResolution.x / 2 + 100, screenResolution.y - 800 }, 100);
+
+	multiplayer.addDog(RIFLE, PLAYER_2_TEAM, { screenResolution.x - 200, screenResolution.y - 800 }, 100);
+	multiplayer.addDog(RIFLE, PLAYER_2_TEAM, { screenResolution.x + 400, screenResolution.y - 1000 }, 100);
+	multiplayer.addDog(RIFLE, PLAYER_2_TEAM, { screenResolution.x + 600, screenResolution.y - 400 }, 100);
+
+	multiplayer.setTimer(10000.0f);
 
 	return multiplayer;
 }
