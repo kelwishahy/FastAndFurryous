@@ -49,7 +49,7 @@ void GameController::init(GLFWwindow* window, MapSystem::Map& map, OrthographicC
 	inAGame = true;
 	player_mode = PLAYER_MODE::MOVING;
 
-	ai.init(shooting_system);
+	ai.init(shooting_system, player1_team, npcai_team);
 
 	ui.init(textManager);
 
