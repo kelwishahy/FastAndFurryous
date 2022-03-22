@@ -350,14 +350,14 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 			if (action == GLFW_RELEASE) {
 				if (key == GLFW_KEY_A && catMotion.velocity.x < 0) {
 					catMotion.velocity.x = 0.0f;
-					AnimationSystem::animate_cat_idle(curr_selected_char);
+					AnimationSystem::animate_cat_aim(curr_selected_char);
 					//AnimationSystem::animate_dog_idle(curr_selected_char);
 					player_mode = PLAYER_MODE::SHOOTING;
 					ui.show_crosshair(curr_selected_char);
 				}
 				if (key == GLFW_KEY_D && catMotion.velocity.x > 0) {
 					catMotion.velocity.x = 0.0f;
-					AnimationSystem::animate_cat_idle(curr_selected_char);
+					AnimationSystem::animate_cat_aim(curr_selected_char);
 					//AnimationSystem::animate_dog_idle(curr_selected_char);
 					player_mode = PLAYER_MODE::SHOOTING;
 					ui.show_crosshair(curr_selected_char);

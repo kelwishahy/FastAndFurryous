@@ -94,7 +94,7 @@ void RenderSystem::draw(float elapsed_ms, WorldSystem& world) {
 				drawQuad(request, shaderInputs, 2);
 
 				float depth = registry.buttons.has(entity) ? 0.8f : 0.0f;
-				renderToScreen(transform(motion.position, motion.scale, depth, 0));
+				renderToScreen(transform(motion.position, motion.scale, depth, motion.angle));
 				break;
 			}
 
@@ -107,8 +107,8 @@ void RenderSystem::draw(float elapsed_ms, WorldSystem& world) {
 mat4 RenderSystem::transform(vec2 position, vec2 scale, float depth, float angle) {
 	Transform transform;
 	transform.mat = glm::translate(transform.mat, vec3(position, depth));
-	transform.mat = glm::scale(transform.mat, vec3(scale, depth));
 	transform.mat = glm::rotate(transform.mat, angle, vec3(0.0f, 0.0f, 1.0f));
+	transform.mat = glm::scale(transform.mat, vec3(scale, depth));
 	return transform.mat;
 }
 
@@ -221,7 +221,7 @@ void RenderSystem::animateSprite(RenderRequest& request, Entity& entity) {
 
 	// Render to the screen
 	auto& motion = registry.motions.get(entity);
-	renderToScreen(transform(motion.position, motion.scale, 0.5f, 0));
+	renderToScreen(transform(motion.position, motion.scale, 0.5f, motion.angle));
 
 	// Resetting the texture coordinates after use
 	texturedQuad[0].texCoord = { 1.f, 1.f }; // top right

@@ -18,6 +18,7 @@ void calculateBoxVerticesAndSetTriangles(vec2 pos, vec2 scale, Boxcollider& box)
 	box.vertices.push_back(pos + vec2{ left, down }); //downleft
 }
 
+
 Entity createCat(WEAPON_TYPES weapon, vec2 pos, int health) {
 	auto head = Entity();
 	auto frontArm = Entity();
@@ -79,6 +80,7 @@ Entity createCat(WEAPON_TYPES weapon, vec2 pos, int health) {
 			SHADER_PROGRAM_IDS::ANIMATION,
 			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
 
+
 	registry.cats.emplace(entity);
 
 	// Setting initial motion values
@@ -112,6 +114,7 @@ Entity createCat(WEAPON_TYPES weapon, vec2 pos, int health) {
 
 	Animation& anim = registry.animations.emplace(entity);
 	anim.animation_states_constants.insert({TEXTURE_IDS::CAT_FRONT_IDLE, CAT_IDLE_CONSTANTS});
+	anim.animation_states_constants.insert({ TEXTURE_IDS::CAT_SIDE_IDLE, CAT_SIDE_IDLE_CONSTANTS });
 	anim.animation_states_constants.insert({TEXTURE_IDS::CAT_WALK, CAT_WALK_CONSTANTS });
 	anim.animation_states_constants.insert({ TEXTURE_IDS::CAT_JUMP, CAT_JUMP_CONSTANTS });
 	anim.animation_states_constants.insert({ TEXTURE_IDS::CAT_HURT, CAT_HURT_CONSTANTS });

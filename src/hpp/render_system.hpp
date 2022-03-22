@@ -48,6 +48,7 @@ class RenderSystem {
 		"cat_hurt.png",
 		"cat_dead.png",
 		// Dog Sprites
+		"dog_side_idle.png",
 		"dog_front_blink.png",
 		"dog_side_blink.png",
 		"dog_front_idle.png",
