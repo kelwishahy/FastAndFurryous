@@ -64,40 +64,49 @@ void MapSystem::Map::build() {
 
 	switch (name) {
 		case MAPS::INDUSTRIAL: {
-			// Set the background image
-			auto ent = Entity();
-			registry.backgrounds.emplace(ent);
-			registry.renderRequests.insert(
-				ent,
-				{ TEXTURE_IDS::INDUSTRIAL_BG,
-					SHADER_PROGRAM_IDS::TEXTURE,
-					GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
+			for (int i = 0; i < IndustrialBackgroundLayers; i++) {
+				auto ent = Entity();
+				auto& bg = registry.backgrounds.emplace(ent);
+				bg.layer = LAYERS[i];
+				TEXTURE_IDS texture;
 
-			auto ent2 = Entity();
-			registry.backgrounds.emplace(ent2);
-			registry.renderRequests.insert(
-				ent2,
-				{ TEXTURE_IDS::INDUSTRIAL_FAR_BUILDINGS,
-					SHADER_PROGRAM_IDS::TEXTURE,
-					GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
+				switch (i) {
+					case 0:
+						texture = TEXTURE_IDS::INDUSTRIAL_BG;
+						break;
+					case 1:
+						texture = TEXTURE_IDS::INDUSTRIAL_FAR_BUILDINGS;
+						break;
+					case 2:
+						texture = TEXTURE_IDS::INDUSTRIAL_BUILDINGS;
+						break;
+					default:
+						texture = TEXTURE_IDS::INDUSTRIAL_FOREGROUND;
+				}
 
-			auto ent3 = Entity();
-			registry.backgrounds.emplace(ent3);
-			registry.renderRequests.insert(
-				ent3,
-				{ TEXTURE_IDS::INDUSTRIAL_BUILDINGS,
-					SHADER_PROGRAM_IDS::TEXTURE,
-					GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
-
-			auto ent4 = Entity();
-			registry.backgrounds.emplace(ent4);
-			registry.renderRequests.insert(
-				ent4,
-				{ TEXTURE_IDS::INDUSTRIAL_FOREGROUND,
-					SHADER_PROGRAM_IDS::TEXTURE,
-					GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
+				registry.renderRequests.insert(ent, { texture, SHADER_PROGRAM_IDS::TEXTURE, GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
+			}
 			break;
 		}
+
+		case MAPS::NIGHT: {
+			for (int i = 0; i < NightBackgroundLayers; i++) {
+				auto ent = Entity();
+				auto& bg = registry.backgrounds.emplace(ent);
+				bg.layer = LAYERS[i];
+				TEXTURE_IDS texture;
+
+				if (i == 0) {
+					texture = TEXTURE_IDS::NIGHT1;
+				} else {
+					texture = TEXTURE_IDS::NIGHT2;
+				}
+
+				registry.renderRequests.insert(ent, { texture, SHADER_PROGRAM_IDS::TEXTURE, GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
+			}
+			break;
+		}
+
 		case MAPS::FOREST: {
 			auto ent = Entity();
 			registry.backgrounds.emplace(ent);
