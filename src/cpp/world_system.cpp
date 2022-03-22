@@ -425,10 +425,3 @@ void WorldSystem::remove_components() {
 	}
 
 }
-
-Game WorldSystem::level_one() {
-	Game level_one;
-	level_one.addCat(RIFLE, PLAYER_1_TEAM, { screenResolution.x / 2 - 200, screenResolution.y - 400 }, 100);
-
-	return level_one;
-}
