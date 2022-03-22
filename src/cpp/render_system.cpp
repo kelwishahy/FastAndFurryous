@@ -90,7 +90,7 @@ void RenderSystem::draw(float elapsed_ms, WorldSystem& world) {
 mat4 RenderSystem::transform(vec2 position, vec2 scale, float depth, float angle) {
 	Transform transform;
 	transform.mat = glm::translate(transform.mat, vec3(position, depth));
-	transform.mat = glm::rotate(transform.mat, angle, vec3(0.0f, 0.0f, 1.0f));
+	transform.mat = (angle != 0) ? glm::rotate(transform.mat, angle, vec3(0.0f, 0.0f, 1.0f)) : transform.mat;
 	transform.mat = glm::scale(transform.mat, vec3(scale, depth));
 	return transform.mat;
 }
@@ -339,7 +339,7 @@ void RenderSystem::drawText(TextManager& textManager, Entity e) {
 
 	GLuint fontvbo;
 
-	Motion motion = registry.motions.get(e);
+	Motion& motion = registry.motions.get(e);
 	Text& fonttext = registry.texts.get(e);
 
 	//we need to do this we're dynamically creating geometry in this function
@@ -359,13 +359,12 @@ void RenderSystem::drawText(TextManager& textManager, Entity e) {
 	glActiveTexture(GL_TEXTURE0);
 
 	//this is capital 'A' for reference
-	float captialsize = textManager.getGlyphs()[65].size.y;
+	float captialsize = textManager.getCapitalSize();
 
 	// iterate through all characters
 	std::string::const_iterator c;
 	float acc = motion.position.x;
-	for (c = fonttext.text.begin(); c != fonttext.text.end(); c++)
-	{
+	for (c = fonttext.text.begin(); c != fonttext.text.end(); c++) {
 		//'$' character
 		if (*c == 36) {
 			isBold = isBold ? false : true;
@@ -378,15 +377,10 @@ void RenderSystem::drawText(TextManager& textManager, Entity e) {
 
 		Glyph ch;
 		if (isItalic) {
-			assert(!textManager.getBoldGlyphs().empty());
 			ch = textManager.getItalicGlyphs()[*c];
-		}
-		else if (isBold) {
-			assert(!textManager.getBoldGlyphs().empty());
+		} else if (isBold) {
 			ch = textManager.getBoldGlyphs()[*c];
-		}
-		else {
-			assert(!textManager.getGlyphs().empty());
+		} else {
 			ch = textManager.getGlyphs()[*c];
 		}
 
@@ -429,13 +423,13 @@ void RenderSystem::drawText(TextManager& textManager, Entity e) {
 	}
 	fonttext.scale.x = acc - motion.position.x; // set x scale
 	fonttext.scale.y = captialsize * motion.scale.y; // set y scale
-	glBindTexture(GL_TEXTURE_2D, 0);
 
 	//Custom projection matrix
 	auto m = registry.motions.get(e);
 	m.position = {m.position.x / defaultResolution.x * screenWidth, m.position.y / defaultResolution.y * screenHeight};
 	m.scale = { m.scale.x / defaultResolution.x * screenWidth, m.scale.y / defaultResolution.y * screenHeight };
-	renderToScreen(transform(m.position, m.scale, 1.0f, 0));
+	renderToScreen(transform(scaleToScreenResolution(m.position), scaleToScreenResolution(m.scale), 1.0f, 0));
+	glDeleteBuffers((GLuint)1, &fontvbo);
 }
 
 /*

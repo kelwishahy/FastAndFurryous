@@ -87,4 +87,5 @@ void TextManager::initFonts() {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	FT_Done_FreeType(ft);
+	this->capitalSize = glyphs[65].size.y;
 }

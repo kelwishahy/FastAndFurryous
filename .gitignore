@@ -3,3 +3,4 @@
 /ext/project_path.hpp
 ext/project_path.hpp
 /CMakePresets.json
+/src/tracy
