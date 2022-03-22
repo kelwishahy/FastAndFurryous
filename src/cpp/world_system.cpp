@@ -63,12 +63,12 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 }
 
 // Reset the world state to its initial state
-void WorldSystem::restart_game(MAPS maps) {
+void WorldSystem::restart_game(Game level) {
 	while (registry.motions.entities.size() > 0)
 		registry.remove_all_components_of(registry.motions.entities.back());
 
 	//Initialize current game
-	current_game.init(window, mapSystem.getMap(MAPS::INDUSTRIAL), camera, textManager, level_one());
+	current_game.init(window, mapSystem.getMap(level.getBackGround()), camera, textManager, level);
 }
 
 void WorldSystem::handle_collisions() {
@@ -157,7 +157,8 @@ void WorldSystem::check_for_button_presses() {
 			else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTON2) {
 
 				remove_components();
-				play_select();
+				restart_game(multiplayer());
+				//play_select();
 
 				break;
 			}
@@ -257,7 +258,7 @@ void WorldSystem::check_for_button_presses() {
 
 			else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONGAME) {
 				remove_components();
-				restart_game(MAPS::INDUSTRIAL);
+				//restart_game(MAPS::INDUSTRIAL);
 
 				break;
 			}
@@ -270,21 +271,21 @@ void WorldSystem::check_for_button_presses() {
 			}
 			else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONL1) {
 				remove_components();
-				restart_game(MAPS::INDUSTRIAL);
+				restart_game(level_one());
 				
 				break;
 			}
 
 			else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONL2) {
 				remove_components();
-				restart_game(MAPS::FOREST);
+				restart_game(level_two());
 
 				break;
 			}
 
 			else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONL3) {
 				remove_components();
-				restart_game(MAPS::SPACE);
+				//restart_game(MAPS::SPACE);
 
 				break;
 			}
@@ -397,6 +398,32 @@ Game WorldSystem::level_one() {
 	return level_one;
 }
 
+Game WorldSystem::level_two() {
+	Game level_one;
+	level_one.addCat(RIFLE, PLAYER_1_TEAM, { screenResolution.x / 2 - 200, screenResolution.y - 400 }, 100);
+	level_one.setBackGround(MAPS::FOREST);
+
+	return level_one;
+}
+
+Game WorldSystem::level_three() {
+
+	Game level_one;
+	level_one.addCat(RIFLE, PLAYER_1_TEAM, { screenResolution.x / 2 - 200, screenResolution.y - 400 }, 100);
+
+	return level_one;
+
+}
+
+Game WorldSystem::multiplayer() {
+	Game multiplayer;
+	multiplayer.addCat(RIFLE, PLAYER_1_TEAM, { screenResolution.x / 2 - 200, screenResolution.y - 400 }, 100);
+	multiplayer.addCat(RIFLE, PLAYER_1_TEAM, { screenResolution.x / 2 - 100, screenResolution.y - 400 }, 100);
+	multiplayer.addCat(RIFLE, PLAYER_1_TEAM, { screenResolution.x / 2 + 100, screenResolution.y - 400 }, 100);
+
+	return multiplayer;
+}
+
 void WorldSystem::remove_components() {
 	if (registry.menus.size() > 0) {
 		for (Entity e : registry.menus.entities) {
@@ -423,5 +450,4 @@ void WorldSystem::remove_components() {
 			registry.remove_all_components_of(e);
 		}
 	}
-
 }

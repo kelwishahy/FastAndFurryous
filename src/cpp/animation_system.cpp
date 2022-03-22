@@ -79,7 +79,9 @@ void AnimationSystem::animate_cat_walk(Entity e) {
 		Animation& extra = registry.animations.get(rig);
 		if (extra.name == "cat_head") {
 			//Animate the head
-			change_animation(rig, TEXTURE_IDS::CAT_SIDE_BLINK);
+			if (check_if_part_of_parent(e, rig)) {
+				change_animation(rig, TEXTURE_IDS::CAT_SIDE_BLINK);
+			}
 		} 
 	}
 
@@ -92,9 +94,11 @@ void AnimationSystem::animate_cat_idle(Entity e) {
 	for (Entity rig : registry.animations.entities) {
 
 		Animation& extra = registry.animations.get(rig);
-		if (extra.name == "cat_head") {
+		if (extra.name == "cat_head" && rig == e) {
 			//Animate the head
-			change_animation(rig, TEXTURE_IDS::CAT_FRONT_BLINK);
+			if (check_if_part_of_parent(e, rig)) {
+				change_animation(rig, TEXTURE_IDS::CAT_FRONT_BLINK);
+			}
 		}
 
 	}
@@ -106,9 +110,11 @@ void AnimationSystem::animate_cat_jump(Entity e) {
 	for (Entity rig : registry.animations.entities) {
 
 		Animation& extra = registry.animations.get(rig);
-		if (extra.name == "cat_head") {
+		if (extra.name == "cat_head" && rig == e) {
 			//Animate the head
-			change_animation(rig, TEXTURE_IDS::CAT_FRONT_BLINK);
+			if (check_if_part_of_parent(e, rig)) {
+				change_animation(rig, TEXTURE_IDS::CAT_FRONT_BLINK);
+			}
 		}
 	}
 }
@@ -121,7 +127,9 @@ void AnimationSystem::animate_cat_hurt(Entity e) {
 		Animation& extra = registry.animations.get(rig);
 		if (extra.name == "cat_head") {
 			//Animate the head
-			change_animation(rig, TEXTURE_IDS::CAT_HURT_FACE);
+			if (check_if_part_of_parent(e, rig)) {
+				change_animation(rig, TEXTURE_IDS::CAT_HURT_FACE);
+			}
 		}
 
 	}
@@ -137,11 +145,12 @@ void AnimationSystem::animate_cat_aim(Entity e) {
 
 	change_animation(e, TEXTURE_IDS::CAT_SIDE_IDLE);
 	for (Entity rig : registry.animations.entities) {
-
 		Animation& extra = registry.animations.get(rig);
 		if (extra.name == "cat_head") {
 			//Animate the head
-			change_animation(rig, TEXTURE_IDS::CAT_SIDE_BLINK);
+			if (check_if_part_of_parent(e, rig)) {
+				change_animation(rig, TEXTURE_IDS::CAT_SIDE_BLINK);
+			}
 		}
 	}
 
@@ -150,13 +159,15 @@ void AnimationSystem::animate_cat_aim(Entity e) {
 void AnimationSystem::animate_dog_idle(Entity e) {
 
 	change_animation(e, TEXTURE_IDS::DOG_FRONT_IDLE);
-
+	std::vector<Entity> children = get_all_children(e);
 	for (Entity rig : registry.animations.entities) {
 
 		Animation& extra = registry.animations.get(rig);
 		if (extra.name == "dog_head") {
 			//Animate the head
-			change_animation(rig, TEXTURE_IDS::DOG_FRONT_BLINK);
+			if (check_if_part_of_parent(e, rig)) {
+				change_animation(rig, TEXTURE_IDS::DOG_FRONT_BLINK);
+			}
 		}
 
 	}
@@ -173,7 +184,9 @@ void AnimationSystem::animate_dog_walk(Entity e) {
 		Animation& extra = registry.animations.get(rig);
 		if (extra.name == "dog_head") {
 			//Animate the head
-			change_animation(rig, TEXTURE_IDS::DOG_SIDE_BLINK);
+			if (check_if_part_of_parent(e, rig)) {
+				change_animation(rig, TEXTURE_IDS::DOG_SIDE_BLINK);
+			}
 		}
 	}
 }
@@ -187,7 +200,9 @@ void AnimationSystem::animate_dog_jump(Entity e) {
 		Animation& extra = registry.animations.get(rig);
 		if (extra.name == "dog_head") {
 			//Animate the head
-			change_animation(rig, TEXTURE_IDS::DOG_FRONT_BLINK);
+			if (check_if_part_of_parent(e, rig)) {
+				change_animation(rig, TEXTURE_IDS::DOG_FRONT_BLINK);
+			}
 		}
 
 	}
@@ -202,7 +217,9 @@ void AnimationSystem::animate_dog_hurt(Entity e) {
 		Animation& extra = registry.animations.get(rig);
 		if (extra.name == "dog_head") {
 			//Animate the head
-			change_animation(rig, TEXTURE_IDS::DOG_HURT_FACE);
+			if (check_if_part_of_parent(e, rig)) {
+				change_animation(rig, TEXTURE_IDS::DOG_HURT_FACE);
+			}
 		}
 
 	}
@@ -213,6 +230,16 @@ void AnimationSystem::animate_dog_dead(Entity e) {
 	remove_children(e);
 	change_animation(e, TEXTURE_IDS::DOG_DEAD);
 	registry.dogs.remove(e);
+}
+
+bool AnimationSystem::check_if_part_of_parent(Entity e, Entity child) {
+	std::vector<Entity> children = get_all_children(e);
+	for (Entity check_child : children) {
+		if (child == check_child) {
+			return true;
+		}
+	}
+	return false;
 }
 //
 void AnimationSystem::update_anim_orientation() {

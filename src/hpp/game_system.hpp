@@ -27,6 +27,9 @@ public:
 	void setTimer(float timeInMs);
 	float getTimer();
 
+	void setBackGround(MAPS map);
+	MAPS getBackGround();
+
 	std::vector<Character> getCharacters();
 
 	
@@ -34,5 +37,6 @@ private:
 
 	std::vector<Character> characters;
 	float timer = 1.0f;
+	MAPS background = MAPS::INDUSTRIAL;
 
 };

@@ -38,6 +38,15 @@ void Game::setTimer(float timeInMs) {
 	timer = timeInMs;
 }
 
+void Game::setBackGround(MAPS map) {
+	background = map;
+}
+
+MAPS Game::getBackGround() {
+	return background;
+}
+
+
 float Game::getTimer() {
 	return timer;
 }

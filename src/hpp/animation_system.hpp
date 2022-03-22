@@ -36,5 +36,6 @@ public:
 private:
 
 	static void swap_children_orientation(Entity e);
+	static bool check_if_part_of_parent(Entity e, Entity child);
 
 };
