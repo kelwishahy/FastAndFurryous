@@ -100,6 +100,18 @@ class RenderSystem {
 		"night/night1.png",
 		"night/night2.png",
 
+		// Cyberpunk parallax background
+		"cyberpunk/far-buildings.png",
+		"cyberpunk/back-buildings.png",
+		"cyberpunk/foreground.png",
+
+		// Miami Parallax background
+		"miami/back.png",
+		"miami/sun.png",
+		"miami/buildings.png",
+		"miami/palms.png",
+		
+
 		"forest/forest.png",
 		"space/space.png"
 	};

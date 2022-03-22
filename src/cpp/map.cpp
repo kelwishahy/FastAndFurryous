@@ -107,6 +107,55 @@ void MapSystem::Map::build() {
 			break;
 		}
 
+		case MAPS::CYBERPUNK: {
+			for (int i = 0; i < CyberpunkBackgroundLayers; i++) {
+				auto ent = Entity();
+				auto& bg = registry.backgrounds.emplace(ent);
+				bg.layer = LAYERS[i];
+				TEXTURE_IDS texture;
+
+				switch (i) {
+				case 0:
+					texture = TEXTURE_IDS::CYBERPUNK1;
+					break;
+				case 1:
+					texture = TEXTURE_IDS::CYBERPUNK2;
+					break;
+				default:
+					texture = TEXTURE_IDS::CYBERPUNK3;
+				}
+
+				registry.renderRequests.insert(ent, { texture, SHADER_PROGRAM_IDS::TEXTURE, GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
+			}
+			break;
+		}
+
+		case MAPS::MIAMI: {
+			for (int i = 0; i < MiamiBackgroundLayers; i++) {
+				auto ent = Entity();
+				auto& bg = registry.backgrounds.emplace(ent);
+				bg.layer = LAYERS[i];
+				TEXTURE_IDS texture;
+
+				switch (i) {
+				case 0:
+					texture = TEXTURE_IDS::MIAMI1;
+					break;
+				case 1:
+					texture = TEXTURE_IDS::MIAMI2;
+					break;
+				case 2:
+					texture = TEXTURE_IDS::MIAMI3;
+					break;
+				default:
+					texture = TEXTURE_IDS::MIAMI4;
+				}
+
+				registry.renderRequests.insert(ent, { texture, SHADER_PROGRAM_IDS::TEXTURE, GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
+			}
+			break;
+		}
+
 		case MAPS::FOREST: {
 			auto ent = Entity();
 			registry.backgrounds.emplace(ent);

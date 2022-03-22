@@ -4,11 +4,14 @@
 #include <unordered_map>
 
 enum MUSIC_LIST {
-	IN_GAME_BACKGROUND
+	IN_GAME_BACKGROUND,
+	CYBERPUNK,
+	INDUSTRIAL
 };
 
 enum SOUND_EFFECTS {
 	CAT_SCREAM,
+	DOG_BARK,
 	GUNSHOT,
 	WIN
 };
@@ -32,14 +35,23 @@ public:
 			return;
 		}
 
-		Mix_AllocateChannels(5);
+		Mix_AllocateChannels(8);
 
 		//Audio references
 		Mix_Music* background_music = Mix_LoadMUS(audio_path("background-music.wav").c_str());
 		music_list.insert({ IN_GAME_BACKGROUND, background_music });
 
+		Mix_Music* cyberpunk_music = Mix_LoadMUS(audio_path("cyberpunk.wav").c_str());
+		music_list.insert({ CYBERPUNK, cyberpunk_music });
+
+		Mix_Music* industrial_music = Mix_LoadMUS(audio_path("industrial.wav").c_str());
+		music_list.insert({ INDUSTRIAL, industrial_music });
+
 		Mix_Chunk* cat_scream = Mix_LoadWAV(audio_path("cat_scream.wav").c_str());
 		sound_effects.insert({ CAT_SCREAM, cat_scream });
+
+		Mix_Chunk* dog_bark = Mix_LoadWAV(audio_path("dog_bark.wav").c_str());
+		sound_effects.insert({ DOG_BARK, dog_bark });
 
 		Mix_Chunk* gunshot = Mix_LoadWAV(audio_path("gunshot.wav").c_str());
 		sound_effects.insert({ GUNSHOT, gunshot });
@@ -65,7 +77,10 @@ public:
 
 	void play_music(MUSIC_LIST music) {
 		Mix_PlayMusic(music_list.at(music), -1);
-		fprintf(stderr, "Loaded music\n");
+	}
+
+	void stop_music() {
+		Mix_PauseMusic();
 	}
 
 	void play_sfx(SOUND_EFFECTS sound) {

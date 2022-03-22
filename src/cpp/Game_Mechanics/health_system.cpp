@@ -3,9 +3,17 @@
 #include "hpp/audio_manager.hpp"
 
 void decreaseHealth(Entity entity, int amount, Entity hurtEntity) {
-	auto& health = registry.health.get(entity).hp;
-	health = (health - amount >= 0) ? health - amount : 0;
-	audio.play_sfx(SOUND_EFFECTS::CAT_SCREAM);
+	auto& health = registry.health.get(entity);
+	health.hp = (health.hp - amount >= 0) ? health.hp - amount : 0;
+	if (registry.cats.has(entity)) {
+		audio.play_sfx(SOUND_EFFECTS::CAT_SCREAM);
+	}
+
+	if (registry.dogs.has(entity)) {
+		audio.play_sfx(SOUND_EFFECTS::DOG_BARK);
+	}
+	
+	health.hurt = true;
 }
 
 void increaseHealth(Entity entity, int amount) {

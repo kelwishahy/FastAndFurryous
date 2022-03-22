@@ -197,6 +197,7 @@ void RenderSystem::animateSprite(RenderRequest& request, Entity& entity) {
 	GLfloat frame_width_uloc = glGetUniformLocation(shaderProgram, "frameWidth");
 	GLint facing_left_uloc = glGetUniformLocation(shaderProgram, "facingLeft");
 	GLboolean selectedLoc = glGetUniformLocation(shaderProgram, "selected");
+	GLboolean hurtLoc = glGetUniformLocation(shaderProgram, "hurt");
 	glUniform1i(frame_uloc, animation.curr_frame);
 	glUniform1f(frame_width_uloc, constants.FRAME_TEXTURE_WIDTH);
 	glUniform1i(facing_left_uloc, animation.facingLeft);
@@ -321,6 +322,13 @@ void RenderSystem::drawBackground(RenderRequest& request, float layer, vec2 posi
 		break;
 	case TEXTURE_IDS::NIGHT1:
 	case TEXTURE_IDS::NIGHT2:
+	case TEXTURE_IDS::CYBERPUNK1:
+	case TEXTURE_IDS::CYBERPUNK2:
+	case TEXTURE_IDS::CYBERPUNK3:
+	case TEXTURE_IDS::MIAMI1:
+	case TEXTURE_IDS::MIAMI2:
+	case TEXTURE_IDS::MIAMI3:
+	case TEXTURE_IDS::MIAMI4:
 		texturedQuad[0].texCoord = { 3.f, 1.f }; // top right
 		texturedQuad[1].texCoord = { 3.f, 0.f }; // bottom right
 		bindVBOandIBO(GEOMETRY_BUFFER_IDS::TEXTURED_QUAD, texturedQuad, quadIndices);
