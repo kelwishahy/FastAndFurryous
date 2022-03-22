@@ -72,8 +72,10 @@ enum class TEXTURE_IDS {
 	// Tutorial Menu 
 	HOWTOMOVE,
 	// Option Menu Buttons
-	BUTTONR,
-	BUTTONL,
+	BUTTONRA,
+	BUTTONLA,
+	BUTTONRB,
+	BUTTONLB,
 	// Level Menu Buttons
 	BUTTONL1,
 	BUTTONL2,
@@ -81,6 +83,8 @@ enum class TEXTURE_IDS {
 	CAT_CROSSHAIR,
 	DOG_CROSSHAIR,
 	HEALTH_SQUARE,
+	BUTTONGAME,
+	BUTTONCANCEL,
 	// Maps
 	INDUSTRIAL_BG,
 	INDUSTRIAL_FAR_BUILDINGS,
@@ -381,5 +385,14 @@ struct DebugComponent {
 	// Note, an empty struct has size 1
 };
 
+struct OptionTimer {
+	int timerC;
+};
+
+struct OptionPlayers {
+	int playersN;
+};
+
 void remove_children(Entity e);
 std::vector<Entity> get_all_children(Entity e);
+

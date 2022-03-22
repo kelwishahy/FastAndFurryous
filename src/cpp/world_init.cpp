@@ -376,12 +376,11 @@ Entity createMenu(MENU_TYPES menu, float layer) {
 	return entity;
 }
 
-Entity createButton(vec2 pos, vec2 scale, TEXTURE_IDS tex_id, std::vector<std::function<void()>> callbacks) {
+Entity createButton(vec2 pos, vec2 scale, TEXTURE_IDS tex_id) {
 
 	const auto entity = Entity();
 
 	Clickable& button = registry.buttons.emplace(entity);
-	button.callbacks = callbacks;
 
 	const float left = -scale.x / 2;
 	const float right = scale.x / 2;
@@ -561,6 +560,34 @@ Entity createHealthCounter(Entity origin, int health, TextManager& textManager) 
 	Motion& motion = registry.motions.emplace(entity);
 	motion.scale = { 100.0f, 100.0f };
 
+	return entity;
+
+}
+
+Entity createTimerCounter(int timer, TextManager& textManager) {
+
+	auto entity = Entity();
+
+	OptionTimer& timer0 = registry.timer.emplace(entity);
+
+	timer0.timerC = timer;
+	//timer0.text = createText({ 1025.0f, 390.0f }, 2.0f, { 0.0f, 0.0f, 0.0f }, std::to_string(timer0.timerC));
+	createText(textManager, std::to_string(timer0.timerC), { 1060.0f, 390.0f }, 2.0f, { 0.0f, 0.0f, 0.0f });
+
+	return entity;
+
+}
+
+
+Entity createPlayersCounter(int newplayers, TextManager& textManager) {
+
+
+	auto entity = Entity();
+	OptionPlayers& players = registry.players.emplace(entity);
+	players.playersN = newplayers;
+
+	//createText({ 1045.0f, 615.0f }, 2.0f, { 0.0f, 0.0f, 0.0f }, std::to_string(players.playersN));
+	createText(textManager, std::to_string(players.playersN), { 1050.0f, 615.0f }, 2.0f, { 0.0f, 0.0f, 0.0f });
 	return entity;
 
 }
