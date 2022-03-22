@@ -136,9 +136,13 @@ void AnimationSystem::animate_cat_hurt(Entity e) {
 }
 
 void AnimationSystem::animate_cat_dead(Entity e) {
-	remove_children(e);
-	change_animation(e, TEXTURE_IDS::CAT_DEAD);
-	registry.cats.remove(e);
+
+	registry.renderRequests.remove(e);
+	registry.renderRequests.insert(e, {
+		TEXTURE_IDS::CAT_DEAD,
+		SHADER_PROGRAM_IDS::TEXTURE,
+		GEOMETRY_BUFFER_IDS::TEXTURED_QUAD
+		});
 }
 
 void AnimationSystem::animate_cat_aim(Entity e) {
@@ -226,10 +230,27 @@ void AnimationSystem::animate_dog_hurt(Entity e) {
 }
 
 void AnimationSystem::animate_dog_dead(Entity e) {
-	
-	remove_children(e);
-	change_animation(e, TEXTURE_IDS::DOG_DEAD);
-	registry.dogs.remove(e);
+	registry.renderRequests.remove(e);
+	registry.renderRequests.insert(e, {
+		TEXTURE_IDS::DOG_DEAD,
+		SHADER_PROGRAM_IDS::TEXTURE,
+		GEOMETRY_BUFFER_IDS::TEXTURED_QUAD
+		});
+}
+
+void AnimationSystem::animate_dog_aim(Entity e) {
+
+	change_animation(e, TEXTURE_IDS::DOG_SIDE_IDLE);
+	for (Entity rig : registry.animations.entities) {
+		Animation& extra = registry.animations.get(rig);
+		if (extra.name == "dog_head") {
+			//Animate the head
+			if (check_if_part_of_parent(e, rig)) {
+				change_animation(rig, TEXTURE_IDS::DOG_SIDE_BLINK);
+			}
+		}
+	}
+
 }
 
 bool AnimationSystem::check_if_part_of_parent(Entity e, Entity child) {
