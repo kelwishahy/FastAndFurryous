@@ -97,6 +97,17 @@ enum class TEXTURE_IDS {
 	NIGHT1,
 	NIGHT2,
 
+	// Cyberpunk
+	CYBERPUNK1,
+	CYBERPUNK2,
+	CYBERPUNK3,
+
+	// MIAMI
+	MIAMI1,
+	MIAMI2,
+	MIAMI3,
+	MIAMI4,
+
 	FOREST,
 	SPACE,
 	TOTAL
@@ -157,6 +168,8 @@ enum class MAPS {
 	SPACE,
 	NIGHT,
 	CITY,
+	CYBERPUNK,
+	MIAMI,
 	TOTAL
 }; constexpr int mapCount = (int)MAPS::TOTAL;
 
@@ -175,6 +188,21 @@ enum class NightBackground {
 	NIGHT2,
 	TOTAL
 }; constexpr int NightBackgroundLayers = (int)NightBackground::TOTAL;
+
+enum class CyberpunkBackground {
+	CYBERPUNK1,
+	CYBERPUNK2,
+	CYBERPUNK3,
+	TOTAL
+}; constexpr int CyberpunkBackgroundLayers = (int)CyberpunkBackground::TOTAL;
+
+enum class MiamiBackground {
+	MIAMI1,
+	MIAMI2,
+	MIAMI3,
+	MIAMI4,
+	TOTAL
+}; constexpr int MiamiBackgroundLayers = (int)MiamiBackground::TOTAL;
 
 enum class ANIMAL {
 	CAT,
@@ -196,6 +224,8 @@ struct Selected {
 
 struct Health {
 	int hp = 100;
+	float damageTimer = 800;
+	bool hurt = false;
 };
 
 struct AI {

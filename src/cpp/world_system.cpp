@@ -133,22 +133,18 @@ void WorldSystem::check_for_button_presses() {
 			if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTON1) {
 				remove_components();
 				play_levels();
-
 				break;
 			}
-			
-			else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTON3) {
 
+			else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTON3) {
 				remove_components();
 				play_tutorial();
-
 				break;
 			}
 			
 			else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTON4) {
 
 				remove_components();
-
 				glfwSetWindowShouldClose(this->window, true);
 				break;
 			}
@@ -158,8 +154,7 @@ void WorldSystem::check_for_button_presses() {
 
 				remove_components();
 				restart_game(multiplayer());
-				//play_select();
-
+				audio.play_music(INDUSTRIAL);
 				break;
 			}
 		
@@ -174,7 +169,6 @@ void WorldSystem::check_for_button_presses() {
 			else if ((registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONC) || (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTOND)) {
 				remove_components();
 				play_options(20, 3);
-
 				break;
 			}
 			
@@ -272,21 +266,21 @@ void WorldSystem::check_for_button_presses() {
 			else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONL1) {
 				remove_components();
 				restart_game(level_one());
-				
+				audio.play_music(INDUSTRIAL);
 				break;
 			}
 
 			else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONL2) {
 				remove_components();
 				restart_game(level_two());
-
+				audio.play_music(CYBERPUNK);
 				break;
 			}
 
 			else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONL3) {
 				remove_components();
-				//restart_game(MAPS::SPACE);
-
+				restart_game(level_three());// audio.stop_music();
+				audio.play_music(CYBERPUNK);
 				break;
 			}
 		}
@@ -394,15 +388,13 @@ void WorldSystem::play_levels() {
 Game WorldSystem::level_one() {
 	Game level_one;
 	level_one.addCat(RIFLE, PLAYER_1_TEAM, { screenResolution.x / 2 - 200, screenResolution.y - 400 }, 100);
-
 	return level_one;
 }
 
 Game WorldSystem::level_two() {
 	Game level_one;
 	level_one.addCat(RIFLE, PLAYER_1_TEAM, { screenResolution.x / 2 - 200, screenResolution.y - 400 }, 100);
-	level_one.setBackGround(MAPS::FOREST);
-
+	level_one.setBackGround(MAPS::MIAMI);
 	return level_one;
 }
 
@@ -410,7 +402,7 @@ Game WorldSystem::level_three() {
 
 	Game level_one;
 	level_one.addCat(RIFLE, PLAYER_1_TEAM, { screenResolution.x / 2 - 200, screenResolution.y - 400 }, 100);
-
+	level_one.setBackGround(MAPS::CYBERPUNK);
 	return level_one;
 
 }
@@ -426,7 +418,6 @@ Game WorldSystem::multiplayer() {
 	multiplayer.addDog(RIFLE, PLAYER_2_TEAM, { screenResolution.x + 600, screenResolution.y - 400 }, 100);
 
 	multiplayer.setTimer(10000.0f);
-
 	return multiplayer;
 }
 
