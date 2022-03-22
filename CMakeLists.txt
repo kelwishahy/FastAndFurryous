@@ -30,12 +30,6 @@ configure_file("${CMAKE_CURRENT_SOURCE_DIR}/ext/project_path.hpp.in" "${CMAKE_CU
 # Add source files
 file(GLOB SOURCE_FILES src/cpp/*.cpp src/hpp/*.hpp src/cpp/Game_Mechanics/*.cpp src/hpp/Game_Mechanics/*.hpp)
 
-# Tracy profiler
-if (EXISTS ${PROJECT_NAME}/src/tracy/)
-    file (GLOB SOURCE_FILES src/tracy/*.cpp src/tracy/*hpp)
-    target_compile_definitions(${PROJECT_NAME} PRIVATE TRACY_ENABLE ON)
-endif()
-
 
 # external libraries will be installed into /usr/local/include and /usr/local/lib but that folder is not automatically included in the search on MACs
 if (IS_OS_MAC)

@@ -106,7 +106,7 @@ enum class GEOMETRY_BUFFER_IDS {
 	QUAD,
 	TEXTURED_QUAD,
 	WALL,
-	AI,
+	FONT,
 	TOTAL
 }; constexpr int geometryCount = (int)GEOMETRY_BUFFER_IDS::TOTAL;
 

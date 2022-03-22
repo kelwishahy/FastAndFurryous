@@ -337,18 +337,15 @@ void RenderSystem::drawText(TextManager& textManager, Entity e) {
 	bool isItalic = false;
 	bool isBold = false;
 
-	GLuint fontvbo;
+	const GLuint fontvbo = vertexBuffers[(GLuint)GEOMETRY_BUFFER_IDS::FONT];
 
 	Motion& motion = registry.motions.get(e);
 	Text& fonttext = registry.texts.get(e);
 
-	//we need to do this we're dynamically creating geometry in this function
-	glGenBuffers(1, &fontvbo);
 	glBindBuffer(GL_ARRAY_BUFFER, fontvbo);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	// set shaders
 	const GLuint shaderProgram = shaders[(GLuint)SHADER_PROGRAM_IDS::FONT];
@@ -429,7 +426,6 @@ void RenderSystem::drawText(TextManager& textManager, Entity e) {
 	m.position = {m.position.x / defaultResolution.x * screenWidth, m.position.y / defaultResolution.y * screenHeight};
 	m.scale = { m.scale.x / defaultResolution.x * screenWidth, m.scale.y / defaultResolution.y * screenHeight };
 	renderToScreen(transform(scaleToScreenResolution(m.position), scaleToScreenResolution(m.scale), 1.0f, 0));
-	glDeleteBuffers((GLuint)1, &fontvbo);
 }
 
 /*

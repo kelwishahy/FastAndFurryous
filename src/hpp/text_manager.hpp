@@ -1,5 +1,6 @@
 #pragma once
 #include "components.hpp"
+#include "glad/glad.h"
 
 class TextManager {
 public:
