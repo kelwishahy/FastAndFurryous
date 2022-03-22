@@ -90,6 +90,7 @@ private:
 	std::vector<Entity> npcai_team;
 	std::vector<std::vector<Entity>> teams;
 
+	void change_selected_state(Entity e, bool state);
 	void change_curr_selected_char(Entity e);
 	void change_to_next_char_on_team();
 	

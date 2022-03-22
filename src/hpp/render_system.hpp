@@ -48,6 +48,7 @@ class RenderSystem {
 		"cat_hurt.png",
 		"cat_dead.png",
 		// Dog Sprites
+		"dog_side_idle.png",
 		"dog_front_blink.png",
 		"dog_side_blink.png",
 		"dog_front_idle.png",
@@ -58,7 +59,11 @@ class RenderSystem {
 		"dog_hurt.png",
 		"dog_hurt_face.png",
 		"dog_dead.png",
-		//
+		// Gun Sprites
+		"rifle.png",
+		"ak47.png",
+		"awp.png",
+		"grenade_launcher.png",
 		"stone.png",
 		"background.png",
 		"start_bg.jpg",

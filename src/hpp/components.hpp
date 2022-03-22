@@ -37,6 +37,7 @@ enum class TEXTURE_IDS {
 	CAT_HURT,
 	CAT_DEAD,
 	// Dog Textures
+	DOG_SIDE_IDLE,
 	DOG_FRONT_BLINK,
 	DOG_SIDE_BLINK,
 	DOG_FRONT_IDLE,
@@ -48,6 +49,11 @@ enum class TEXTURE_IDS {
 	DOG_HURT_FACE,
 	DOG_DEAD,
 	//
+	//Gun Sprites
+	RIFLE,
+	AK_47,
+	AWP,
+	GRENADE_LAUNCHER,
 	STONE,
 	// All Screens
 	BACKGROUND,
@@ -379,8 +385,6 @@ struct DebugComponent {
 	// Note, an empty struct has size 1
 };
 
-void remove_children(Entity e);
-
 struct OptionTimer {
 	int timerC;
 };
@@ -388,3 +392,7 @@ struct OptionTimer {
 struct OptionPlayers {
 	int playersN;
 };
+
+void remove_children(Entity e);
+std::vector<Entity> get_all_children(Entity e);
+

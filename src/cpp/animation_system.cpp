@@ -22,33 +22,21 @@ void AnimationSystem::init() {
 void AnimationSystem::step(float elapsed_ms) {
 
 	for (Entity e : registry.animations.entities) {
-		Motion& catMotion = registry.motions.get(e);
-		Animation& catAnimation = registry.animations.get(e);
+		if (registry.cats.has(e) || registry.dogs.has(e)) {
+			Motion& motion = registry.motions.get(e);
+			Animation& anim = registry.animations.get(e);
 
-		if (catMotion.velocity.x < 0) {
-			catAnimation.facingLeft = true;
-		}
-		if (catMotion.velocity.x > 0) {
-			catAnimation.facingLeft = false;
-		}
-	}
-
-
-	for (int i = 0; i < registry.parentEntities.components.size(); i++) {
-		ChildEntities& children = registry.parentEntities.components[i];
-		Entity e = registry.parentEntities.entities[i];
-
-
-		//so everything swaps sides properly
-		for (int j = 0; j < children.child_data_map.size(); j++) {
-			Entity child = children.child_data_map.at(j);
-			if (registry.animations.has(e) && registry.animations.has(child)) {
-				Animation parent_anim = registry.animations.get(e);
-				Animation& anchored_anim = registry.animations.get(child);
-				anchored_anim.facingLeft = parent_anim.facingLeft;
+			if (motion.velocity.x < 0) {
+				anim.facingLeft = true;
+				swap_children_orientation(e);
+			}
+			if (motion.velocity.x > 0) {
+				anim.facingLeft = false;
+				swap_children_orientation(e);
 			}
 		}
 	}
+
 	update_anim_orientation();
 
 	//Animate sprites
@@ -113,7 +101,6 @@ void AnimationSystem::animate_cat_idle(Entity e) {
 }
 
 void AnimationSystem::animate_cat_jump(Entity e) {
-
 	change_animation(e, TEXTURE_IDS::CAT_JUMP);
 
 	for (Entity rig : registry.animations.entities) {
@@ -127,7 +114,6 @@ void AnimationSystem::animate_cat_jump(Entity e) {
 }
 
 void AnimationSystem::animate_cat_hurt(Entity e) {
-
 	change_animation(e, TEXTURE_IDS::CAT_HURT);
 
 	for (Entity rig : registry.animations.entities) {
@@ -145,6 +131,20 @@ void AnimationSystem::animate_cat_dead(Entity e) {
 	remove_children(e);
 	change_animation(e, TEXTURE_IDS::CAT_DEAD);
 	registry.cats.remove(e);
+}
+
+void AnimationSystem::animate_cat_aim(Entity e) {
+
+	change_animation(e, TEXTURE_IDS::CAT_SIDE_IDLE);
+	for (Entity rig : registry.animations.entities) {
+
+		Animation& extra = registry.animations.get(rig);
+		if (extra.name == "cat_head") {
+			//Animate the head
+			change_animation(rig, TEXTURE_IDS::CAT_SIDE_BLINK);
+		}
+	}
+
 }
 
 void AnimationSystem::animate_dog_idle(Entity e) {
@@ -232,7 +232,7 @@ void AnimationSystem::update_anim_orientation() {
 						else {
 							children.normal_dists[j].x = children.original_dists[j].x;
 						}
-					} 
+					}
 				}
 			}
 		}
@@ -246,3 +246,21 @@ void AnimationSystem::change_animation(Entity e, TEXTURE_IDS tex_id) {
 	animation.anim_state = tex_id;
 
 }
+
+void AnimationSystem::swap_children_orientation(Entity e) {
+
+	bool parent_orientation = registry.animations.get(e).facingLeft;
+
+	if (registry.parentEntities.has(e)) {
+		ChildEntities& children = registry.parentEntities.get(e);
+		for (auto pair : children.child_data_map) {
+			if (registry.animations.has(pair.second)) {
+				Animation& child_anim = registry.animations.get(pair.second);
+				child_anim.facingLeft = parent_orientation;
+			}
+			swap_children_orientation(pair.second);
+		}
+	}
+
+}
+
