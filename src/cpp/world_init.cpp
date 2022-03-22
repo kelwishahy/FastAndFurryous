@@ -428,69 +428,15 @@ Entity createText(TextManager& textManager, std::string text, vec2 pos, float sc
 			SHADER_PROGRAM_IDS::FONT,
 			GEOMETRY_BUFFER_IDS::TOTAL });
 
-	// Determine text size
-	bool isItalic = false;
-	bool isBold = false;
-
 	//this is capital 'A' for reference
 	float captialsize = textManager.getGlyphs()[65].size.y;
 
 	// iterate through all characters
 	std::string::const_iterator c;
 	float acc = motion.position.x;
-	for (c = textfield.text.begin(); c != textfield.text.end(); c++)
-	{
-		//'$' character
-		if (*c == 36) {
-			isBold = isBold ? false : true;
-			continue;
-		}
-		if (*c == 126) {
-			isItalic = isItalic ? false : true;
-			continue;
-		}
-
-		Glyph ch;
-		if (isItalic) {
-			assert(!textManager.getBoldGlyphs().empty());
-			ch = textManager.getItalicGlyphs()[*c];
-		}
-		else if (isBold) {
-			assert(!textManager.getBoldGlyphs().empty());
-			ch = textManager.getBoldGlyphs()[*c];
-		}
-		else {
-			assert(!textManager.getGlyphs().empty());
-			ch = textManager.getGlyphs()[*c];
-		}
-
-		float xpos = acc + ch.bearing.x * motion.scale.x;
-		float ypos = motion.position.y + (ch.size.y - ch.bearing.y) * motion.scale.y;
-
-		//We need to offset lower case letters because of our coordinate system (since 0,0 is top left)
-		if (!isupper((int)*c)) {
-			ypos += captialsize - ch.size.y;
-		}
-
-		float w = ch.size.x * motion.scale.x;
-		float h = ch.size.y * motion.scale.y;
-		// update VBO for each character
-		float vertices[6][4] = {
-			{ xpos,     ypos + h,   0.0f, 1.0f },
-			{ xpos,     ypos,       0.0f, 0.0f },
-			{ xpos + w, ypos,       1.0f, 0.0f },
-
-			{ xpos,     ypos + h,   0.0f, 1.0f },
-			{ xpos + w, ypos,       1.0f, 0.0f },
-			{ xpos + w, ypos + h,   1.0f, 1.0f }
-		};
-		
-		if (isItalic) {
-			acc += (ch.advance >> 6) * motion.scale.x + 3.0f;
-		}
-		else {
-			acc += (ch.advance >> 6) * motion.scale.x; // bitshift by 6 to get value in pixels (2^6 = 64)
-		}
+	for (c = textfield.text.begin(); c != textfield.text.end(); c++) {
+		Glyph ch = textManager.getGlyphs()[*c];
+		acc += (ch.advance >> 6) * motion.scale.x; // bitshift by 6 to get value in pixels (2^6 = 64)
 	}
 	textfield.scale.x = acc - motion.position.x; // set x scale
 	textfield.scale.y = captialsize * motion.scale.y; // set y scale

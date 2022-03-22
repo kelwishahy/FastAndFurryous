@@ -283,8 +283,7 @@ void PhysicsSystem :: applyMotions(float elapsed_ms) {
 	}
 }
 
-void PhysicsSystem::step(float elapsed_ms)
-{
+void PhysicsSystem::step(float elapsed_ms) {
 	fixed_update_accumulator += elapsed_ms - FIXED_UPDATE_STEP;
 	//printf("accumulator: %f\n", fixed_update_accumulator);
 

@@ -89,11 +89,17 @@ class RenderSystem {
 		"health_square.png",
 		"playgame.png",
 		"cancel.png",
+
 		// Industrial parallax background
 		"industrial/bg.png",
 		"industrial/far-buildings.png",
 		"industrial/buildings.png",
 		"industrial/skill-foreground.png",
+
+		// Night parallax background
+		"night/night1.png",
+		"night/night2.png",
+
 		"forest/forest.png",
 		"space/space.png"
 	};

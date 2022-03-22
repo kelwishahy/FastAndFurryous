@@ -31,32 +31,15 @@ void RenderSystem::draw(float elapsed_ms, WorldSystem& world) {
 
 		RenderRequest request = registry.renderRequests.get(entity);
 
-		vec2 playerPos = { 0.f, 0.f };
-		if (registry.motions.has(world.getCurrentGame().getSelectedCharacter())) {
-			playerPos = registry.motions.get(world.getCurrentGame().getSelectedCharacter()).position;
-		}
 		if (registry.backgrounds.has(entity)) {
 			float pos = screenWidth;
-			float depth;
-			switch(request.texture) {
-			case TEXTURE_IDS::INDUSTRIAL_BG:
-				depth = -0.9f;
-				break;
-			case TEXTURE_IDS::INDUSTRIAL_FAR_BUILDINGS:
-				depth = -0.8f;
-				pos -= playerPos.x / 60.f;
-				break;
-			case TEXTURE_IDS::INDUSTRIAL_BUILDINGS:
-				depth = -0.7f;
-				pos -= playerPos.x / 30.f;
-				break;
-			case TEXTURE_IDS::INDUSTRIAL_FOREGROUND:
-				depth = -0.6f;
-				break;
-			default:
-				depth = -0.5f;
+			float depth = registry.backgrounds.get(entity).layer;
+			if (depth == LAYERS[1]) {
+				pos -= camera->getPosition().x / 5.f;
+			} else if (depth == LAYERS[2]) {
+				pos -= camera->getPosition().x / 25.f;
 			}
-			drawBackground(request, depth, { pos, screenHeight / 2 }, { 2 * screenWidth, screenHeight });
+			drawBackground(request, depth, scaleToScreenResolution({ pos, screenHeight / 2 }), scaleToScreenResolution({ 2 * screenWidth, screenHeight }));
 			continue;
 		}
 
@@ -107,7 +90,7 @@ void RenderSystem::draw(float elapsed_ms, WorldSystem& world) {
 mat4 RenderSystem::transform(vec2 position, vec2 scale, float depth, float angle) {
 	Transform transform;
 	transform.mat = glm::translate(transform.mat, vec3(position, depth));
-	transform.mat = glm::rotate(transform.mat, angle, vec3(0.0f, 0.0f, 1.0f));
+	transform.mat = (angle != 0) ? glm::rotate(transform.mat, angle, vec3(0.0f, 0.0f, 1.0f)) : transform.mat;
 	transform.mat = glm::scale(transform.mat, vec3(scale, depth));
 	return transform.mat;
 }
@@ -326,6 +309,26 @@ void RenderSystem::drawTiles() {
 void RenderSystem::drawBackground(RenderRequest& request, float layer, vec2 position, vec2 scale) {
 	mat4 transformationMatrix = transform(position, scale, layer, 0);
 	std::string shaderInputs[] = { "position", "texCoord" };
+
+	switch(request.texture) {
+	case TEXTURE_IDS::INDUSTRIAL_BG:
+	case TEXTURE_IDS::INDUSTRIAL_FAR_BUILDINGS:
+	case TEXTURE_IDS::INDUSTRIAL_BUILDINGS:
+	case TEXTURE_IDS::INDUSTRIAL_FOREGROUND:
+		texturedQuad[0].texCoord = { 2.f, 1.f }; // top right
+		texturedQuad[1].texCoord = { 2.f, 0.f }; // bottom right
+		bindVBOandIBO(GEOMETRY_BUFFER_IDS::TEXTURED_QUAD, texturedQuad, quadIndices);
+		break;
+	case TEXTURE_IDS::NIGHT1:
+	case TEXTURE_IDS::NIGHT2:
+		texturedQuad[0].texCoord = { 3.f, 1.f }; // top right
+		texturedQuad[1].texCoord = { 3.f, 0.f }; // bottom right
+		bindVBOandIBO(GEOMETRY_BUFFER_IDS::TEXTURED_QUAD, texturedQuad, quadIndices);
+	
+	default:
+		break;
+	}
+
 	drawQuad(request, shaderInputs, 2);
 	renderToScreen(transformationMatrix);
 }
@@ -334,18 +337,15 @@ void RenderSystem::drawText(TextManager& textManager, Entity e) {
 	bool isItalic = false;
 	bool isBold = false;
 
-	GLuint fontvbo;
+	const GLuint fontvbo = vertexBuffers[(GLuint)GEOMETRY_BUFFER_IDS::FONT];
 
-	Motion motion = registry.motions.get(e);
+	Motion& motion = registry.motions.get(e);
 	Text& fonttext = registry.texts.get(e);
 
-	//we need to do this we're dynamically creating geometry in this function
-	glGenBuffers(1, &fontvbo);
 	glBindBuffer(GL_ARRAY_BUFFER, fontvbo);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	// set shaders
 	const GLuint shaderProgram = shaders[(GLuint)SHADER_PROGRAM_IDS::FONT];
@@ -356,13 +356,12 @@ void RenderSystem::drawText(TextManager& textManager, Entity e) {
 	glActiveTexture(GL_TEXTURE0);
 
 	//this is capital 'A' for reference
-	float captialsize = textManager.getGlyphs()[65].size.y;
+	float captialsize = textManager.getCapitalSize();
 
 	// iterate through all characters
 	std::string::const_iterator c;
 	float acc = motion.position.x;
-	for (c = fonttext.text.begin(); c != fonttext.text.end(); c++)
-	{
+	for (c = fonttext.text.begin(); c != fonttext.text.end(); c++) {
 		//'$' character
 		if (*c == 36) {
 			isBold = isBold ? false : true;
@@ -375,15 +374,10 @@ void RenderSystem::drawText(TextManager& textManager, Entity e) {
 
 		Glyph ch;
 		if (isItalic) {
-			assert(!textManager.getBoldGlyphs().empty());
 			ch = textManager.getItalicGlyphs()[*c];
-		}
-		else if (isBold) {
-			assert(!textManager.getBoldGlyphs().empty());
+		} else if (isBold) {
 			ch = textManager.getBoldGlyphs()[*c];
-		}
-		else {
-			assert(!textManager.getGlyphs().empty());
+		} else {
 			ch = textManager.getGlyphs()[*c];
 		}
 
@@ -426,13 +420,12 @@ void RenderSystem::drawText(TextManager& textManager, Entity e) {
 	}
 	fonttext.scale.x = acc - motion.position.x; // set x scale
 	fonttext.scale.y = captialsize * motion.scale.y; // set y scale
-	glBindTexture(GL_TEXTURE_2D, 0);
 
 	//Custom projection matrix
 	auto m = registry.motions.get(e);
 	m.position = {m.position.x / defaultResolution.x * screenWidth, m.position.y / defaultResolution.y * screenHeight};
 	m.scale = { m.scale.x / defaultResolution.x * screenWidth, m.scale.y / defaultResolution.y * screenHeight };
-	renderToScreen(transform(m.position, m.scale, 1.0f, 0));
+	renderToScreen(transform(scaleToScreenResolution(m.position), scaleToScreenResolution(m.scale), 1.0f, 0));
 }
 
 /*
