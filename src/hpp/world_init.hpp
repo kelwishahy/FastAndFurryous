@@ -24,11 +24,15 @@ Entity createProjectile(Entity originE, glm::vec2 force);
 //Specify a menu
 Entity createMenu(MENU_TYPES menu, float layer);
 
-Entity createButton(glm::vec2 pos, glm::vec2 scale, TEXTURE_IDS tex_id, std::vector<std::function<void()>> callbacks);
+Entity createButton(glm::vec2 pos, glm::vec2 scale, TEXTURE_IDS tex_id);
 
 Entity createText(TextManager& textManager, std::string text, glm::vec2 pos, float scale, glm::vec3 color);
 
 Entity createCrosshair(Entity origin, bool iscat);
 
 Entity createHealthCounter(Entity origin, int health, TextManager& textManager);
+
+Entity createTimerCounter(int newtimer, TextManager& textManager);
+
+Entity createPlayersCounter(int newplayers, TextManager& textManager);
 
