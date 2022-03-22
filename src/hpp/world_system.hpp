@@ -54,8 +54,6 @@ public:
 
 	Game level_one();
 
-	Game level_one();
-
 	glm::vec2 mouse_pos;
 
 	GameController& getCurrentGame() { return this->current_game; }
