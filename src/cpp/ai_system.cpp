@@ -26,7 +26,7 @@ void AISystem::step(float elapsed_ms, int turn) {
 	}
 	if (blackboard->turn == TURN_CODE::NPCAI_TURN) {
 		checkJump();
-		if (calculateDistance(blackboard->prev_pos, blackboard->motion->position) > 200) {
+		if (calculateDistance(blackboard->prev_pos, blackboard->motion->position) > 600) {
 			blackboard->motion->velocity.x = 0.f;
 			blackboard->motion->velocity.y = 350.f;
 			blackboard->turn = TURN_CODE::PLAYER1_TURN;
@@ -182,12 +182,12 @@ void AISystem::checkJump()
 
 	if (motion.velocity.x > 0) {
 		if (blackboard->prev_pos.x >= motion.position.x) {
-			motion.velocity.y = -800.f;
+			motion.velocity.y = -500.f;
 		}
 	}
 	else if (motion.velocity.x < 0) {
 		if (blackboard->prev_pos.x <= motion.position.x) {
-			motion.velocity.y = -800.f;
+			motion.velocity.y = -500.f;
 		}
 	}
 }
