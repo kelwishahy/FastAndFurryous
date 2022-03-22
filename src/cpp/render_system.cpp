@@ -197,6 +197,7 @@ void RenderSystem::animateSprite(RenderRequest& request, Entity& entity) {
 	GLfloat frame_width_uloc = glGetUniformLocation(shaderProgram, "frameWidth");
 	GLint facing_left_uloc = glGetUniformLocation(shaderProgram, "facingLeft");
 	GLboolean selectedLoc = glGetUniformLocation(shaderProgram, "selected");
+	GLboolean hurtLoc = glGetUniformLocation(shaderProgram, "hurt");
 	glUniform1i(frame_uloc, animation.curr_frame);
 	glUniform1f(frame_width_uloc, constants.FRAME_TEXTURE_WIDTH);
 	glUniform1i(facing_left_uloc, animation.facingLeft);

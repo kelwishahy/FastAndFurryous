@@ -11,6 +11,7 @@ enum MUSIC_LIST {
 
 enum SOUND_EFFECTS {
 	CAT_SCREAM,
+	DOG_BARK,
 	GUNSHOT,
 	WIN
 };
@@ -34,7 +35,7 @@ public:
 			return;
 		}
 
-		Mix_AllocateChannels(6);
+		Mix_AllocateChannels(8);
 
 		//Audio references
 		Mix_Music* background_music = Mix_LoadMUS(audio_path("background-music.wav").c_str());
@@ -43,15 +44,14 @@ public:
 		Mix_Music* cyberpunk_music = Mix_LoadMUS(audio_path("cyberpunk.wav").c_str());
 		music_list.insert({ CYBERPUNK, cyberpunk_music });
 
-		if (!cyberpunk_music) {
-			printf("Mix_LoadMUS(\"cyberpunk.mp3\"): %s\n", Mix_GetError());
-		}
-
 		Mix_Music* industrial_music = Mix_LoadMUS(audio_path("industrial.wav").c_str());
 		music_list.insert({ INDUSTRIAL, industrial_music });
 
 		Mix_Chunk* cat_scream = Mix_LoadWAV(audio_path("cat_scream.wav").c_str());
 		sound_effects.insert({ CAT_SCREAM, cat_scream });
+
+		Mix_Chunk* dog_bark = Mix_LoadWAV(audio_path("dog_bark.wav").c_str());
+		sound_effects.insert({ DOG_BARK, dog_bark });
 
 		Mix_Chunk* gunshot = Mix_LoadWAV(audio_path("gunshot.wav").c_str());
 		sound_effects.insert({ GUNSHOT, gunshot });

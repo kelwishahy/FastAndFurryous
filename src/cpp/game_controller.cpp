@@ -112,18 +112,6 @@ void GameController::step(float elapsed_ms) {
 			registry.cats.remove(e);
 			AnimationSystem::animate_cat_dead(e);
 		}
-
-		// auto rightDist = abs(registry.motions.get(e).position.x - camera->getCameraRight().x);
-		// auto leftDist = abs(registry.motions.get(e).position.x - camera->getPosition().x);
-		// if (rightDist < 400.f && camera->getCameraRight().x < 2 * screenResolution.x) {
-		// 	camera->setPosition(camera->getPosition() + vec3(1.5f, 0.f, 0.f));
-		// } else if (leftDist < 400.f && camera->getPosition().x > 0.f) {
-		// 	camera->setPosition(camera->getPosition() + vec3(-1.5f, 0.f, 0.f));
-		// }
-
-		// if (player1_team.size() == 0) {
-		// 	restart_current_match();
-		// }
 	}
 
 	for (int i = 0; i < teams[TURN_CODE::PLAYER2].size(); i++) {
@@ -136,18 +124,6 @@ void GameController::step(float elapsed_ms) {
 			registry.dogs.remove(e);
 			AnimationSystem::animate_dog_dead(e);
 		}
-
-		// auto rightDist = abs(registry.motions.get(e).position.x - camera->getCameraRight().x);
-		// auto leftDist = abs(registry.motions.get(e).position.x - camera->getPosition().x);
-		// if (rightDist < 400.f && camera->getCameraRight().x < 2 * screenResolution.x) {
-		// 	camera->setPosition(camera->getPosition() + vec3(1.5f, 0.f, 0.f));
-		// } else if (leftDist < 400.f && camera->getPosition().x > 0.f) {
-		// 	camera->setPosition(camera->getPosition() + vec3(-1.5f, 0.f, 0.f));
-		// }
-
-		// if (player1_team.size() == 0) {
-		// 	restart_current_match();
-		// }
 	}
 
 	for (int i = 0; i < teams[TURN_CODE::NPCAI].size(); i++) {
@@ -155,9 +131,11 @@ void GameController::step(float elapsed_ms) {
 		if (registry.health.get(e).hp == 0) {
 			teams[TURN_CODE::NPCAI].erase(teams[TURN_CODE::NPCAI].begin() + i);
 			remove_children(e);
-			registry.remove_all_components_of(e);
+			registry.animations.remove(e);
+			registry.rigidBodies.remove(e);
+			registry.dogs.remove(e);
+			AnimationSystem::animate_dog_dead(e);
 		}
-
 	}
 
 

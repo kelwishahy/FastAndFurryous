@@ -5,15 +5,14 @@
 void decreaseHealth(Entity entity, int amount, Entity hurtEntity) {
 	auto& health = registry.health.get(entity);
 	health.hp = (health.hp - amount >= 0) ? health.hp - amount : 0;
-	if (health.hp == 0) {
-		AnimationSystem::animate_cat_dead(hurtEntity);
-		//AnimationSystem::animate_dog_dead(hurtEntity);
+	if (registry.cats.has(entity)) {
+		audio.play_sfx(SOUND_EFFECTS::CAT_SCREAM);
 	}
-	else {
-		AnimationSystem::animate_cat_hurt(hurtEntity);
-		//AnimationSystem::animate_dog_hurt(hurtEntity);
+
+	if (registry.dogs.has(entity)) {
+		audio.play_sfx(SOUND_EFFECTS::DOG_BARK);
 	}
-	audio.play_sfx(SOUND_EFFECTS::CAT_SCREAM);
+	
 	health.hurt = true;
 }
 

@@ -387,22 +387,43 @@ void WorldSystem::play_levels() {
 
 Game WorldSystem::level_one() {
 	Game level_one;
-	level_one.addCat(RIFLE, PLAYER_1_TEAM, { screenResolution.x / 2 - 200, screenResolution.y - 400 }, 100);
+	level_one.addCat(RIFLE, PLAYER_1_TEAM, { screenResolution.x / 2 - 400, screenResolution.y - 800 }, 100);
+	level_one.addCat(RIFLE, PLAYER_1_TEAM, { screenResolution.x / 2 - 100, screenResolution.y - 400 }, 100);
+	level_one.addCat(RIFLE, PLAYER_1_TEAM, { screenResolution.x / 2 + 100, screenResolution.y - 800 }, 100);
+
+	level_one.addDog(RIFLE, NPC_AI_TEAM, { screenResolution.x - 200, screenResolution.y - 800 }, 100);
+	level_one.addDog(RIFLE, NPC_AI_TEAM, { screenResolution.x + 400, screenResolution.y - 1000 }, 100);
+	level_one.addDog(RIFLE, NPC_AI_TEAM, { screenResolution.x + 600, screenResolution.y - 400 }, 100);
+	level_one.setTimer(12000.0f);
 	return level_one;
 }
 
 Game WorldSystem::level_two() {
 	Game level_one;
-	level_one.addCat(RIFLE, PLAYER_1_TEAM, { screenResolution.x / 2 - 200, screenResolution.y - 400 }, 100);
+	level_one.addCat(RIFLE, PLAYER_1_TEAM, { screenResolution.x / 2 - 400, screenResolution.y - 800 }, 100);
+	level_one.addCat(RIFLE, PLAYER_1_TEAM, { screenResolution.x / 2 - 100, screenResolution.y - 400 }, 100);
+	level_one.addCat(RIFLE, PLAYER_1_TEAM, { screenResolution.x / 2 + 100, screenResolution.y - 800 }, 100);
+
+	level_one.addDog(RIFLE, NPC_AI_TEAM, { screenResolution.x - 200, screenResolution.y - 800 }, 100);
+	level_one.addDog(RIFLE, NPC_AI_TEAM, { screenResolution.x + 400, screenResolution.y - 1000 }, 100);
+	level_one.addDog(RIFLE, NPC_AI_TEAM, { screenResolution.x + 600, screenResolution.y - 400 }, 100);
 	level_one.setBackGround(MAPS::MIAMI);
+	level_one.setTimer(12000.0f);
 	return level_one;
 }
 
 Game WorldSystem::level_three() {
 
 	Game level_one;
-	level_one.addCat(RIFLE, PLAYER_1_TEAM, { screenResolution.x / 2 - 200, screenResolution.y - 400 }, 100);
+	level_one.addCat(RIFLE, PLAYER_1_TEAM, { screenResolution.x / 2 - 400, screenResolution.y - 800 }, 100);
+	level_one.addCat(RIFLE, PLAYER_1_TEAM, { screenResolution.x / 2 - 100, screenResolution.y - 400 }, 100);
+	level_one.addCat(RIFLE, PLAYER_1_TEAM, { screenResolution.x / 2 + 100, screenResolution.y - 800 }, 100);
+
+	level_one.addDog(RIFLE, NPC_AI_TEAM, { screenResolution.x - 200, screenResolution.y - 800 }, 100);
+	level_one.addDog(RIFLE, NPC_AI_TEAM, { screenResolution.x + 400, screenResolution.y - 1000 }, 100);
+	level_one.addDog(RIFLE, NPC_AI_TEAM, { screenResolution.x + 600, screenResolution.y - 400 }, 100);
 	level_one.setBackGround(MAPS::CYBERPUNK);
+	level_one.setTimer(12000.0f);
 	return level_one;
 
 }
@@ -417,7 +438,7 @@ Game WorldSystem::multiplayer() {
 	multiplayer.addDog(RIFLE, PLAYER_2_TEAM, { screenResolution.x + 400, screenResolution.y - 1000 }, 100);
 	multiplayer.addDog(RIFLE, PLAYER_2_TEAM, { screenResolution.x + 600, screenResolution.y - 400 }, 100);
 
-	multiplayer.setTimer(10000.0f);
+	multiplayer.setTimer(20000.0f);
 	return multiplayer;
 }
 
