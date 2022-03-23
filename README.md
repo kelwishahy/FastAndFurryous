@@ -1,6 +1,6 @@
 # Fast and Furryous
 
-## Milestone 3: Minimally Playable Game
+## Milestone 3: Fully Playable Game
 
 ### Playability
 - Gameplay
