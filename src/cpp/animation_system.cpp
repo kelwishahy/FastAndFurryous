@@ -94,7 +94,7 @@ void AnimationSystem::animate_cat_idle(Entity e) {
 	for (Entity rig : registry.animations.entities) {
 
 		Animation& extra = registry.animations.get(rig);
-		if (extra.name == "cat_head" && rig == e) {
+		if (extra.name == "cat_head") {
 			//Animate the head
 			if (check_if_part_of_parent(e, rig)) {
 				change_animation(rig, TEXTURE_IDS::CAT_FRONT_BLINK);
@@ -110,7 +110,7 @@ void AnimationSystem::animate_cat_jump(Entity e) {
 	for (Entity rig : registry.animations.entities) {
 
 		Animation& extra = registry.animations.get(rig);
-		if (extra.name == "cat_head" && rig == e) {
+		if (extra.name == "cat_head" && rig) {
 			//Animate the head
 			if (check_if_part_of_parent(e, rig)) {
 				change_animation(rig, TEXTURE_IDS::CAT_FRONT_BLINK);

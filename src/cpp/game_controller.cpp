@@ -238,19 +238,23 @@ void GameController::next_turn() {
 	game_state.turn_possesion += 1;
 	game_state.turn_number += 1;
 	timePerTurnMs = game_data.getTimer();
+	// force players to stop moving
+	for (std::vector<Entity> team : teams) {
+		for (Entity e : team) {
+			auto& motion = registry.motions.get(e);
+			motion.velocity.x = 0;
+			if (registry.cats.has(e)) {
+				AnimationSystem::animate_cat_idle(e);
+			} else {
+				AnimationSystem::animate_dog_idle(e);
+			}
+		}
+	}
 
 	if (game_state.turn_possesion == TURN_CODE::END) {
 		game_state.turn_possesion = TURN_CODE::PLAYER1;
 	} else if (teams[game_state.turn_possesion].empty()) {
 		game_state.turn_number -= 1;
-
-		// force players to stop moving
-		for (std::vector<Entity> team : teams) {
-			for (Entity e : team) {
-				auto& motion = registry.motions.get(e);
-				motion.velocity.x = 0;
-			}
-		}
 		next_turn();
 	}
 	change_curr_selected_char(teams[game_state.turn_possesion][0]); //supposed to be the first player on each team
@@ -360,7 +364,7 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 			if (action == GLFW_PRESS) {
 				if (key == GLFW_KEY_W) {
 					if (catMotion.velocity.y == gravity_force) {
-						catMotion.velocity.y = -gravity_force * current_speed;
+						catMotion.velocity.y = -gravity_force * (current_speed + 20.0f);
 						rb.collision_normal.y = 0;
 						player_mode = PLAYER_MODE::MOVING;
 						AnimationSystem::animate_cat_jump(curr_selected_char);
@@ -434,7 +438,7 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 			if (action == GLFW_PRESS) {
 				if (key == GLFW_KEY_I) {
 					if (catMotion.velocity.y == gravity_force) {
-						catMotion.velocity.y = -gravity_force * current_speed;
+						catMotion.velocity.y = -gravity_force * (current_speed + 20.0f);
 						rb.collision_normal.y = 0;
 						player_mode = PLAYER_MODE::MOVING;
 						AnimationSystem::animate_dog_jump(curr_selected_char);
