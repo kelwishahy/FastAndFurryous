@@ -7,12 +7,12 @@
 using namespace glm;
 ;
 
-void AISystem::step(float elapsed_ms, int turn, Entity *selected_ai) {
+void AISystem::step(float elapsed_ms, int turn, Entity *selected_ai, Entity last_player) {
 
 	blackboard->turn = turn;
 	timer -= elapsed_ms;
 	blackboard->timer = timer;
-
+	blackboard->player = &last_player;
 	if (timer <= 0.f) {
 		blackboard->shot = true;
 		timer = 5000.f;
@@ -54,7 +54,7 @@ void AISystem::init(ShootingSystem& shootingSystem, std::vector<Entity> team) {
 	aiTurnTime = 5000.f;
 	// Decision tree
 	blackboard = new Blackboard;
-	blackboard->velocity = 60.f;
+	blackboard->velocity = 90.f;
 	blackboard->shootingSystem = &this->shootingSystem;
 	blackboard->lowerhp = false;
 	decisionTree = new IsAITurn;
@@ -101,9 +101,8 @@ void AISystem::decideAction()
 		return;
 	}
 	Entity& closest_ai = ai_container.entities[0];
-	Entity& player = player1_team[0];
-	Motion& player_motion = registry.motions.get(player);
-	blackboard->player = &player;
+	Motion& player_motion = registry.motions.get(*blackboard->player);
+
 	blackboard->shot = false;
 	// find the closest ai to the player
 	for (uint i = 0; i < ai_container.components.size(); i++) {
@@ -150,12 +149,12 @@ void AISystem::checkJump()
 	// if the position has not changed and there is a tile blocking its way, make it jump
 	if (motion.velocity.x > 0) {
 		if (blackboard->prev_pos.x >= motion.position.x) {
-			motion.velocity.y = -150.f;
+			motion.velocity.y = -220.f;
 		}
 	}
 	else if (motion.velocity.x < 0) {
 		if (blackboard->prev_pos.x <= motion.position.x) {
-			motion.velocity.y = -150.f;
+			motion.velocity.y = -220.f;
 		}
 	}
 }

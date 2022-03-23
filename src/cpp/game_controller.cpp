@@ -138,8 +138,8 @@ void GameController::step(float elapsed_ms) {
 		}
 	}
 
-
-	ai.step(elapsed_ms, game_state.turn_possesion, &selected_ai);
+	int i = rand() % teams[TURN_CODE::PLAYER1].size();
+	ai.step(elapsed_ms, game_state.turn_possesion, &selected_ai, teams[TURN_CODE::PLAYER1][i]);
 
 	// if (game_state.turn_possesion == TURN_CODE::NPCAI) next_turn();
 	decrementTurnTime(elapsed_ms);

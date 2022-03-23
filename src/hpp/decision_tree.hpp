@@ -12,10 +12,6 @@ enum TURN_CODE {
 	END
 };
 
-enum MOVE_MODE {
-	ATTACK,
-	RUN
-};
 
 struct Blackboard {
 	Entity* entity;
@@ -132,7 +128,7 @@ class Charge : public Node {
 	bool run() override {
 		Motion& player_motion = registry.motions.get(*blackboard->player);
 
-		if (abs(blackboard->motion->position.x - player_motion.position.x) > 300.f) {
+		if (abs(blackboard->motion->position.x - player_motion.position.x) > 100.f) {
 			if (blackboard->motion->position.x < player_motion.position.x) {
 				blackboard->motion->velocity.x = blackboard->velocity;
 			}
