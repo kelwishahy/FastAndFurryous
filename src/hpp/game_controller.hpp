@@ -109,7 +109,7 @@ private:
 	ShootingSystem shooting_system;
 
 	AISystem ai;
-
+	Entity selected_ai;
 	UISystem ui;
 
 	float timePerTurnMs;

@@ -5,11 +5,16 @@
 #include "Game_Mechanics/shooting_system.hpp"
 
 enum TURN_CODE {
-	PLAYER1_TURN,
-	PLAYER2_TURN,
+	PLAYER1,
+	PLAYER2,
 	AI_TURN,
-	NPCAI_TURN,
+	NPCAI,
 	END
+};
+
+enum MOVE_MODE {
+	ATTACK,
+	RUN
 };
 
 struct Blackboard {
@@ -25,6 +30,7 @@ struct Blackboard {
 	float move_delay;
 	bool shot;
 	vec2 prev_pos;
+	bool attack;
 };
 
 static Blackboard* blackboard;
@@ -70,21 +76,11 @@ private:
 	std::list<Node*> children;
 };
 
-class SequenceNode : public Node {
-public:
-	SequenceNode() {};
-	bool run() override {
-		for (Node* child : getChildren()) {
-			if (!child->run())
-				return false;
-		}
-		return true;
-	}
-};
+
 // DECISIONS
 class IsAITurn : public Node {
 	bool run() override {
-		return (blackboard->turn == TURN_CODE::NPCAI_TURN);
+		return (blackboard->turn == TURN_CODE::NPCAI);
 	}
 };
 
@@ -120,7 +116,7 @@ class IsHurt : public Node {
 
 class HpLower : public Node {
 	bool run() override {
-		return blackboard->lowerhp;
+		return (blackboard->attack);
 	}
 };
 
@@ -135,11 +131,14 @@ class Shot : public Node {
 class Charge : public Node {
 	bool run() override {
 		Motion& player_motion = registry.motions.get(*blackboard->player);
-		if (blackboard->motion->position.x < player_motion.position.x) {
-			blackboard->motion->velocity.x = blackboard->velocity;
-		}
-		else {
-			blackboard->motion->velocity.x = -blackboard->velocity;
+
+		if (abs(blackboard->motion->position.x - player_motion.position.x) > 300.f) {
+			if (blackboard->motion->position.x < player_motion.position.x) {
+				blackboard->motion->velocity.x = blackboard->velocity;
+			}
+			else {
+				blackboard->motion->velocity.x = -blackboard->velocity;
+			}
 		}
 		
 		return (blackboard->motion->velocity.x < 0 || blackboard->motion->velocity.x > 0);
@@ -149,8 +148,6 @@ class Charge : public Node {
 class RunAway : public Node {
 	bool run() override {
 		Motion& player_motion = registry.motions.get(*blackboard->player);
-		printf("move away \n");
-
 		if (blackboard->motion->position.x < player_motion.position.x) {
 			blackboard->motion->velocity.x = -blackboard->velocity;
 		}
@@ -164,35 +161,21 @@ class RunAway : public Node {
 class Move : public Node {
 	bool run() override {
 		Motion& player_motion = registry.motions.get(*blackboard->player);
-		if (blackboard->shot) {
+		/*if (blackboard->shot) {
 			blackboard->motion->velocity.x = 0;
 			return true;
-		}
-		if (blackboard->lowerhp) {
-			//Motion& player_motion = registry.motions.get(*blackboard->player);
-			printf("move away \n");
+		}*/
 
-			if (blackboard->motion->position.x < player_motion.position.x) {
-				blackboard->motion->velocity.x = -blackboard->velocity;
-			}
-			else {
-				blackboard->motion->velocity.x = blackboard->velocity;
-			}
+		//float angle = atan2(blackboard->motion->position.y - player_motion.position.y, blackboard->motion->position.x - player_motion.position.x);
+		if (blackboard->attack) {
 
-			return (blackboard->motion->velocity.x < 0 || blackboard->motion->velocity.x > 0);
+			blackboard->motion->velocity.x = (blackboard->motion->position.x - player_motion.position.x)/100;
 		}
 		else {
-			printf("charge \n");
 
-			if (blackboard->motion->position.x < player_motion.position.x) {
-				blackboard->motion->velocity.x = blackboard->velocity;
-			}
-			else {
-				blackboard->motion->velocity.x = -blackboard->velocity;
-			}
-
-			return (blackboard->motion->velocity.x < 0 || blackboard->motion->velocity.x > 0);
+			blackboard->motion->velocity.x = (blackboard->motion->position.x - player_motion.position.x) / 100;
 		}
+		return true;
 	}
 
 };
@@ -220,17 +203,18 @@ class SwitchDirection : public Node {
 
 class Shoot : public Node {
 	bool run() override {
-		if (blackboard->shot) {
-			blackboard->motion->velocity.x = 0;
-			blackboard->motion->velocity.y = -2.5;
-			// for (int i = 0; i < 7; i++) {
-			// 	blackboard->shootingSystem->aimDown(*blackboard->entity);
-			// }
-			blackboard->shootingSystem->shoot(*blackboard->entity);
-			blackboard->shot = true;
-			return true;
-		}
-		return false;
+		
+		Motion& player_motion = registry.motions.get(*blackboard->player);
+
+		blackboard->motion->velocity.x = 0;
+		blackboard->motion->velocity.y = -2.5;
+		float angle = atan2(blackboard->motion->position.y - player_motion.position.y, blackboard->motion->position.x - player_motion.position.x);
+		blackboard->shootingSystem->aimDown(*blackboard->entity, angle);
+		blackboard->shootingSystem->shoot(*blackboard->entity);
+		blackboard->shot = true;
+	
+		return true;
+		
 	}
 };
 
@@ -238,7 +222,7 @@ class EndTurn : public Node {
 	bool run() override {
 		blackboard->motion->velocity.x = 0.f;
 		blackboard->motion->velocity.y = 350.f;
-		blackboard->turn = TURN_CODE::PLAYER1_TURN;
+		blackboard->turn = TURN_CODE::PLAYER1;
 		blackboard->shot = false;
 		return true;
 	}

@@ -49,7 +49,7 @@ void GameController::init(GLFWwindow* window, MapSystem::Map& map, OrthographicC
 	inAGame = true;
 	player_mode = PLAYER_MODE::MOVING;
 
-	ai.init(shooting_system, player1_team, npcai_team);
+	ai.init(shooting_system, teams[TURN_CODE::PLAYER1]);
 
 	ui.init(textManager);
 
@@ -89,7 +89,7 @@ void GameController::step(float elapsed_ms) {
 		turnIndicatorText.text = "COMPUTER'S TURN";
 		turnIndicatorPosition = turnPosition;
 		turnIndicatorPosition.x = turnIndicatorPosition.x - turnIndicatorText.scale.x / 2.f;
-	} else if (game_state.turn_possesion == NPCAI_TURN) {
+	} else if (game_state.turn_possesion == NPCAI) {
 		turnIndicatorText.text = "COMPUTER'S TURN";
 		turnIndicatorPosition = turnPosition;
 		turnIndicatorPosition.x = turnIndicatorPosition.x - turnIndicatorText.scale.x / 2.f;
@@ -139,7 +139,8 @@ void GameController::step(float elapsed_ms) {
 	}
 
 
-	ai.step(elapsed_ms, game_state.turn_possesion);
+	ai.step(elapsed_ms, game_state.turn_possesion, &selected_ai);
+
 	// if (game_state.turn_possesion == TURN_CODE::NPCAI) next_turn();
 	decrementTurnTime(elapsed_ms);
 
@@ -258,7 +259,14 @@ void GameController::next_turn() {
 		game_state.turn_number -= 1;
 		next_turn();
 	}
-	change_curr_selected_char(teams[game_state.turn_possesion][0]); //supposed to be the first player on each team
+	if (game_state.turn_possesion == TURN_CODE::NPCAI) {
+		change_curr_selected_char(selected_ai);
+	}
+	else {
+		change_curr_selected_char(teams[game_state.turn_possesion][0]); //supposed to be the first player on each team
+	}
+	
+	
 }
 
 void GameController::handle_collisions() {
