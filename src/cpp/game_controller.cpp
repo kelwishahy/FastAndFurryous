@@ -110,7 +110,8 @@ void GameController::step(float elapsed_ms) {
 			registry.animations.remove(e);
 			registry.rigidBodies.remove(e);
 			registry.cats.remove(e);
-			AnimationSystem::animate_cat_dead(e);
+			Cat cat = registry.cats.get(e);
+			cat.animate_cat_dead();
 		}
 	}
 
@@ -122,7 +123,8 @@ void GameController::step(float elapsed_ms) {
 			registry.animations.remove(e);
 			registry.rigidBodies.remove(e);
 			registry.dogs.remove(e);
-			AnimationSystem::animate_dog_dead(e);
+			Dog dog = registry.dogs.get(e);
+			dog.animate_dog_dead();
 		}
 	}
 
@@ -134,7 +136,8 @@ void GameController::step(float elapsed_ms) {
 			registry.animations.remove(e);
 			registry.rigidBodies.remove(e);
 			registry.dogs.remove(e);
-			AnimationSystem::animate_dog_dead(e);
+			Dog dog = registry.dogs.get(e);
+			dog.animate_dog_dead();
 		}
 	}
 
@@ -245,9 +248,11 @@ void GameController::next_turn() {
 			auto& motion = registry.motions.get(e);
 			motion.velocity.x = 0;
 			if (registry.cats.has(e)) {
-				AnimationSystem::animate_cat_idle(e);
+				Cat cat = registry.cats.get(e);
+				cat.animate_cat_idle();
 			} else {
-				AnimationSystem::animate_dog_idle(e);
+				Dog dog = registry.dogs.get(e);
+				dog.animate_dog_idle();
 			}
 		}
 	}
@@ -366,6 +371,7 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 		if (registry.cats.has(curr_selected_char)) {
 			Motion& catMotion = registry.motions.get(curr_selected_char);
 			Rigidbody& rb = registry.rigidBodies.get(curr_selected_char);
+			Cat cat = registry.cats.get(curr_selected_char);
 
 			float current_speed = 90.0f;
 			float gravity_force = 2.5;
@@ -376,21 +382,20 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 						catMotion.velocity.y = -gravity_force * (current_speed + 20.0f);
 						rb.collision_normal.y = 0;
 						player_mode = PLAYER_MODE::MOVING;
-						AnimationSystem::animate_cat_jump(curr_selected_char);
-						//AnimationSystem::animate_dog_jump(curr_selected_char);
+						cat.animate_cat_walk();
 						ui.hide_crosshair();
 					}
 				}
 				if (key == GLFW_KEY_D) {
 					catMotion.velocity.x = current_speed;
-					AnimationSystem::animate_cat_walk(curr_selected_char);
+					cat.animate_cat_walk();
 					//AnimationSystem::animate_dog_walk(curr_selected_char);
 					player_mode = PLAYER_MODE::MOVING;
 					ui.hide_crosshair();
 				}
 				if (key == GLFW_KEY_A) {
 					catMotion.velocity.x = -current_speed;
-					AnimationSystem::animate_cat_walk(curr_selected_char);
+					cat.animate_cat_walk();
 					//AnimationSystem::animate_dog_walk(curr_selected_char);
 					player_mode = PLAYER_MODE::MOVING;
 					ui.hide_crosshair();
@@ -405,14 +410,14 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 			if (action == GLFW_RELEASE) {
 				if (key == GLFW_KEY_A && catMotion.velocity.x < 0) {
 					catMotion.velocity.x = 0.0f;
-					AnimationSystem::animate_cat_aim(curr_selected_char);
+					cat.animate_cat_aim();
 					//AnimationSystem::animate_dog_idle(curr_selected_char);
 					player_mode = PLAYER_MODE::SHOOTING;
 					ui.show_crosshair(curr_selected_char);
 				}
 				if (key == GLFW_KEY_D && catMotion.velocity.x > 0) {
 					catMotion.velocity.x = 0.0f;
-					AnimationSystem::animate_cat_aim(curr_selected_char);
+					cat.animate_cat_aim();
 					//AnimationSystem::animate_dog_idle(curr_selected_char);
 					player_mode = PLAYER_MODE::SHOOTING;
 					ui.show_crosshair(curr_selected_char);
@@ -440,6 +445,7 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 		if (registry.dogs.has(curr_selected_char)) {
 			Motion& catMotion = registry.motions.get(curr_selected_char);
 			Rigidbody& rb = registry.rigidBodies.get(curr_selected_char);
+			Dog dog = registry.dogs.get(curr_selected_char);
 
 			float current_speed = 90.0f;
 			float gravity_force = 2.5;
@@ -450,22 +456,19 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 						catMotion.velocity.y = -gravity_force * (current_speed + 20.0f);
 						rb.collision_normal.y = 0;
 						player_mode = PLAYER_MODE::MOVING;
-						AnimationSystem::animate_dog_jump(curr_selected_char);
-						//AnimationSystem::animate_dog_jump(curr_selected_char);
+						dog.animate_dog_jump();
 						ui.hide_crosshair();
 					}
 				}
 				if (key == GLFW_KEY_L) {
 					catMotion.velocity.x = current_speed;
-					AnimationSystem::animate_dog_walk(curr_selected_char);
-					//AnimationSystem::animate_dog_walk(curr_selected_char);
+					dog.animate_dog_walk();
 					player_mode = PLAYER_MODE::MOVING;
 					ui.hide_crosshair();
 				}
 				if (key == GLFW_KEY_J) {
 					catMotion.velocity.x = -current_speed;
-					AnimationSystem::animate_dog_walk(curr_selected_char);
-					//AnimationSystem::animate_dog_walk(curr_selected_char);
+					dog.animate_dog_walk();
 					player_mode = PLAYER_MODE::MOVING;
 					ui.hide_crosshair();
 				}
@@ -479,15 +482,13 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 			if (action == GLFW_RELEASE) {
 				if (key == GLFW_KEY_J && catMotion.velocity.x < 0) {
 					catMotion.velocity.x = 0.0f;
-					AnimationSystem::animate_dog_aim(curr_selected_char);
-					//AnimationSystem::animate_dog_idle(curr_selected_char);
+					dog.animate_dog_aim();
 					player_mode = PLAYER_MODE::SHOOTING;
 					ui.show_crosshair(curr_selected_char);
 				}
 				if (key == GLFW_KEY_L && catMotion.velocity.x > 0) {
 					catMotion.velocity.x = 0.0f;
-					AnimationSystem::animate_dog_aim(curr_selected_char);
-					//AnimationSystem::animate_dog_idle(curr_selected_char);
+					dog.animate_dog_aim();
 					player_mode = PLAYER_MODE::SHOOTING;
 					ui.show_crosshair(curr_selected_char);
 				}

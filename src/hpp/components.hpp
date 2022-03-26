@@ -347,11 +347,23 @@ struct UIElement {
 };
 
 struct Cat {
-
+	Entity cat;
+	void animate_cat_walk();
+	void animate_cat_idle();
+	void animate_cat_jump();
+	void animate_cat_hurt();
+	void animate_cat_dead();
+	void animate_cat_aim();
 };
 
 struct Dog {
-
+	Entity dog;
+	void animate_dog_idle();
+	void animate_dog_walk();
+	void animate_dog_jump();
+	void animate_dog_hurt();
+	void animate_dog_dead();
+	void animate_dog_aim();
 };
 
 struct HealthBox {
@@ -450,4 +462,6 @@ struct OptionPlayers {
 
 void remove_children(Entity e);
 std::vector<Entity> get_all_children(Entity e);
+void change_animation(Entity e, TEXTURE_IDS tex_id);
+bool check_if_part_of_parent(Entity e, Entity child);
 
