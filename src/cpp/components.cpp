@@ -6,6 +6,8 @@
 #include <sstream>
 #include <glm/gtx/extended_min_max.hpp>
 
+#include "hpp/audio_manager.hpp"
+
 Debug debugging;
 float death_timer_counter_ms = 3000;
 
@@ -148,8 +150,9 @@ std::vector<Entity> get_all_children(Entity e) {
 	return allchildren;
 
 }
-
-void Cat::animate_cat_walk() {
+///////////////////CAT MEMBER functions///////////////////////////////
+//////////////////////////////////////////////////////////////////////
+void Cat::animate_walk() {
 
 
 	//Animate the cat's main torso
@@ -169,7 +172,7 @@ void Cat::animate_cat_walk() {
 
 }
 
-void Cat::animate_cat_idle() {
+void Cat::animate_idle() {
 
 	change_animation(this->character, TEXTURE_IDS::CAT_FRONT_IDLE);
 
@@ -186,7 +189,7 @@ void Cat::animate_cat_idle() {
 	}
 }
 
-void Cat::animate_cat_jump() {
+void Cat::animate_jump() {
 	change_animation(this->character, TEXTURE_IDS::CAT_JUMP);
 
 	for (Entity rig : registry.animations.entities) {
@@ -201,7 +204,7 @@ void Cat::animate_cat_jump() {
 	}
 }
 
-void Cat::animate_cat_hurt() {
+void Cat::animate_hurt() {
 	change_animation(this->character, TEXTURE_IDS::CAT_HURT);
 
 	for (Entity rig : registry.animations.entities) {
@@ -217,7 +220,7 @@ void Cat::animate_cat_hurt() {
 	}
 }
 
-void Cat::animate_cat_dead() {
+void Cat::animate_dead() {
 
 	registry.renderRequests.remove(this->character);
 	registry.renderRequests.insert(this->character, {
@@ -227,7 +230,7 @@ void Cat::animate_cat_dead() {
 		});
 }
 
-void Cat::animate_cat_aim() {
+void Cat::animate_aim() {
 
 	change_animation(this->character, TEXTURE_IDS::CAT_SIDE_IDLE);
 	for (Entity rig : registry.animations.entities) {
@@ -239,10 +242,18 @@ void Cat::animate_cat_aim() {
 			}
 		}
 	}
-
 }
 
-void Dog::animate_dog_walk() {
+void Cat::play_hurt_sfx() {
+	audio.play_sfx(CAT_SCREAM);
+}
+//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
+
+///////////////////DOG MEMBER functions///////////////////////////////
+//////////////////////////////////////////////////////////////////////
+void Dog::animate_walk() {
 
 	///Animate the cat's main torso
 	change_animation(this->character, TEXTURE_IDS::DOG_WALK);
@@ -260,7 +271,7 @@ void Dog::animate_dog_walk() {
 	}
 }
 
-void Dog::animate_dog_idle() {
+void Dog::animate_idle() {
 
 	change_animation(this->character, TEXTURE_IDS::DOG_FRONT_IDLE);
 	std::vector<Entity> children = get_all_children(this->character);
@@ -277,7 +288,7 @@ void Dog::animate_dog_idle() {
 	}
 }
 
-void Dog::animate_dog_jump() {
+void Dog::animate_jump() {
 
 	change_animation(this->character, TEXTURE_IDS::DOG_JUMP);
 
@@ -294,7 +305,7 @@ void Dog::animate_dog_jump() {
 	}
 }
 
-void Dog::animate_dog_hurt() {
+void Dog::animate_hurt() {
 
 	change_animation(this->character, TEXTURE_IDS::DOG_HURT);
 
@@ -311,7 +322,7 @@ void Dog::animate_dog_hurt() {
 	}
 }
 
-void Dog::animate_dog_dead() {
+void Dog::animate_dead() {
 	registry.renderRequests.remove(this->character);
 	registry.renderRequests.insert(this->character, {
 		TEXTURE_IDS::DOG_DEAD,
@@ -320,7 +331,7 @@ void Dog::animate_dog_dead() {
 		});
 }
 
-void Dog::animate_dog_aim() {
+void Dog::animate_aim() {
 
 	change_animation(this->character, TEXTURE_IDS::DOG_SIDE_IDLE);
 	for (Entity rig : registry.animations.entities) {
@@ -332,8 +343,13 @@ void Dog::animate_dog_aim() {
 			}
 		}
 	}
-
 }
+
+void Dog::play_hurt_sfx() {
+	audio.play_sfx(DOG_BARK);
+}
+//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
 
 void change_animation(Entity e, TEXTURE_IDS tex_id) {
 
@@ -349,13 +365,6 @@ bool check_if_part_of_parent(Entity e, Entity child) {
 		if (child == check_child) {
 			return true;
 		}
-	}
-	return false;
-}
-
-bool check_if_cat(Entity e) {
-	if (registry.cats.has(e)) {
-		return true;
 	}
 	return false;
 }

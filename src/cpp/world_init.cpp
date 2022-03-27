@@ -81,7 +81,7 @@ Entity createCat(WEAPON_TYPES weapon, vec2 pos, int health, GLFWwindow* window) 
 			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
 
 
-	Cat& cat = registry.cats.emplace(entity);
+	Character& cat = registry.characters.insert(entity, Cat());
 	cat.character = entity;
 	cat.window = window;
 	
@@ -187,7 +187,7 @@ Entity createDog(WEAPON_TYPES weapon, vec2 pos, int health, GLFWwindow* window) 
 
 
 	//----------------------------------------------
-	Dog& dog = registry.dogs.emplace(entity);
+	Character& dog = registry.characters.insert(entity, Dog());
 	dog.character = entity;
 	dog.window = window;
 
@@ -502,7 +502,7 @@ Entity createCrosshair(Entity origin, bool iscat) {
 
 Entity createHealthCounter(Entity origin, int health, TextManager& textManager) {
 
-	const vec3 color = registry.cats.has(origin) ? vec3{ 0.862f, 0.525f, 0.517f } : vec3{ 0.039, 0.454, 1 };
+	const vec3 color = registry.characters.get(origin).team_color;
 
 	const auto entity = Entity();
 

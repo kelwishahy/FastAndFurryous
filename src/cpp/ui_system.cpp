@@ -74,7 +74,7 @@ void UISystem::step(float elapsed_ms) {
 void UISystem::show_crosshair(Entity e) {
 
 	Motion entity_motion = registry.motions.get(e);
-	Entity crosshair = createCrosshair(e, registry.cats.has(e));
+	Entity crosshair = createCrosshair(e, registry.characters.get(e).animal == ANIMAL::CAT);
 	crosshair_marker = crosshair;
 
 }

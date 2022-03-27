@@ -22,7 +22,7 @@ void AnimationSystem::init() {
 void AnimationSystem::step(float elapsed_ms) {
 
 	for (Entity e : registry.animations.entities) {
-		if (registry.cats.has(e) || registry.dogs.has(e)) {
+		if (registry.characters.has(e)) {
 			Motion& motion = registry.motions.get(e);
 			Animation& anim = registry.animations.get(e);
 

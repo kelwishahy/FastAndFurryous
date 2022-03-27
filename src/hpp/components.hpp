@@ -227,6 +227,9 @@ public:
 	}
 
 	void changeState(CharacterState* new_state);
+	bool isSelected() {
+		return selected;
+	}
 	void selectChar() {
 		selected = true;
 	}
@@ -385,36 +388,58 @@ struct UIElement {
 };
 
 struct Character {
-
 	Entity character;
 	GLFWwindow* window;
 	CharacterStateMachine state_machine;
 	CharacterIdleState* idle_state;
 	CharacterMoveState* move_state;
+	glm::vec3 team_color;
+	ANIMAL animal;
 
 	void init() {
 		idle_state = new CharacterIdleState(character, window);
 		state_machine = CharacterStateMachine();
 		state_machine.init(idle_state);
 	}
+
+	virtual void animate_walk() {}
+	virtual void animate_idle() {}
+	virtual void animate_jump() {}
+	virtual void animate_hurt() {}
+	virtual void animate_dead() {}
+	virtual void animate_aim() {}
+
+	virtual void play_hurt_sfx() {}
 };
 
 struct Cat : Character {
-	void animate_cat_walk();
-	void animate_cat_idle();
-	void animate_cat_jump();
-	void animate_cat_hurt();
-	void animate_cat_dead();
-	void animate_cat_aim();
+	Cat() : Character() {
+		team_color = glm::vec3{ 0.862f, 0.525f, 0.517f };
+		animal = ANIMAL::CAT;
+	}
+	void animate_walk() override;
+	void animate_idle() override;
+	void animate_jump() override;
+	void animate_hurt() override;
+	void animate_dead() override;
+	void animate_aim() override;
+
+	void play_hurt_sfx() override;
 };
 
 struct Dog : Character {
-	void animate_dog_idle();
-	void animate_dog_walk();
-	void animate_dog_jump();
-	void animate_dog_hurt();
-	void animate_dog_dead();
-	void animate_dog_aim();
+	Dog() : Character() {
+		team_color = glm::vec3{ 0.039, 0.454, 1 };
+		animal = ANIMAL::DOG;
+	}
+	void animate_walk() override;
+	void animate_idle() override;
+	void animate_jump() override;
+	void animate_hurt() override;
+	void animate_dead() override;
+	void animate_aim() override;
+
+	void play_hurt_sfx() override;
 };
 
 struct HealthBox {

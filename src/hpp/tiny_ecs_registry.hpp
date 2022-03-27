@@ -33,8 +33,7 @@ public:
 	ComponentContainer<Text> texts;
 	ComponentContainer<ChildEntities> parentEntities;
 	ComponentContainer<UIElement> uiElements;
-	ComponentContainer<Cat> cats;
-	ComponentContainer<Dog> dogs;
+	ComponentContainer<Character> characters;
 	ComponentContainer<HealthBox> healthboxes;
 	ComponentContainer<Selected> selected;
 	ComponentContainer<OptionTimer> timer;
@@ -47,11 +46,10 @@ public:
 		registry_list.push_back(&backgrounds);
 		registry_list.push_back(&boxColliders);
 		registry_list.push_back(&buttons);
-		registry_list.push_back(&cats);
+		registry_list.push_back(&characters);
 		registry_list.push_back(&circleColliders);
 		registry_list.push_back(&collisions);
 		registry_list.push_back(&colors);
-		registry_list.push_back(&dogs);
 		registry_list.push_back(&health);
 		registry_list.push_back(&menus);
 		registry_list.push_back(&meshPtrs);
