@@ -37,6 +37,13 @@ CharacterIdleState::~CharacterIdleState() = default;
 
 void CharacterIdleState::enter() {
 	CharacterGroundedState::enter();
+	if (check_if_cat(character)) {
+		Cat cat = registry.cats.get(character);
+		cat.animate_cat_idle();
+	} else {
+		Dog dog = registry.dogs.get(character);
+		dog.animate_dog_idle();
+	}
 }
 
 void CharacterIdleState::exit() {

@@ -21,6 +21,7 @@ public:
 
 class CharacterIdleState : public CharacterGroundedState {
 
+public:
 	CharacterIdleState(Entity e, GLFWwindow* w);
 	~CharacterIdleState() override;
 
@@ -38,6 +39,7 @@ class CharacterIdleState : public CharacterGroundedState {
 
 class CharacterMoveState : public CharacterGroundedState {
 
+public:
 	CharacterMoveState(Entity e, GLFWwindow* w);
 	~CharacterMoveState() override;
 

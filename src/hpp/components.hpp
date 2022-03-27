@@ -227,9 +227,17 @@ public:
 	}
 
 	void changeState(CharacterState* new_state);
+	void selectChar() {
+		selected = true;
+	}
+	void deselectChar() {
+		selected = false;
+	}
+
 
 protected:
 	CharacterState* curr_state;
+	bool selected = false;
 
 	void setCurrentState(CharacterState* state) {
 		curr_state = state;
@@ -376,8 +384,22 @@ struct UIElement {
 	UI_ELEMENT element_type;
 };
 
-struct Cat {
-	Entity cat;
+struct Character {
+
+	Entity character;
+	GLFWwindow* window;
+	CharacterStateMachine state_machine;
+	CharacterIdleState* idle_state;
+	CharacterMoveState* move_state;
+
+	void init() {
+		idle_state = new CharacterIdleState(character, window);
+		state_machine = CharacterStateMachine();
+		state_machine.init(idle_state);
+	}
+};
+
+struct Cat : Character {
 	void animate_cat_walk();
 	void animate_cat_idle();
 	void animate_cat_jump();
@@ -386,29 +408,13 @@ struct Cat {
 	void animate_cat_aim();
 };
 
-struct Dog {
-	Entity dog;
+struct Dog : Character {
 	void animate_dog_idle();
 	void animate_dog_walk();
 	void animate_dog_jump();
 	void animate_dog_hurt();
 	void animate_dog_dead();
 	void animate_dog_aim();
-struct Character {
-	
-	Character() = default;
-	Entity character;
-	CharacterStateMachine state_machine;
-	CharacterIdleState* idle_state;
-	CharacterMoveState* move_state;
-};
-
-struct Cat : Character{
-	
-};
-
-struct Dog : Character{
-
 };
 
 struct HealthBox {
@@ -509,4 +515,5 @@ void remove_children(Entity e);
 std::vector<Entity> get_all_children(Entity e);
 void change_animation(Entity e, TEXTURE_IDS tex_id);
 bool check_if_part_of_parent(Entity e, Entity child);
+bool check_if_cat(Entity e);
 

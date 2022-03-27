@@ -10,8 +10,8 @@
 
 
 
-GameController::GameController() {
-	inAGame = false;
+GameController::GameController() : inAGame(false) {
+
 }
 
 GameController::~GameController() {
@@ -124,7 +124,7 @@ void GameController::step(float elapsed_ms) {
 	}
 
 	for (int i = 0; i < teams[TURN_CODE::PLAYER2].size(); i++) {
-		auto e = teams[TURN_CODE::PLAYER2][i];
+		const auto e = teams[TURN_CODE::PLAYER2][i];
 		if (registry.health.get(e).hp == 0) {
 			teams[TURN_CODE::PLAYER2].erase(teams[TURN_CODE::PLAYER2].begin() + i);
 			remove_children(e);
@@ -137,7 +137,7 @@ void GameController::step(float elapsed_ms) {
 	}
 
 	for (int i = 0; i < teams[TURN_CODE::NPCAI].size(); i++) {
-		auto e = teams[TURN_CODE::NPCAI][i];
+		const auto e = teams[TURN_CODE::NPCAI][i];
 		if (registry.health.get(e).hp == 0) {
 			teams[TURN_CODE::NPCAI].erase(teams[TURN_CODE::NPCAI].begin() + i);
 			remove_children(e);
@@ -219,7 +219,15 @@ void GameController::init_player_teams() {
 	std::vector<Entity> npcai_team;
 
 	for (Game::Character character : game_data.getCharacters()) {
-		Entity e = character.animal == ANIMAL::CAT ? createCat(character.weapon, character.starting_pos, character.health) : createDog(character.weapon, character.starting_pos, character.health);
+		Entity e = character.animal == ANIMAL::CAT ? createCat(character.weapon, character.starting_pos, character.health, this->window) : createDog(character.weapon, character.starting_pos, character.health, this->window);
+
+		if (registry.cats.has(e)) {
+			Cat& cat = registry.cats.get(e);
+			cat.init();
+		} else {
+			Dog& dog = registry.dogs.get(e);
+			dog.init();
+		}
 
 		if (character.alignment == TEAM::PLAYER_1_TEAM) {
 			player1_team.push_back(e);
@@ -341,7 +349,27 @@ void GameController::change_selected_state(Entity e, bool state) {
 
 void GameController::change_curr_selected_char(Entity e) {
 
+	if (!curr_selected_char) {
+		if (registry.cats.has(curr_selected_char)) {
+			Cat& cat = registry.cats.get(curr_selected_char);
+			cat.state_machine.deselectChar();
+		}
+		else {
+			Dog& dog = registry.dogs.get(curr_selected_char);
+			dog.state_machine.deselectChar();
+		}
+	}
+
 	curr_selected_char = e;
+
+	if (registry.cats.has(curr_selected_char)) {
+		Cat& cat = registry.cats.get(curr_selected_char);
+		cat.state_machine.selectChar();
+	}
+	else {
+		Dog& dog = registry.dogs.get(curr_selected_char);
+		dog.state_machine.selectChar();
+	}
 
 	for (std::vector<Entity> team : teams) {
 		for (Entity player : team) {
@@ -373,171 +401,171 @@ void GameController::change_to_next_char_on_team() {
 }
 
 // On key callback
-void GameController::on_player_key(int key, int, int action, int mod) {
-	//Only allowed to move on specified turn
-	if (game_state.turn_possesion == PLAYER1 && inAGame) {
-		if (registry.cats.has(curr_selected_char)) {
-			Motion& catMotion = registry.motions.get(curr_selected_char);
-			Rigidbody& rb = registry.rigidBodies.get(curr_selected_char);
-			Cat cat = registry.cats.get(curr_selected_char);
-
-			float current_speed = 90.0f;
-			float gravity_force = 2.5;
-
-			if (action == GLFW_PRESS) {
-				if (key == GLFW_KEY_W) {
-					if (catMotion.velocity.y == gravity_force) {
-						catMotion.velocity.y = -gravity_force * (current_speed + 20.0f);
-						rb.collision_normal.y = 0;
-						player_mode = PLAYER_MODE::MOVING;
-						cat.animate_cat_walk();
-						ui.hide_crosshair();
-					}
-				}
-				if (key == GLFW_KEY_D) {
-					catMotion.velocity.x = current_speed;
-					cat.animate_cat_walk();
-					//AnimationSystem::animate_dog_walk(curr_selected_char);
-					player_mode = PLAYER_MODE::MOVING;
-					ui.hide_crosshair();
-				}
-				if (key == GLFW_KEY_A) {
-					catMotion.velocity.x = -current_speed;
-					cat.animate_cat_walk();
-					//AnimationSystem::animate_dog_walk(curr_selected_char);
-					player_mode = PLAYER_MODE::MOVING;
-					ui.hide_crosshair();
-				}
-				if (key == GLFW_KEY_S) {
-					change_to_next_char_on_team();
-				}
-			}
-
-
-
-			if (action == GLFW_RELEASE) {
-				if (key == GLFW_KEY_A && catMotion.velocity.x < 0) {
-					catMotion.velocity.x = 0.0f;
-					cat.animate_cat_aim();
-					//AnimationSystem::animate_dog_idle(curr_selected_char);
-					player_mode = PLAYER_MODE::SHOOTING;
-					ui.show_crosshair(curr_selected_char);
-				}
-				if (key == GLFW_KEY_D && catMotion.velocity.x > 0) {
-					catMotion.velocity.x = 0.0f;
-					cat.animate_cat_aim();
-					//AnimationSystem::animate_dog_idle(curr_selected_char);
-					player_mode = PLAYER_MODE::SHOOTING;
-					ui.show_crosshair(curr_selected_char);
-				}
-			}
-
-
-			if (action == GLFW_PRESS && key == GLFW_KEY_UP) {
-				shooting_system.aimUp(curr_selected_char, 0.025f);
-			}
-
-			if (action == GLFW_PRESS && key == GLFW_KEY_DOWN) {
-				shooting_system.aimDown(curr_selected_char, 0.025f);
-			}
-
-			if (action == GLFW_PRESS && key == GLFW_KEY_ENTER) {
-				// should only shoot when standing
-				if (catMotion.velocity.y == gravity_force && catMotion.velocity.x == 0.0) {
-					shooting_system.shoot(curr_selected_char);
-					next_turn();
-				}
-			}
-		}
-	} else if (game_state.turn_possesion == PLAYER2 && inAGame) {
-		if (registry.dogs.has(curr_selected_char)) {
-			Motion& catMotion = registry.motions.get(curr_selected_char);
-			Rigidbody& rb = registry.rigidBodies.get(curr_selected_char);
-			Dog dog = registry.dogs.get(curr_selected_char);
-
-			float current_speed = 90.0f;
-			float gravity_force = 2.5;
-
-			if (action == GLFW_PRESS) {
-				if (key == GLFW_KEY_I) {
-					if (catMotion.velocity.y == gravity_force) {
-						catMotion.velocity.y = -gravity_force * (current_speed + 20.0f);
-						rb.collision_normal.y = 0;
-						player_mode = PLAYER_MODE::MOVING;
-						dog.animate_dog_jump();
-						ui.hide_crosshair();
-					}
-				}
-				if (key == GLFW_KEY_L) {
-					catMotion.velocity.x = current_speed;
-					dog.animate_dog_walk();
-					player_mode = PLAYER_MODE::MOVING;
-					ui.hide_crosshair();
-				}
-				if (key == GLFW_KEY_J) {
-					catMotion.velocity.x = -current_speed;
-					dog.animate_dog_walk();
-					player_mode = PLAYER_MODE::MOVING;
-					ui.hide_crosshair();
-				}
-				if (key == GLFW_KEY_K) {
-					change_to_next_char_on_team();
-				}
-			}
-
-
-
-			if (action == GLFW_RELEASE) {
-				if (key == GLFW_KEY_J && catMotion.velocity.x < 0) {
-					catMotion.velocity.x = 0.0f;
-					dog.animate_dog_aim();
-					player_mode = PLAYER_MODE::SHOOTING;
-					ui.show_crosshair(curr_selected_char);
-				}
-				if (key == GLFW_KEY_L && catMotion.velocity.x > 0) {
-					catMotion.velocity.x = 0.0f;
-					dog.animate_dog_aim();
-					player_mode = PLAYER_MODE::SHOOTING;
-					ui.show_crosshair(curr_selected_char);
-				}
-			}
-
-
-			if (action == GLFW_PRESS && key == GLFW_KEY_UP) {
-				shooting_system.aimUp(curr_selected_char, 0.025f);
-			}
-
-			if (action == GLFW_PRESS && key == GLFW_KEY_DOWN) {
-				shooting_system.aimDown(curr_selected_char, 0.025f);
-			}
-
-			if (action == GLFW_PRESS && key == GLFW_KEY_ENTER) {
-				// should only shoot when standing
-				if (catMotion.velocity.y == gravity_force && catMotion.velocity.x == 0.0) {
-					shooting_system.shoot(curr_selected_char);
-					next_turn();
-				}
-			}
-		}
-	}
-}
+//void GameController::on_player_key(int key, int, int action, int mod) {
+//	//Only allowed to move on specified turn
+//	if (game_state.turn_possesion == PLAYER1 && inAGame) {
+//		if (registry.cats.has(curr_selected_char)) {
+//			Motion& catMotion = registry.motions.get(curr_selected_char);
+//			Rigidbody& rb = registry.rigidBodies.get(curr_selected_char);
+//			Cat cat = registry.cats.get(curr_selected_char);
+//
+//			float current_speed = 90.0f;
+//			float gravity_force = 2.5;
+//
+//			if (action == GLFW_PRESS) {
+//				if (key == GLFW_KEY_W) {
+//					if (catMotion.velocity.y == gravity_force) {
+//						catMotion.velocity.y = -gravity_force * (current_speed + 20.0f);
+//						rb.collision_normal.y = 0;
+//						player_mode = PLAYER_MODE::MOVING;
+//						cat.animate_cat_walk();
+//						ui.hide_crosshair();
+//					}
+//				}
+//				if (key == GLFW_KEY_D) {
+//					catMotion.velocity.x = current_speed;
+//					cat.animate_cat_walk();
+//					//AnimationSystem::animate_dog_walk(curr_selected_char);
+//					player_mode = PLAYER_MODE::MOVING;
+//					ui.hide_crosshair();
+//				}
+//				if (key == GLFW_KEY_A) {
+//					catMotion.velocity.x = -current_speed;
+//					cat.animate_cat_walk();
+//					//AnimationSystem::animate_dog_walk(curr_selected_char);
+//					player_mode = PLAYER_MODE::MOVING;
+//					ui.hide_crosshair();
+//				}
+//				if (key == GLFW_KEY_S) {
+//					change_to_next_char_on_team();
+//				}
+//			}
+//
+//
+//
+//			if (action == GLFW_RELEASE) {
+//				if (key == GLFW_KEY_A && catMotion.velocity.x < 0) {
+//					catMotion.velocity.x = 0.0f;
+//					cat.animate_cat_aim();
+//					//AnimationSystem::animate_dog_idle(curr_selected_char);
+//					player_mode = PLAYER_MODE::SHOOTING;
+//					ui.show_crosshair(curr_selected_char);
+//				}
+//				if (key == GLFW_KEY_D && catMotion.velocity.x > 0) {
+//					catMotion.velocity.x = 0.0f;
+//					cat.animate_cat_aim();
+//					//AnimationSystem::animate_dog_idle(curr_selected_char);
+//					player_mode = PLAYER_MODE::SHOOTING;
+//					ui.show_crosshair(curr_selected_char);
+//				}
+//			}
+//
+//
+//			if (action == GLFW_PRESS && key == GLFW_KEY_UP) {
+//				shooting_system.aimUp(curr_selected_char, 0.025f);
+//			}
+//
+//			if (action == GLFW_PRESS && key == GLFW_KEY_DOWN) {
+//				shooting_system.aimDown(curr_selected_char, 0.025f);
+//			}
+//
+//			if (action == GLFW_PRESS && key == GLFW_KEY_ENTER) {
+//				// should only shoot when standing
+//				if (catMotion.velocity.y == gravity_force && catMotion.velocity.x == 0.0) {
+//					shooting_system.shoot(curr_selected_char);
+//					next_turn();
+//				}
+//			}
+//		}
+//	} else if (game_state.turn_possesion == PLAYER2 && inAGame) {
+//		if (registry.dogs.has(curr_selected_char)) {
+//			Motion& catMotion = registry.motions.get(curr_selected_char);
+//			Rigidbody& rb = registry.rigidBodies.get(curr_selected_char);
+//			Dog dog = registry.dogs.get(curr_selected_char);
+//
+//			float current_speed = 90.0f;
+//			float gravity_force = 2.5;
+//
+//			if (action == GLFW_PRESS) {
+//				if (key == GLFW_KEY_I) {
+//					if (catMotion.velocity.y == gravity_force) {
+//						catMotion.velocity.y = -gravity_force * (current_speed + 20.0f);
+//						rb.collision_normal.y = 0;
+//						player_mode = PLAYER_MODE::MOVING;
+//						dog.animate_dog_jump();
+//						ui.hide_crosshair();
+//					}
+//				}
+//				if (key == GLFW_KEY_L) {
+//					catMotion.velocity.x = current_speed;
+//					dog.animate_dog_walk();
+//					player_mode = PLAYER_MODE::MOVING;
+//					ui.hide_crosshair();
+//				}
+//				if (key == GLFW_KEY_J) {
+//					catMotion.velocity.x = -current_speed;
+//					dog.animate_dog_walk();
+//					player_mode = PLAYER_MODE::MOVING;
+//					ui.hide_crosshair();
+//				}
+//				if (key == GLFW_KEY_K) {
+//					change_to_next_char_on_team();
+//				}
+//			}
+//
+//
+//
+//			if (action == GLFW_RELEASE) {
+//				if (key == GLFW_KEY_J && catMotion.velocity.x < 0) {
+//					catMotion.velocity.x = 0.0f;
+//					dog.animate_dog_aim();
+//					player_mode = PLAYER_MODE::SHOOTING;
+//					ui.show_crosshair(curr_selected_char);
+//				}
+//				if (key == GLFW_KEY_L && catMotion.velocity.x > 0) {
+//					catMotion.velocity.x = 0.0f;
+//					dog.animate_dog_aim();
+//					player_mode = PLAYER_MODE::SHOOTING;
+//					ui.show_crosshair(curr_selected_char);
+//				}
+//			}
+//
+//
+//			if (action == GLFW_PRESS && key == GLFW_KEY_UP) {
+//				shooting_system.aimUp(curr_selected_char, 0.025f);
+//			}
+//
+//			if (action == GLFW_PRESS && key == GLFW_KEY_DOWN) {
+//				shooting_system.aimDown(curr_selected_char, 0.025f);
+//			}
+//
+//			if (action == GLFW_PRESS && key == GLFW_KEY_ENTER) {
+//				// should only shoot when standing
+//				if (catMotion.velocity.y == gravity_force && catMotion.velocity.x == 0.0) {
+//					shooting_system.shoot(curr_selected_char);
+//					next_turn();
+//				}
+//			}
+//		}
+//	}
+//}
 
 void GameController::on_mouse_move(vec2 mouse_pos) {
 	this->mousePosition = mouse_pos;
 }
-
-void GameController::on_mouse_click(int button, int action, int mods) {
-
-	if (action == GLFW_PRESS) {
-		printf("In A Game");
-	}
-}
-
+//
+//void GameController::on_mouse_click(int button, int action, int mods) {
+//
+//	if (action == GLFW_PRESS) {
+//		printf("In A Game");
+//	}
+//}
+//
 void GameController::set_user_input_callbacks() {
-	auto key_redirect = [](GLFWwindow* wnd, int _0, int _1, int _2, int _3) { ((GameController*)glfwGetWindowUserPointer(wnd))->on_player_key(_0, _1, _2, _3); };
-	glfwSetKeyCallback(this->window, key_redirect);
+	/*auto key_redirect = [](GLFWwindow* wnd, int _0, int _1, int _2, int _3) { ((GameController*)glfwGetWindowUserPointer(wnd))->on_player_key(_0, _1, _2, _3); };
+	glfwSetKeyCallback(this->window, key_redirect);*/
 	auto cursor_pos_redirect = [](GLFWwindow* wnd, double _0, double _1) { ((GameController*)glfwGetWindowUserPointer(wnd))->on_mouse_move({ _0, _1 }); };
 	glfwSetCursorPosCallback(this->window, cursor_pos_redirect);
-	auto mouse_input = [](GLFWwindow* wnd, int _0, int _1, int _2) { ((GameController*)glfwGetWindowUserPointer(wnd))->on_mouse_click(_0, _1, _2); };
-	glfwSetMouseButtonCallback(this->window, mouse_input);
+	/*auto mouse_input = [](GLFWwindow* wnd, int _0, int _1, int _2) { ((GameController*)glfwGetWindowUserPointer(wnd))->on_mouse_click(_0, _1, _2); };
+	glfwSetMouseButtonCallback(this->window, mouse_input);*/
 }

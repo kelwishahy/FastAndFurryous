@@ -19,7 +19,7 @@ void calculateBoxVerticesAndSetTriangles(vec2 pos, vec2 scale, Boxcollider& box)
 }
 
 
-Entity createCat(WEAPON_TYPES weapon, vec2 pos, int health) {
+Entity createCat(WEAPON_TYPES weapon, vec2 pos, int health, GLFWwindow* window) {
 	auto head = Entity();
 	auto frontArm = Entity();
 	const auto entity = Entity();
@@ -82,7 +82,9 @@ Entity createCat(WEAPON_TYPES weapon, vec2 pos, int health) {
 
 
 	Cat& cat = registry.cats.emplace(entity);
-	cat.cat = entity;
+	cat.character = entity;
+	cat.window = window;
+	
 
 	// Setting initial motion values
 	Motion& motion = registry.motions.emplace(entity);
@@ -125,7 +127,7 @@ Entity createCat(WEAPON_TYPES weapon, vec2 pos, int health) {
 	return entity;
 }
 
-Entity createDog(WEAPON_TYPES weapon, vec2 pos, int health) {
+Entity createDog(WEAPON_TYPES weapon, vec2 pos, int health, GLFWwindow* window) {
 
 	auto head = Entity();
 	const auto entity = Entity();
@@ -186,7 +188,8 @@ Entity createDog(WEAPON_TYPES weapon, vec2 pos, int health) {
 
 	//----------------------------------------------
 	Dog& dog = registry.dogs.emplace(entity);
-	dog.dog = entity;
+	dog.character = entity;
+	dog.window = window;
 
 	// Add health component
 	Health& healthbar = registry.health.emplace(entity);
