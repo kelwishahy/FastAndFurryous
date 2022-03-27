@@ -2,7 +2,7 @@
 
 #include <chrono>
 
-#include "tiny_ecs.hpp"
+#include "hpp/tiny_ecs.hpp"
 #include "hpp/common.hpp"
 
 #include "GLFW/glfw3.h"

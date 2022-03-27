@@ -1,4 +1,4 @@
-#include "hpp/character_state.hpp"
+#include "hpp/States/character_state.hpp"
 
 CharacterState::CharacterState(Entity e, GLFWwindow* window) : character(e), window(window) {
 
