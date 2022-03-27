@@ -65,9 +65,17 @@ void CharacterIdleState::on_player_key(int key, int, int action, int mod) {
 		}
 		if (key == GLFW_KEY_D) {
 			printf("Hello1");
+			Motion& motion = registry.motions.get(character);
+			motion.velocity.x = 90.0f;
+			Character& chara = registry.characters.get(character);
+			chara.state_machine.changeState(chara.move_state);
 		}
 		if (key == GLFW_KEY_A) {
-
+			printf("Hello1");
+			Motion& motion = registry.motions.get(character);
+			motion.velocity.x = -90.0f;
+			Character& chara = registry.characters.get(character);
+			chara.state_machine.changeState(chara.move_state);
 		}
 
 	}
@@ -117,10 +125,10 @@ void CharacterMoveState::on_player_key(int key, int, int action, int mod) {
 			printf("hello world 2");
 		}
 		if (key == GLFW_KEY_D) {
-
+			printf("hello world 2");
 		}
 		if (key == GLFW_KEY_A) {
-
+			printf("hello world 2");
 		}
 	}
 }

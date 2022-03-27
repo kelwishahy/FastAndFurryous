@@ -398,6 +398,7 @@ struct Character {
 
 	void init() {
 		idle_state = new CharacterIdleState(character, window);
+		move_state = new CharacterMoveState(character, window);
 		state_machine = CharacterStateMachine();
 		state_machine.init(idle_state);
 	}
