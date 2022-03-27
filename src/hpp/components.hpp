@@ -210,7 +210,7 @@ enum class ANIMAL {
 	CAT,
 	DOG
 };
-// State Machine
+// State Machine------------------------------------------------------------------
 
 class CharacterStateMachine {
 
