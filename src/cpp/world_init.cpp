@@ -81,7 +81,8 @@ Entity createCat(WEAPON_TYPES weapon, vec2 pos, int health) {
 			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
 
 
-	registry.cats.emplace(entity);
+	Cat& cat = registry.cats.emplace(entity);
+	cat.cat = entity;
 
 	// Setting initial motion values
 	Motion& motion = registry.motions.emplace(entity);
@@ -184,7 +185,8 @@ Entity createDog(WEAPON_TYPES weapon, vec2 pos, int health) {
 
 
 	//----------------------------------------------
-	registry.dogs.emplace(entity);
+	Dog& dog = registry.dogs.emplace(entity);
+	dog.dog = entity;
 
 	// Add health component
 	Health& healthbar = registry.health.emplace(entity);
