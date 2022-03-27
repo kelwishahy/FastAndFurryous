@@ -9,6 +9,8 @@
 #include <glm/vec4.hpp>
 #include <string>
 
+#include <hpp/States/character_grounded_state.hpp>
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // Component IDs
@@ -208,6 +210,34 @@ enum class ANIMAL {
 	CAT,
 	DOG
 };
+// State Machine
+
+class CharacterStateMachine {
+
+public:
+
+	CharacterStateMachine() = default;
+	~CharacterStateMachine() = default;
+
+	void init(CharacterState* starting_state);
+
+
+	CharacterState* getCurrentState() {
+		return curr_state;
+	}
+
+	void changeState(CharacterState* new_state);
+
+protected:
+	CharacterState* curr_state;
+
+	void setCurrentState(CharacterState* state) {
+		curr_state = state;
+	}
+
+};
+
+
 // Game components ------------------------------------------------------------
 struct Background {
 	float layer = -0.5;
@@ -281,7 +311,7 @@ struct WeaponBase {
 };
 
 struct Rifle : WeaponBase {
-	Rifle() { 
+	Rifle() : WeaponBase() { 
 		//a little less than pi/2
 		MAX_ANGLE = 1.2f;
 		//a little more than 0
@@ -346,11 +376,20 @@ struct UIElement {
 	UI_ELEMENT element_type;
 };
 
-struct Cat {
-
+struct Character {
+	
+	Character() = default;
+	Entity character;
+	CharacterStateMachine state_machine;
+	CharacterIdleState* idle_state;
+	CharacterMoveState* move_state;
 };
 
-struct Dog {
+struct Cat : Character{
+	
+};
+
+struct Dog : Character{
 
 };
 

@@ -148,3 +148,15 @@ std::vector<Entity> get_all_children(Entity e) {
 	return allchildren;
 
 }
+
+//------------CHARACTER STATE MACHINE
+void CharacterStateMachine::init(CharacterState* starting_state) {
+	curr_state = starting_state;
+	curr_state->enter();
+}
+
+void CharacterStateMachine::changeState(CharacterState* new_state) {
+	curr_state->exit();
+	curr_state = new_state;
+	curr_state->enter();
+}

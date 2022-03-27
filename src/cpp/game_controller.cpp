@@ -66,6 +66,14 @@ void GameController::step(float elapsed_ms) {
 
 	//Pan camera based on mouse position
 	moveCamera();
+	//Step the player state machines
+	for (Cat& cat : registry.cats.components) {
+		cat.state_machine.getCurrentState()->step(elapsed_ms);
+	}
+
+	for (Dog& dog : registry.dogs.components) {
+		dog.state_machine.getCurrentState()->step(elapsed_ms);
+	}
 
 	shooting_system.step(elapsed_ms);
 	ui.step(elapsed_ms);
