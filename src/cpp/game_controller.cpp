@@ -70,6 +70,11 @@ void GameController::step(float elapsed_ms) {
 
 	for (Character* chara : registry.characters.components) {
 		chara->state_machine.getCurrentState()->step(elapsed_ms);
+		if (chara->state_machine.getCurrentState()->next_turn) {
+			chara->state_machine.getCurrentState()->next_turn = false;
+			chara->state_machine.changeState(chara->idle_state);
+			next_turn();
+		}
 	}
 
 	shooting_system.step(elapsed_ms);
@@ -180,6 +185,8 @@ void GameController::decrementTurnTime(float elapsed_ms) {
 	// registry.remove_all_components_of(timeIndicator);
 	uint timePerTurnSec = uint(timePerTurnMs / 1000);
 	if (timePerTurnMs <= 0) {
+		Character* c = registry.characters.get(curr_selected_char);
+		c->state_machine.changeState(c->idle_state);
 		next_turn();
 		timePerTurnMs = game_data.getTimer();
 	} else {
@@ -217,6 +224,9 @@ void GameController::init_player_teams() {
 
 		Character* chara = registry.characters.get(e);
 		chara->init();
+		if (character.alignment == AI_TEAM || character.alignment == NPC_AI_TEAM) {
+			chara->state_machine.setAI(true);
+		}
 
 		if (character.alignment == TEAM::PLAYER_1_TEAM) {
 			player1_team.push_back(e);
@@ -248,12 +258,6 @@ void GameController::next_turn() {
 	game_state.turn_number += 1;
 	timePerTurnMs = game_data.getTimer();
 	// force players to stop moving
-	for (std::vector<Entity> team : teams) {
-		for (Entity e : team) {
-			auto& motion = registry.motions.get(e);
-			motion.velocity.x = 0;
-		}
-	}
 
 	if (game_state.turn_possesion == TURN_CODE::END) {
 		game_state.turn_possesion = TURN_CODE::PLAYER1;
@@ -372,8 +376,11 @@ void GameController::change_to_next_char_on_team() {
 // On key callback
 void GameController::on_player_key(int key, int, int action, int mod) {
 
+	
 	Character* c = registry.characters.get(curr_selected_char);
-	c->state_machine.getCurrentState()->on_player_key(key, 0, action, mod);
+	if (!c->state_machine.isAI()) {
+		c->state_machine.getCurrentState()->on_player_key(key, 0, action, mod);
+	}
 }
 
 void GameController::on_mouse_move(vec2 mouse_pos) {
@@ -383,7 +390,9 @@ void GameController::on_mouse_move(vec2 mouse_pos) {
 void GameController::on_mouse_click(int button, int action, int mods) {
 
 	Character* c = registry.characters.get(curr_selected_char);
-	c->state_machine.getCurrentState()->on_mouse_click(button, action, mods);
+	if (!c->state_machine.isAI()) {
+		c->state_machine.getCurrentState()->on_mouse_click(button, action, mods);
+	}
 
 	if (action == GLFW_PRESS) {
 		printf("In A Game");
@@ -392,7 +401,9 @@ void GameController::on_mouse_click(int button, int action, int mods) {
 
 void GameController::on_mouse_scroll(double xoffset, double yoffset) {
 	Character* c = registry.characters.get(curr_selected_char);
-	c->state_machine.getCurrentState()->on_mouse_scroll(xoffset, yoffset);
+	if (!c->state_machine.isAI()) {
+		c->state_machine.getCurrentState()->on_mouse_scroll(xoffset, yoffset);
+	}
 }
 //
 void GameController::set_user_input_callbacks() {

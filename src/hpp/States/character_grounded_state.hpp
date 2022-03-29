@@ -99,4 +99,18 @@ public:
 	void on_mouse_click(int button, int action, int mods) override;
 	void on_mouse_scroll(double xoffset, double yoffset) override;
 
+	
+
+};
+
+class CharacterWaitForBulletFrozenState : public CharacterGroundedState {
+
+public:
+	CharacterWaitForBulletFrozenState(Entity e);
+
+	void enter() override;
+	void exit() override;
+	void step(float elapsed_ms) override;
+	void doChecks() override;
+
 };

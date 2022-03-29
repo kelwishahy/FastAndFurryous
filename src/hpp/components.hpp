@@ -237,10 +237,18 @@ public:
 		selected = false;
 	}
 
+	bool isAI() {
+		return isAi;
+	}
+	void setAI(bool isAI) {
+		isAi = isAI;
+	}
+
 
 protected:
 	CharacterState* curr_state;
 	bool selected = false;
+	bool isAi = false;
 
 	void setCurrentState(CharacterState* state) {
 		curr_state = state;
@@ -389,12 +397,12 @@ struct UIElement {
 
 struct Character {
 	Entity character;
-	GLFWwindow* window;
 	CharacterStateMachine state_machine;
 	CharacterIdleState* idle_state;
 	CharacterMoveLeftState* move_left_state;
 	CharacterMoveRightState* move_right_state;
 	CharacterAimState* aim_state;
+	CharacterWaitForBulletFrozenState* frozen_state;
 	glm::vec3 team_color;
 	ANIMAL animal;
 
@@ -403,6 +411,7 @@ struct Character {
 		move_left_state = new CharacterMoveLeftState(character);
 		move_right_state = new CharacterMoveRightState(character);
 		aim_state = new CharacterAimState(character);
+		frozen_state = new CharacterWaitForBulletFrozenState(character);
 
 		state_machine = CharacterStateMachine();
 		state_machine.init(idle_state);

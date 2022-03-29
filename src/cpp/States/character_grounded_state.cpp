@@ -1,5 +1,6 @@
 #include "hpp/States/character_grounded_state.hpp"
 
+#include "GLFW/glfw3.h"
 #include "hpp/tiny_ecs_registry.hpp"
 #include "hpp/ui_system.hpp"
 #include "hpp/Game_Mechanics/shooting_system.hpp"
@@ -43,6 +44,7 @@ void CharacterIdleState::enter() {
 	CharacterGroundedState::enter();
 	Character* chara = registry.characters.get(character);
 	chara->animate_idle();
+	UISystem::hide_crosshair(character);
 }
 
 void CharacterIdleState::exit() {
@@ -154,6 +156,10 @@ void CharacterMoveLeftState::enter() {
 
 void CharacterMoveLeftState::step(float elapsed_ms) {
 	CharacterMoveState::step(elapsed_ms);
+	if (registry.motions.get(character).velocity.x == 0.0f) {
+		Character* chara = registry.characters.get(character);
+		chara->state_machine.changeState(chara->aim_state);
+	}
 
 }
 
@@ -163,17 +169,11 @@ void CharacterMoveLeftState::doChecks() {
 
 void CharacterMoveLeftState::on_player_key(int key, int, int action, int mod) {
 
-
 	if (action == GLFW_RELEASE) {
 
-		if (key == GLFW_KEY_W) {
-			printf("hello world 2");
-		}
-		if (key == GLFW_KEY_D) {
-			printf("hello world 2");
-		}
 		if (key == GLFW_KEY_A) {
-			printf("hello world 2");
+			Motion& motion = registry.motions.get(character);
+			motion.velocity.x = 0.0f;
 		}
 	}
 }
@@ -200,6 +200,10 @@ void CharacterMoveRightState::enter() {
 
 void CharacterMoveRightState::step(float elapsed_ms) {
 	CharacterMoveState::step(elapsed_ms);
+	if (registry.motions.get(character).velocity.x == 0.0f) {
+		Character* chara = registry.characters.get(character);
+		chara->state_machine.changeState(chara->aim_state);
+	} 
 
 }
 
@@ -209,17 +213,11 @@ void CharacterMoveRightState::doChecks() {
 
 void CharacterMoveRightState::on_player_key(int key, int, int action, int mod) {
 
-
 	if (action == GLFW_RELEASE) {
 
-		if (key == GLFW_KEY_W) {
-			printf("hello world 2");
-		}
 		if (key == GLFW_KEY_D) {
-			printf("hello world 2");
-		}
-		if (key == GLFW_KEY_A) {
-			printf("hello world 2");
+			Motion& motion = registry.motions.get(character);
+			motion.velocity.x = 0.0f;
 		}
 	}
 }
@@ -261,22 +259,24 @@ void CharacterAimState::doChecks() {
 
 void CharacterAimState::on_player_key(int key, int, int action, int mod) {
 	Character* chara = registry.characters.get(character);
-	if (action == GLFW_PRESS) {
+	if (!chara->state_machine.isAI()) {
+		if (action == GLFW_PRESS) {
 
-		if (key == GLFW_KEY_UP) {
-			ShootingSystem::aimUp(character, 0.05f);
-		}
-		if (key == GLFW_KEY_DOWN) {
-			ShootingSystem::aimDown(character, 0.05f);
-		}
-		if (key == GLFW_KEY_W) {
-			//TODO
-		}
-		if (key == GLFW_KEY_D) {
-			chara->state_machine.changeState(chara->move_right_state);
-		}
-		if (key == GLFW_KEY_A) {
-			chara->state_machine.changeState(chara->move_left_state);
+			if (key == GLFW_KEY_UP) {
+				ShootingSystem::aimUp(character, 0.05f);
+			}
+			if (key == GLFW_KEY_DOWN) {
+				ShootingSystem::aimDown(character, 0.05f);
+			}
+			if (key == GLFW_KEY_W) {
+				//TODO
+			}
+			if (key == GLFW_KEY_D) {
+				chara->state_machine.changeState(chara->move_right_state);
+			}
+			if (key == GLFW_KEY_A) {
+				chara->state_machine.changeState(chara->move_left_state);
+			}
 		}
 	}
 }
@@ -284,15 +284,48 @@ void CharacterAimState::on_mouse_move(glm::vec2 mouse_pos) {
 
 }
 void CharacterAimState::on_mouse_click(int button, int action, int mods) {
-
+	if (button == GLFW_MOUSE_BUTTON_LEFT) {
+		if (action == GLFW_PRESS) {
+			ShootingSystem::shoot(character);
+			Character* chara = registry.characters.get(character);
+			chara->state_machine.changeState(chara->frozen_state);
+		}
+	}
 }
 
 void CharacterAimState::on_mouse_scroll(double xoffset, double yoffset) {
 	if (yoffset > 0) {
-		ShootingSystem::aimUp(character, (float)(0.05 * yoffset));
-	} else {
-		ShootingSystem::aimDown(character, (float)(0.05 * yoffset));
+		ShootingSystem::aimUp(character, (float)(0.05 * abs(yoffset)));
+	}
+	else {
+		ShootingSystem::aimDown(character, (float)(0.05 * abs(yoffset)));
 	}
 }
 
 #pragma endregion CharacterAimState
+
+#pragma region CharacterFrozenState
+CharacterWaitForBulletFrozenState::CharacterWaitForBulletFrozenState(Entity e) : CharacterGroundedState(e) {
+
+}
+
+
+void CharacterWaitForBulletFrozenState::enter() {
+	CharacterGroundedState::enter();
+}
+
+void CharacterWaitForBulletFrozenState::exit() {
+	CharacterGroundedState::exit();
+}
+
+void CharacterWaitForBulletFrozenState::step(float elapsed_ms) {
+	CharacterGroundedState::step(elapsed_ms);
+}
+
+void CharacterWaitForBulletFrozenState::doChecks() {
+	CharacterGroundedState::doChecks();
+	if (registry.projectiles.components.empty()) {
+		next_turn = true;
+	}
+}
+#pragma endregion

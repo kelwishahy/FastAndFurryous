@@ -5,8 +5,6 @@
 #include "hpp/tiny_ecs.hpp"
 #include "hpp/common.hpp"
 
-#include "GLFW/glfw3.h"
-
 
 class CharacterState {
 
@@ -25,7 +23,12 @@ public:
 	virtual void on_mouse_click(int button, int action, int mods) {}
 	virtual void on_mouse_scroll(double xoffset, double yoffset) {}
 
+	bool should_increment_turn() const {
+		return next_turn;
+	}
+
 	Entity character;
 	std::chrono::time_point<std::chrono::system_clock> start_time;
+	bool next_turn;
 
 };

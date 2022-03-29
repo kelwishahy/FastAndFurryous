@@ -83,7 +83,6 @@ Entity createCat(WEAPON_TYPES weapon, vec2 pos, int health, GLFWwindow* window) 
 	Character* c = new Cat();
 	Character* cat = registry.characters.insert(entity, c);
 	cat->character = entity;
-	cat->window = window;
 	
 
 	// Setting initial motion values
@@ -190,7 +189,6 @@ Entity createDog(WEAPON_TYPES weapon, vec2 pos, int health, GLFWwindow* window) 
 	Character* d = new Dog();
 	Character* dog = registry.characters.insert(entity, d);
 	dog->character = entity;
-	dog->window = window;
 
 	// Add health component
 	Health& healthbar = registry.health.emplace(entity);

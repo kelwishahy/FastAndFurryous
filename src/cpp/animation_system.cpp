@@ -94,16 +94,18 @@ void AnimationSystem::update_anim_orientation() {
 
 void AnimationSystem::swap_children_orientation(Entity e) {
 
-	bool parent_orientation = registry.animations.get(e).facingLeft;
+	if (registry.animations.has(e)) {
+		bool parent_orientation = registry.animations.get(e).facingLeft;
 
-	if (registry.parentEntities.has(e)) {
-		ChildEntities& children = registry.parentEntities.get(e);
-		for (auto pair : children.child_data_map) {
-			if (registry.animations.has(pair.second)) {
-				Animation& child_anim = registry.animations.get(pair.second);
-				child_anim.facingLeft = parent_orientation;
+		if (registry.parentEntities.has(e)) {
+			ChildEntities& children = registry.parentEntities.get(e);
+			for (auto pair : children.child_data_map) {
+				if (registry.animations.has(pair.second)) {
+					Animation& child_anim = registry.animations.get(pair.second);
+					child_anim.facingLeft = parent_orientation;
+				}
+				swap_children_orientation(pair.second);
 			}
-			swap_children_orientation(pair.second);
 		}
 	}
 

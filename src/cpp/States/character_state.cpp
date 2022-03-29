@@ -10,6 +10,7 @@ CharacterState::~CharacterState() = default;
 void CharacterState::enter() {
 	doChecks();
 	start_time = std::chrono::system_clock::now();
+	next_turn = false;
 }
 
 void CharacterState::exit() {
