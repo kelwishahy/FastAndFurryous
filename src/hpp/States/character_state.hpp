@@ -12,7 +12,7 @@ class CharacterState {
 
 public:
 
-	CharacterState(Entity e, GLFWwindow* window);
+	CharacterState(Entity e);
 	virtual ~CharacterState();
 
 	virtual void enter();
@@ -23,9 +23,9 @@ public:
 	virtual void on_player_key(int key, int, int action, int mod) {}
 	virtual void on_mouse_move(glm::vec2 mouse_pos) {}
 	virtual void on_mouse_click(int button, int action, int mods) {}
+	virtual void on_mouse_scroll(double xoffset, double yoffset) {}
 
 	Entity character;
-	GLFWwindow* window;
 	std::chrono::time_point<std::chrono::system_clock> start_time;
 
 };

@@ -1,6 +1,5 @@
 #include "hpp/ui_system.hpp"
 #include "hpp/world_init.hpp"
-#include <hpp/Game_Mechanics/shooting_system.hpp>
 
 UISystem::UISystem() {
 	
@@ -74,14 +73,13 @@ void UISystem::step(float elapsed_ms) {
 void UISystem::show_crosshair(Entity e) {
 
 	Motion entity_motion = registry.motions.get(e);
-	Entity crosshair = createCrosshair(e, registry.characters.get(e).animal == ANIMAL::CAT);
-	crosshair_marker = crosshair;
+	Entity crosshair = createCrosshair(e, registry.characters.get(e)->animal == ANIMAL::CAT);
 
 }
 
-void UISystem::hide_crosshair() {
-	if (registry.parentEntities.has(crosshair_marker)) {
-		ChildEntities& children = registry.parentEntities.get(crosshair_marker); //shoudl be a character entity i.e cat/dog
+void UISystem::hide_crosshair(Entity e) {
+	if (registry.parentEntities.has(e)) {
+		ChildEntities& children = registry.parentEntities.get(e); //shoudl be a character entity i.e cat/dog
 		for (int i = 0; i < children.child_data_map.size(); i++) {
 			if (children.tags.at(i) == "crosshair") { //there should be a tag in the character for crosshair
 				for (Entity e : registry.parentEntities.entities) {

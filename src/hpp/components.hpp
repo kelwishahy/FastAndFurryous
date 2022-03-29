@@ -392,25 +392,30 @@ struct Character {
 	GLFWwindow* window;
 	CharacterStateMachine state_machine;
 	CharacterIdleState* idle_state;
-	CharacterMoveState* move_state;
+	CharacterMoveLeftState* move_left_state;
+	CharacterMoveRightState* move_right_state;
+	CharacterAimState* aim_state;
 	glm::vec3 team_color;
 	ANIMAL animal;
 
 	void init() {
-		idle_state = new CharacterIdleState(character, window);
-		move_state = new CharacterMoveState(character, window);
+		idle_state = new CharacterIdleState(character);
+		move_left_state = new CharacterMoveLeftState(character);
+		move_right_state = new CharacterMoveRightState(character);
+		aim_state = new CharacterAimState(character);
+
 		state_machine = CharacterStateMachine();
 		state_machine.init(idle_state);
 	}
 
-	virtual void animate_walk() {}
-	virtual void animate_idle() {}
-	virtual void animate_jump() {}
-	virtual void animate_hurt() {}
-	virtual void animate_dead() {}
-	virtual void animate_aim() {}
+	virtual void animate_walk() = 0;
+	virtual void animate_idle() = 0;
+	virtual void animate_jump() = 0;
+	virtual void animate_hurt() = 0;
+	virtual void animate_dead() = 0;
+	virtual void animate_aim() = 0;
 
-	virtual void play_hurt_sfx() {}
+	virtual void play_hurt_sfx() = 0;
 };
 
 struct Cat : Character {

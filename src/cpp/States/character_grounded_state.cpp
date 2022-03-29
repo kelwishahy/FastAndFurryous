@@ -1,10 +1,12 @@
 #include "hpp/States/character_grounded_state.hpp"
 
 #include "hpp/tiny_ecs_registry.hpp"
+#include "hpp/ui_system.hpp"
+#include "hpp/Game_Mechanics/shooting_system.hpp"
 
 #pragma region
 //Super class 
-CharacterGroundedState::CharacterGroundedState(Entity e, GLFWwindow* win) : CharacterState(e, win) {
+CharacterGroundedState::CharacterGroundedState(Entity e) : CharacterState(e) {
 
 }
 
@@ -16,7 +18,7 @@ void CharacterGroundedState::enter() {
 }
 
 void CharacterGroundedState::exit() {
-	CharacterState::enter();
+	CharacterState::exit();
 }
 
 void CharacterGroundedState::step(float elapsed_ms) {
@@ -30,7 +32,7 @@ void CharacterGroundedState::doChecks() {
 
 #pragma region
 //Idle Sub class
-CharacterIdleState::CharacterIdleState(Entity e, GLFWwindow* w) : CharacterGroundedState(e, w) {
+CharacterIdleState::CharacterIdleState(Entity e) : CharacterGroundedState(e) {
 
 }
 
@@ -39,12 +41,12 @@ CharacterIdleState::~CharacterIdleState() = default;
 
 void CharacterIdleState::enter() {
 	CharacterGroundedState::enter();
-	Character chara = registry.characters.get(character);
-	chara.animate_idle();
+	Character* chara = registry.characters.get(character);
+	chara->animate_idle();
 }
 
 void CharacterIdleState::exit() {
-	CharacterGroundedState::enter();
+	CharacterGroundedState::exit();
 }
 
 void CharacterIdleState::step(float elapsed_ms) {
@@ -53,6 +55,10 @@ void CharacterIdleState::step(float elapsed_ms) {
 
 void CharacterIdleState::doChecks() {
 	CharacterGroundedState::doChecks();
+	Character* chara = registry.characters.get(character);
+	if (chara->state_machine.isSelected()) {
+		chara->state_machine.changeState(chara->aim_state);
+	}
 }
 
 void CharacterIdleState::on_player_key(int key, int, int action, int mod) {
@@ -64,18 +70,10 @@ void CharacterIdleState::on_player_key(int key, int, int action, int mod) {
 			//TODO
 		}
 		if (key == GLFW_KEY_D) {
-			printf("Hello1");
-			Motion& motion = registry.motions.get(character);
-			motion.velocity.x = 90.0f;
-			Character& chara = registry.characters.get(character);
-			chara.state_machine.changeState(chara.move_state);
+
 		}
 		if (key == GLFW_KEY_A) {
-			printf("Hello1");
-			Motion& motion = registry.motions.get(character);
-			motion.velocity.x = -90.0f;
-			Character& chara = registry.characters.get(character);
-			chara.state_machine.changeState(chara.move_state);
+
 		}
 
 	}
@@ -90,7 +88,8 @@ void CharacterIdleState::on_mouse_click(int button, int action, int mods) {
 
 
 //Move sub class
-CharacterMoveState::CharacterMoveState(Entity e, GLFWwindow* w) : CharacterGroundedState(e, w) {
+#pragma region
+CharacterMoveState::CharacterMoveState(Entity e) : CharacterGroundedState(e) {
 
 }
 
@@ -99,12 +98,14 @@ CharacterMoveState::~CharacterMoveState() = default;
 
 void CharacterMoveState::enter() {
 	CharacterGroundedState::enter();
-	Character chara = registry.characters.get(character);
-	chara.animate_walk();
+	Character* chara = registry.characters.get(character);
+	chara->animate_walk();
 }
 
 void CharacterMoveState::exit() {
-	CharacterGroundedState::enter();
+	CharacterGroundedState::exit();
+	Motion& motion = registry.motions.get(character);
+	motion.velocity.x = 0.0f;
 }
 
 void CharacterMoveState::step(float elapsed_ms) {
@@ -119,7 +120,7 @@ void CharacterMoveState::doChecks() {
 void CharacterMoveState::on_player_key(int key, int, int action, int mod) {
 
 
-	if (action == GLFW_PRESS) {
+	if (action == GLFW_RELEASE) {
 
 		if (key == GLFW_KEY_W) {
 			printf("hello world 2");
@@ -138,3 +139,160 @@ void CharacterMoveState::on_mouse_move(glm::vec2 mouse_pos) {
 void CharacterMoveState::on_mouse_click(int button, int action, int mods) {
 
 }
+#pragma endregion CharacterMoveState
+
+#pragma region
+CharacterMoveLeftState::CharacterMoveLeftState(Entity e) : CharacterMoveState(e) {
+
+}
+
+void CharacterMoveLeftState::enter() {
+	CharacterMoveState::enter();
+	Motion& motion = registry.motions.get(character);
+	motion.velocity.x = -speed;
+}
+
+void CharacterMoveLeftState::step(float elapsed_ms) {
+	CharacterMoveState::step(elapsed_ms);
+
+}
+
+void CharacterMoveLeftState::doChecks() {
+	CharacterMoveState::doChecks();
+}
+
+void CharacterMoveLeftState::on_player_key(int key, int, int action, int mod) {
+
+
+	if (action == GLFW_RELEASE) {
+
+		if (key == GLFW_KEY_W) {
+			printf("hello world 2");
+		}
+		if (key == GLFW_KEY_D) {
+			printf("hello world 2");
+		}
+		if (key == GLFW_KEY_A) {
+			printf("hello world 2");
+		}
+	}
+}
+void CharacterMoveLeftState::on_mouse_move(glm::vec2 mouse_pos) {
+
+}
+void CharacterMoveLeftState::on_mouse_click(int button, int action, int mods) {
+
+}
+#pragma endregion CharacterMoveLeftState
+
+#pragma region
+CharacterMoveRightState::CharacterMoveRightState(Entity e) : CharacterMoveState(e) {
+
+}
+
+void CharacterMoveRightState::enter() {
+	CharacterMoveState::enter();
+	Motion& motion = registry.motions.get(character);
+	motion.velocity.x = speed;
+
+}
+
+
+void CharacterMoveRightState::step(float elapsed_ms) {
+	CharacterMoveState::step(elapsed_ms);
+
+}
+
+void CharacterMoveRightState::doChecks() {
+	CharacterMoveState::doChecks();
+}
+
+void CharacterMoveRightState::on_player_key(int key, int, int action, int mod) {
+
+
+	if (action == GLFW_RELEASE) {
+
+		if (key == GLFW_KEY_W) {
+			printf("hello world 2");
+		}
+		if (key == GLFW_KEY_D) {
+			printf("hello world 2");
+		}
+		if (key == GLFW_KEY_A) {
+			printf("hello world 2");
+		}
+	}
+}
+void CharacterMoveRightState::on_mouse_move(glm::vec2 mouse_pos) {
+
+}
+void CharacterMoveRightState::on_mouse_click(int button, int action, int mods) {
+
+}
+#pragma endregion CharacterMoveRightState
+
+//Aiming
+#pragma region
+CharacterAimState::CharacterAimState(Entity e) : CharacterGroundedState(e) {
+
+}
+
+
+void CharacterAimState::enter() {
+	CharacterGroundedState::enter();
+	Character* chara = registry.characters.get(character);
+	chara->animate_aim();
+	UISystem::show_crosshair(character);
+}
+
+void CharacterAimState::exit() {
+	CharacterGroundedState::exit();
+	UISystem::hide_crosshair(character);
+}
+
+void CharacterAimState::step(float elapsed_ms) {
+	CharacterGroundedState::step(elapsed_ms);
+
+}
+
+void CharacterAimState::doChecks() {
+	CharacterGroundedState::doChecks();
+}
+
+void CharacterAimState::on_player_key(int key, int, int action, int mod) {
+	Character* chara = registry.characters.get(character);
+	if (action == GLFW_PRESS) {
+
+		if (key == GLFW_KEY_UP) {
+			ShootingSystem::aimUp(character, 0.05f);
+		}
+		if (key == GLFW_KEY_DOWN) {
+			ShootingSystem::aimDown(character, 0.05f);
+		}
+		if (key == GLFW_KEY_W) {
+			//TODO
+		}
+		if (key == GLFW_KEY_D) {
+			chara->state_machine.changeState(chara->move_right_state);
+		}
+		if (key == GLFW_KEY_A) {
+			chara->state_machine.changeState(chara->move_left_state);
+		}
+	}
+}
+void CharacterAimState::on_mouse_move(glm::vec2 mouse_pos) {
+
+}
+void CharacterAimState::on_mouse_click(int button, int action, int mods) {
+
+}
+
+void CharacterAimState::on_mouse_scroll(double xoffset, double yoffset) {
+	if (yoffset > 0) {
+		ShootingSystem::aimUp(character, (float)(0.05 * yoffset));
+	} else {
+		ShootingSystem::aimDown(character, (float)(0.05 * yoffset));
+	}
+}
+
+#pragma endregion CharacterAimState

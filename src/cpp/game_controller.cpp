@@ -68,8 +68,8 @@ void GameController::step(float elapsed_ms) {
 	moveCamera();
 	//Step the player state machines
 
-	for (Character& chara : registry.characters.components) {
-		chara.state_machine.getCurrentState()->step(elapsed_ms);
+	for (Character* chara : registry.characters.components) {
+		chara->state_machine.getCurrentState()->step(elapsed_ms);
 	}
 
 	shooting_system.step(elapsed_ms);
@@ -114,8 +114,8 @@ void GameController::step(float elapsed_ms) {
 			remove_children(e);
 			registry.animations.remove(e);
 			registry.rigidBodies.remove(e);
-			Character chara = registry.characters.get(e);
-			chara.animate_dead();
+			Character* chara = registry.characters.get(e);
+			chara->animate_dead();
 		}
 	}
 
@@ -126,8 +126,8 @@ void GameController::step(float elapsed_ms) {
 			remove_children(e);
 			registry.animations.remove(e);
 			registry.rigidBodies.remove(e);
-			Character chara = registry.characters.get(e);
-			chara.animate_dead();
+			Character* chara = registry.characters.get(e);
+			chara->animate_dead();
 		}
 	}
 
@@ -138,8 +138,8 @@ void GameController::step(float elapsed_ms) {
 			remove_children(e);
 			registry.animations.remove(e);
 			registry.rigidBodies.remove(e);
-			Character chara = registry.characters.get(e);
-			chara.animate_dead();;
+			Character* chara = registry.characters.get(e);
+			chara->animate_dead();
 		}
 	}
 
@@ -215,8 +215,8 @@ void GameController::init_player_teams() {
 	for (Game::Character character : game_data.getCharacters()) {
 		Entity e = character.animal == ANIMAL::CAT ? createCat(character.weapon, character.starting_pos, character.health, this->window) : createDog(character.weapon, character.starting_pos, character.health, this->window);
 
-		Character& chara = registry.characters.get(e);
-		chara.init();
+		Character* chara = registry.characters.get(e);
+		chara->init();
 
 		if (character.alignment == TEAM::PLAYER_1_TEAM) {
 			player1_team.push_back(e);
@@ -244,7 +244,6 @@ void GameController::next_turn() {
 	//Turn order will ALWAYS be PLAYER1 -> PLAYER2 -> ENEMY_AI -> (not implemented) AI
 	//IF THERE IS NO ONE ON A TEAM, THE GAME CONTROLLER WILL MOVE ON TO THE NEXT TURN
 
-	ui.hide_crosshair();
 	game_state.turn_possesion += 1;
 	game_state.turn_number += 1;
 	timePerTurnMs = game_data.getTimer();
@@ -332,13 +331,13 @@ void GameController::change_selected_state(Entity e, bool state) {
 
 void GameController::change_curr_selected_char(Entity e) {
 
-	Character& chara = registry.characters.get(e);
-	chara.state_machine.deselectChar();
+	Character* chara = registry.characters.get(e);
+	chara->state_machine.deselectChar();
 
 	curr_selected_char = e;
 
-	Character& chara_new = registry.characters.get(e);
-	chara_new.state_machine.selectChar();
+	Character* chara_new = registry.characters.get(e);
+	chara_new->state_machine.selectChar();
 
 
 	for (std::vector<Entity> team : teams) {
@@ -373,8 +372,8 @@ void GameController::change_to_next_char_on_team() {
 // On key callback
 void GameController::on_player_key(int key, int, int action, int mod) {
 
-	Character& c = registry.characters.get(curr_selected_char);
-	c.state_machine.getCurrentState()->on_player_key(key, 0, action, mod);
+	Character* c = registry.characters.get(curr_selected_char);
+	c->state_machine.getCurrentState()->on_player_key(key, 0, action, mod);
 }
 
 void GameController::on_mouse_move(vec2 mouse_pos) {
@@ -383,9 +382,17 @@ void GameController::on_mouse_move(vec2 mouse_pos) {
 //
 void GameController::on_mouse_click(int button, int action, int mods) {
 
+	Character* c = registry.characters.get(curr_selected_char);
+	c->state_machine.getCurrentState()->on_mouse_click(button, action, mods);
+
 	if (action == GLFW_PRESS) {
 		printf("In A Game");
 	}
+}
+
+void GameController::on_mouse_scroll(double xoffset, double yoffset) {
+	Character* c = registry.characters.get(curr_selected_char);
+	c->state_machine.getCurrentState()->on_mouse_scroll(xoffset, yoffset);
 }
 //
 void GameController::set_user_input_callbacks() {
@@ -395,4 +402,6 @@ void GameController::set_user_input_callbacks() {
 	glfwSetCursorPosCallback(this->window, cursor_pos_redirect);
 	auto mouse_input = [](GLFWwindow* wnd, int _0, int _1, int _2) { ((GameController*)glfwGetWindowUserPointer(wnd))->on_mouse_click(_0, _1, _2); };
 	glfwSetMouseButtonCallback(this->window, mouse_input);
+	auto mouse_scroll = [](GLFWwindow* wnd, double _0, double _1) { ((GameController*)glfwGetWindowUserPointer(wnd))->on_mouse_scroll(_0, _1); };
+	glfwSetScrollCallback(this->window, mouse_scroll);
 }

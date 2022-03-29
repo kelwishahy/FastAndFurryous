@@ -80,10 +80,10 @@ Entity createCat(WEAPON_TYPES weapon, vec2 pos, int health, GLFWwindow* window) 
 			SHADER_PROGRAM_IDS::ANIMATION,
 			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
 
-
-	Character& cat = registry.characters.insert(entity, Cat());
-	cat.character = entity;
-	cat.window = window;
+	Character* c = new Cat();
+	Character* cat = registry.characters.insert(entity, c);
+	cat->character = entity;
+	cat->window = window;
 	
 
 	// Setting initial motion values
@@ -187,9 +187,10 @@ Entity createDog(WEAPON_TYPES weapon, vec2 pos, int health, GLFWwindow* window) 
 
 
 	//----------------------------------------------
-	Character& dog = registry.characters.insert(entity, Dog());
-	dog.character = entity;
-	dog.window = window;
+	Character* d = new Dog();
+	Character* dog = registry.characters.insert(entity, d);
+	dog->character = entity;
+	dog->window = window;
 
 	// Add health component
 	Health& healthbar = registry.health.emplace(entity);
@@ -502,7 +503,7 @@ Entity createCrosshair(Entity origin, bool iscat) {
 
 Entity createHealthCounter(Entity origin, int health, TextManager& textManager) {
 
-	const vec3 color = registry.characters.get(origin).team_color;
+	const vec3 color = registry.characters.get(origin)->team_color;
 
 	const auto entity = Entity();
 

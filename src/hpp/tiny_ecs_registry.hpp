@@ -33,7 +33,7 @@ public:
 	ComponentContainer<Text> texts;
 	ComponentContainer<ChildEntities> parentEntities;
 	ComponentContainer<UIElement> uiElements;
-	ComponentContainer<Character> characters;
+	ComponentContainer<Character*> characters;
 	ComponentContainer<HealthBox> healthboxes;
 	ComponentContainer<Selected> selected;
 	ComponentContainer<OptionTimer> timer;

@@ -30,7 +30,7 @@ void AISystem::step(float elapsed_ms, int turn, Entity *selected_ai, Entity last
 			blackboard->motion->velocity.x = 0.f;
 			blackboard->motion->velocity.y = 350.f;
 			if (blackboard->shot) {
-				blackboard->shootingSystem->shoot(*blackboard->entity);
+				ShootingSystem::shoot(*blackboard->entity);
 			}
 			//blackboard->shot = true;
 			//blackboard->shootingSystem->shoot(*blackboard->entity);
@@ -55,7 +55,6 @@ void AISystem::init(ShootingSystem& shootingSystem, std::vector<Entity> team) {
 	// Decision tree
 	blackboard = new Blackboard;
 	blackboard->velocity = 90.f;
-	blackboard->shootingSystem = &this->shootingSystem;
 	blackboard->lowerhp = false;
 	decisionTree = new IsAITurn;
 
