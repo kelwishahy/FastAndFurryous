@@ -114,3 +114,15 @@ public:
 	void doChecks() override;
 
 };
+
+class CharacterDeadState : public CharacterGroundedState {
+
+public:
+	CharacterDeadState(Entity e);
+
+	void enter() override;
+	void exit() override;
+	void step(float elapsed_ms) override;
+	void doChecks() override;
+	
+};

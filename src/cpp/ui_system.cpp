@@ -82,9 +82,9 @@ void UISystem::hide_crosshair(Entity e) {
 		ChildEntities& children = registry.parentEntities.get(e); //shoudl be a character entity i.e cat/dog
 		for (int i = 0; i < children.child_data_map.size(); i++) {
 			if (children.tags.at(i) == "crosshair") { //there should be a tag in the character for crosshair
-				for (Entity e : registry.parentEntities.entities) {
-					if (e == children.child_data_map.at(i)) {
-						ChildEntities& crosshair_children = registry.parentEntities.get(e); //the child of the child
+				for (Entity e_ : registry.parentEntities.entities) {
+					if (e_ == children.child_data_map.at(i)) {
+						ChildEntities& crosshair_children = registry.parentEntities.get(e_); //the child of the child
 						registry.remove_all_components_of(crosshair_children.child_data_map[0]); //erase the actual physical crosshair
 						registry.remove_all_components_of(children.child_data_map.at(i)); //erase the crosshair child
 						children.remove_child(children.child_data_map.at(i)); //update the ChildEntities

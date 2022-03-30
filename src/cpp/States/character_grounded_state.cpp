@@ -44,7 +44,6 @@ void CharacterIdleState::enter() {
 	CharacterGroundedState::enter();
 	Character* chara = registry.characters.get(character);
 	chara->animate_idle();
-	UISystem::hide_crosshair(character);
 }
 
 void CharacterIdleState::exit() {
@@ -61,24 +60,15 @@ void CharacterIdleState::doChecks() {
 	if (chara->state_machine.isSelected()) {
 		chara->state_machine.changeState(chara->aim_state);
 	}
+
+	if (registry.health.get(character).hp <= 0) {
+		chara->state_machine.changeState(chara->dead_state);
+	}
 }
 
 void CharacterIdleState::on_player_key(int key, int, int action, int mod) {
 
 
-	if (action == GLFW_PRESS) {
-
-		if (key == GLFW_KEY_W) {
-			//TODO
-		}
-		if (key == GLFW_KEY_D) {
-
-		}
-		if (key == GLFW_KEY_A) {
-
-		}
-
-	}
 }
 void CharacterIdleState::on_mouse_move(glm::vec2 mouse_pos) {
 
@@ -168,7 +158,7 @@ void CharacterMoveLeftState::on_player_key(int key, int, int action, int mod) {
 
 	if (action == GLFW_PRESS) {
 		if (key == GLFW_KEY_W) {
-			c->state_machine.changeState(c->airborne_move_right);
+			c->state_machine.changeState(c->airborne_move_left);
 		}
 	}
 }
@@ -291,7 +281,7 @@ void CharacterAimState::on_mouse_click(int button, int action, int mods) {
 		if (action == GLFW_PRESS) {
 			ShootingSystem::shoot(character);
 			Character* chara = registry.characters.get(character);
-			chara->state_machine.changeState(chara->frozen_state);
+			//chara->state_machine.changeState(chara->frozen_state);
 		}
 	}
 }
@@ -330,5 +320,32 @@ void CharacterWaitForBulletFrozenState::doChecks() {
 	if (registry.projectiles.components.empty()) {
 		next_turn = true;
 	}
+}
+#pragma endregion
+
+#pragma region CharacterDeadState
+//Idle Sub class
+CharacterDeadState::CharacterDeadState(Entity e) : CharacterGroundedState(e) {
+
+}
+
+
+void CharacterDeadState::enter() {
+	CharacterGroundedState::enter();
+
+	Character* c = registry.characters.get(character);
+	c->animate_dead();
+}
+
+void CharacterDeadState::exit() {
+	CharacterGroundedState::exit();
+}
+
+void CharacterDeadState::step(float elapsed_ms) {
+	CharacterGroundedState::step(elapsed_ms);
+}
+
+void CharacterDeadState::doChecks() {
+	CharacterGroundedState::doChecks();
 }
 #pragma endregion

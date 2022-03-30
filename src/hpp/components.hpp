@@ -416,6 +416,7 @@ struct Character {
 	CharacterAirborneState* airborne_state;
 	CharacterAirborneMoveLeftState* airborne_move_left;
 	CharacterAirborneMoveRightState* airborne_move_right;
+	CharacterDeadState* dead_state;
 	glm::vec3 team_color;
 	ANIMAL animal;
 
@@ -428,6 +429,7 @@ struct Character {
 		airborne_move_left = new CharacterAirborneMoveLeftState(character);
 		airborne_move_right = new CharacterAirborneMoveRightState(character);
 		airborne_state = new CharacterAirborneState(character);
+		dead_state = new CharacterDeadState(character);
 
 		state_machine = CharacterStateMachine();
 		state_machine.init(idle_state);

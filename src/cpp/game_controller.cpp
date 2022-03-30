@@ -122,7 +122,7 @@ void GameController::step(float elapsed_ms) {
 			registry.animations.remove(e);
 			registry.rigidBodies.remove(e);
 			Character* chara = registry.characters.get(e);
-			chara->animate_dead();
+			chara->state_machine.changeState(chara->dead_state);
 		}
 	}
 
@@ -134,7 +134,7 @@ void GameController::step(float elapsed_ms) {
 			registry.animations.remove(e);
 			registry.rigidBodies.remove(e);
 			Character* chara = registry.characters.get(e);
-			chara->animate_dead();
+			chara->state_machine.changeState(chara->dead_state);
 		}
 	}
 
@@ -144,14 +144,14 @@ void GameController::step(float elapsed_ms) {
 			teams[TURN_CODE::NPCAI].erase(teams[TURN_CODE::NPCAI].begin() + i);
 			remove_children(e);
 			registry.animations.remove(e);
-			registry.rigidBodies.remove(e);
+			//registry.rigidBodies.remove(e);
 			Character* chara = registry.characters.get(e);
-			chara->animate_dead();
+			chara->state_machine.changeState(chara->dead_state);
 		}
 	}
 
 	int i = rand() % teams[TURN_CODE::PLAYER1].size();
-	ai.step(elapsed_ms, game_state.turn_possesion, &selected_ai, teams[TURN_CODE::PLAYER1][i]);
+	//ai.step(elapsed_ms, game_state.turn_possesion, &selected_ai, teams[TURN_CODE::PLAYER1][i]);
 
 	// if (game_state.turn_possesion == TURN_CODE::NPCAI) next_turn();
 	decrementTurnTime(elapsed_ms);
@@ -269,7 +269,7 @@ void GameController::next_turn() {
 		next_turn();
 	}
 	if (game_state.turn_possesion == TURN_CODE::NPCAI) {
-		change_curr_selected_char(selected_ai);
+		//change_curr_selected_char(selected_ai);
 	}
 	else {
 		change_curr_selected_char(teams[game_state.turn_possesion][0]); //supposed to be the first player on each team
