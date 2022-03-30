@@ -11,6 +11,8 @@
 
 #include <hpp/States/character_grounded_state.hpp>
 
+#include "States/character_airborne_states.hpp"
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // Component IDs
@@ -403,6 +405,7 @@ struct Character {
 	CharacterMoveRightState* move_right_state;
 	CharacterAimState* aim_state;
 	CharacterWaitForBulletFrozenState* frozen_state;
+	CharacterAirborneState* airborne_state;
 	glm::vec3 team_color;
 	ANIMAL animal;
 
@@ -412,6 +415,7 @@ struct Character {
 		move_right_state = new CharacterMoveRightState(character);
 		aim_state = new CharacterAimState(character);
 		frozen_state = new CharacterWaitForBulletFrozenState(character);
+		airborne_state = new CharacterAirborneState(character);
 
 		state_machine = CharacterStateMachine();
 		state_machine.init(idle_state);

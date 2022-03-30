@@ -27,8 +27,18 @@ public:
 		return next_turn;
 	}
 
+	void set_A_key_state(int state) {
+		A_key_state = state;
+	}
+	void set_D_key_state(int state) {
+		D_key_state = state;
+	}
+
+
 	Entity character;
 	std::chrono::time_point<std::chrono::system_clock> start_time;
 	bool next_turn;
+	int A_key_state = -1;
+	int D_key_state = -1;
 
 };

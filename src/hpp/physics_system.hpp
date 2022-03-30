@@ -38,7 +38,7 @@ private:
 	void transformChildedEntities();
 
 	const float GRAVITY_CONST = 2.5f;
-	const float TERMINAL_VELOCITY = 500.0f;
+	const float TERMINAL_VELOCITY = 400.0f;
 	const glm::vec2 GRAVITY_FORCE = { 0.0f, 0.5f };
 
 	float fixed_update_accumulator = 0.0f;

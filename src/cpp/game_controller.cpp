@@ -74,6 +74,8 @@ void GameController::step(float elapsed_ms) {
 			chara->state_machine.getCurrentState()->next_turn = false;
 			chara->state_machine.changeState(chara->idle_state);
 			next_turn();
+			chara->state_machine.getCurrentState()->set_A_key_state(glfwGetKey(window, GLFW_KEY_A));
+			chara->state_machine.getCurrentState()->set_D_key_state(glfwGetKey(window, GLFW_KEY_D));
 		}
 	}
 

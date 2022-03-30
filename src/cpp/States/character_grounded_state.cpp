@@ -125,13 +125,8 @@ void CharacterMoveState::on_player_key(int key, int, int action, int mod) {
 	if (action == GLFW_RELEASE) {
 
 		if (key == GLFW_KEY_W) {
-			printf("hello world 2");
-		}
-		if (key == GLFW_KEY_D) {
-			printf("hello world 2");
-		}
-		if (key == GLFW_KEY_A) {
-			printf("hello world 2");
+			Character* c = registry.characters.get(character);
+			c->state_machine.changeState(c->airborne_state);
 		}
 	}
 }
@@ -168,6 +163,7 @@ void CharacterMoveLeftState::doChecks() {
 }
 
 void CharacterMoveLeftState::on_player_key(int key, int, int action, int mod) {
+	CharacterMoveState::on_player_key(key, 0, action, mod);
 
 	if (action == GLFW_RELEASE) {
 
@@ -212,7 +208,7 @@ void CharacterMoveRightState::doChecks() {
 }
 
 void CharacterMoveRightState::on_player_key(int key, int, int action, int mod) {
-
+	CharacterMoveState::on_player_key(key, 0, action, mod);
 	if (action == GLFW_RELEASE) {
 
 		if (key == GLFW_KEY_D) {
@@ -269,7 +265,7 @@ void CharacterAimState::on_player_key(int key, int, int action, int mod) {
 				ShootingSystem::aimDown(character, 0.05f);
 			}
 			if (key == GLFW_KEY_W) {
-				//TODO
+				chara->state_machine.changeState(chara->airborne_state);
 			}
 			if (key == GLFW_KEY_D) {
 				chara->state_machine.changeState(chara->move_right_state);
