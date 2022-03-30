@@ -352,7 +352,7 @@ struct Rifle : WeaponBase {
 		distance = 500.0f;
 		//"radius" around distance
 		area = 200.0f;
-		damage = 10;
+		damage = 45;
 		type = RIFLE;
 	}
 };

@@ -139,7 +139,7 @@ void AISystem::checkJump()
 	Motion& motion = *blackboard->motion;
 	
 	// check if the ai is alreadyjumping
-	if (motion.velocity.x == 0 || motion.velocity.y < 0) {
+	if ((int)motion.velocity.x == 0 || motion.velocity.y < 0) {
 		motion.velocity.y = 35.f;
 		return;
 	}

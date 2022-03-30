@@ -281,7 +281,7 @@ void CharacterAimState::on_mouse_click(int button, int action, int mods) {
 		if (action == GLFW_PRESS) {
 			ShootingSystem::shoot(character);
 			Character* chara = registry.characters.get(character);
-			//chara->state_machine.changeState(chara->frozen_state);
+			chara->state_machine.changeState(chara->frozen_state);
 		}
 	}
 }
