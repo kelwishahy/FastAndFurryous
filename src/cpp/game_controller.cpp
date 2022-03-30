@@ -390,6 +390,10 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 
 void GameController::on_mouse_move(vec2 mouse_pos) {
 	this->mousePosition = mouse_pos;
+	Character* c = registry.characters.get(curr_selected_char);
+	if (!c->state_machine.isAI()) {
+		c->state_machine.getCurrentState()->on_mouse_move(mouse_pos);
+	}
 }
 //
 void GameController::on_mouse_click(int button, int action, int mods) {
