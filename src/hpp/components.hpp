@@ -246,11 +246,19 @@ public:
 		isAi = isAI;
 	}
 
+	bool isJumping() {
+		return is_jumping;
+	}
+	void setJumping(bool isJumping) {
+		is_jumping = isJumping;
+	}
+
 
 protected:
 	CharacterState* curr_state;
 	bool selected = false;
 	bool isAi = false;
+	bool is_jumping = false;
 
 	void setCurrentState(CharacterState* state) {
 		curr_state = state;
@@ -406,6 +414,8 @@ struct Character {
 	CharacterAimState* aim_state;
 	CharacterWaitForBulletFrozenState* frozen_state;
 	CharacterAirborneState* airborne_state;
+	CharacterAirborneMoveLeftState* airborne_move_left;
+	CharacterAirborneMoveRightState* airborne_move_right;
 	glm::vec3 team_color;
 	ANIMAL animal;
 
@@ -415,6 +425,8 @@ struct Character {
 		move_right_state = new CharacterMoveRightState(character);
 		aim_state = new CharacterAimState(character);
 		frozen_state = new CharacterWaitForBulletFrozenState(character);
+		airborne_move_left = new CharacterAirborneMoveLeftState(character);
+		airborne_move_right = new CharacterAirborneMoveRightState(character);
 		airborne_state = new CharacterAirborneState(character);
 
 		state_machine = CharacterStateMachine();

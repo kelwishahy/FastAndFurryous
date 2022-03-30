@@ -121,14 +121,6 @@ void CharacterMoveState::doChecks() {
 
 void CharacterMoveState::on_player_key(int key, int, int action, int mod) {
 
-
-	if (action == GLFW_RELEASE) {
-
-		if (key == GLFW_KEY_W) {
-			Character* c = registry.characters.get(character);
-			c->state_machine.changeState(c->airborne_state);
-		}
-	}
 }
 void CharacterMoveState::on_mouse_move(glm::vec2 mouse_pos) {
 
@@ -164,12 +156,19 @@ void CharacterMoveLeftState::doChecks() {
 
 void CharacterMoveLeftState::on_player_key(int key, int, int action, int mod) {
 	CharacterMoveState::on_player_key(key, 0, action, mod);
+	Character* c = registry.characters.get(character);
 
 	if (action == GLFW_RELEASE) {
 
 		if (key == GLFW_KEY_A) {
 			Motion& motion = registry.motions.get(character);
 			motion.velocity.x = 0.0f;
+		}
+	}
+
+	if (action == GLFW_PRESS) {
+		if (key == GLFW_KEY_W) {
+			c->state_machine.changeState(c->airborne_move_right);
 		}
 	}
 }
@@ -209,11 +208,19 @@ void CharacterMoveRightState::doChecks() {
 
 void CharacterMoveRightState::on_player_key(int key, int, int action, int mod) {
 	CharacterMoveState::on_player_key(key, 0, action, mod);
+	Character* c = registry.characters.get(character);
+
 	if (action == GLFW_RELEASE) {
 
 		if (key == GLFW_KEY_D) {
 			Motion& motion = registry.motions.get(character);
 			motion.velocity.x = 0.0f;
+		}
+	}
+
+	if (action == GLFW_PRESS) {
+		if (key == GLFW_KEY_W) {
+			c->state_machine.changeState(c->airborne_move_right);
 		}
 	}
 }
