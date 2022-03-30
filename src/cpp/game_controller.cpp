@@ -118,33 +118,39 @@ void GameController::step(float elapsed_ms) {
 	for (int i = 0; i < teams[TURN_CODE::PLAYER2].size(); i++) {
 		auto e = teams[TURN_CODE::PLAYER2][i];
 		if (registry.health.get(e).hp == 0) {
+			Dog dog = registry.dogs.get(e);
+			dog.animate_dog_dead();
 			teams[TURN_CODE::PLAYER2].erase(teams[TURN_CODE::PLAYER2].begin() + i);
 			remove_children(e);
 			registry.animations.remove(e);
 			registry.rigidBodies.remove(e);
 			registry.dogs.remove(e);
-			Dog dog = registry.dogs.get(e);
-			dog.animate_dog_dead();
+			/*Dog dog = registry.dogs.get(e);
+			dog.animate_dog_dead();*/
 		}
 	}
 
 	for (int i = 0; i < teams[TURN_CODE::NPCAI].size(); i++) {
 		auto e = teams[TURN_CODE::NPCAI][i];
 		if (registry.health.get(e).hp == 0) {
+			Dog dog = registry.dogs.get(e);
+			dog.animate_dog_dead();
 			teams[TURN_CODE::NPCAI].erase(teams[TURN_CODE::NPCAI].begin() + i);
 			remove_children(e);
 			registry.animations.remove(e);
 			registry.rigidBodies.remove(e);
 			registry.dogs.remove(e);
-			Dog dog = registry.dogs.get(e);
-			dog.animate_dog_dead();
+			registry.ais.remove(e);
+			/*Dog dog = registry.dogs.get(e);
+			dog.animate_dog_dead();*/
 		}
 	}
 	if (teams[TURN_CODE::NPCAI].size() > 0) {
 		int i = rand() % teams[TURN_CODE::PLAYER1].size();
 		ai.step(elapsed_ms, game_state.turn_possesion, &selected_ai, teams[TURN_CODE::PLAYER1][i]);
 	}
-
+	/*int i = rand() % teams[TURN_CODE::PLAYER1].size();
+	ai.step(elapsed_ms, game_state.turn_possesion, &selected_ai, teams[TURN_CODE::PLAYER1][i]);*/
 	// if (game_state.turn_possesion == TURN_CODE::NPCAI) next_turn();
 	decrementTurnTime(elapsed_ms);
 
@@ -272,7 +278,7 @@ void GameController::next_turn() {
 		change_curr_selected_char(teams[game_state.turn_possesion][0]); //supposed to be the first player on each team
 	}
 	
-	
+
 }
 
 void GameController::handle_collisions() {
