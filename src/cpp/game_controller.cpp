@@ -273,7 +273,9 @@ void GameController::next_turn() {
 		//change_curr_selected_char(selected_ai);
 	}
 	else {
-		change_curr_selected_char(teams[game_state.turn_possesion][0]); //supposed to be the first player on each team
+		if (!teams[game_state.turn_possesion].empty()) {
+			change_curr_selected_char(teams[game_state.turn_possesion][0]);//supposed to be the first player on each team
+		}
 	}
 	
 	
