@@ -140,9 +140,10 @@ void GameController::step(float elapsed_ms) {
 			dog.animate_dog_dead();
 		}
 	}
-
-	int i = rand() % teams[TURN_CODE::PLAYER1].size();
-	ai.step(elapsed_ms, game_state.turn_possesion, &selected_ai, teams[TURN_CODE::PLAYER1][i]);
+	if (teams[TURN_CODE::NPCAI].size() > 0) {
+		int i = rand() % teams[TURN_CODE::PLAYER1].size();
+		ai.step(elapsed_ms, game_state.turn_possesion, &selected_ai, teams[TURN_CODE::PLAYER1][i]);
+	}
 
 	// if (game_state.turn_possesion == TURN_CODE::NPCAI) next_turn();
 	decrementTurnTime(elapsed_ms);
