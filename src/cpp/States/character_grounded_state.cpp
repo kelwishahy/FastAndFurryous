@@ -52,10 +52,6 @@ void CharacterIdleState::exit() {
 
 void CharacterIdleState::step(float elapsed_ms) {
 	CharacterGroundedState::step(elapsed_ms);
-}
-
-void CharacterIdleState::doChecks() {
-	CharacterGroundedState::doChecks();
 	Character* chara = registry.characters.get(character);
 	if (chara->state_machine.isSelected()) {
 		chara->state_machine.changeState(chara->aim_state);
@@ -64,6 +60,10 @@ void CharacterIdleState::doChecks() {
 	if (registry.health.get(character).hp <= 0) {
 		chara->state_machine.changeState(chara->dead_state);
 	}
+}
+
+void CharacterIdleState::doChecks() {
+	CharacterGroundedState::doChecks();
 }
 
 void CharacterIdleState::on_player_key(int key, int, int action, int mod) {

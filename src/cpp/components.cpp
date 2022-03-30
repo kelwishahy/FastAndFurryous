@@ -228,8 +228,6 @@ void Cat::animate_dead() {
 		SHADER_PROGRAM_IDS::TEXTURE,
 		GEOMETRY_BUFFER_IDS::TEXTURED_QUAD
 	});
-	Motion& motion = registry.motions.get(character);
-	motion.position.x += 10.0f;
 }
 
 void Cat::animate_aim() {

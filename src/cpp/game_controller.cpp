@@ -337,12 +337,12 @@ void GameController::change_selected_state(Entity e, bool state) {
 
 void GameController::change_curr_selected_char(Entity e) {
 
-	Character* chara = registry.characters.get(e);
+	Character* chara = registry.characters.get(curr_selected_char);
 	chara->state_machine.deselectChar();
 
 	curr_selected_char = e;
 
-	Character* chara_new = registry.characters.get(e);
+	Character* chara_new = registry.characters.get(curr_selected_char);
 	chara_new->state_machine.selectChar();
 
 
