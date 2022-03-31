@@ -274,11 +274,11 @@ void CharacterAimState::on_player_key(int key, int, int action, int mod) {
 	}
 }
 void CharacterAimState::on_mouse_move(glm::vec2 mouse_pos) {
-	WeaponBase& weapon = registry.weapons.get(character);
+	/*WeaponBase& weapon = registry.weapons.get(character);
 	Motion motion = registry.motions.get(character);
 	float y = -mouse_pos.y + motion.position.y;
 	float x = mouse_pos.x - motion.position.x;
-	weapon.aim_angle = atan2f(y, x);
+	weapon.aim_angle = atan2f(y, x);*/
 }
 void CharacterAimState::on_mouse_click(int button, int action, int mods) {
 	if (button == GLFW_MOUSE_BUTTON_LEFT) {
