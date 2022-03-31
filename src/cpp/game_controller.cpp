@@ -270,7 +270,7 @@ void GameController::next_turn() {
 		next_turn();
 	}
 	if (game_state.turn_possesion == TURN_CODE::NPCAI) {
-		//change_curr_selected_char(selected_ai);
+		change_curr_selected_char(selected_ai);
 	}
 	else {
 		if (!teams[game_state.turn_possesion].empty()) {
