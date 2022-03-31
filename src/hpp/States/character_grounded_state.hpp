@@ -103,16 +103,17 @@ public:
 
 };
 
-class CharacterWaitForBulletFrozenState : public CharacterGroundedState {
+class CharacterShootingState : public CharacterGroundedState {
 
 public:
-	CharacterWaitForBulletFrozenState(Entity e);
+	CharacterShootingState(Entity e);
 
 	void enter() override;
 	void exit() override;
 	void step(float elapsed_ms) override;
 	void doChecks() override;
 
+	bool has_shot = false;
 };
 
 class CharacterDeadState : public CharacterGroundedState {

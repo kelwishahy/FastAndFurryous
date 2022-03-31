@@ -283,9 +283,8 @@ void CharacterAimState::on_mouse_move(glm::vec2 mouse_pos) {
 void CharacterAimState::on_mouse_click(int button, int action, int mods) {
 	if (button == GLFW_MOUSE_BUTTON_LEFT) {
 		if (action == GLFW_PRESS) {
-			ShootingSystem::shoot(character);
 			Character* chara = registry.characters.get(character);
-			chara->state_machine.changeState(chara->frozen_state);
+			chara->state_machine.changeState(chara->shooting_state);
 		}
 	}
 }
@@ -301,28 +300,32 @@ void CharacterAimState::on_mouse_scroll(double xoffset, double yoffset) {
 
 #pragma endregion CharacterAimState
 
-#pragma region CharacterFrozenState
-CharacterWaitForBulletFrozenState::CharacterWaitForBulletFrozenState(Entity e) : CharacterGroundedState(e) {
+#pragma region CharacterShootingState
+CharacterShootingState::CharacterShootingState(Entity e) : CharacterGroundedState(e) {
 
 }
 
 
-void CharacterWaitForBulletFrozenState::enter() {
+void CharacterShootingState::enter() {
 	CharacterGroundedState::enter();
+	ShootingSystem::shoot(character);
+	has_shot = true;
 }
 
-void CharacterWaitForBulletFrozenState::exit() {
+void CharacterShootingState::exit() {
 	CharacterGroundedState::exit();
 }
 
-void CharacterWaitForBulletFrozenState::step(float elapsed_ms) {
+void CharacterShootingState::step(float elapsed_ms) {
 	CharacterGroundedState::step(elapsed_ms);
 }
 
-void CharacterWaitForBulletFrozenState::doChecks() {
+void CharacterShootingState::doChecks() {
 	CharacterGroundedState::doChecks();
-	if (registry.projectiles.components.empty()) {
-		next_turn = true;
+	if (has_shot) {
+		if (registry.projectiles.components.empty()) {
+			next_turn = true;
+		}
 	}
 }
 #pragma endregion

@@ -412,7 +412,7 @@ struct Character {
 	CharacterMoveLeftState* move_left_state;
 	CharacterMoveRightState* move_right_state;
 	CharacterAimState* aim_state;
-	CharacterWaitForBulletFrozenState* frozen_state;
+	CharacterShootingState* shooting_state;
 	CharacterAirborneState* airborne_state;
 	CharacterAirborneMoveLeftState* airborne_move_left;
 	CharacterAirborneMoveRightState* airborne_move_right;
@@ -425,7 +425,7 @@ struct Character {
 		move_left_state = new CharacterMoveLeftState(character);
 		move_right_state = new CharacterMoveRightState(character);
 		aim_state = new CharacterAimState(character);
-		frozen_state = new CharacterWaitForBulletFrozenState(character);
+		shooting_state = new CharacterShootingState(character);
 		airborne_move_left = new CharacterAirborneMoveLeftState(character);
 		airborne_move_right = new CharacterAirborneMoveRightState(character);
 		airborne_state = new CharacterAirborneState(character);
