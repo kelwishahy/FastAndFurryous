@@ -13,8 +13,8 @@ public:
 
 	void init(TextManager& textManager);
 
-	void show_crosshair(Entity e);
-	void hide_crosshair();
+	static void show_crosshair(Entity e);
+	static void hide_crosshair(Entity e);
 
 private:
 	//First entity is the actual UIElement, second entity is the character it is attached to

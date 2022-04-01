@@ -9,6 +9,10 @@
 #include <glm/vec4.hpp>
 #include <string>
 
+#include <hpp/States/character_grounded_state.hpp>
+
+#include "States/character_airborne_states.hpp"
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // Component IDs
@@ -208,6 +212,61 @@ enum class ANIMAL {
 	CAT,
 	DOG
 };
+// State Machine------------------------------------------------------------------
+
+class CharacterStateMachine {
+
+public:
+
+	CharacterStateMachine() = default;
+	~CharacterStateMachine() = default;
+
+	void init(CharacterState* starting_state);
+
+
+	CharacterState* getCurrentState() {
+		return curr_state;
+	}
+
+	void changeState(CharacterState* new_state);
+	bool isSelected() {
+		return selected;
+	}
+	void selectChar() {
+		selected = true;
+	}
+	void deselectChar() {
+		selected = false;
+	}
+
+	bool isAI() {
+		return isAi;
+	}
+	void setAI(bool isAI) {
+		isAi = isAI;
+	}
+
+	bool isJumping() {
+		return is_jumping;
+	}
+	void setJumping(bool isJumping) {
+		is_jumping = isJumping;
+	}
+
+
+protected:
+	CharacterState* curr_state;
+	bool selected = false;
+	bool isAi = false;
+	bool is_jumping = false;
+
+	void setCurrentState(CharacterState* state) {
+		curr_state = state;
+	}
+
+};
+
+
 // Game components ------------------------------------------------------------
 struct Background {
 	float layer = -0.5;
@@ -281,7 +340,7 @@ struct WeaponBase {
 };
 
 struct Rifle : WeaponBase {
-	Rifle() { 
+	Rifle() : WeaponBase() { 
 		//a little less than pi/2
 		MAX_ANGLE = 1.2f;
 		//a little more than 0
@@ -293,7 +352,7 @@ struct Rifle : WeaponBase {
 		distance = 500.0f;
 		//"radius" around distance
 		area = 200.0f;
-		damage = 10;
+		damage = 45;
 		type = RIFLE;
 	}
 };
@@ -346,24 +405,74 @@ struct UIElement {
 	UI_ELEMENT element_type;
 };
 
-struct Cat {
-	Entity cat;
-	void animate_cat_walk();
-	void animate_cat_idle();
-	void animate_cat_jump();
-	void animate_cat_hurt();
-	void animate_cat_dead();
-	void animate_cat_aim();
+struct Character {
+	Entity character;
+	CharacterStateMachine state_machine;
+	CharacterIdleState* idle_state;
+	CharacterMoveLeftState* move_left_state;
+	CharacterMoveRightState* move_right_state;
+	CharacterAimState* aim_state;
+	CharacterShootingState* shooting_state;
+	CharacterAirborneState* airborne_state;
+	CharacterAirborneMoveLeftState* airborne_move_left;
+	CharacterAirborneMoveRightState* airborne_move_right;
+	CharacterDeadState* dead_state;
+	glm::vec3 team_color;
+	ANIMAL animal;
+
+	void init() {
+		idle_state = new CharacterIdleState(character);
+		move_left_state = new CharacterMoveLeftState(character);
+		move_right_state = new CharacterMoveRightState(character);
+		aim_state = new CharacterAimState(character);
+		shooting_state = new CharacterShootingState(character);
+		airborne_move_left = new CharacterAirborneMoveLeftState(character);
+		airborne_move_right = new CharacterAirborneMoveRightState(character);
+		airborne_state = new CharacterAirborneState(character);
+		dead_state = new CharacterDeadState(character);
+
+		state_machine = CharacterStateMachine();
+		state_machine.init(idle_state);
+	}
+
+	virtual void animate_walk() = 0;
+	virtual void animate_idle() = 0;
+	virtual void animate_jump() = 0;
+	virtual void animate_hurt() = 0;
+	virtual void animate_dead() = 0;
+	virtual void animate_aim() = 0;
+
+	virtual void play_hurt_sfx() = 0;
 };
 
-struct Dog {
-	Entity dog;
-	void animate_dog_idle();
-	void animate_dog_walk();
-	void animate_dog_jump();
-	void animate_dog_hurt();
-	void animate_dog_dead();
-	void animate_dog_aim();
+struct Cat : Character {
+	Cat() : Character() {
+		team_color = glm::vec3{ 0.862f, 0.525f, 0.517f };
+		animal = ANIMAL::CAT;
+	}
+	void animate_walk() override;
+	void animate_idle() override;
+	void animate_jump() override;
+	void animate_hurt() override;
+	void animate_dead() override;
+	void animate_aim() override;
+
+	void play_hurt_sfx() override;
+};
+
+struct Dog : Character {
+	Dog() : Character() {
+		team_color = glm::vec3{ 0.039, 0.454, 1 };
+		animal = ANIMAL::DOG;
+	}
+	void animate_walk() override;
+	void animate_idle() override;
+	void animate_jump() override;
+	void animate_hurt() override;
+	void animate_dead() override;
+	void animate_aim() override;
+
+	void play_hurt_sfx() override;
 };
 
 struct HealthBox {
@@ -464,4 +573,5 @@ void remove_children(Entity e);
 std::vector<Entity> get_all_children(Entity e);
 void change_animation(Entity e, TEXTURE_IDS tex_id);
 bool check_if_part_of_parent(Entity e, Entity child);
+bool check_if_cat(Entity e);
 

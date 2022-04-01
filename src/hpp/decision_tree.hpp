@@ -21,7 +21,6 @@ struct Blackboard {
 	int turn;
 	float timer;
 	float lowerhp;
-	ShootingSystem* shootingSystem;
 	Entity* player;
 	float move_delay;
 	bool shot;
@@ -205,8 +204,8 @@ class Shoot : public Node {
 		blackboard->motion->velocity.x = 0;
 		blackboard->motion->velocity.y = -2.5;
 		float angle = atan2(blackboard->motion->position.y - player_motion.position.y, blackboard->motion->position.x - player_motion.position.x);
-		blackboard->shootingSystem->aimDown(*blackboard->entity, angle);
-		blackboard->shootingSystem->shoot(*blackboard->entity);
+		ShootingSystem::aimDown(*blackboard->entity, angle);
+		ShootingSystem::shoot(*blackboard->entity);
 		blackboard->shot = true;
 	
 		return true;

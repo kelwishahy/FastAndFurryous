@@ -35,7 +35,7 @@ public:
 
 	bool inAGame;
 
-	GLFWwindow* window;
+	GLFWwindow* window{};
 
 	MapSystem::Map& getGameMap() { return gameMap; }
 	OrthographicCamera& getCamera() { return *camera; }
@@ -61,14 +61,14 @@ public:
 	Entity& getSelectedCharacter() { return curr_selected_char; }
 
 private:
-	OrthographicCamera* camera;
+	OrthographicCamera* camera{};
 	MapSystem::Map gameMap;
 	TextManager textManager;
 	Game game_data;
 
-	glm::vec2 mousePosition;
-	float mouseDeadzone;
-	glm::vec2 mouseTriggerArea;
+	glm::vec2 mousePosition{};
+	float mouseDeadzone{};
+	glm::vec2 mouseTriggerArea{};
 	void moveCamera();
 
 	// restart level it was in the private 
@@ -81,6 +81,7 @@ private:
 	void on_player_key(int key, int, int action, int mod);
 	void on_mouse_move(glm::vec2 mouse_pos);
 	void on_mouse_click(int button, int action, int mods);
+	void on_mouse_scroll(double xoffset, double yoffset);
 	void set_user_input_callbacks();
 
 	void next_turn();
@@ -112,16 +113,16 @@ private:
 	Entity selected_ai;
 	UISystem ui;
 
-	float timePerTurnMs;
+	float timePerTurnMs{};
 
 	// Turn indicators & turn timer
 	Entity timeIndicator;
-	float timerScale;
+	float timerScale{};
 
 	Entity turnIndicator;
-	float turnIndicatorScale;
+	float turnIndicatorScale{};
 	glm::vec3 redColor = { 1.0, 0.0f, 0.0f };
 	glm::vec3 blueColor = { 0.0, 0.0f, 1.0f };
 	glm::vec3 darkGreenColor = { 0.0f, 0.4f, 0.0f };
-	glm::vec2 turnPosition;
+	glm::vec2 turnPosition{};
 };

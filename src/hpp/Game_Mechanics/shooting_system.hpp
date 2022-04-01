@@ -21,13 +21,10 @@ public:
 	//deltaTime is normalized between 0 and 1, where 0 is the time at and 1 is the time at end
 	static float calculate_point(vec4 A, float deltaTime);
 
-	void aimUp(Entity e, float aimrate);
-
-	void aimDown(Entity e, float amount);
-
-	void setAimLoc(Entity e);
-
-	void shoot(Entity e);
+	static void aimUp(Entity e, float amount);
+	static void aimDown(Entity e, float amount);
+	static void setAimLoc(Entity e);
+	static void shoot(Entity e);
 
 private:
 
@@ -39,8 +36,8 @@ private:
 	//[ 1  0  0  0]
 	mat4 hermite_matrix = mat4(vec4(2, -3, 0, 1), vec4(-2, 3, 0, 0), vec4(1, -2, 1, 0), vec4(1, -1, 0, 0));
 
-	float pi = 3.14159;
-	float pio2 = 1.57079;
+	static float constexpr pi = 3.14159f;
+	static float constexpr pio2 = 1.57079f;
 
 	void calculate_trajectory(Entity e);
 

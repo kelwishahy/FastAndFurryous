@@ -19,7 +19,7 @@ void calculateBoxVerticesAndSetTriangles(vec2 pos, vec2 scale, Boxcollider& box)
 }
 
 
-Entity createCat(WEAPON_TYPES weapon, vec2 pos, int health) {
+Entity createCat(WEAPON_TYPES weapon, vec2 pos, int health, GLFWwindow* window) {
 	auto head = Entity();
 	auto frontArm = Entity();
 	const auto entity = Entity();
@@ -80,9 +80,10 @@ Entity createCat(WEAPON_TYPES weapon, vec2 pos, int health) {
 			SHADER_PROGRAM_IDS::ANIMATION,
 			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
 
-
-	Cat& cat = registry.cats.emplace(entity);
-	cat.cat = entity;
+	Character* c = new Cat();
+	Character* cat = registry.characters.insert(entity, c);
+	cat->character = entity;
+	
 
 	// Setting initial motion values
 	Motion& motion = registry.motions.emplace(entity);
@@ -125,7 +126,7 @@ Entity createCat(WEAPON_TYPES weapon, vec2 pos, int health) {
 	return entity;
 }
 
-Entity createDog(WEAPON_TYPES weapon, vec2 pos, int health) {
+Entity createDog(WEAPON_TYPES weapon, vec2 pos, int health, GLFWwindow* window) {
 
 	auto head = Entity();
 	const auto entity = Entity();
@@ -185,8 +186,9 @@ Entity createDog(WEAPON_TYPES weapon, vec2 pos, int health) {
 
 
 	//----------------------------------------------
-	Dog& dog = registry.dogs.emplace(entity);
-	dog.dog = entity;
+	Character* d = new Dog();
+	Character* dog = registry.characters.insert(entity, d);
+	dog->character = entity;
 
 	// Add health component
 	Health& healthbar = registry.health.emplace(entity);
@@ -499,7 +501,7 @@ Entity createCrosshair(Entity origin, bool iscat) {
 
 Entity createHealthCounter(Entity origin, int health, TextManager& textManager) {
 
-	const vec3 color = registry.cats.has(origin) ? vec3{ 0.862f, 0.525f, 0.517f } : vec3{ 0.039, 0.454, 1 };
+	const vec3 color = registry.characters.get(origin)->team_color;
 
 	const auto entity = Entity();
 

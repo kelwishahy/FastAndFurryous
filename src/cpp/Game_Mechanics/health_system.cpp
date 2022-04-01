@@ -1,17 +1,10 @@
 #include <hpp/Game_Mechanics/health_system.hpp>
 #include <hpp/tiny_ecs_registry.hpp>
-#include "hpp/audio_manager.hpp"
 
 void decreaseHealth(Entity entity, int amount, Entity hurtEntity) {
 	auto& health = registry.health.get(entity);
 	health.hp = (health.hp - amount >= 0) ? health.hp - amount : 0;
-	if (registry.cats.has(entity)) {
-		audio.play_sfx(SOUND_EFFECTS::CAT_SCREAM);
-	}
-
-	if (registry.dogs.has(entity)) {
-		audio.play_sfx(SOUND_EFFECTS::DOG_BARK);
-	}
+	registry.characters.get(entity)->play_hurt_sfx();
 	
 	health.hurt = true;
 }

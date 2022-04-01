@@ -1,6 +1,5 @@
 #include "hpp/ui_system.hpp"
 #include "hpp/world_init.hpp"
-#include <hpp/Game_Mechanics/shooting_system.hpp>
 
 UISystem::UISystem() {
 	
@@ -74,19 +73,18 @@ void UISystem::step(float elapsed_ms) {
 void UISystem::show_crosshair(Entity e) {
 
 	Motion entity_motion = registry.motions.get(e);
-	Entity crosshair = createCrosshair(e, registry.cats.has(e));
-	crosshair_marker = crosshair;
+	Entity crosshair = createCrosshair(e, registry.characters.get(e)->animal == ANIMAL::CAT);
 
 }
 
-void UISystem::hide_crosshair() {
-	if (registry.parentEntities.has(crosshair_marker)) {
-		ChildEntities& children = registry.parentEntities.get(crosshair_marker); //shoudl be a character entity i.e cat/dog
+void UISystem::hide_crosshair(Entity e) {
+	if (registry.parentEntities.has(e)) {
+		ChildEntities& children = registry.parentEntities.get(e); //shoudl be a character entity i.e cat/dog
 		for (int i = 0; i < children.child_data_map.size(); i++) {
 			if (children.tags.at(i) == "crosshair") { //there should be a tag in the character for crosshair
-				for (Entity e : registry.parentEntities.entities) {
-					if (e == children.child_data_map.at(i)) {
-						ChildEntities& crosshair_children = registry.parentEntities.get(e); //the child of the child
+				for (Entity e_ : registry.parentEntities.entities) {
+					if (e_ == children.child_data_map.at(i)) {
+						ChildEntities& crosshair_children = registry.parentEntities.get(e_); //the child of the child
 						registry.remove_all_components_of(crosshair_children.child_data_map[0]); //erase the actual physical crosshair
 						registry.remove_all_components_of(children.child_data_map.at(i)); //erase the crosshair child
 						children.remove_child(children.child_data_map.at(i)); //update the ChildEntities

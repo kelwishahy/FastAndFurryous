@@ -50,10 +50,10 @@ void ShootingSystem::aimDown(Entity e, float amount) {
 	SHOOT_ORIENTATION orientation = (registry.animations.get(e).facingLeft) ? SHOOT_ORIENTATION::LEFT : SHOOT_ORIENTATION::RIGHT;
 
 	if (orientation == SHOOT_ORIENTATION::LEFT) {
-		weapon.aim_angle = (weapon.aim_angle + 0.1 >= pi - weapon.MIN_ANGLE) ? pi - weapon.MIN_ANGLE : weapon.aim_angle + 0.1;
+		weapon.aim_angle = (weapon.aim_angle + amount >= pi - weapon.MIN_ANGLE) ? pi - weapon.MIN_ANGLE : weapon.aim_angle + amount;
 	}
 	else {
-		weapon.aim_angle = (weapon.aim_angle - 0.1 <= weapon.MIN_ANGLE) ? weapon.MIN_ANGLE : weapon.aim_angle - 0.1;
+		weapon.aim_angle = (weapon.aim_angle - amount <= weapon.MIN_ANGLE) ? weapon.MIN_ANGLE : weapon.aim_angle - amount;
 	}
 	// printf("weapons aim angle: %f \n", weapon.aim_angle);
 	setAimLoc(e);
@@ -85,7 +85,7 @@ void ShootingSystem::setAimLoc(Entity e) {
 	}
 
 	//Calculate cubic curves
-	calculate_trajectory(e);
+	//calculate_trajectory(e);
 }
 
 void ShootingSystem::shoot(Entity e) {

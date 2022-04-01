@@ -4,10 +4,10 @@
 #include "render_system.hpp"
 
 // Player entities
-Entity createCat(::WEAPON_TYPES weapon, glm::vec2 pos, int health);
+Entity createCat(::WEAPON_TYPES weapon, glm::vec2 pos, int health, GLFWwindow* window);
 
 // Player entities
-Entity createDog(WEAPON_TYPES weapon, glm::vec2 pos, int health);
+Entity createDog(WEAPON_TYPES weapon, glm::vec2 pos, int health, GLFWwindow* window);
 
 // solid terrain
 Entity createWall(glm::vec2 pos, float width, float height);
