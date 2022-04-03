@@ -24,6 +24,11 @@ void RenderSystem::draw(float elapsed_ms, WorldSystem& world) {
 	// Draw the map
 	drawTiles();
 
+	// Sort all the RenderRequests by depth
+	registry.renderRequests.sort([](Entity& lhs, Entity& rhs) {
+			return lhs.getDepth() < rhs.getDepth();
+	});
+
 	for (Entity entity : registry.renderRequests.entities) {
 
 		if (!registry.renderRequests.has(entity))
