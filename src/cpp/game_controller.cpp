@@ -308,8 +308,22 @@ void GameController::handle_collisions() {
 				// 	}
 				// }
 
+				// if the enemy is closer in distance, they get more damage
+				Motion& motion_enemy = registry.motions.get(entity_other);
+				float pos_enemy = motion_enemy.position.x;
+				Motion& motion_attacker = registry.motions.get(curr_selected_char);
+				float pos_attacker = motion_attacker.position.x;
+
+				float distance = abs(pos_enemy - pos_attacker);
+				int damage_gun = registry.weapons.get(pj.origin).damage;
+				// 100 can be changed to a higher value later depending on the guns damage
+				int final_damage = damage_gun - int(distance / 100);
+				if (final_damage <= 0) {
+					final_damage = 1;
+				}
+
 				// Friendly fire is enabled
-				decreaseHealth(entity_other, registry.weapons.get(pj.origin).damage, curr_selected_char);
+				decreaseHealth(entity_other, final_damage, curr_selected_char);
 				registry.remove_all_components_of(entity);
 			}
 		}
