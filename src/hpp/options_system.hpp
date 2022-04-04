@@ -1,9 +1,10 @@
 #pragma once
 #include "hpp/tiny_ecs.hpp"
 
-int decreaseTimer(Entity entity, int amount);
+// change option timer type
+int decreaseTimer(Entity entity, float amount);
 
-int increaseTimer(Entity entity, int amount);
+int increaseTimer(Entity entity, float amount);
 
 int decreasePlayers(Entity entity, int amount);
 

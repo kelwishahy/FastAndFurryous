@@ -36,7 +36,7 @@ public:
 private:
 
 	std::vector<Character> characters;
-	float timer = 1.0f;
+	float timer;
 	MAPS background = MAPS::INDUSTRIAL;
 
 };
