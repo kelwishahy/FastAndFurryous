@@ -294,19 +294,22 @@ void GameController::handle_collisions() {
 			if (registry.terrains.has(entity_other) && entity_other != pj.origin) {
 				registry.remove_all_components_of(entity);
 			} else if (entity_other != pj.origin) { // Projectile hit another player
-				for (std::vector<Entity> vec : teams) {
-					bool origin_isonteam = false;
-					bool entity_other_isonteam = false;
-					for (Entity e : vec) { //check for friendly fire, since std::find dosen't work
-						if (e == pj.origin) 
-							origin_isonteam = true;
-						if (e == entity_other) 
-							entity_other_isonteam = true;
-					}
-					if (origin_isonteam && !entity_other_isonteam) {
-						decreaseHealth(entity_other, registry.weapons.get(pj.origin).damage, curr_selected_char);
-					}
-				}
+				// for (std::vector<Entity> vec : teams) {
+				// 	bool origin_isonteam = false;
+				// 	bool entity_other_isonteam = false;
+				// 	for (Entity e : vec) { //check for friendly fire, since std::find dosen't work
+				// 		if (e == pj.origin) 
+				// 			origin_isonteam = true;
+				// 		if (e == entity_other) 
+				// 			entity_other_isonteam = true;
+				// 	}
+				// 	if (origin_isonteam) {
+				// 		decreaseHealth(entity_other, registry.weapons.get(pj.origin).damage, curr_selected_char);
+				// 	}
+				// }
+
+				// Friendly fire is enabled
+				decreaseHealth(entity_other, registry.weapons.get(pj.origin).damage, curr_selected_char);
 				registry.remove_all_components_of(entity);
 			}
 		}
