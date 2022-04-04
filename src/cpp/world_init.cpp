@@ -516,7 +516,7 @@ Entity createHealthCounter(Entity origin, int health, TextManager& textManager) 
 
 }
 
-Entity createTimerCounter(int timer, TextManager& textManager) {
+Entity createTimerCounter(float timer, TextManager& textManager) {
 
 	auto entity = Entity();
 
