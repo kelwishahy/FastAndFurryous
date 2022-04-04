@@ -523,8 +523,10 @@ Entity createTimerCounter(float timer, TextManager& textManager) {
 	OptionTimer& timer0 = registry.timer.emplace(entity);
 
 	timer0.timerC = timer;
+	
+	int n = static_cast<int>(timer0.timerC);
 	//timer0.text = createText({ 1025.0f, 390.0f }, 2.0f, { 0.0f, 0.0f, 0.0f }, std::to_string(timer0.timerC));
-	createText(textManager, std::to_string(timer0.timerC), { 1060.0f, 390.0f }, 2.0f, { 0.0f, 0.0f, 0.0f });
+	createText(textManager, std::to_string(n), { 1060.0f, 390.0f }, 2.0f, { 0.0f, 0.0f, 0.0f });
 
 	return entity;
 
