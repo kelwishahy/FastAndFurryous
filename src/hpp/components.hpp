@@ -343,7 +343,7 @@ struct Rifle : WeaponBase {
 		//a little less than pi/2
 		MAX_ANGLE = 1.2f;
 		//a little more than 0
-		MIN_ANGLE = 0.2f;
+		MIN_ANGLE = 5.5f;
 		// pi/4
 		// aim_angle = 0.7854f;
 		aim_angle = MIN_ANGLE;
