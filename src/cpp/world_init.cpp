@@ -112,6 +112,10 @@ Entity createCat(WEAPON_TYPES weapon, vec2 pos, int health, GLFWwindow* window) 
 
 	if (weapon == WEAPON_TYPES::RIFLE) {
 		registry.weapons.insert(entity, Rifle());
+	} else if (weapon == SHOTGUN) {
+		registry.weapons.insert(entity, Shotgun());
+	} else if (weapon == AWP) {
+		registry.weapons.insert(entity, Awp());
 	}
 
 	Animation& anim = registry.animations.emplace(entity);

@@ -3,6 +3,7 @@
 #include "GLFW/glfw3.h"
 #include "hpp/tiny_ecs_registry.hpp"
 #include "hpp/ui_system.hpp"
+#include "hpp/Game_Mechanics/health_system.hpp"
 #include "hpp/Game_Mechanics/shooting_system.hpp"
 
 #pragma region
@@ -52,6 +53,7 @@ void CharacterIdleState::exit() {
 
 void CharacterIdleState::step(float elapsed_ms) {
 	CharacterGroundedState::step(elapsed_ms);
+	handle_bullet_collisions();
 	Character* chara = registry.characters.get(character);
 	if (chara->state_machine.isSelected()) {
 		chara->state_machine.changeState(chara->aim_state);
@@ -76,7 +78,84 @@ void CharacterIdleState::on_mouse_move(glm::vec2 mouse_pos) {
 void CharacterIdleState::on_mouse_click(int button, int action, int mods) {
 
 }
+
+void CharacterIdleState::handle_bullet_collisions() {
+	auto& collisionsRegistry = registry.collisions;
+	for (uint i = 0; i < collisionsRegistry.components.size(); i++) {
+		// The entity and its collider
+		Entity entity = collisionsRegistry.entities[i];
+		Entity entity_other = collisionsRegistry.components[i].other;
+
+		if (registry.projectiles.has(entity)) {// Projectile hit terrain
+			Projectile& pj = registry.projectiles.get(entity);
+			if (entity_other == character && character != pj.origin) { // Projectile hit another player
+			 // for (std::vector<Entity> vec : teams) {
+			 // 	bool origin_isonteam = false;
+			 // 	bool entity_other_isonteam = false;
+			 // 	for (Entity e : vec) { //check for friendly fire, since std::find dosen't work
+			 // 		if (e == pj.origin) 
+			 // 			origin_isonteam = true;
+			 // 		if (e == entity_other) 
+			 // 			entity_other_isonteam = true;
+			 // 	}
+			 // 	if (origin_isonteam) {
+			 // 		decreaseHealth(entity_other, registry.weapons.get(pj.origin).damage, curr_selected_char);
+			 // 	}
+			 // }
+
+			 // Friendly fire is enabled
+				Character* c = registry.characters.get(character);
+				c->state_machine.changeState(c->damage_state);
+			}
+		}
+	}
+}
 #pragma endregion Sub-CharacterIdleState
+
+#pragma region CharacterDamagedState
+CharacterDamageState::CharacterDamageState(Entity e) : CharacterGroundedState(e) {
+
+}
+
+
+void CharacterDamageState::enter() {
+	CharacterGroundedState::enter();
+	Character* chara = registry.characters.get(character);
+	chara->animate_hurt();
+}
+
+void CharacterDamageState::exit() {
+	CharacterGroundedState::exit();
+}
+
+void CharacterDamageState::step(float elapsed_ms) {
+	CharacterGroundedState::step(elapsed_ms);
+	hurt_timer -= elapsed_ms;
+}
+
+void CharacterDamageState::doChecks() {
+	CharacterGroundedState::doChecks();
+	auto& collisionsRegistry = registry.collisions;
+	for (uint i = 0; i < collisionsRegistry.components.size(); i++) {
+		// The entity and its collider
+		Entity entity = collisionsRegistry.entities[i];
+		Entity entity_other = collisionsRegistry.components[i].other;
+
+		if (registry.projectiles.has(entity) && entity_other == character) {
+			Projectile& pj = registry.projectiles.get(entity);
+			WeaponBase weap = registry.weapons.get(pj.origin);
+			decreaseHealth(character, (int)weap.damage);
+			registry.characters.get(character)->play_hurt_sfx();
+			hurt_timer = 1500.0f;
+			registry.remove_all_components_of(entity);
+		}
+	}
+	if (hurt_timer <= 0.0f) {
+		Character* chara = registry.characters.get(character);
+		chara->state_machine.changeState(chara->idle_state);
+	}
+}
+#pragma endregion
 
 
 //Move sub class

@@ -69,23 +69,17 @@ void ShootingSystem::setAimLoc(Entity e) {
 	float x_begin;
 	//right facing
 	if (orientation == SHOOT_ORIENTATION::RIGHT) {
-		x_end = motion.position.x + weapon.distance + weapon.area;
-		x_begin = motion.position.x + weapon.distance - weapon.area;
 		if (weapon.aim_angle > pio2) {
 			weapon.aim_angle = pio2 - (weapon.aim_angle - pio2);
 		}
 	}
 	//left facing
 	else {
-		x_end = motion.position.x - weapon.distance - weapon.area;
-		x_begin = motion.position.x - weapon.distance + weapon.area;
 		if (weapon.aim_angle < pio2) {
 			weapon.aim_angle = pio2 + (pio2 - weapon.aim_angle);
 		}
 	}
 
-	//Calculate cubic curves
-	//calculate_trajectory(e);
 }
 
 void ShootingSystem::shoot(Entity e) {
@@ -102,6 +96,26 @@ void ShootingSystem::shoot(Entity e) {
 		float yforce = -sinf(weapon.aim_angle) * 45.0f;
 
 		createProjectile(e, { xforce, yforce });
+		audio.play_sfx(SOUND_EFFECTS::GUNSHOT);
+	} else if (weapon.type == SHOTGUN) {
+
+		float xforce;
+		float yforce;
+
+		for (int i = 0; i < 8; i++) { //8 pellets are fired from shotgun
+			xforce = cosf(weapon.aim_angle) * (48.0f - (float)i);
+			yforce = -sinf(weapon.aim_angle) * (40.0f + (float)i);
+			createProjectile(e, { xforce, yforce });
+		}
+
+		audio.play_sfx(SOUND_EFFECTS::GUNSHOT);
+	} else if (weapon.type == AWP) {
+		float xforce = cosf(weapon.aim_angle) * 40.0f;
+		float yforce = -sinf(weapon.aim_angle) * 45.0f;
+
+		Entity bullet = createProjectile(e, { xforce, yforce });
+		Rigidbody& rb = registry.rigidBodies.get(bullet);
+		rb.gravity_affected = false;
 		audio.play_sfx(SOUND_EFFECTS::GUNSHOT);
 	}
 

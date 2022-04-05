@@ -33,6 +33,20 @@ public:
 	void on_mouse_move(glm::vec2 mouse_pos) override;
 	void on_mouse_click(int button, int action, int mods) override;
 
+	void handle_bullet_collisions();
+
+};
+
+class CharacterDamageState: public CharacterGroundedState {
+
+public:
+	CharacterDamageState(Entity e);
+	void enter() override;
+	void exit() override;
+	void step(float elapsed_ms) override;
+	void doChecks() override;
+
+	float hurt_timer = 1000.0f;
 };
 
 class CharacterMoveState : public CharacterGroundedState {

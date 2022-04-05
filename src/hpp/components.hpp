@@ -138,6 +138,7 @@ enum RB_TYPES {
 enum WEAPON_TYPES {
 	RIFLE = 0,
 	SHOTGUN = 1,
+	AWP = 2,
 	TOTAL //For no weaponed 
 }; constexpr int weaponCount = (int)WEAPON_TYPES::TOTAL;
 
@@ -320,6 +321,7 @@ struct Rigidbody {
 	enum RB_TYPES type = NORMAL;
 	float mass = 1;
 	float collision_depth;
+	bool gravity_affected = true;
 	glm::vec2 collision_normal;
 	glm::vec2 force_accumulator;
 };
@@ -332,9 +334,6 @@ struct WeaponBase {
 	float MAX_ANGLE;
 	float MIN_ANGLE;
 	float aim_angle;
-	float distance;
-	float area;
-	//float aim_loc_x;
 	float damage;
 	WEAPON_TYPES type;
 };
@@ -348,17 +347,37 @@ struct Rifle : WeaponBase {
 		// pi/4
 		// aim_angle = 0.7854f;
 		aim_angle = MIN_ANGLE;
-		//distance the gun can shoot
-		distance = 500.0f;
-		//"radius" around distance
-		area = 200.0f;
 		damage = 45;
 		type = RIFLE;
 	}
 };
 
-struct Shotgun : WeaponBase {
+struct Awp : WeaponBase {
+	Awp() : WeaponBase() {
+		//a little less than pi/2
+		MAX_ANGLE = 0.9f;
+		//a little more than 0
+		MIN_ANGLE = 0.3f;
+		// pi/4
+		// aim_angle = 0.7854f;
+		aim_angle = MIN_ANGLE;
+		damage = 80;
+		type = AWP;
+	}
+};
 
+struct Shotgun : WeaponBase {
+	Shotgun() : WeaponBase() {
+		//a little less than pi/2
+		MAX_ANGLE = 1.2f;
+		//a little more than 0
+		MIN_ANGLE = 0.2f;
+		// pi/4
+		// aim_angle = 0.7854f;
+		aim_angle = MIN_ANGLE;
+		damage = 5;
+		type = SHOTGUN;
+	}
 };
 
 struct Projectile {
@@ -417,6 +436,7 @@ struct Character {
 	CharacterAirborneMoveLeftState* airborne_move_left;
 	CharacterAirborneMoveRightState* airborne_move_right;
 	CharacterDeadState* dead_state;
+	CharacterDamageState* damage_state;
 	glm::vec3 team_color;
 	ANIMAL animal;
 
@@ -430,6 +450,7 @@ struct Character {
 		airborne_move_right = new CharacterAirborneMoveRightState(character);
 		airborne_state = new CharacterAirborneState(character);
 		dead_state = new CharacterDeadState(character);
+		damage_state = new CharacterDamageState(character);
 
 		state_machine = CharacterStateMachine();
 		state_machine.init(idle_state);

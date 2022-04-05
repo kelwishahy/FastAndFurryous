@@ -67,6 +67,42 @@ void GameController::step(float elapsed_ms) {
 	//Pan camera based on mouse position
 	moveCamera();
 	//Step the player state machines
+	
+	for (int i = 0; i < teams[TURN_CODE::PLAYER1].size(); i++) {
+		auto e = teams[TURN_CODE::PLAYER1][i];
+		if (registry.health.get(e).hp == 0) {
+			teams[TURN_CODE::PLAYER1].erase(teams[TURN_CODE::PLAYER1].begin() + i);
+			remove_children(e);
+			registry.animations.remove(e);
+			registry.rigidBodies.remove(e);
+			Character* chara = registry.characters.get(e);
+			chara->state_machine.changeState(chara->dead_state);
+		}
+	}
+
+	for (int i = 0; i < teams[TURN_CODE::PLAYER2].size(); i++) {
+		const auto e = teams[TURN_CODE::PLAYER2][i];
+		if (registry.health.get(e).hp == 0) {
+			teams[TURN_CODE::PLAYER2].erase(teams[TURN_CODE::PLAYER2].begin() + i);
+			remove_children(e);
+			registry.animations.remove(e);
+			registry.rigidBodies.remove(e);
+			Character* chara = registry.characters.get(e);
+			chara->state_machine.changeState(chara->dead_state);
+		}
+	}
+
+	for (int i = 0; i < teams[TURN_CODE::NPCAI].size(); i++) {
+		const auto e = teams[TURN_CODE::NPCAI][i];
+		if (registry.health.get(e).hp == 0) {
+			teams[TURN_CODE::NPCAI].erase(teams[TURN_CODE::NPCAI].begin() + i);
+			remove_children(e);
+			registry.animations.remove(e);
+			//registry.rigidBodies.remove(e);
+			Character* chara = registry.characters.get(e);
+			chara->state_machine.changeState(chara->dead_state);
+		}
+	}
 
 	for (Character* chara : registry.characters.components) {
 		chara->state_machine.getCurrentState()->step(elapsed_ms);
@@ -114,41 +150,6 @@ void GameController::step(float elapsed_ms) {
 		shooting_system.setAimLoc(e);
 	}
 
-	for (int i = 0; i < teams[TURN_CODE::PLAYER1].size(); i++) {
-		auto e = teams[TURN_CODE::PLAYER1][i];
-		if (registry.health.get(e).hp == 0) {
-			teams[TURN_CODE::PLAYER1].erase(teams[TURN_CODE::PLAYER1].begin() + i);
-			remove_children(e);
-			registry.animations.remove(e);
-			registry.rigidBodies.remove(e);
-			Character* chara = registry.characters.get(e);
-			chara->state_machine.changeState(chara->dead_state);
-		}
-	}
-
-	for (int i = 0; i < teams[TURN_CODE::PLAYER2].size(); i++) {
-		const auto e = teams[TURN_CODE::PLAYER2][i];
-		if (registry.health.get(e).hp == 0) {
-			teams[TURN_CODE::PLAYER2].erase(teams[TURN_CODE::PLAYER2].begin() + i);
-			remove_children(e);
-			registry.animations.remove(e);
-			registry.rigidBodies.remove(e);
-			Character* chara = registry.characters.get(e);
-			chara->state_machine.changeState(chara->dead_state);
-		}
-	}
-
-	for (int i = 0; i < teams[TURN_CODE::NPCAI].size(); i++) {
-		const auto e = teams[TURN_CODE::NPCAI][i];
-		if (registry.health.get(e).hp == 0) {
-			teams[TURN_CODE::NPCAI].erase(teams[TURN_CODE::NPCAI].begin() + i);
-			remove_children(e);
-			registry.animations.remove(e);
-			//registry.rigidBodies.remove(e);
-			Character* chara = registry.characters.get(e);
-			chara->state_machine.changeState(chara->dead_state);
-		}
-	}
 	if (teams[TURN_CODE::NPCAI].size() > 0) {
 		int i = rand() % teams[TURN_CODE::PLAYER1].size();
 		ai.step(elapsed_ms, game_state.turn_possesion, &selected_ai, teams[TURN_CODE::PLAYER1][i]);
@@ -293,26 +294,9 @@ void GameController::handle_collisions() {
 			Projectile& pj = registry.projectiles.get(entity);
 			if (registry.terrains.has(entity_other) && entity_other != pj.origin) {
 				registry.remove_all_components_of(entity);
-			} else if (entity_other != pj.origin) { // Projectile hit another player
-				// for (std::vector<Entity> vec : teams) {
-				// 	bool origin_isonteam = false;
-				// 	bool entity_other_isonteam = false;
-				// 	for (Entity e : vec) { //check for friendly fire, since std::find dosen't work
-				// 		if (e == pj.origin) 
-				// 			origin_isonteam = true;
-				// 		if (e == entity_other) 
-				// 			entity_other_isonteam = true;
-				// 	}
-				// 	if (origin_isonteam) {
-				// 		decreaseHealth(entity_other, registry.weapons.get(pj.origin).damage, curr_selected_char);
-				// 	}
-				// }
-
-				// Friendly fire is enabled
-				decreaseHealth(entity_other, registry.weapons.get(pj.origin).damage, curr_selected_char);
-				registry.remove_all_components_of(entity);
 			}
 		}
+
 
 		if (registry.motions.has(entity) && registry.rigidBodies.has(entity) && registry.terrains.has(entity_other)) {
 			Rigidbody& rb = registry.rigidBodies.get(entity);
