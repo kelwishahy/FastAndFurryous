@@ -58,10 +58,6 @@ void CharacterIdleState::step(float elapsed_ms) {
 	if (chara->state_machine.isSelected()) {
 		chara->state_machine.changeState(chara->aim_state);
 	}
-
-	if (registry.health.get(character).hp <= 0) {
-		chara->state_machine.changeState(chara->dead_state);
-	}
 }
 
 void CharacterIdleState::doChecks() {
@@ -102,8 +98,6 @@ void CharacterIdleState::handle_bullet_collisions() {
 			 // 		decreaseHealth(entity_other, registry.weapons.get(pj.origin).damage, curr_selected_char);
 			 // 	}
 			 // }
-
-			 // Friendly fire is enabled
 				Character* c = registry.characters.get(character);
 				c->state_machine.changeState(c->damage_state);
 			}
@@ -131,11 +125,8 @@ void CharacterDamageState::exit() {
 void CharacterDamageState::step(float elapsed_ms) {
 	CharacterGroundedState::step(elapsed_ms);
 	hurt_timer -= elapsed_ms;
-}
-
-void CharacterDamageState::doChecks() {
-	CharacterGroundedState::doChecks();
 	auto& collisionsRegistry = registry.collisions;
+	Character* chara = registry.characters.get(character);
 	for (uint i = 0; i < collisionsRegistry.components.size(); i++) {
 		// The entity and its collider
 		Entity entity = collisionsRegistry.entities[i];
@@ -145,15 +136,21 @@ void CharacterDamageState::doChecks() {
 			Projectile& pj = registry.projectiles.get(entity);
 			WeaponBase weap = registry.weapons.get(pj.origin);
 			decreaseHealth(character, (int)weap.damage);
+			if (registry.health.get(character).hp == 0) {
+				chara->state_machine.changeState(chara->dead_state);
+			}
 			registry.characters.get(character)->play_hurt_sfx();
 			hurt_timer = 1500.0f;
 			registry.remove_all_components_of(entity);
 		}
 	}
 	if (hurt_timer <= 0.0f) {
-		Character* chara = registry.characters.get(character);
 		chara->state_machine.changeState(chara->idle_state);
 	}
+}
+
+void CharacterDamageState::doChecks() {
+	CharacterGroundedState::doChecks();
 }
 #pragma endregion
 
@@ -322,6 +319,7 @@ void CharacterAimState::exit() {
 
 void CharacterAimState::step(float elapsed_ms) {
 	CharacterGroundedState::step(elapsed_ms);
+	ShootingSystem::setAimLoc(character);
 
 }
 
@@ -418,7 +416,11 @@ CharacterDeadState::CharacterDeadState(Entity e) : CharacterGroundedState(e) {
 
 void CharacterDeadState::enter() {
 	CharacterGroundedState::enter();
-
+	remove_children(character);
+	registry.animations.remove(character);
+	registry.rigidBodies.remove(character);
+	Motion& motion = registry.motions.get(character);
+	motion.velocity = vec2(.0f, .0f);
 	Character* c = registry.characters.get(character);
 	c->animate_dead();
 }

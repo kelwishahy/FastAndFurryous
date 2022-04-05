@@ -67,48 +67,33 @@ void GameController::step(float elapsed_ms) {
 	//Pan camera based on mouse position
 	moveCamera();
 	//Step the player state machines
-	
-	for (int i = 0; i < teams[TURN_CODE::PLAYER1].size(); i++) {
-		auto e = teams[TURN_CODE::PLAYER1][i];
-		if (registry.health.get(e).hp == 0) {
-			teams[TURN_CODE::PLAYER1].erase(teams[TURN_CODE::PLAYER1].begin() + i);
-			remove_children(e);
-			registry.animations.remove(e);
-			registry.rigidBodies.remove(e);
-			Character* chara = registry.characters.get(e);
-			chara->state_machine.changeState(chara->dead_state);
-		}
-	}
-
-	for (int i = 0; i < teams[TURN_CODE::PLAYER2].size(); i++) {
-		const auto e = teams[TURN_CODE::PLAYER2][i];
-		if (registry.health.get(e).hp == 0) {
-			teams[TURN_CODE::PLAYER2].erase(teams[TURN_CODE::PLAYER2].begin() + i);
-			remove_children(e);
-			registry.animations.remove(e);
-			registry.rigidBodies.remove(e);
-			Character* chara = registry.characters.get(e);
-			chara->state_machine.changeState(chara->dead_state);
-		}
-	}
-
-	for (int i = 0; i < teams[TURN_CODE::NPCAI].size(); i++) {
-		const auto e = teams[TURN_CODE::NPCAI][i];
-		if (registry.health.get(e).hp == 0) {
-			teams[TURN_CODE::NPCAI].erase(teams[TURN_CODE::NPCAI].begin() + i);
-			remove_children(e);
-			registry.animations.remove(e);
-			//registry.rigidBodies.remove(e);
-			Character* chara = registry.characters.get(e);
-			chara->state_machine.changeState(chara->dead_state);
-		}
-	}
 
 	for (Character* chara : registry.characters.components) {
 		chara->state_machine.getCurrentState()->step(elapsed_ms);
+		for (int i = 0; i < teams[TURN_CODE::PLAYER1].size(); i++) {
+			auto e = teams[TURN_CODE::PLAYER1][i];
+			if (registry.health.get(e).hp == 0) {
+				teams[TURN_CODE::PLAYER1].erase(teams[TURN_CODE::PLAYER1].begin() + i);
+			}
+		}
+
+		for (int i = 0; i < teams[TURN_CODE::PLAYER2].size(); i++) {
+			const auto e = teams[TURN_CODE::PLAYER2][i];
+			if (registry.health.get(e).hp == 0) {
+				teams[TURN_CODE::PLAYER2].erase(teams[TURN_CODE::PLAYER2].begin() + i);
+			}
+		}
+
+		for (int i = 0; i < teams[TURN_CODE::NPCAI].size(); i++) {
+			const auto e = teams[TURN_CODE::NPCAI][i];
+			if (registry.health.get(e).hp == 0) {
+				teams[TURN_CODE::NPCAI].erase(teams[TURN_CODE::NPCAI].begin() + i);
+			}
+		}
 		if (chara->state_machine.getCurrentState()->next_turn) {
 			chara->state_machine.getCurrentState()->next_turn = false;
 			chara->state_machine.changeState(chara->idle_state);
+
 			next_turn();
 			chara->state_machine.getCurrentState()->set_A_key_state(glfwGetKey(window, GLFW_KEY_A));
 			chara->state_machine.getCurrentState()->set_D_key_state(glfwGetKey(window, GLFW_KEY_D));
@@ -142,12 +127,6 @@ void GameController::step(float elapsed_ms) {
 		turnIndicatorPosition = turnPosition;
 		turnIndicatorPosition.x = turnIndicatorPosition.x - turnIndicatorText.scale.x / 2.f;
 		turnIndicatorText.color = darkGreenColor;
-
-
-	}
-
-	for (Entity e : teams[game_state.turn_possesion]) {
-		shooting_system.setAimLoc(e);
 	}
 
 	if (teams[TURN_CODE::NPCAI].size() > 0) {

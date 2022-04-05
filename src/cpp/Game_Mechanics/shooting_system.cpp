@@ -34,12 +34,20 @@ void ShootingSystem::aimUp(Entity e, float amount) {
 	SHOOT_ORIENTATION orientation = (registry.animations.get(e).facingLeft) ? SHOOT_ORIENTATION::LEFT : SHOOT_ORIENTATION::RIGHT;
 
 	if (orientation == SHOOT_ORIENTATION::LEFT) {
-		weapon.aim_angle = (weapon.aim_angle - amount <= pi - weapon.MAX_ANGLE) ? pi - weapon.MAX_ANGLE : weapon.aim_angle - amount;
+		weapon.aim_angle = (weapon.aim_angle - amount <= pi - weapon.MAX_ANGLE) ? pi - weapon.MAX_ANGLE : weapon.aim_angle - amount; 
 	}
 	else {
-		weapon.aim_angle = (weapon.aim_angle + amount >= weapon.MAX_ANGLE) ? weapon.MAX_ANGLE : weapon.aim_angle + amount;
+		if (weapon.aim_angle + amount > twopi) {
+			weapon.aim_angle = 0.0f + amount;
+		}
+		else {
+			if (weapon.aim_angle + amount > weapon.MAX_ANGLE && weapon.aim_angle < pio2) {
+				weapon.aim_angle = weapon.MAX_ANGLE;
+			} else {
+				weapon.aim_angle += amount;
+			}
+		}
 	}
-	// printf("weapons aim angle: %f \n", weapon.aim_angle);
 	setAimLoc(e);
 }
 
@@ -50,10 +58,18 @@ void ShootingSystem::aimDown(Entity e, float amount) {
 	SHOOT_ORIENTATION orientation = (registry.animations.get(e).facingLeft) ? SHOOT_ORIENTATION::LEFT : SHOOT_ORIENTATION::RIGHT;
 
 	if (orientation == SHOOT_ORIENTATION::LEFT) {
-		weapon.aim_angle = (weapon.aim_angle + amount >= pi - weapon.MIN_ANGLE) ? pi - weapon.MIN_ANGLE : weapon.aim_angle + amount;
+		weapon.aim_angle = (weapon.aim_angle + amount >= threepio2 - (twopi - weapon.MIN_ANGLE)) ? threepio2 - (twopi - weapon.MIN_ANGLE) : weapon.aim_angle + amount;
 	}
 	else {
-		weapon.aim_angle = (weapon.aim_angle - amount <= weapon.MIN_ANGLE) ? weapon.MIN_ANGLE : weapon.aim_angle - amount;
+		if (weapon.aim_angle - amount < 0.0f) {
+			weapon.aim_angle = twopi - amount;
+		} else {
+			if (weapon.aim_angle > threepio2 && weapon.aim_angle - amount < weapon.MIN_ANGLE) {
+				weapon.aim_angle = weapon.MIN_ANGLE;
+			} else {
+				weapon.aim_angle -= amount;
+			}
+		}
 	}
 	// printf("weapons aim angle: %f \n", weapon.aim_angle);
 	setAimLoc(e);
@@ -69,14 +85,24 @@ void ShootingSystem::setAimLoc(Entity e) {
 	float x_begin;
 	//right facing
 	if (orientation == SHOOT_ORIENTATION::RIGHT) {
-		if (weapon.aim_angle > pio2) {
-			weapon.aim_angle = pio2 - (weapon.aim_angle - pio2);
+		if (weapon.aim_angle > pio2 && weapon.aim_angle < threepio2) {
+			if (weapon.aim_angle > pi) {
+				weapon.aim_angle = threepio2 + (threepio2 - weapon.aim_angle);
+			}
+			else {
+				weapon.aim_angle = pio2 - (weapon.aim_angle - pio2);
+			}
 		}
 	}
 	//left facing
 	else {
-		if (weapon.aim_angle < pio2) {
-			weapon.aim_angle = pio2 + (pio2 - weapon.aim_angle);
+		if (weapon.aim_angle < pio2 || weapon.aim_angle > threepio2) {
+			if (weapon.aim_angle > threepio2) {
+				weapon.aim_angle = threepio2 - (weapon.aim_angle - threepio2);
+			}
+			else {
+				weapon.aim_angle = pio2 + (pio2 - weapon.aim_angle);
+			}
 		}
 	}
 
@@ -89,9 +115,6 @@ void ShootingSystem::shoot(Entity e) {
 	WeaponBase& weapon = registry.weapons.get(e);
 
 	if (weapon.type == RIFLE) {
-		//float direction_scaler = abs(tanf(weapon.aim_angle));
-		//direction_scaler = clamp(direction_scaler, 0.75f, 0.25f);
-		//printf("direction scaler %f\n", direction_scaler);
 		float xforce = cosf(weapon.aim_angle) * 40.0f;
 		float yforce = -sinf(weapon.aim_angle) * 45.0f;
 
