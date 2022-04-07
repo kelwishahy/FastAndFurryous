@@ -561,8 +561,9 @@ struct DebugComponent {
 	// Note, an empty struct has size 1
 };
 
+// change option timer type
 struct OptionTimer {
-	int timerC;
+	float timerC = 1.f;
 };
 
 struct OptionPlayers {

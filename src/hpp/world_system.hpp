@@ -46,7 +46,8 @@ public:
 
 	void play_startscreen();
 
-	void play_options(int newtimer, int newPlayers);
+// change option timer type
+	void play_options(float newtimer, int newPlayers);
 
 	void play_levels();
 
@@ -65,7 +66,7 @@ public:
 	Game level_one();
 	Game level_two();
 	Game level_three();
-	Game multiplayer();
+	Game multiplayer(float newtimer);
 
 private:
 	// restart level it was in the private 

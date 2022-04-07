@@ -45,7 +45,7 @@ void GameController::init(GLFWwindow* window, MapSystem::Map& map, OrthographicC
 	set_user_input_callbacks();
 
 	timePerTurnMs = game_data.getTimer();
-
+	
 	inAGame = true;
 	player_mode = PLAYER_MODE::MOVING;
 

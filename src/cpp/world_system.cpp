@@ -153,8 +153,9 @@ void WorldSystem::check_for_button_presses() {
 			else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTON2) {
 
 				remove_components();
-				restart_game(multiplayer());
-				audio.play_music(INDUSTRIAL);
+				play_select();
+				// restart_game(multiplayer());
+				// audio.play_music(INDUSTRIAL);
 				break;
 			}
 		
@@ -168,16 +169,17 @@ void WorldSystem::check_for_button_presses() {
 			
 			else if ((registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONC) || (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTOND)) {
 				remove_components();
-				play_options(20, 3);
+				// change option timer type
+				play_options(20.0f, 3);
 				break;
 			}
 			
 			else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONLA) {
 
-				int newtimer;
+				float newtimer;
 				for (Entity e : registry.timer.entities) {
 					OptionTimer timer = registry.timer.get(e);
-					newtimer = decreaseTimer(e, 5);
+					newtimer = decreaseTimer(e, 5.f);
 				}
 
 				int newplayers;
@@ -193,10 +195,10 @@ void WorldSystem::check_for_button_presses() {
 			}
 			else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONRA) {
 
-				int newtimer;
+				float newtimer;
 				for (Entity e : registry.timer.entities) {
 					OptionTimer timer = registry.timer.get(e);
-					newtimer = increaseTimer(e, 5);
+					newtimer = increaseTimer(e, 5.f);
 				}
 
 				int newplayers;
@@ -212,7 +214,7 @@ void WorldSystem::check_for_button_presses() {
 			}
 			else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONLB) {
 
-				int newtimer;
+				float newtimer;
 				for (Entity e : registry.timer.entities) {
 					OptionTimer timer = registry.timer.get(e);
 					newtimer = timer.timerC;
@@ -232,7 +234,7 @@ void WorldSystem::check_for_button_presses() {
 
 			else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONRB) {
 
-				int newtimer;
+				float newtimer;
 				for (Entity e : registry.timer.entities) {
 					OptionTimer timer = registry.timer.get(e);
 					newtimer = timer.timerC;
@@ -251,15 +253,22 @@ void WorldSystem::check_for_button_presses() {
 			}
 
 			else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONGAME) {
+				float newtimer;
+				for (Entity e : registry.timer.entities) {
+					OptionTimer timer = registry.timer.get(e);
+					newtimer = timer.timerC;
+				}
 				remove_components();
-				//restart_game(MAPS::INDUSTRIAL);
-
+				
+				restart_game(multiplayer(newtimer));
+				audio.play_music(INDUSTRIAL);
 				break;
 			}
 
 			else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONCANCEL) {
 				remove_components();
-				play_options(20, 3);
+				// change option timer type
+				play_startscreen();
 
 				break;
 			}
@@ -339,7 +348,8 @@ void WorldSystem::play_startscreen() {
 
 }
 
-void WorldSystem::play_options(int newtimer, int newPlayers) {
+// change option timer type
+void WorldSystem::play_options(float newtimer, int newPlayers) {
 	createMenu(MENU_TYPES::OPTIONS, -0.5);
 
 	vec2 pos1 = { (defaultResolution.x - 980.f) / defaultResolution.x * screenResolution.x, (450.f / defaultResolution.y) * screenResolution.y };
@@ -428,7 +438,7 @@ Game WorldSystem::level_three() {
 
 }
 
-Game WorldSystem::multiplayer() {
+Game WorldSystem::multiplayer(float newtimer) {
 	Game multiplayer;
 	multiplayer.addCat(RIFLE, PLAYER_1_TEAM, { screenResolution.x / 2 - 400, screenResolution.y - 800 }, 100);
 	multiplayer.addCat(RIFLE, PLAYER_1_TEAM, { screenResolution.x / 2 - 100, screenResolution.y - 400 }, 100);
@@ -437,8 +447,10 @@ Game WorldSystem::multiplayer() {
 	multiplayer.addDog(RIFLE, PLAYER_2_TEAM, { screenResolution.x - 200, screenResolution.y - 800 }, 100);
 	multiplayer.addDog(RIFLE, PLAYER_2_TEAM, { screenResolution.x + 400, screenResolution.y - 1000 }, 100);
 	multiplayer.addDog(RIFLE, PLAYER_2_TEAM, { screenResolution.x + 600, screenResolution.y - 400 }, 100);
+	
+	// set time to option timer
+	multiplayer.setTimer(newtimer * 1000.f);
 
-	multiplayer.setTimer(20000.0f);
 	return multiplayer;
 }
 
