@@ -316,18 +316,25 @@ void WorldSystem::set_user_input_callbacks() {
 
 void WorldSystem::play_tutorial() {
 	createButton(vec2{ screenResolution.x / 2, screenResolution.y / 2 }, vec2{ screenResolution.x, screenResolution.y },TEXTURE_IDS::HOWTOMOVE);
+	vec2 scale = set_scale(100.f,100.f);
+	vec2 pos6 = set_pos(300.f, 850.f);
+	createButton(pos6, scale, TEXTURE_IDS::BUTTONCANCEL);
 }
 
 void WorldSystem::play_select() {
 	createMenu(MENU_TYPES::SELECT, 0.75);
 
 	vec2 pos_cat = { (defaultResolution.x / 4.f) / defaultResolution.x * screenResolution.x, (defaultResolution.y / 2.0) / defaultResolution.y * screenResolution.y };
-	vec2 scale = scaleToScreenResolution(vec2(500.f,500.f));
+	vec2 scale = set_scale(500.f,500.f);
 	//vec2 scale = { (500.f / defaultResolution.x) * screenResolution.x, (500.f / defaultResolution.y) * screenResolution.y };
 	createButton(pos_cat, scale,TEXTURE_IDS::BUTTONC);
 	
 	vec2 pos_dog = { (3.1f * defaultResolution.x / 4.f) / defaultResolution.x * screenResolution.x, (defaultResolution.y / 2.0) / defaultResolution.y * screenResolution.y };
 	createButton(pos_dog, scale,TEXTURE_IDS::BUTTOND);
+
+	vec2 pos6 = set_pos(300.f, 850.f);
+	vec2 scale6 = set_scale(100.f,100.f);
+	createButton(pos6, scale6, TEXTURE_IDS::BUTTONCANCEL);
 }
 
 void WorldSystem::play_startscreen() {
@@ -352,23 +359,23 @@ void WorldSystem::play_startscreen() {
 void WorldSystem::play_options(float newtimer, int newPlayers) {
 	createMenu(MENU_TYPES::OPTIONS, -0.5);
 
-	vec2 pos1 = { (defaultResolution.x - 980.f) / defaultResolution.x * screenResolution.x, (450.f / defaultResolution.y) * screenResolution.y };
-	vec2 scale = scaleToScreenResolution(vec2(100.f,100.f));
+	vec2 pos1 = set_pos(980.f, 450.f);
+	vec2 scale = set_scale(100.f,100.f);
 	createButton(pos1, scale, TEXTURE_IDS::BUTTONLA);
 
-	vec2 pos2 = { (defaultResolution.x - 730.f) / defaultResolution.x * screenResolution.x, (450.f / defaultResolution.y) * screenResolution.y };
+	vec2 pos2 = set_pos(730.f, 450.f);
 	createButton(pos2, scale, TEXTURE_IDS::BUTTONRA);
 
-	vec2 pos3 = { (defaultResolution.x - 980.f) / defaultResolution.x * screenResolution.x, (670.f / defaultResolution.y) * screenResolution.y };
+	vec2 pos3 = set_pos(980.f, 670.f);
 	createButton(pos3, scale, TEXTURE_IDS::BUTTONLB);
 
-	vec2 pos4 = { (defaultResolution.x - 730.f) / defaultResolution.x * screenResolution.x, (670.f / defaultResolution.y) * screenResolution.y };
+	vec2 pos4 = set_pos(730.f,670.f);
 	createButton(pos4, scale, TEXTURE_IDS::BUTTONRB);
 
-	vec2 pos5 = { (defaultResolution.x - 1520) / defaultResolution.x * screenResolution.x, (850.f / defaultResolution.y) * screenResolution.y };
+	vec2 pos5 = set_pos(1520.f,850.f);
 	createButton(pos5, scale, TEXTURE_IDS::BUTTONGAME);
 
-	vec2 pos6 = { (defaultResolution.x - 300.f) / defaultResolution.x * screenResolution.x, (850.f / defaultResolution.y) * screenResolution.y };
+	vec2 pos6 = set_pos(300.f,850.f);
 	createButton(pos6, scale, TEXTURE_IDS::BUTTONCANCEL);
 
 	createTimerCounter(newtimer, textManager);
@@ -383,15 +390,18 @@ void WorldSystem::play_options(float newtimer, int newPlayers) {
 void WorldSystem::play_levels() {
 	createMenu(MENU_TYPES::LEVELS, 0.75);
 
-	vec2 pos1 = {(defaultResolution.x - 1400.f) / defaultResolution.x * screenResolution.x, (400.f / defaultResolution.y) * screenResolution.y };
-	vec2 scale = scaleToScreenResolution(vec2(100.f,100.f));	
+	vec2 pos1 = set_pos(1400.f, 400.f);
+	vec2 scale = set_scale(100.f,100.f);
 	createButton(pos1, scale,TEXTURE_IDS::BUTTONL1);
 
-	vec2 pos2 = {(defaultResolution.x - 1000.f) / defaultResolution.x * screenResolution.x, (400.f / defaultResolution.y) * screenResolution.y };
+	vec2 pos2 = set_pos(1000.f,400.f);
 	createButton(pos2, scale,TEXTURE_IDS::BUTTONL2);
 
-	vec2 pos3 = {(defaultResolution.x - 600.f) / defaultResolution.x * screenResolution.x, (400.f / defaultResolution.y) * screenResolution.y };
+	vec2 pos3 = set_pos(600.f, 400.f);
 	createButton(pos3, scale,TEXTURE_IDS::BUTTONL3);
+
+	vec2 pos6 = set_pos(300.f, 850.f);
+	createButton(pos6, scale, TEXTURE_IDS::BUTTONCANCEL);
 
 }
 
@@ -480,4 +490,12 @@ void WorldSystem::remove_components() {
 			registry.remove_all_components_of(e);
 		}
 	}
+}
+
+vec2 WorldSystem::set_pos(float posX, float posY){
+	return {(defaultResolution.x - posX) / defaultResolution.x * screenResolution.x, (posY / defaultResolution.y) * screenResolution.y };
+}
+
+vec2 WorldSystem::set_scale(float scaleX, float scaleY){
+	return scaleToScreenResolution(vec2(scaleX,scaleY));
 }

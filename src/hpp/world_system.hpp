@@ -68,6 +68,9 @@ public:
 	Game level_three();
 	Game multiplayer(float newtimer);
 
+	vec2 set_pos(float posX, float posY);
+	vec2 set_scale(float scaleX, float scaleY);
+
 private:
 	// restart level it was in the private 
 	void restart_game(Game level);
