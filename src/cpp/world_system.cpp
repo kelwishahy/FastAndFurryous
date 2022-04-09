@@ -154,8 +154,6 @@ void WorldSystem::check_for_button_presses() {
 
 				remove_components();
 				play_select();
-				// restart_game(multiplayer());
-				// audio.play_music(INDUSTRIAL);
 				break;
 			}
 		
@@ -306,19 +304,13 @@ void WorldSystem::on_mouse_move(vec2 mouse_position) {
 void WorldSystem::set_user_input_callbacks() {
 	auto cursor_pos_redirect = [](GLFWwindow* wnd, double _0, double _1) { ((WorldSystem*)glfwGetWindowUserPointer(wnd))->on_mouse_move({ _0, _1 }); };
 	glfwSetCursorPosCallback(this->window, cursor_pos_redirect);
-
-	//auto key_redirect = [](GLFWwindow* wnd, int _0, int _1, int _2) { ((WorldSystem*)glfwGetWindowUserPointer(wnd))->on_key(_0, _1, _2); };
-	//glfwSetKeyCallback(wthis->window, key_redirect);*/
-
 	auto mouse_input = [](GLFWwindow* wnd, int _0, int _1, int _2) { ((WorldSystem*)glfwGetWindowUserPointer(wnd))->on_mouse_click(_0, _1, _2); };
 	glfwSetMouseButtonCallback(this->window, mouse_input);
 }
 
 void WorldSystem::play_tutorial() {
 	createButton(vec2{ screenResolution.x / 2, screenResolution.y / 2 }, vec2{ screenResolution.x, screenResolution.y },TEXTURE_IDS::HOWTOMOVE);
-	vec2 scale = set_scale(100.f,100.f);
-	vec2 pos6 = set_pos(300.f, 850.f);
-	createButton(pos6, scale, TEXTURE_IDS::BUTTONCANCEL);
+	cancel_button();
 }
 
 void WorldSystem::play_select() {
@@ -326,15 +318,12 @@ void WorldSystem::play_select() {
 
 	vec2 pos_cat = { (defaultResolution.x / 4.f) / defaultResolution.x * screenResolution.x, (defaultResolution.y / 2.0) / defaultResolution.y * screenResolution.y };
 	vec2 scale = set_scale(500.f,500.f);
-	//vec2 scale = { (500.f / defaultResolution.x) * screenResolution.x, (500.f / defaultResolution.y) * screenResolution.y };
 	createButton(pos_cat, scale,TEXTURE_IDS::BUTTONC);
 	
 	vec2 pos_dog = { (3.1f * defaultResolution.x / 4.f) / defaultResolution.x * screenResolution.x, (defaultResolution.y / 2.0) / defaultResolution.y * screenResolution.y };
 	createButton(pos_dog, scale,TEXTURE_IDS::BUTTOND);
 
-	vec2 pos6 = set_pos(300.f, 850.f);
-	vec2 scale6 = set_scale(100.f,100.f);
-	createButton(pos6, scale6, TEXTURE_IDS::BUTTONCANCEL);
+	cancel_button();
 }
 
 void WorldSystem::play_startscreen() {
@@ -372,17 +361,15 @@ void WorldSystem::play_options(float newtimer, int newPlayers) {
 	vec2 pos4 = set_pos(730.f,670.f);
 	createButton(pos4, scale, TEXTURE_IDS::BUTTONRB);
 
-	vec2 pos5 = set_pos(1520.f,850.f);
-	createButton(pos5, scale, TEXTURE_IDS::BUTTONGAME);
+	vec2 pos5 = set_pos(240.f,910.f);
+	vec2 scale6 = set_scale(224.f,87.f);
+	createButton(pos5, scale6, TEXTURE_IDS::BUTTONGAME);
 
-	vec2 pos6 = set_pos(300.f,850.f);
-	createButton(pos6, scale, TEXTURE_IDS::BUTTONCANCEL);
+	cancel_button();
 
 	createTimerCounter(newtimer, textManager);
-	//createText({ 1025.0f, 390.0f }, 2.0f, { 0.0f, 0.0f, 0.0f }, "20");
 
 	createPlayersCounter(newPlayers, textManager);
-	//createText({ 1045.0f, 615.0f }, 2.0f, { 0.0f, 0.0f, 0.0f }, "3");
 
 }
 
@@ -400,8 +387,7 @@ void WorldSystem::play_levels() {
 	vec2 pos3 = set_pos(600.f, 400.f);
 	createButton(pos3, scale,TEXTURE_IDS::BUTTONL3);
 
-	vec2 pos6 = set_pos(300.f, 850.f);
-	createButton(pos6, scale, TEXTURE_IDS::BUTTONCANCEL);
+	cancel_button();
 
 }
 
@@ -499,3 +485,10 @@ vec2 WorldSystem::set_pos(float posX, float posY){
 vec2 WorldSystem::set_scale(float scaleX, float scaleY){
 	return scaleToScreenResolution(vec2(scaleX,scaleY));
 }
+
+Entity WorldSystem::cancel_button(){
+	vec2 pos6 = set_pos(1700.f, 920.f);
+	vec2 scale6 = set_scale(224.f,87.f);
+	return createButton(pos6, scale6, TEXTURE_IDS::BUTTONCANCEL);
+}
+
