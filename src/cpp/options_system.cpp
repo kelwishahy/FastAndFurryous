@@ -15,15 +15,3 @@ int increaseTimer(Entity entity, float amount) {
 	timer_count = (timer_count < 50.f) ? timer_count + amount : 50.f;
 	return timer_count;
 }
-
-int decreasePlayers(Entity entity, int amount) {
-	auto& player_count = registry.players.get(entity).playersN;
-	player_count = (player_count - amount >= 3) ? player_count - amount : 3;
-	return player_count;
-}
-
-int increasePlayers(Entity entity, int amount) {
-	auto& player_count = registry.players.get(entity).playersN;
-	player_count = (player_count < 10) ? player_count + amount : 10;
-	return player_count;
-}

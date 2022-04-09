@@ -168,7 +168,7 @@ void WorldSystem::check_for_button_presses() {
 			else if ((registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONC) || (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTOND)) {
 				remove_components();
 				// change option timer type
-				play_options(20.0f, 3);
+				play_options(20.0f);
 				break;
 			}
 			
@@ -180,14 +180,8 @@ void WorldSystem::check_for_button_presses() {
 					newtimer = decreaseTimer(e, 5.f);
 				}
 
-				int newplayers;
-				for (Entity e : registry.players.entities) {
-					OptionPlayers players = registry.players.get(e);
-					newplayers = players.playersN;
-				}
-
 				remove_components();
-				play_options(newtimer, newplayers);
+				play_options(newtimer);
 
 				break;
 			}
@@ -199,56 +193,50 @@ void WorldSystem::check_for_button_presses() {
 					newtimer = increaseTimer(e, 5.f);
 				}
 
-				int newplayers;
-				for (Entity e : registry.players.entities) {
-					OptionPlayers players = registry.players.get(e);
-					newplayers = players.playersN;
-				}
-
 				remove_components();
-				play_options(newtimer, newplayers);
+				play_options(newtimer);
 
 				break;
 			}
-			else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONLB) {
+			// else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONLB) {
 
-				float newtimer;
-				for (Entity e : registry.timer.entities) {
-					OptionTimer timer = registry.timer.get(e);
-					newtimer = timer.timerC;
-				}
+			// 	float newtimer;
+			// 	for (Entity e : registry.timer.entities) {
+			// 		OptionTimer timer = registry.timer.get(e);
+			// 		newtimer = timer.timerC;
+			// 	}
 
-				int newplayers;
-				for (Entity e : registry.players.entities) {
-					OptionPlayers players = registry.players.get(e);
-					newplayers = decreasePlayers(e, 1);
-				}
+			// 	int newplayers;
+			// 	for (Entity e : registry.players.entities) {
+			// 		OptionPlayers players = registry.players.get(e);
+			// 		newplayers = decreasePlayers(e, 1);
+			// 	}
 
-				remove_components();
-				play_options(newtimer, newplayers);
+			// 	remove_components();
+			// 	play_options(newtimer, newplayers);
 
-				break;
-			}
+			// 	break;
+			// }
 
-			else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONRB) {
+			// else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONRB) {
 
-				float newtimer;
-				for (Entity e : registry.timer.entities) {
-					OptionTimer timer = registry.timer.get(e);
-					newtimer = timer.timerC;
-				}
+			// 	float newtimer;
+			// 	for (Entity e : registry.timer.entities) {
+			// 		OptionTimer timer = registry.timer.get(e);
+			// 		newtimer = timer.timerC;
+			// 	}
 
-				int newplayers;
-				for (Entity e : registry.players.entities) {
-					OptionPlayers players = registry.players.get(e);
-					newplayers = increasePlayers(e, 1);
-				}
+			// 	int newplayers;
+			// 	for (Entity e : registry.players.entities) {
+			// 		OptionPlayers players = registry.players.get(e);
+			// 		newplayers = increasePlayers(e, 1);
+			// 	}
 
-				remove_components();
+			// 	remove_components();
 
-				play_options(newtimer, newplayers);
-				break;
-			}
+			// 	play_options(newtimer, newplayers);
+			// 	break;
+			// }
 
 			else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONGAME) {
 				float newtimer;
@@ -345,7 +333,7 @@ void WorldSystem::play_startscreen() {
 }
 
 // change option timer type
-void WorldSystem::play_options(float newtimer, int newPlayers) {
+void WorldSystem::play_options(float newtimer) {
 	createMenu(MENU_TYPES::OPTIONS, -0.5);
 
 	vec2 pos1 = set_pos(980.f, 450.f);
@@ -355,11 +343,11 @@ void WorldSystem::play_options(float newtimer, int newPlayers) {
 	vec2 pos2 = set_pos(730.f, 450.f);
 	createButton(pos2, scale, TEXTURE_IDS::BUTTONRA);
 
-	vec2 pos3 = set_pos(980.f, 670.f);
-	createButton(pos3, scale, TEXTURE_IDS::BUTTONLB);
+	// vec2 pos3 = set_pos(980.f, 670.f);
+	// createButton(pos3, scale, TEXTURE_IDS::BUTTONLB);
 
-	vec2 pos4 = set_pos(730.f,670.f);
-	createButton(pos4, scale, TEXTURE_IDS::BUTTONRB);
+	// vec2 pos4 = set_pos(730.f,670.f);
+	// createButton(pos4, scale, TEXTURE_IDS::BUTTONRB);
 
 	vec2 pos5 = set_pos(240.f,910.f);
 	vec2 scale6 = set_scale(224.f,87.f);
@@ -369,7 +357,7 @@ void WorldSystem::play_options(float newtimer, int newPlayers) {
 
 	createTimerCounter(newtimer, textManager);
 
-	createPlayersCounter(newPlayers, textManager);
+//	createPlayersCounter(newPlayers, textManager);
 
 }
 
@@ -463,11 +451,6 @@ void WorldSystem::remove_components() {
 	}
 	if (registry.timer.size() > 0) {
 		for (Entity e : registry.timer.entities) {
-			registry.remove_all_components_of(e);
-		}
-	}
-	if (registry.players.size() > 0) {
-		for (Entity e : registry.players.entities) {
 			registry.remove_all_components_of(e);
 		}
 	}
