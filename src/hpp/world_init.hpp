@@ -35,5 +35,3 @@ Entity createHealthCounter(Entity origin, int health, TextManager& textManager);
 // change option timer type
 Entity createTimerCounter(float newtimer, TextManager& textManager);
 
-Entity createPlayersCounter(int newplayers, TextManager& textManager);
-

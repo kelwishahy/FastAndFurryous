@@ -566,10 +566,6 @@ struct OptionTimer {
 	float timerC = 1.f;
 };
 
-struct OptionPlayers {
-	int playersN;
-};
-
 void remove_children(Entity e);
 std::vector<Entity> get_all_children(Entity e);
 void change_animation(Entity e, TEXTURE_IDS tex_id);
