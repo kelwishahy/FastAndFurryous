@@ -1,9 +1,12 @@
 #include "../hpp/components.hpp"
-#include "../hpp/render_system.hpp" // for gl_has_errors
+#include <hpp/tiny_ecs_registry.hpp>
 
 // stlib
 #include <iostream>
 #include <sstream>
+#include <glm/gtx/extended_min_max.hpp>
+
+#include "hpp/audio_manager.hpp"
 
 Debug debugging;
 float death_timer_counter_ms = 3000;
@@ -101,8 +104,8 @@ bool Mesh::loadMeshFromObj(std::string obj_path, std::vector<ColoredVertex>& out
 	glm::vec3 min_position = { 99999,99999,99999 };
 	for (ColoredVertex& pos : out_vertices)
 	{
-		max_position = glm::max(max_position, pos.position);
-		min_position = glm::min(min_position, pos.position);
+		max_position = max(max_position, pos.position);
+		min_position = min(min_position, pos.position);
 	}
 	if(abs(max_position.z - min_position.z)<0.001)
 		max_position.z = min_position.z+1; // don't scale z direction when everythin is on one plane
@@ -115,4 +118,265 @@ bool Mesh::loadMeshFromObj(std::string obj_path, std::vector<ColoredVertex>& out
 		pos.position = ((pos.position - min_position) / size3d) - glm::vec3(0.5f, 0.5f, 0.5f);
 
 	return true;
+}
+
+void remove_children(Entity e) {
+	if (registry.parentEntities.has(e)) {
+		const ChildEntities children = registry.parentEntities.get(e);
+
+		for (const auto& pair : children.child_data_map) {
+			remove_children(pair.second);
+			registry.remove_all_components_of(pair.second);
+		}
+	}
+}
+
+std::vector<Entity> get_all_children(Entity e) {
+
+	std::vector<Entity> allchildren;
+
+	if (registry.parentEntities.has(e)) {
+		const ChildEntities children = registry.parentEntities.get(e);
+
+		for (auto pair : children.child_data_map) {
+			allchildren.push_back(pair.second);
+			for (Entity next_level_child : get_all_children(pair.second)) {
+				allchildren.push_back(next_level_child);
+			}
+		}
+
+	}
+
+	return allchildren;
+
+}
+///////////////////CAT MEMBER functions///////////////////////////////
+//////////////////////////////////////////////////////////////////////
+void Cat::animate_walk() {
+
+
+	//Animate the cat's main torso
+	change_animation(this->character, TEXTURE_IDS::CAT_WALK);
+
+	//This is scuffed but we can just look for the extraAnim we need
+	for (Entity rig : registry.animations.entities) {
+
+		Animation& extra = registry.animations.get(rig);
+		if (extra.name == "cat_head") {
+			//Animate the head
+			if (check_if_part_of_parent(this->character, rig)) {
+				change_animation(rig, TEXTURE_IDS::CAT_SIDE_BLINK);
+			}
+		}
+	}
+
+}
+
+void Cat::animate_idle() {
+
+	change_animation(this->character, TEXTURE_IDS::CAT_FRONT_IDLE);
+
+	for (Entity rig : registry.animations.entities) {
+
+		Animation& extra = registry.animations.get(rig);
+		if (extra.name == "cat_head") {
+			//Animate the head
+			if (check_if_part_of_parent(this->character, rig)) {
+				change_animation(rig, TEXTURE_IDS::CAT_FRONT_BLINK);
+			}
+		}
+
+	}
+}
+
+void Cat::animate_jump() {
+	change_animation(this->character, TEXTURE_IDS::CAT_JUMP);
+
+	for (Entity rig : registry.animations.entities) {
+
+		Animation& extra = registry.animations.get(rig);
+		if (extra.name == "cat_head" && rig) {
+			//Animate the head
+			if (check_if_part_of_parent(this->character, rig)) {
+				change_animation(rig, TEXTURE_IDS::CAT_FRONT_BLINK);
+			}
+		}
+	}
+}
+
+void Cat::animate_hurt() {
+	change_animation(this->character, TEXTURE_IDS::CAT_HURT);
+
+	for (Entity rig : registry.animations.entities) {
+
+		Animation& extra = registry.animations.get(rig);
+		if (extra.name == "cat_head") {
+			//Animate the head
+			if (check_if_part_of_parent(this->character, rig)) {
+				change_animation(rig, TEXTURE_IDS::CAT_HURT_FACE);
+			}
+		}
+
+	}
+}
+
+void Cat::animate_dead() {
+
+	registry.renderRequests.remove(this->character);
+	registry.renderRequests.insert(this->character, {
+		TEXTURE_IDS::CAT_DEAD,
+		SHADER_PROGRAM_IDS::TEXTURE,
+		GEOMETRY_BUFFER_IDS::TEXTURED_QUAD
+	});
+}
+
+void Cat::animate_aim() {
+
+	change_animation(this->character, TEXTURE_IDS::CAT_SIDE_IDLE);
+	for (Entity rig : registry.animations.entities) {
+		Animation& extra = registry.animations.get(rig);
+		if (extra.name == "cat_head") {
+			//Animate the head
+			if (check_if_part_of_parent(this->character, rig)) {
+				change_animation(rig, TEXTURE_IDS::CAT_SIDE_BLINK);
+			}
+		}
+	}
+}
+
+void Cat::play_hurt_sfx() {
+	audio.play_sfx(CAT_SCREAM);
+}
+//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
+
+///////////////////DOG MEMBER functions///////////////////////////////
+//////////////////////////////////////////////////////////////////////
+void Dog::animate_walk() {
+
+	///Animate the cat's main torso
+	change_animation(this->character, TEXTURE_IDS::DOG_WALK);
+
+	//This is scuffed but we can just look for the extraAnim we need
+	for (Entity rig : registry.animations.entities) {
+
+		Animation& extra = registry.animations.get(rig);
+		if (extra.name == "dog_head") {
+			//Animate the head
+			if (check_if_part_of_parent(this->character, rig)) {
+				change_animation(rig, TEXTURE_IDS::DOG_SIDE_BLINK);
+			}
+		}
+	}
+}
+
+void Dog::animate_idle() {
+
+	change_animation(this->character, TEXTURE_IDS::DOG_FRONT_IDLE);
+	std::vector<Entity> children = get_all_children(this->character);
+	for (Entity rig : registry.animations.entities) {
+
+		Animation& extra = registry.animations.get(rig);
+		if (extra.name == "dog_head") {
+			//Animate the head
+			if (check_if_part_of_parent(this->character, rig)) {
+				change_animation(rig, TEXTURE_IDS::DOG_FRONT_BLINK);
+			}
+		}
+
+	}
+}
+
+void Dog::animate_jump() {
+
+	change_animation(this->character, TEXTURE_IDS::DOG_JUMP);
+
+	for (Entity rig : registry.animations.entities) {
+
+		Animation& extra = registry.animations.get(rig);
+		if (extra.name == "dog_head") {
+			//Animate the head
+			if (check_if_part_of_parent(this->character, rig)) {
+				change_animation(rig, TEXTURE_IDS::DOG_FRONT_BLINK);
+			}
+		}
+
+	}
+}
+
+void Dog::animate_hurt() {
+
+	change_animation(this->character, TEXTURE_IDS::DOG_HURT);
+
+	for (Entity rig : registry.animations.entities) {
+
+		Animation& extra = registry.animations.get(rig);
+		if (extra.name == "dog_head") {
+			//Animate the head
+			if (check_if_part_of_parent(this->character, rig)) {
+				change_animation(rig, TEXTURE_IDS::DOG_HURT_FACE);
+			}
+		}
+
+	}
+}
+
+void Dog::animate_dead() {
+	registry.renderRequests.remove(this->character);
+	registry.renderRequests.insert(this->character, {
+		TEXTURE_IDS::DOG_DEAD,
+		SHADER_PROGRAM_IDS::TEXTURE,
+		GEOMETRY_BUFFER_IDS::TEXTURED_QUAD
+		});
+}
+
+void Dog::animate_aim() {
+
+	change_animation(this->character, TEXTURE_IDS::DOG_SIDE_IDLE);
+	for (Entity rig : registry.animations.entities) {
+		Animation& extra = registry.animations.get(rig);
+		if (extra.name == "dog_head") {
+			//Animate the head
+			if (check_if_part_of_parent(this->character, rig)) {
+				change_animation(rig, TEXTURE_IDS::DOG_SIDE_BLINK);
+			}
+		}
+	}
+}
+
+void Dog::play_hurt_sfx() {
+	audio.play_sfx(DOG_BARK);
+}
+//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
+void change_animation(Entity e, TEXTURE_IDS tex_id) {
+
+	assert(registry.animations.has(e));
+	Animation& animation = registry.animations.get(e);
+	animation.anim_state = tex_id;
+
+}
+
+bool check_if_part_of_parent(Entity e, Entity child) {
+	std::vector<Entity> children = get_all_children(e);
+	for (Entity check_child : children) {
+		if (child == check_child) {
+			return true;
+		}
+	}
+	return false;
+}
+
+//------------CHARACTER STATE MACHINE
+void CharacterStateMachine::init(CharacterState* starting_state) {
+	curr_state = starting_state;
+	curr_state->enter();
+}
+
+void CharacterStateMachine::changeState(CharacterState* new_state) {
+	curr_state->exit();
+	curr_state = new_state;
+	curr_state->enter();
 }

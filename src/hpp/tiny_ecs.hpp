@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <vector>
 #include <unordered_map>
-#include <set>
 #include <functional>
 #include <typeindex>
 #include <assert.h>
@@ -12,19 +11,19 @@
 class Entity {
 
 	unsigned int id;
-	static unsigned int id_count; // starts from 1, entit 0 is the default initialization
+	static unsigned int id_count;
+	float depth;
 
-	public:
+public:
 	// Entity constructor
 	Entity() {
-		// Note, indices of already deleted entities arent re-used in this simple implementation.
 		id = id_count++;
-
-		// TO-DO:
-		// Allow indices of deleted entities to be reused
+		depth = 0.5f;
 	}
 
-	operator unsigned int() { return id; } // this enables automatic casting to int
+	operator unsigned int() { return id; }
+	float getDepth() { return depth; }
+	void setDepth(float depth) { this->depth = depth; }
 };
 
 // Common interface to refer to all containers in the ECS registry

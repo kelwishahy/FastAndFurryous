@@ -1,47 +1,57 @@
 # Fast and Furryous
 
-## Milestone 2: Minimally Playable Game
-
-### Improved Gameplay
-- Game logic to user input
-  - File: `src/cpp/ai_system.cpp`
-  - Function: `AISystem::init()`
-  - Relavant Line Numbers: `34 - 81`
-- Sprite sheet animation
-  - File: `src/cpp/render_system.cpp`
-  - Function: `RenderSystem::draw()`
-  - Relavant Line Numbers: `66 - 69`
-- New integrated assets (audio)
-  - File: `src/cpp/world_system.cpp`
-  - Function: `WorldSystem::init()`
-  - Relavant Line Numbers: `61 - 64`
-- New integrated assets (textures)
-  - File: `src/hpp/render_system.hpp`
-  - Functions: `RenderSystem::drawTiles()`, `RenderSystem::drawBackground()`
-  - Relavant Line Numbers: `31 - 43, 88, 91`
-- Basic user tutorial/help
-  - File: `src/cpp/world_init.cpp`
-  - Functions: `createMenu()`, `createButton()`
-  - Relavant Line Numbers: `160 - 221`
+## Milestone 3: Fully Playable Game
 
 ### Playability
-- Gameplay mechanics
+- Gameplay
   - File: `src/cpp/game_controller.cpp`
   - Function: `GameController::step()`
-  - Relavant Line Numbers: `54 - 117`
+  - Relavant Line Numbers: `63 - 146`
+
+- Two-player gamemode
+  - File: `src/cpp/world_system.cpp`
+  - Function: `WorldSystem::multiplayer()`
+  - Relavant Line Numbers: `431 - 443`
+
+- On-screen text
+  - File: `src/cpp/world_init.cpp`
+  - Function: `createText()`
+  - Relavant Line Numbers: `413 - 450`
+
+- Crosshair angle indicators:
+  - File: `src/cpp/world_init.cpp`
+  - Function: `createCrosshair()`
+  - Relavant Line Numbers: `450 - 494`
+
+### Robustness
+The game was profiled using [Tracy](https://github.com/wolfpld/tracy#tracy-profiler), and optimization was done in multiple bottleneck locations.
+The following functions were optimized for better performance and memory management:
+- `RenderSystem::drawText()` in `src/cpp/render_system.cpp`
+- `GameController::step()` in `src/cpp/game_controller.cpp`
+- `RenderSystem::transform()` in `src/cpp/render_system.cpp`
+- `createText()` in `src/cpp/world_init.cpp`
+- `TextManager::getGlyphs()`, `TextManager::getItalicGlyphs()`, and `TextManager::getBoldGlyphs()` in `src/hpp/text_manager.hpp`
 
 ### Stability
-- Consistent game resolution
-  - File: `src/cpp/render_system.cpp`
-  - Function: `RenderSystem::init()`
-  - Relavant Line Numbers: `397 - 405`
+- Consistent resolution
+  - File: `src/cpp/common.cpp`
+  - Function: `scaleToScreenResolution()`
+  - Relavant Line Numbers: `88 - 92`
     
 ### Creative Component
-- Background music and sound effects
-  - File: `src/cpp/world_system.cpp`
-  - Function: `WorldSystem::Init()`
-  - Relavant Line Numbers: `50 - 73`
-- Complex projectile motion
-  - File: `src/cpp/Game_Mechanics/shooting_system.cpp`
-  - Function: `ShootingSystem::step()`
-  - Relavant Line Numbers: `36 - 39`
+- Camera that is controlled with mouse input
+  - File: `src/cpp/game_controller.cpp`
+  - Function: `GameController::moveCamera()`
+  - Relavant Line Numbers: `148 - 170`
+
+- Parallax scrolling backgrounds
+  - File: `src/cpp/map.cpp`
+  - Function: `MapSystem::Map::build()`
+  - Relavant Line Numbers: `65 - 181`
+
+- Characters sprites are faded when not selected
+  - File: `src/cpp/render_system.cpp`
+  - Function: `RenderSystem::animateSprite()`
+  - Relavant Line Numbers: `169 - 174, 204`
+
+

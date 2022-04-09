@@ -28,3 +28,12 @@ void APIENTRY glDebugOutput(GLenum source, GLenum type, unsigned int id, GLenum 
 struct Transform {
 	glm::mat4 mat = glm::mat4(1.0); // 4x4 Identity matrix
 };
+
+// Default screen resolution
+constexpr glm::vec2 defaultResolution = glm::vec2(1920.f, 1080.f);
+
+// Global screen resolution
+extern glm::vec2 screenResolution;
+
+// scale to screen size
+glm::vec2 scaleToScreenResolution(glm::vec2 defaultScale);

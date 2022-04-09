@@ -4,9 +4,14 @@
 #include "hpp/ai_system.hpp"
 #include "hpp/Game_Mechanics/health_system.hpp"
 
-GameController::GameController() {
-	inAGame = false;
-	//ShootingSystem shooting_system(renderer);
+#include <glm/vec2.hpp>	
+#include <hpp/tiny_ecs_registry.hpp>
+#include <hpp/components.hpp>
+
+
+
+GameController::GameController() : inAGame(false) {
+
 }
 
 GameController::~GameController() {
@@ -14,10 +19,16 @@ GameController::~GameController() {
 }
 
 //initialize stuff here
-void GameController::init(RenderSystem* renderer, GLFWwindow* window) {
-	//Set renderer
-	this->renderer = renderer;
+void GameController::init(GLFWwindow* window, MapSystem::Map& map, OrthographicCamera& camera, TextManager& textManager, Game game) {
 	this->window = window;
+	this->gameMap = map;
+	this->camera = &camera;
+	this->textManager = textManager;
+	this->game_data = game;
+	this->mousePosition = scaleToScreenResolution(defaultResolution/2.f);
+	this->mouseDeadzone = scaleToScreenResolution({ 250.f, 250.f }).x;
+	this->mouseTriggerArea = scaleToScreenResolution({ 300.f, 150.f });
+
 
 	//Init game metadata
 	game_state.turn_number += 1;
@@ -27,157 +38,219 @@ void GameController::init(RenderSystem* renderer, GLFWwindow* window) {
 	build_map();
 
 	//Building the teams via json
-	numPlayersInTeam = 1; // Default number of players for each team
 	init_player_teams();
 
 	//Setting player key callback
 	//glfwSetWindowUserPointer(window, this);
-	auto key_redirect = [](GLFWwindow* wnd, int _0, int _1, int _2, int _3) { ((GameController*)glfwGetWindowUserPointer(wnd))->on_player_key(_0, _1, _2, _3); };
-	glfwSetKeyCallback(this->window, key_redirect);
-	auto cursor_pos_redirect = [](GLFWwindow* wnd, double _0, double _1) { ((GameController*)glfwGetWindowUserPointer(wnd))->on_mouse_move({ _0, _1 }); };
-	glfwSetCursorPosCallback(this->window, cursor_pos_redirect);
+	set_user_input_callbacks();
 
+	timePerTurnMs = game_data.getTimer();
+	
 	inAGame = true;
 	player_mode = PLAYER_MODE::MOVING;
 
-	this->shooting_system.init(renderer);
-	this->timePerTurnMs = 20000.0;
+	ai.init(shooting_system, teams[TURN_CODE::PLAYER1]);
 
-	ai.init(shooting_system);
+	ui.init(textManager);
 
-	//TEST TEXT
-	createText({ 10.0f, 10.0f }, 1.0f, { 0.172f, 0.929f, 0.286f }, "~The quick brown fox~ $jumped over the lazy$ dog !., 1234567890");
-	ai.init(shooting_system);
+	turnIndicatorScale = scaleToScreenResolution({ 2.0f, 2.f }).x;
+	turnIndicator = createText(textManager, "", turnPosition, turnIndicatorScale, redColor);
+
+	timerScale = scaleToScreenResolution({ 1.5f, 1.5f }).x;
+	timeIndicator = createText(textManager, "", scaleToScreenResolution({ 2 * defaultResolution.x / 4.f + this->camera->getPosition().x, 110.0f }), timerScale, { 0.172f, 0.929f, 0.286f });
 }
 
 void GameController::step(float elapsed_ms) {
 	//While a game is happening make sure the players are controlling from here
 	glfwSetWindowUserPointer(window, this);
-	//While a game is happening make sure the players are controlling from here
+
+	//Pan camera based on mouse position
+	moveCamera();
+	//Step the player state machines
+
+	for (Character* chara : registry.characters.components) {
+		chara->state_machine.getCurrentState()->step(elapsed_ms);
+		if (chara->state_machine.getCurrentState()->next_turn) {
+			chara->state_machine.getCurrentState()->next_turn = false;
+			chara->state_machine.changeState(chara->idle_state);
+			next_turn();
+			chara->state_machine.getCurrentState()->set_A_key_state(glfwGetKey(window, GLFW_KEY_A));
+			chara->state_machine.getCurrentState()->set_D_key_state(glfwGetKey(window, GLFW_KEY_D));
+		}
+	}
+
 	shooting_system.step(elapsed_ms);
+	ui.step(elapsed_ms);
+
 	handle_collisions();
 
-	// change the animation type depending on the velocity
-	for (Entity e : registry.animations.entities) {
-		if (registry.players.has(e)) {
-			Motion& catMotion = registry.motions.get(e);
-			Animation& catAnimation = registry.animations.get(e);
+	turnPosition = scaleToScreenResolution({ 2 * defaultResolution.x / 4.f + camera->getPosition().x,  30.0f });
+	auto& turnIndicatorText = registry.texts.get(turnIndicator);
+	auto& turnIndicatorPosition = registry.motions.get(turnIndicator).position;
 
-			if (catMotion.velocity.x == 0) {
-				catAnimation.animation_type = IDLE;
-			}
-			if (catMotion.velocity.x != 0) {
-				catAnimation.animation_type = WALKING;
-			}
-			if (catMotion.velocity.y < 0) {
-				catAnimation.animation_type = JUMPING;
-			}
-			if (catMotion.velocity.x < 0) {
-				catAnimation.facingLeft = true;
-				shooting_system.setAimLoc(e);
-			}
-			if (catMotion.velocity.x > 0) {
-				catAnimation.facingLeft = false;
-				shooting_system.setAimLoc(e);
-			}
-		}
+	if (game_state.turn_possesion == PLAYER1) {
+		turnIndicatorText.text = "PLAYER 1'S TURN";
+		turnIndicatorPosition = turnPosition;
+		turnIndicatorPosition.x = turnIndicatorPosition.x - turnIndicatorText.scale.x / 2.f;
+		turnIndicatorText.color = redColor;
+	} else if (game_state.turn_possesion == PLAYER2) {
+		turnIndicatorText.text = "PLAYER 2'S TURN";
+		turnIndicatorPosition = turnPosition;
+		turnIndicatorPosition.x = turnIndicatorPosition.x - turnIndicatorText.scale.x / 2.f;
+	} else if (game_state.turn_possesion == AI) {
+		turnIndicatorText.text = "COMPUTER'S TURN";
+		turnIndicatorPosition = turnPosition;
+		turnIndicatorPosition.x = turnIndicatorPosition.x - turnIndicatorText.scale.x / 2.f;
+	} else if (game_state.turn_possesion == NPCAI) {
+		turnIndicatorText.text = "COMPUTER'S TURN";
+		turnIndicatorPosition = turnPosition;
+		turnIndicatorPosition.x = turnIndicatorPosition.x - turnIndicatorText.scale.x / 2.f;
+		turnIndicatorText.color = darkGreenColor;
+
+
 	}
 
-	for (int i = 0; i < player1_team.size(); i++) {
-		auto& e = player1_team[i];
+	for (Entity e : teams[game_state.turn_possesion]) {
+		shooting_system.setAimLoc(e);
+	}
+
+	for (int i = 0; i < teams[TURN_CODE::PLAYER1].size(); i++) {
+		auto e = teams[TURN_CODE::PLAYER1][i];
 		if (registry.health.get(e).hp == 0) {
-			player1_team.erase(player1_team.begin() + i);
-			registry.remove_all_components_of(e);
-			inAGame = false;
+			teams[TURN_CODE::PLAYER1].erase(teams[TURN_CODE::PLAYER1].begin() + i);
+			remove_children(e);
+			registry.animations.remove(e);
+			registry.rigidBodies.remove(e);
+			Character* chara = registry.characters.get(e);
+			chara->state_machine.changeState(chara->dead_state);
 		}
-
-		// if (player1_team.size() == 0) {
-		// 	restart_current_match();
-		// }
 	}
 
-	for (int i = 0; i < npcai_team.size(); i++) {
-		auto e = npcai_team[i];
+	for (int i = 0; i < teams[TURN_CODE::PLAYER2].size(); i++) {
+		const auto e = teams[TURN_CODE::PLAYER2][i];
 		if (registry.health.get(e).hp == 0) {
-			npcai_team.erase(npcai_team.begin() + i);
-			registry.remove_all_components_of(e);
+			teams[TURN_CODE::PLAYER2].erase(teams[TURN_CODE::PLAYER2].begin() + i);
+			remove_children(e);
+			registry.animations.remove(e);
+			registry.rigidBodies.remove(e);
+			Character* chara = registry.characters.get(e);
+			chara->state_machine.changeState(chara->dead_state);
 		}
-
-		// if (npcai_team.size() == 0) {
-		// 	restart_current_match();
-		// }
 	}
 
-	// decrementTurnTime(elapsed_ms);
+	for (int i = 0; i < teams[TURN_CODE::NPCAI].size(); i++) {
+		const auto e = teams[TURN_CODE::NPCAI][i];
+		if (registry.health.get(e).hp == 0) {
+			teams[TURN_CODE::NPCAI].erase(teams[TURN_CODE::NPCAI].begin() + i);
+			remove_children(e);
+			registry.animations.remove(e);
+			//registry.rigidBodies.remove(e);
+			Character* chara = registry.characters.get(e);
+			chara->state_machine.changeState(chara->dead_state);
+		}
+	}
+	if (teams[TURN_CODE::NPCAI].size() > 0) {
+		int i = rand() % teams[TURN_CODE::PLAYER1].size();
+		ai.step(elapsed_ms, game_state.turn_possesion, &selected_ai, teams[TURN_CODE::PLAYER1][i]);
+	}
 
-	ai.step(elapsed_ms, game_state.turn_possesion);
 	// if (game_state.turn_possesion == TURN_CODE::NPCAI) next_turn();
 	decrementTurnTime(elapsed_ms);
+
 }
 
+void GameController::moveCamera() {
+	auto mousePos = mousePosition.x + camera->getPosition().x;
+	auto rightDist = abs(mousePos - camera->getCameraRight().x);
+	auto leftDist = abs(mousePos - camera->getPosition().x);
+
+	if (mousePosition.y > mouseDeadzone) {
+		if (camera->getCameraRight().x < 2 * screenResolution.x) {
+			if (rightDist < mouseTriggerArea.x && rightDist > mouseTriggerArea.y) {
+				camera->setPosition(camera->getPosition() + vec3(3.f, 0.f, 0.f));
+			} else if (rightDist < mouseTriggerArea.y) {
+				camera->setPosition(camera->getPosition() + vec3(6.f, 0.f, 0.f));
+			}
+		}
+
+		if (camera->getPosition().x > 0.f) {
+			if (leftDist < mouseTriggerArea.x && leftDist > mouseTriggerArea.y) {
+				camera->setPosition(camera->getPosition() + vec3(-3.f, 0.f, 0.f));
+			} else if (leftDist < mouseTriggerArea.y) {
+				camera->setPosition(camera->getPosition() + vec3(-6.f, 0.f, 0.f));
+			}
+		}
+	}
+}
+
+
 void GameController::decrementTurnTime(float elapsed_ms) {
+	// registry.remove_all_components_of(timeIndicator);
+	uint timePerTurnSec = uint(timePerTurnMs / 1000);
 	if (timePerTurnMs <= 0) {
+		Character* c = registry.characters.get(curr_selected_char);
+		c->state_machine.changeState(c->idle_state);
 		next_turn();
-		timePerTurnMs = 20000.0;
+		timePerTurnMs = game_data.getTimer();
 	} else {
 		timePerTurnMs -= elapsed_ms;
 	}
+	auto& timerPosition = registry.motions.get(timeIndicator);
+	auto& timerText = registry.texts.get(timeIndicator);
+	timerText.text = std::to_string(timePerTurnSec) + " seconds left!";
+	timerPosition.position = scaleToScreenResolution({ 2 * defaultResolution.x / 4.f + camera->getPosition().x, 110.0f });
+	timerPosition.position.x = timerPosition.position.x - timerText.scale.x / 2.f;
 }
 
 
 void GameController::build_map() {
-	const int width = renderer->getScreenWidth();
-	const int height = renderer->getScreenHeight();
-
-	// Move the walls off screen
-	// Floor
-	// createWall({ width / 2, height + 10 }, width, 10);
+	const int width = screenResolution.x;
+	const int height = screenResolution.y;
 	
-	// //Left Wall
+	//Left Wall
 	createWall({ -10, height / 2 }, 10, height - 10);
-	//
-	// //Right Wall
-	createWall({ width + 10, height / 2 }, 10, height);
-	//
-	// //Ceiling
-	createWall({ width / 2, -10 }, width, 10);
 
-	this->gameMap = Map();
-	gameMap.init();
-	renderer->setTileMap(gameMap);
+	//Right Wall
+	createWall({ 2 * width + 10, height / 2 }, 10, height);
+
+	gameMap.build();
 }
 
 void GameController::init_player_teams() {
+	std::vector<Entity> player1_team;
+	std::vector<Entity> player2_team;
+	std::vector<Entity> ai_team;
+	std::vector<Entity> npcai_team;
 
-	if (numPlayersInTeam < 1) {
-		printf("CRITICAL ERROR: NO TEAMS CAN BE INITIALIZED");
-		assert(false);
+	for (Game::Character character : game_data.getCharacters()) {
+		Entity e = character.animal == ANIMAL::CAT ? createCat(character.weapon, character.starting_pos, character.health, this->window) : createDog(character.weapon, character.starting_pos, character.health, this->window);
+
+		Character* chara = registry.characters.get(e);
+		chara->init();
+		if (character.alignment == AI_TEAM || character.alignment == NPC_AI_TEAM) {
+			chara->state_machine.setAI(true);
+		}
+
+		if (character.alignment == TEAM::PLAYER_1_TEAM) {
+			player1_team.push_back(e);
+		} else if (character.alignment == TEAM::PLAYER_2_TEAM) {
+			player2_team.push_back(e);
+		} else if (character.alignment == TEAM::AI_TEAM) {
+			registry.ais.emplace(e);
+			ai_team.push_back(e);
+		} else {
+			registry.ais.emplace(e);
+			npcai_team.push_back(e);
+		}
 	}
-
-	const int width = renderer->getScreenWidth();
-	const int height = renderer->getScreenHeight();
-
-	// Init the player team
-	// If our game gets more complex I'd probably abstract this out an have an Entity hierarchy -Fred
-	for (int i = 0; i < numPlayersInTeam; i++) {
-		Entity player_cat = createCat({ width / 2 - 200, height - 400 });
-		player1_team.push_back(player_cat);
-		curr_selected_char = player_cat;
-	}
-
-	// Init npcai team
-	// NOTE: We should add some kind of bool to check if we should init a specific team,
-	// and then add the contents of this loop to the loop above
-	Entity ai_cat0 = createAI({ width - 400,300 });
-	Entity ai_cat1 = createAI({ width - 200,300 });
-	npcai_team.push_back(ai_cat0);
-	npcai_team.push_back(ai_cat1);
 
 	//This needs to be in order
 	teams.push_back(player1_team);
 	teams.push_back(player2_team);
 	teams.push_back(ai_team);
 	teams.push_back(npcai_team);
+	curr_selected_char = player1_team[0];
+	change_curr_selected_char(player1_team[0]);
 }
 
 void GameController::next_turn() {
@@ -186,17 +259,26 @@ void GameController::next_turn() {
 
 	game_state.turn_possesion += 1;
 	game_state.turn_number += 1;
-	
-	for (Entity e : registry.projectiles.entities) {
-		registry.remove_all_components_of(e);
-	}
+	timePerTurnMs = game_data.getTimer();
+	// force players to stop moving
 
 	if (game_state.turn_possesion == TURN_CODE::END) {
 		game_state.turn_possesion = TURN_CODE::PLAYER1;
-	} else if (teams[game_state.turn_possesion].empty()) {
+	}
+	else if (teams[game_state.turn_possesion].empty()) {
 		game_state.turn_number -= 1;
 		next_turn();
 	}
+	if (game_state.turn_possesion == TURN_CODE::NPCAI) {
+		change_curr_selected_char(selected_ai);
+	}
+	else {
+		if (!teams[game_state.turn_possesion].empty()) {
+			change_curr_selected_char(teams[game_state.turn_possesion][0]);//supposed to be the first player on each team
+		}
+	}
+	
+	
 }
 
 void GameController::handle_collisions() {
@@ -206,19 +288,28 @@ void GameController::handle_collisions() {
 		// The entity and its collider
 		Entity entity = collisionsRegistry.entities[i];
 		Entity entity_other = collisionsRegistry.components[i].other;
-		
+
 		if (registry.projectiles.has(entity)) {// Projectile hit terrain
 			Projectile& pj = registry.projectiles.get(entity);
 			if (registry.terrains.has(entity_other) && entity_other != pj.origin) {
 				registry.remove_all_components_of(entity);
-			} else if (entity_other != pj.origin && registry.players.has(entity_other)) { // Projectile hit another player
-				auto team = registry.players.get(pj.origin).team;
-				auto otherTeam = registry.players.get(entity_other).team;
+			} else if (entity_other != pj.origin) { // Projectile hit another player
+				// for (std::vector<Entity> vec : teams) {
+				// 	bool origin_isonteam = false;
+				// 	bool entity_other_isonteam = false;
+				// 	for (Entity e : vec) { //check for friendly fire, since std::find dosen't work
+				// 		if (e == pj.origin) 
+				// 			origin_isonteam = true;
+				// 		if (e == entity_other) 
+				// 			entity_other_isonteam = true;
+				// 	}
+				// 	if (origin_isonteam) {
+				// 		decreaseHealth(entity_other, registry.weapons.get(pj.origin).damage, curr_selected_char);
+				// 	}
+				// }
 
-				// Decrease that players health
-				if (team != otherTeam) {
-					decreaseHealth(entity_other, registry.weapons.get(pj.origin).damage);
-				}
+				// Friendly fire is enabled
+				decreaseHealth(entity_other, registry.weapons.get(pj.origin).damage, curr_selected_char);
 				registry.remove_all_components_of(entity);
 			}
 		}
@@ -230,7 +321,7 @@ void GameController::handle_collisions() {
 			if (rb.collision_normal.y == -1) {
 				motion.velocity.y = 0;
 			}
-		
+
 		}
 	}
 
@@ -238,67 +329,102 @@ void GameController::handle_collisions() {
 	registry.collisions.clear();
 }
 
-// On key callback
-void GameController::on_player_key(int key, int, int action, int mod) {
-
-	//Only allowed to move on specified turn
-	if (game_state.turn_possesion == PLAYER1 && inAGame) {
-		Motion& catMotion = registry.motions.get(player1_team[0]);
-		Rigidbody& rb = registry.rigidBodies.get(player1_team[0]);
-
-		float current_speed = 150.0f;
-		float gravity_force = 2.5;
-		
-		if (action == GLFW_PRESS && key == GLFW_KEY_W) {
-			if (catMotion.velocity.y == gravity_force) {
-				catMotion.velocity.y = -gravity_force * current_speed;
-				rb.collision_normal.y = 0;
-			}
-		}
-
-		if (action == GLFW_PRESS && key == GLFW_KEY_S) {
-			catMotion.velocity.y = current_speed;
-		}
-
-		if (action == GLFW_PRESS && key == GLFW_KEY_D) {
-			catMotion.velocity.x = current_speed;
-			player_mode = PLAYER_MODE::MOVING;
-		}
-
-		if (action == GLFW_PRESS && key == GLFW_KEY_A) {
-			catMotion.velocity.x = -current_speed;
-			player_mode = PLAYER_MODE::MOVING;
-		}
-
-		if (action == GLFW_RELEASE) {
-			if (key == GLFW_KEY_A && catMotion.velocity.x < 0) {
-				catMotion.velocity.x = 0.0f;
-				player_mode = PLAYER_MODE::SHOOTING;
-			}
-			if (key == GLFW_KEY_D && catMotion.velocity.x > 0) {
-				catMotion.velocity.x = 0.0f;
-				player_mode = PLAYER_MODE::SHOOTING;
-			}
-		}
-		
-		if (action == GLFW_PRESS && key == GLFW_KEY_UP) {
-			shooting_system.aimUp(curr_selected_char);
-		}
-
-		if (action == GLFW_PRESS && key == GLFW_KEY_DOWN) {
-			shooting_system.aimDown(curr_selected_char);
-		}
-
-		if (action == GLFW_PRESS && key == GLFW_KEY_ENTER) {
-			// should only shoot when standing
-			if (catMotion.velocity.y == gravity_force && catMotion.velocity.x == 0.0) {
-				shooting_system.shoot(curr_selected_char);
-			}
+void GameController::change_selected_state(Entity e, bool state) {
+	Selected& selparent = registry.selected.get(e); //unselect parent
+	selparent.isSelected = state;
+	std::vector<Entity> children = get_all_children(e);
+	for (Entity child : children) {
+		if (registry.selected.has(child)) {
+			Selected& sel = registry.selected.get(child); //unselect all children attached
+			sel.isSelected = state;
 		}
 	}
 }
 
+void GameController::change_curr_selected_char(Entity e) {
+
+	Character* chara = registry.characters.get(curr_selected_char);
+	chara->state_machine.deselectChar();
+
+	curr_selected_char = e;
+
+	Character* chara_new = registry.characters.get(curr_selected_char);
+	chara_new->state_machine.selectChar();
+
+
+	for (std::vector<Entity> team : teams) {
+		for (Entity player : team) {
+			if (curr_selected_char != player && registry.renderRequests.has(player)) {
+				change_selected_state(player, false);
+			} else if (curr_selected_char == player) {
+				change_selected_state(player, true);
+			}
+		}
+	}
+
+}
+void GameController::change_to_next_char_on_team() {
+
+	//so scuffed lmao
+	bool next_char = false;
+
+	for (int i = 0; i < teams[game_state.turn_possesion].size(); i++) {
+		if (teams[game_state.turn_possesion][i] == curr_selected_char) {
+			if (i + 1 == teams[game_state.turn_possesion].size()) {
+				change_curr_selected_char(teams[game_state.turn_possesion][0]);
+				break;
+			}
+			change_curr_selected_char(teams[game_state.turn_possesion][i + 1]);
+			break;
+		}
+	}
+
+}
+
+// On key callback
+void GameController::on_player_key(int key, int, int action, int mod) {
+
+	
+	Character* c = registry.characters.get(curr_selected_char);
+	if (!c->state_machine.isAI()) {
+		c->state_machine.getCurrentState()->on_player_key(key, 0, action, mod);
+	}
+}
+
 void GameController::on_mouse_move(vec2 mouse_pos) {
-	(void)mouse_pos;
-	// printf("now in game_controller");
+	this->mousePosition = mouse_pos;
+	Character* c = registry.characters.get(curr_selected_char);
+	if (!c->state_machine.isAI()) {
+		c->state_machine.getCurrentState()->on_mouse_move(mouse_pos);
+	}
+}
+//
+void GameController::on_mouse_click(int button, int action, int mods) {
+
+	Character* c = registry.characters.get(curr_selected_char);
+	if (!c->state_machine.isAI()) {
+		c->state_machine.getCurrentState()->on_mouse_click(button, action, mods);
+	}
+
+	if (action == GLFW_PRESS) {
+		printf("In A Game");
+	}
+}
+
+void GameController::on_mouse_scroll(double xoffset, double yoffset) {
+	Character* c = registry.characters.get(curr_selected_char);
+	if (!c->state_machine.isAI()) {
+		c->state_machine.getCurrentState()->on_mouse_scroll(xoffset, yoffset);
+	}
+}
+//
+void GameController::set_user_input_callbacks() {
+	auto key_redirect = [](GLFWwindow* wnd, int _0, int _1, int _2, int _3) { ((GameController*)glfwGetWindowUserPointer(wnd))->on_player_key(_0, _1, _2, _3); };
+	glfwSetKeyCallback(this->window, key_redirect);
+	auto cursor_pos_redirect = [](GLFWwindow* wnd, double _0, double _1) { ((GameController*)glfwGetWindowUserPointer(wnd))->on_mouse_move({ _0, _1 }); };
+	glfwSetCursorPosCallback(this->window, cursor_pos_redirect);
+	auto mouse_input = [](GLFWwindow* wnd, int _0, int _1, int _2) { ((GameController*)glfwGetWindowUserPointer(wnd))->on_mouse_click(_0, _1, _2); };
+	glfwSetMouseButtonCallback(this->window, mouse_input);
+	auto mouse_scroll = [](GLFWwindow* wnd, double _0, double _1) { ((GameController*)glfwGetWindowUserPointer(wnd))->on_mouse_scroll(_0, _1); };
+	glfwSetScrollCallback(this->window, mouse_scroll);
 }

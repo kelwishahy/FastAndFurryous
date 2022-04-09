@@ -1,17 +1,15 @@
 #pragma once
 
 // internal
-#include "common.hpp"
 #include "tiny_ecs.hpp"
 
 // stlib
 #include <vector>
 #include <random>
-
-#include "render_system.hpp"
 #include "game_controller.hpp"
-
-//#include "render_system.hpp"
+#include <glm/vec2.hpp>
+#include "orthographic_camera.hpp"
+#include "text_manager.hpp"
 
 // Container for all our entities and game logic. Individual rendering / update is
 // deferred to the relative update() methods
@@ -23,7 +21,7 @@ public:
 	// Releases all associated resources
 	~WorldSystem();
 
-	void init(RenderSystem* renderer, GLFWwindow* window);
+	void init(GLFWwindow* window);
 
 	// Steps the game ahead by ms milliseconds
 	bool step(float elapsed_ms);
@@ -36,25 +34,46 @@ public:
 
 	// Input callback functions
 	void on_key(int button, int action, int mods);
-	void on_mouse_move(vec2 pos);
+	void on_mouse_move(glm::vec2 pos);
+	void on_mouse_click(int button, int action, int mods);
+	void set_user_input_callbacks();
 
 	void check_for_button_presses();
 
-	void play_tutorial(std::vector<std::function<void()>> callbacks);
-//selectscreen
-	void play_select(std::vector<std::function<void()>> callbacks);
+	void play_tutorial();
+
+	void play_select();
+
+	void play_startscreen();
+
+// change option timer type
+	void play_options(float newtimer, int newPlayers);
+
+	void play_levels();
+
+	void remove_components();
 
 	glm::vec2 mouse_pos;
 
-	GameController getCurrentGame() { return this->current_game; }
+	GameController& getCurrentGame() { return this->current_game; }
+
+	MapSystem& getMapSystem() { return this->mapSystem; }
+
+	OrthographicCamera& getCamera() { return this->camera; }
+
+	TextManager& getTextManager() { return this->textManager; }
+
+	Game level_one();
+	Game level_two();
+	Game level_three();
+	Game multiplayer(float newtimer);
 
 private:
 	// restart level it was in the private 
-	void restart_game();
+	void restart_game(Game level);
 
 	void init_main_menu();
 
-	RenderSystem* renderer;
 	Entity player_cat;
 	float current_speed;
 
@@ -70,12 +89,9 @@ private:
 	// OpenGL window handle
 	GLFWwindow* window;
 
-	//Mouse press cooldown - I need to remove this later
-	float cooldown = 0;
+	MapSystem mapSystem;
 
-	//Audio references
-	Mix_Music* background_music;
-	Mix_Chunk* catScream;
-	Mix_Chunk* gunshot;
-	Mix_Chunk* win;
+	TextManager textManager;
+
+	OrthographicCamera camera;
 };

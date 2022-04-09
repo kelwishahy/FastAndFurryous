@@ -2,7 +2,6 @@
 #include <hpp/render_system.hpp>
 #include <hpp/physics_system.hpp>
 #include <hpp/world_system.hpp>
-#include <hpp/ai_system.hpp>
 
 // stlib
 #include <chrono>
@@ -13,7 +12,6 @@
 using Clock = std::chrono::high_resolution_clock;
 
 int main() {
-
 	std::cout << "Starting Fast and Furry-ous" << std::endl;
 
 	// Global systems
@@ -26,7 +24,7 @@ int main() {
 	GLFWwindow* window = renderer.getWindow(); // Window is part of the renderer context
 
 	physics.init(&renderer);
-	world.init(&renderer, window);
+	world.init(window);
 
 	auto time = Clock::now();
 
@@ -44,7 +42,7 @@ int main() {
 		world.step(elapsed_ms);
 		physics.step(elapsed_ms);
 
-		renderer.draw(elapsed_ms);
+		renderer.draw(elapsed_ms, world);
 		glfwSwapBuffers(window);
 	}
 

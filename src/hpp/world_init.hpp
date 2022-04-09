@@ -1,19 +1,16 @@
 #pragma once
 
-#include "tiny_ecs.hpp"
+#include "components.hpp"
 #include "render_system.hpp"
-#include <glm/vec2.hpp>				// vec2
-
-#include "glm/detail/_noise.hpp"
-#include "glm/detail/_noise.hpp"
-#include "glm/detail/_noise.hpp"
-#include "glm/detail/_noise.hpp"
 
 // Player entities
-Entity createCat(glm::vec2 pos);
+Entity createCat(::WEAPON_TYPES weapon, glm::vec2 pos, int health, GLFWwindow* window);
+
+// Player entities
+Entity createDog(WEAPON_TYPES weapon, glm::vec2 pos, int health, GLFWwindow* window);
 
 // solid terrain
-Entity createWall(glm::vec2 pos, int width, int height);
+Entity createWall(glm::vec2 pos, float width, float height);
 
 // Tile
 Entity createTile(float tileScale, glm::vec2 tilePosition, int numTilesInARow);
@@ -22,11 +19,21 @@ Entity createTile(float tileScale, glm::vec2 tilePosition, int numTilesInARow);
 Entity createAI(glm::vec2 pos);
 
 //Projectile
-Entity createProjectile(RenderSystem* renderer, Entity originE, glm::vec4 coefficientsX, glm::vec4 coefficientsY, glm::vec2 endtangent);
+Entity createProjectile(Entity originE, glm::vec2 force);
 
 //Specify a menu
 Entity createMenu(MENU_TYPES menu, float layer);
 
-Entity createButton(glm::vec2 pos, glm::vec2 scale, TEXTURE_IDS tex_id, std::vector<std::function<void()>> callbacks);
+Entity createButton(glm::vec2 pos, glm::vec2 scale, TEXTURE_IDS tex_id);
 
-Entity createText(glm::vec2 pos, float scale, glm::vec3 color, std::string text);
+Entity createText(TextManager& textManager, std::string text, glm::vec2 pos, float scale, glm::vec3 color);
+
+Entity createCrosshair(Entity origin, bool iscat);
+
+Entity createHealthCounter(Entity origin, int health, TextManager& textManager);
+
+// change option timer type
+Entity createTimerCounter(float newtimer, TextManager& textManager);
+
+Entity createPlayersCounter(int newplayers, TextManager& textManager);
+

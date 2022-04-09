@@ -1,4 +1,5 @@
 #pragma once
+#include <map>
 #include <hpp/tiny_ecs.hpp>
 #include <vector>
 #include <unordered_map>
@@ -6,23 +7,17 @@
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
+#include <string>
+
+#include <hpp/States/character_grounded_state.hpp>
+
+#include "States/character_airborne_states.hpp"
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // Component IDs
 ////////////////////////////////////////////////////////////////////////////////
 
-enum CharacterType {
-	CAT = 1,
-	DOG = 2,
-};
-
-enum AnimationType {
-	IDLE = 1,
-	WALKING = 2,
-	JUMPING = 3
-};
-
-//TODO add AI to the list of IDs
 enum class SHADER_PROGRAM_IDS {
 	ANIMATION,
 	TEXTURE,
@@ -33,17 +28,92 @@ enum class SHADER_PROGRAM_IDS {
 }; constexpr int shaderProgramCount = (int)SHADER_PROGRAM_IDS::TOTAL;
 
 enum class TEXTURE_IDS {
-	CAT_IDLE,
+	//Cat textures
+	CAT_SIDE_IDLE,
+	CAT_FRONT_IDLE,
 	CAT_WALK,
 	CAT_JUMP,
+	CAT_SIDE_BLINK,
+	CAT_FRONT_BLINK,
+	CAT_FRONT_ARM,
+	CAT_BACK_ARM,
+	CAT_HURT_FACE,
+	CAT_HURT,
+	CAT_DEAD,
+	// Dog Textures
+	DOG_SIDE_IDLE,
+	DOG_FRONT_BLINK,
+	DOG_SIDE_BLINK,
+	DOG_FRONT_IDLE,
+	DOG_FRONT_ARM,
+	DOG_BACK_ARM,
+	DOG_WALK,
+	DOG_JUMP,
+	DOG_HURT,
+	DOG_HURT_FACE,
+	DOG_DEAD,
+	//
+	//Gun Sprites
+	RIFLE,
+	AK_47,
+	AWP,
+	GRENADE_LAUNCHER,
 	STONE,
+	// All Screens
 	BACKGROUND,
 	START_MENU,
-	//selectscreen
 	SELECT_MENU,
+	OPTIONS_MENU,
+	LEVELS_MENU,
+	// Start Menu Buttons
 	BUTTON1,
+	BUTTON2,
+	BUTTON3,
+	BUTTON4,
+	// Select Menu Buttons
 	BUTTONC,
+	BUTTOND,
+	// Tutorial Menu 
 	HOWTOMOVE,
+	// Option Menu Buttons
+	BUTTONRA,
+	BUTTONLA,
+	BUTTONRB,
+	BUTTONLB,
+	// Level Menu Buttons
+	BUTTONL1,
+	BUTTONL2,
+	BUTTONL3,
+	CAT_CROSSHAIR,
+	DOG_CROSSHAIR,
+	HEALTH_SQUARE,
+	BUTTONGAME,
+	BUTTONCANCEL,
+	/* Maps */
+
+	// Industrial
+	INDUSTRIAL_BG,
+	INDUSTRIAL_FAR_BUILDINGS,
+	INDUSTRIAL_BUILDINGS,
+	INDUSTRIAL_FOREGROUND,
+
+	// Night
+	NIGHT1,
+	NIGHT2,
+
+	// Cyberpunk
+	CYBERPUNK1,
+	CYBERPUNK2,
+	CYBERPUNK3,
+
+	// MIAMI
+	MIAMI1,
+	MIAMI2,
+	MIAMI3,
+	MIAMI4,
+
+	FOREST,
+	SPACE,
 	TOTAL
 }; constexpr int textureCount = (int)TEXTURE_IDS::TOTAL;
 
@@ -51,7 +121,7 @@ enum class GEOMETRY_BUFFER_IDS {
 	QUAD,
 	TEXTURED_QUAD,
 	WALL,
-	AI,
+	FONT,
 	TOTAL
 }; constexpr int geometryCount = (int)GEOMETRY_BUFFER_IDS::TOTAL;
 
@@ -67,8 +137,9 @@ enum RB_TYPES {
 
 enum WEAPON_TYPES {
 	RIFLE = 0,
-	SHOTGUN = 1
-};
+	SHOTGUN = 1,
+	TOTAL //For no weaponed 
+}; constexpr int weaponCount = (int)WEAPON_TYPES::TOTAL;
 
 enum TILE_TYPES {
 	NONE,
@@ -77,8 +148,9 @@ enum TILE_TYPES {
 
 enum MENU_TYPES {
 	START,
-	//selectscreen
-	SELECT
+	SELECT,
+	OPTIONS,
+	LEVELS
 };
 
 enum TEAM {
@@ -88,14 +160,116 @@ enum TEAM {
 	NPC_AI_TEAM
 };
 
-// Game components ------------------------------------------------------------
-
-struct Player {
-	TEAM team;
+enum UI_ELEMENT {
+	CROSSHAIR,
+	HEALTH_DISPLAY,
+	NAME
 };
 
+enum class MAPS {
+	INDUSTRIAL,
+	FOREST,
+	SPACE,
+	NIGHT,
+	CITY,
+	CYBERPUNK,
+	MIAMI,
+	TOTAL
+}; constexpr int mapCount = (int)MAPS::TOTAL;
+
+constexpr float LAYERS[4] = { -0.9f, -0.8f, -0.7f, -0.6f };
+
+enum class IndustrialBackground {
+	INDUSTRIAL_BG,
+	INDUSTRIAL_FAR_BUILDINGS,
+	INDUSTRIAL_BUILDINGS,
+	INDUSTRIAL_FOREGROUND,
+	TOTAL
+}; constexpr int IndustrialBackgroundLayers = (int)IndustrialBackground::TOTAL;
+
+enum class NightBackground {
+	NIGHT1,
+	NIGHT2,
+	TOTAL
+}; constexpr int NightBackgroundLayers = (int)NightBackground::TOTAL;
+
+enum class CyberpunkBackground {
+	CYBERPUNK1,
+	CYBERPUNK2,
+	CYBERPUNK3,
+	TOTAL
+}; constexpr int CyberpunkBackgroundLayers = (int)CyberpunkBackground::TOTAL;
+
+enum class MiamiBackground {
+	MIAMI1,
+	MIAMI2,
+	MIAMI3,
+	MIAMI4,
+	TOTAL
+}; constexpr int MiamiBackgroundLayers = (int)MiamiBackground::TOTAL;
+
+enum class ANIMAL {
+	CAT,
+	DOG
+};
+// State Machine------------------------------------------------------------------
+
+class CharacterStateMachine {
+
+public:
+
+	CharacterStateMachine() = default;
+	~CharacterStateMachine() = default;
+
+	void init(CharacterState* starting_state);
+
+
+	CharacterState* getCurrentState() {
+		return curr_state;
+	}
+
+	void changeState(CharacterState* new_state);
+	bool isSelected() {
+		return selected;
+	}
+	void selectChar() {
+		selected = true;
+	}
+	void deselectChar() {
+		selected = false;
+	}
+
+	bool isAI() {
+		return isAi;
+	}
+	void setAI(bool isAI) {
+		isAi = isAI;
+	}
+
+	bool isJumping() {
+		return is_jumping;
+	}
+	void setJumping(bool isJumping) {
+		is_jumping = isJumping;
+	}
+
+
+protected:
+	CharacterState* curr_state;
+	bool selected = false;
+	bool isAi = false;
+	bool is_jumping = false;
+
+	void setCurrentState(CharacterState* state) {
+		curr_state = state;
+	}
+
+};
+
+
+// Game components ------------------------------------------------------------
 struct Background {
-	
+	float layer = -0.5;
 };
 
 struct Tile {
@@ -103,8 +277,14 @@ struct Tile {
 	glm::vec2 position;
 };
 
+struct Selected {
+	bool isSelected = true;
+};
+
 struct Health {
 	int hp = 100;
+	float damageTimer = 800;
+	bool hurt = false;
 };
 
 struct AI {
@@ -141,6 +321,7 @@ struct Rigidbody {
 	float mass = 1;
 	float collision_depth;
 	glm::vec2 collision_normal;
+	glm::vec2 force_accumulator;
 };
 
 struct RayCast {
@@ -153,17 +334,17 @@ struct WeaponBase {
 	float aim_angle;
 	float distance;
 	float area;
-	float aim_loc_x;
+	//float aim_loc_x;
 	float damage;
 	WEAPON_TYPES type;
 };
 
 struct Rifle : WeaponBase {
-	Rifle() { 
-		// pi/2
-		MAX_ANGLE = 1.4f;
-		//0
-		MIN_ANGLE = 0.0f;
+	Rifle() : WeaponBase() { 
+		//a little less than pi/2
+		MAX_ANGLE = 1.2f;
+		//a little more than 0
+		MIN_ANGLE = 0.2f;
 		// pi/4
 		// aim_angle = 0.7854f;
 		aim_angle = MIN_ANGLE;
@@ -171,7 +352,7 @@ struct Rifle : WeaponBase {
 		distance = 500.0f;
 		//"radius" around distance
 		area = 200.0f;
-		damage = 10;
+		damage = 45;
 		type = RIFLE;
 	}
 };
@@ -182,11 +363,11 @@ struct Shotgun : WeaponBase {
 
 struct Projectile {
 	Entity origin;
-	glm::vec4 trajectoryAx;
+	/*glm::vec4 trajectoryAx;
 	glm::vec4 trajectoryAy;
-	float delta_time = 0;
-	float hit_radius;
-	glm::vec2 end_tangent;
+	float delta_time = 0;*/
+	//float hit_radius;
+	//glm::vec2 end_tangent;
 };
 
 // Stucture to store collision information
@@ -201,7 +382,111 @@ struct Clickable {
 	std::vector<std::function<void()>> callbacks;
 };
 
+struct ChildEntities {
+	std::map<int, Entity> child_data_map; //unfortunately putting Entity first causes an error
+	std::unordered_map<int, glm::vec2> normal_dists;
+	std::unordered_map<int, std::string> tags; //optional
+	std::unordered_map<int, glm::vec2>  original_dists; //opational, this me hackig stuff in
+	void remove_child(Entity e) {
+		for (int i = 0; i < child_data_map.size(); i++) {
+			if (child_data_map.at(i) == e) {
+				normal_dists.erase(i);
+				tags.erase(i);
+				original_dists.erase(i);
+				child_data_map.erase(i);
+				i--;
+			}
+		}
+	}
+};
+void remove_children(Entity e);
+
+struct UIElement {
+	UI_ELEMENT element_type;
+};
+
+struct Character {
+	Entity character;
+	CharacterStateMachine state_machine;
+	CharacterIdleState* idle_state;
+	CharacterMoveLeftState* move_left_state;
+	CharacterMoveRightState* move_right_state;
+	CharacterAimState* aim_state;
+	CharacterShootingState* shooting_state;
+	CharacterAirborneState* airborne_state;
+	CharacterAirborneMoveLeftState* airborne_move_left;
+	CharacterAirborneMoveRightState* airborne_move_right;
+	CharacterDeadState* dead_state;
+	glm::vec3 team_color;
+	ANIMAL animal;
+
+	void init() {
+		idle_state = new CharacterIdleState(character);
+		move_left_state = new CharacterMoveLeftState(character);
+		move_right_state = new CharacterMoveRightState(character);
+		aim_state = new CharacterAimState(character);
+		shooting_state = new CharacterShootingState(character);
+		airborne_move_left = new CharacterAirborneMoveLeftState(character);
+		airborne_move_right = new CharacterAirborneMoveRightState(character);
+		airborne_state = new CharacterAirborneState(character);
+		dead_state = new CharacterDeadState(character);
+
+		state_machine = CharacterStateMachine();
+		state_machine.init(idle_state);
+	}
+
+	virtual void animate_walk() = 0;
+	virtual void animate_idle() = 0;
+	virtual void animate_jump() = 0;
+	virtual void animate_hurt() = 0;
+	virtual void animate_dead() = 0;
+	virtual void animate_aim() = 0;
+
+	virtual void play_hurt_sfx() = 0;
+};
+
+struct Cat : Character {
+	Cat() : Character() {
+		team_color = glm::vec3{ 0.862f, 0.525f, 0.517f };
+		animal = ANIMAL::CAT;
+	}
+	void animate_walk() override;
+	void animate_idle() override;
+	void animate_jump() override;
+	void animate_hurt() override;
+	void animate_dead() override;
+	void animate_aim() override;
+
+	void play_hurt_sfx() override;
+};
+
+struct Dog : Character {
+	Dog() : Character() {
+		team_color = glm::vec3{ 0.039, 0.454, 1 };
+		animal = ANIMAL::DOG;
+	}
+	void animate_walk() override;
+	void animate_idle() override;
+	void animate_jump() override;
+	void animate_hurt() override;
+	void animate_dead() override;
+	void animate_aim() override;
+
+	void play_hurt_sfx() override;
+};
+
+struct HealthBox {
+	Entity parent;
+	Entity text;
+};
+
 // Render components ----------------------------------------------------------
+
+struct TEXTURE_ANIM_CONSTANTS {
+	int NUM_FRAMES;
+	float FRAME_TEXTURE_WIDTH;
+	float TOTAL_FRAME_TIME;
+};
 
 // Single vertex vuffer element for textured sprites
 struct TexturedVertex {
@@ -238,16 +523,21 @@ struct MenuItem {
 };
 
 struct Animation {
-	int character = 1;
+	std::string name;
 	int frame = 0;
-	int animation_type = IDLE;
 	float frame_counter_ms = 100;
 	bool facingLeft = false;
+	int curr_frame = 0;
+	TEXTURE_IDS anim_state = TEXTURE_IDS::TOTAL;
+	//map of TEXTUREID to animation constants for shaders
+	std::unordered_map<TEXTURE_IDS, TEXTURE_ANIM_CONSTANTS> animation_states_constants;
 };
+
 
 struct Text {
 	std::string text;
 	glm::vec3 color;
+	glm::vec2 scale;
 };
 
 struct Glyph {
@@ -270,3 +560,19 @@ extern Debug debugging;
 struct DebugComponent {
 	// Note, an empty struct has size 1
 };
+
+// change option timer type
+struct OptionTimer {
+	float timerC = 1.f;
+};
+
+struct OptionPlayers {
+	int playersN;
+};
+
+void remove_children(Entity e);
+std::vector<Entity> get_all_children(Entity e);
+void change_animation(Entity e, TEXTURE_IDS tex_id);
+bool check_if_part_of_parent(Entity e, Entity child);
+bool check_if_cat(Entity e);
+

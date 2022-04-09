@@ -3,37 +3,47 @@
 #include <hpp/world_init.hpp>
 #include <fstream>
 #include <../ext/project_path.hpp>
+#include "hpp/common.hpp"
 #include "hpp/tiny_ecs_registry.hpp"
+
 using namespace std;
 
-Map::Map() {
-
+void MapSystem::init() {
+	for (int i = 0; i < (int)MAPS::TOTAL; i++) {
+		maps[i] = Map(MAPS(i));
+	}
 }
 
-Map::~Map() {
-	
+std::vector<std::vector<unsigned>> MapSystem::Map::getTileMap() {
+	return tileMap;
 }
 
-void Map::init() {
-	// Create a default game map
+MapSystem::Map::Map(MAPS name) {
+	this->name = name;
+}
+
+void MapSystem::Map::build() {
 	this->mapHeight = 18;
-	this->mapWidth = 30;
-	this->tileScale = 64.f;
+	this->mapWidth = 60;
+	// this->tileScale = ceil((defaultResolution.x / 30.f) / defaultResolution.x * screenResolution.x);
+	this->tileScale = ceil(scaleToScreenResolution({ (defaultResolution.x / 30.f), (defaultResolution.x / 30.f) }).x);
+	printf("Tiles are %fx%f for map %d\n", tileScale, tileScale, (int)this->name);
 
 	readMapFromFile();
 
 	// Iterate through rows
-	for (int y = mapHeight - 1; y >= 0 ; y--) {
+	for (int y = mapHeight - 1; y >= 0; y--) {
 		int consecutiveTileCount = 1;
 
 		// Iterate through columns
 		for (int x = 0; x < mapWidth; x++) {
 			if (tileMap[y][x] != 0) { // Is the current tile occupied?
 				// YES - this tile is occupied
-				if (y > 0 && tileMap[y-1][x] != 0) { // Is the tile above this one occupied?
+				if (y > 0 && tileMap[y - 1][x] != 0) { // Is the tile above this one occupied?
 					// YES - the tile above is occupied
 					continue;
-				} else {
+				}
+				else {
 					// NO - the tile above is not occupied
 					while (x < mapWidth - 1 && tileMap[y][x + 1] != 0) { // Is the tile to the right occupied?
 						// YES - the tile to the right is occupied
@@ -46,27 +56,154 @@ void Map::init() {
 					createTile(tileScale, { y, x - consecutiveTileCount }, consecutiveTileCount);
 					consecutiveTileCount = 1;
 				}
-				
+
 			}
 			// NO - this tile is not occupied
 		}
 	}
 
+	switch (name) {
+		case MAPS::INDUSTRIAL: {
+			for (int i = 0; i < IndustrialBackgroundLayers; i++) {
+				auto ent = Entity();
+				auto& bg = registry.backgrounds.emplace(ent);
+				bg.layer = LAYERS[i];
+				TEXTURE_IDS texture;
 
-	// Set the background image
-	auto ent = Entity();
-	registry.backgrounds.emplace(ent);
-	registry.renderRequests.insert(
-		ent,
-		{ TEXTURE_IDS::BACKGROUND,
-			SHADER_PROGRAM_IDS::TEXTURE,
-			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
+				switch (i) {
+					case 0:
+						texture = TEXTURE_IDS::INDUSTRIAL_BG;
+						break;
+					case 1:
+						texture = TEXTURE_IDS::INDUSTRIAL_FAR_BUILDINGS;
+						break;
+					case 2:
+						texture = TEXTURE_IDS::INDUSTRIAL_BUILDINGS;
+						break;
+					default:
+						texture = TEXTURE_IDS::INDUSTRIAL_FOREGROUND;
+				}
+
+				registry.renderRequests.insert(ent, { texture, SHADER_PROGRAM_IDS::TEXTURE, GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
+			}
+			break;
+		}
+
+		case MAPS::NIGHT: {
+			for (int i = 0; i < NightBackgroundLayers; i++) {
+				auto ent = Entity();
+				auto& bg = registry.backgrounds.emplace(ent);
+				bg.layer = LAYERS[i];
+				TEXTURE_IDS texture;
+
+				if (i == 0) {
+					texture = TEXTURE_IDS::NIGHT1;
+				} else {
+					texture = TEXTURE_IDS::NIGHT2;
+				}
+
+				registry.renderRequests.insert(ent, { texture, SHADER_PROGRAM_IDS::TEXTURE, GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
+			}
+			break;
+		}
+
+		case MAPS::CYBERPUNK: {
+			for (int i = 0; i < CyberpunkBackgroundLayers; i++) {
+				auto ent = Entity();
+				auto& bg = registry.backgrounds.emplace(ent);
+				bg.layer = LAYERS[i];
+				TEXTURE_IDS texture;
+
+				switch (i) {
+				case 0:
+					texture = TEXTURE_IDS::CYBERPUNK1;
+					break;
+				case 1:
+					texture = TEXTURE_IDS::CYBERPUNK2;
+					break;
+				default:
+					texture = TEXTURE_IDS::CYBERPUNK3;
+				}
+
+				registry.renderRequests.insert(ent, { texture, SHADER_PROGRAM_IDS::TEXTURE, GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
+			}
+			break;
+		}
+
+		case MAPS::MIAMI: {
+			for (int i = 0; i < MiamiBackgroundLayers; i++) {
+				auto ent = Entity();
+				auto& bg = registry.backgrounds.emplace(ent);
+				bg.layer = LAYERS[i];
+				TEXTURE_IDS texture;
+
+				switch (i) {
+				case 0:
+					texture = TEXTURE_IDS::MIAMI1;
+					break;
+				case 1:
+					texture = TEXTURE_IDS::MIAMI2;
+					break;
+				case 2:
+					texture = TEXTURE_IDS::MIAMI3;
+					break;
+				default:
+					texture = TEXTURE_IDS::MIAMI4;
+				}
+
+				registry.renderRequests.insert(ent, { texture, SHADER_PROGRAM_IDS::TEXTURE, GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
+			}
+			break;
+		}
+
+		case MAPS::FOREST: {
+			auto ent = Entity();
+			registry.backgrounds.emplace(ent);
+			registry.renderRequests.insert(
+				ent,
+				{ TEXTURE_IDS::FOREST,
+					SHADER_PROGRAM_IDS::TEXTURE,
+					GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
+			break;
+		}
+		case MAPS::SPACE: {
+			auto ent = Entity();
+			registry.backgrounds.emplace(ent);
+			registry.renderRequests.insert(
+				ent,
+				{ TEXTURE_IDS::SPACE,
+					SHADER_PROGRAM_IDS::TEXTURE,
+					GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
+			break;
+		}
+		default: {
+		}
+	}
 }
 
-void Map::readMapFromFile() {
-	const string mapName = "map1.txt";
+
+void MapSystem::Map::readMapFromFile() {
+	string fileName;
+	switch (name) {
+		case MAPS::INDUSTRIAL: {
+			fileName = "map1.txt";
+			break;
+		}
+		case MAPS::FOREST: {
+			fileName = "map2.txt";
+			break;
+		}
+		case MAPS::SPACE: {
+			fileName = "map3.txt";
+			break;
+		}
+		default: {
+			fileName = "map1.txt";
+		}
+	}
+
 	ifstream infile;
-	infile.open(std::string(PROJECT_SOURCE_DIR) + "assets/maps/" + mapName);
+	infile.open(std::string(PROJECT_SOURCE_DIR) + "assets/maps/" + fileName);
 
 	if (!infile) {
 		std::cerr << "Unable to open file\n" << std::endl;
@@ -85,21 +222,4 @@ void Map::readMapFromFile() {
 	}
 
 	infile.close();
-
-	// cout << "\n";
-	// for (int y = 0; y < mapHeight; y++) {
-	// 	for (int x = 0; x < mapWidth; x++) {
-	// 		cout << tileMap[y][x] << " ";
-	// 	}
-	// 	cout << endl;
-	// }
-}
-
-
-std::vector<std::vector<unsigned int>> Map::getTileMap() {
-	return tileMap;
-}
-
-void Map::updateTileMap() {
-	(void)tileMap;
 }

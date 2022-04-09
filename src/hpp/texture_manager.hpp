@@ -11,10 +11,6 @@
 #include <array>
 #include <string>
 
-
-
-
-
 class TextureManager {
 public:
 
@@ -28,6 +24,5 @@ public:
 		std::array<glm::ivec2, textureCount>& textureDimensions);
 
 private:
-
 	static std::string getTexturePath(const std::string& name) { return std::string(PROJECT_SOURCE_DIR) + "assets/textures/" + std::string(name); };
 };
