@@ -12,6 +12,7 @@ public:
 	double calculateDistance(vec2 v1, vec2 v2);
 	void decideAction();
 	void checkJump();
+
 private:
 	float jumpdelay;
 	float timer;

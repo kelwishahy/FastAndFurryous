@@ -65,8 +65,6 @@ private:
 	MapSystem::Map gameMap;
 	TextManager textManager;
 	Game game_data;
-	// add option timer
-	// OptionTimer timer;
 
 	glm::vec2 mousePosition{};
 	float mouseDeadzone{};

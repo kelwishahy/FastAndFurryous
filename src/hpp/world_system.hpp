@@ -72,6 +72,8 @@ public:
 	vec2 set_scale(float scaleX, float scaleY);
 	Entity WorldSystem::cancel_button();
 
+	static bool pause_flag;
+
 private:
 	// restart level it was in the private 
 	void restart_game(Game level);
