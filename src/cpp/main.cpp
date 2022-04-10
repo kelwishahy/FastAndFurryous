@@ -2,6 +2,7 @@
 #include <hpp/render_system.hpp>
 #include <hpp/physics_system.hpp>
 #include <hpp/world_system.hpp>
+#include <hpp/States/character_grounded_state.hpp>
 
 // stlib
 #include <chrono>
@@ -10,6 +11,8 @@
 //internal
 
 using Clock = std::chrono::high_resolution_clock;
+
+bool WorldSystem::pause_flag = false;
 
 int main() {
 	std::cout << "Starting Fast and Furry-ous" << std::endl;
@@ -30,7 +33,14 @@ int main() {
 
 	// Game loop
 	glfwSetWindowUserPointer(window, &world);
+	
+
 	while (!glfwWindowShouldClose(window)) { // TO-DO: Make this loop condition depend on the world state, like in assignment template
+		if (WorldSystem::pause_flag){
+			glfwPollEvents();
+			time = Clock::now();
+		}
+		else {
 		// Process system events
 		glfwPollEvents();
 
@@ -43,7 +53,10 @@ int main() {
 		physics.step(elapsed_ms);
 
 		renderer.draw(elapsed_ms, world);
-		glfwSwapBuffers(window);
+		glfwSwapBuffers(window);}
+		
+		
+		
 	}
 
 	return EXIT_SUCCESS;

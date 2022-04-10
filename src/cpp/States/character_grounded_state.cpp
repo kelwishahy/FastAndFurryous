@@ -4,6 +4,7 @@
 #include "hpp/tiny_ecs_registry.hpp"
 #include "hpp/ui_system.hpp"
 #include "hpp/Game_Mechanics/shooting_system.hpp"
+#include <hpp/world_system.hpp>
 
 #pragma region
 //Super class 
@@ -199,7 +200,7 @@ void CharacterMoveRightState::doChecks() {
 void CharacterMoveRightState::on_player_key(int key, int, int action, int mod) {
 	CharacterMoveState::on_player_key(key, 0, action, mod);
 	Character* c = registry.characters.get(character);
-
+	
 	if (action == GLFW_RELEASE) {
 
 		if (key == GLFW_KEY_D) {
@@ -252,6 +253,11 @@ void CharacterAimState::doChecks() {
 
 void CharacterAimState::on_player_key(int key, int, int action, int mod) {
 	Character* chara = registry.characters.get(character);
+	if (action == GLFW_PRESS) {
+			if (key == GLFW_KEY_SPACE) {
+				WorldSystem::pause_flag = !WorldSystem::pause_flag;
+			return;
+			}}
 	if (!chara->state_machine.isAI()) {
 		if (action == GLFW_PRESS) {
 
@@ -270,6 +276,7 @@ void CharacterAimState::on_player_key(int key, int, int action, int mod) {
 			if (key == GLFW_KEY_A) {
 				chara->state_machine.changeState(chara->move_left_state);
 			}
+			
 		}
 	}
 }
@@ -281,6 +288,10 @@ void CharacterAimState::on_mouse_move(glm::vec2 mouse_pos) {
 	weapon.aim_angle = atan2f(y, x);*/
 }
 void CharacterAimState::on_mouse_click(int button, int action, int mods) {
+	//!!!
+	if (WorldSystem::pause_flag){
+		return;
+	}
 	if (button == GLFW_MOUSE_BUTTON_LEFT) {
 		if (action == GLFW_PRESS) {
 			Character* chara = registry.characters.get(character);
@@ -290,6 +301,10 @@ void CharacterAimState::on_mouse_click(int button, int action, int mods) {
 }
 
 void CharacterAimState::on_mouse_scroll(double xoffset, double yoffset) {
+	//!!!
+	if (WorldSystem::pause_flag){
+		return;
+	}
 	if (yoffset > 0) {
 		ShootingSystem::aimUp(character, (float)(0.05 * abs(yoffset)));
 	}
