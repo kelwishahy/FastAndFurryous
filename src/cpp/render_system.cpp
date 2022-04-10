@@ -22,7 +22,9 @@ void RenderSystem::draw(float elapsed_ms, WorldSystem& world) {
 	glEnable(GL_DEPTH_TEST);
 
 	// Draw the map
-	drawTiles();
+	if (world.getCurrentGame().inAGame) {
+		drawTiles();
+	}
 
 	// Sort all the RenderRequests by depth
 	registry.renderRequests.sort([](Entity& lhs, Entity& rhs) {
@@ -90,14 +92,6 @@ void RenderSystem::draw(float elapsed_ms, WorldSystem& world) {
 				continue;
 		}
 	}
-}
-
-mat4 RenderSystem::transform(vec2 position, vec2 scale, float depth, float angle) {
-	Transform transform;
-	transform.mat = glm::translate(transform.mat, vec3(position, depth));
-	transform.mat = (angle != 0) ? glm::rotate(transform.mat, angle, vec3(0.0f, 0.0f, 1.0f)) : transform.mat;
-	transform.mat = glm::scale(transform.mat, vec3(scale, depth));
-	return transform.mat;
 }
 
 void RenderSystem::renderToScreen(mat4 transformationMatrix) {
@@ -222,89 +216,56 @@ void RenderSystem::animateSprite(RenderRequest& request, Entity& entity) {
 }
 
 void RenderSystem::drawTiles() {
-	const auto& tileMap = gameMap.getTileMap();
-	const int& mapWidth = gameMap.getMapWidth();
-	const int& mapHeight = gameMap.getMapHeight();
-	const float& scaleFactor = gameMap.getTileScale();
+	const unsigned int& numTiles = gameMap.getNumTiles();
 
-	// Updating the texture coordinates for use with the Stone texture atlas
+	// 1. Set texture coordinates
 	texturedQuad[0].texCoord = { 0.333, 0.333 }; // top right
 	texturedQuad[1].texCoord = { 0.333, 0.667 }; // bottom right
 	texturedQuad[2].texCoord = { 0.0, 0.667 }; // bottom left
 	texturedQuad[3].texCoord = { 0.0, 0.333 }; // top left
 	bindVBOandIBO(GEOMETRY_BUFFER_IDS::TEXTURED_QUAD, texturedQuad, quadIndices);
 
-	// Only draw the bottom 5 rows of tiles
-	for (int i = mapHeight - 1 ; i >= 0; i--) {
-		for (int j = mapWidth - 1; j >= 0; j--) {
-			if (tileMap[i][j] == 1) {
+	// 2. Bind buffers and pass in position and texcoord vertex attributes
+	const GLuint vbo = vertexBuffers[(GLuint)GEOMETRY_BUFFER_IDS::TEXTURED_QUAD];
+	const GLuint ibo = indexBuffers[(GLuint)GEOMETRY_BUFFER_IDS::TEXTURED_QUAD];
 
-				const GLuint vbo = vertexBuffers[(GLuint)GEOMETRY_BUFFER_IDS::TEXTURED_QUAD];
-				const GLuint ibo = indexBuffers[(GLuint)GEOMETRY_BUFFER_IDS::TEXTURED_QUAD];
+	// Bind buffers
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+	glHasError();
 
-				// Bind buffers
-				glBindBuffer(GL_ARRAY_BUFFER, vbo);
-				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-				glHasError();
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex), (void*)0);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex), (void*)sizeof(vec3));
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+	glHasError();
 
-				// set shaders
-				const GLuint shaderProgram = shaders[(GLuint)SHADER_PROGRAM_IDS::TEXTURE];
-				glUseProgram(shaderProgram);
-				glHasError();
+	// 3. Set the shader
+	const GLuint shaderProgram = shaders[(GLuint)SHADER_PROGRAM_IDS::TILE];
+	glUseProgram(shaderProgram);
+	glHasError();
 
-				// Set texture
-				glActiveTexture(GL_TEXTURE0);
-				const GLuint texture = textures[(GLuint)TEXTURE_IDS::STONE];
-				glBindTexture(GL_TEXTURE_2D, texture);
+	// 4. Pass in projection matrix
+	auto proj = camera->getViewProjectionMatrix(); // Passing in the camera's viewProjectionMatrix
+	GLuint projection_loc = glGetUniformLocation(shaderProgram, "projection");
+	glUniformMatrix4fv(projection_loc, 1, GL_FALSE, (float*)&proj);
+	glHasError();
 
-				// Pass in shader inputs
-				std::string shaderInputs[] = { "position", "texCoord" };
-				for (int i = 0; i < 2; i++) {
-					const GLint inputPosition = glGetAttribLocation(shaderProgram, shaderInputs[i].c_str());
-					glHasError();
+	// 5. Bind the texture
+	glActiveTexture(GL_TEXTURE0);
+	const GLuint texture = textures[(GLuint)TEXTURE_IDS::STONE];
+	glBindTexture(GL_TEXTURE_2D, texture);
 
-					// input variable names need to be standardized to match the names below
-					if (shaderInputs[i] == "position") {
-						glVertexAttribPointer(inputPosition, 3, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex), (void*)0);
-					}
-					else if (shaderInputs[i] == "texCoord") {
-						glVertexAttribPointer(inputPosition, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex), (void*)sizeof(vec3));
-					}
+	// 6. Draw
+	GLint size = 0;
+	glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
+	glHasError();
+	const GLsizei numIndices = size / sizeof(uint16_t);
 
-					glEnableVertexAttribArray(inputPosition);
-					glHasError();
-				}
+	// Draw all the tiles at once
+	glDrawElementsInstanced(GL_TRIANGLES, numIndices, GL_UNSIGNED_SHORT, nullptr, numTiles);
 
-				GLint size = 0;
-				glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
-				glHasError();
-				const GLsizei numIndices = size / sizeof(uint16_t);
-
-				/* MATRIX TRANSFORMATIONS */
-				mat4 transformationMatrix = transform(
-					{ (0.5 + j) * scaleFactor, (0.5 + i) * scaleFactor }, 
-					{ scaleFactor, scaleFactor }, 
-					0.f, 0);
-
-				GLint currProgram;
-				glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
-
-				// Setting uniform values to the currently bound program
-				GLuint transform_loc = glGetUniformLocation(currProgram, "transform");
-				glUniformMatrix4fv(transform_loc, 1, GL_FALSE, (float*)&transformationMatrix);
-				
-				auto proj = camera->getViewProjectionMatrix(); // Passing in the camera's viewProjectionMatrix
-				GLuint projection_loc = glGetUniformLocation(currProgram, "projection");
-				glUniformMatrix4fv(projection_loc, 1, GL_FALSE, (float*)&proj);
-				glHasError();
-
-				glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_SHORT, nullptr);
-				glHasError();
-			}
-		}
-	}
-
-	// Resetting the texture coordinates after use
+	// 7. Reset the texture coordinates after use
 	texturedQuad[0].texCoord = { 1.f, 1.f }; // top right
 	texturedQuad[1].texCoord = { 1.f, 0.f }; // bottom right
 	texturedQuad[2].texCoord = { 0.f, 0.f }; // bottom left

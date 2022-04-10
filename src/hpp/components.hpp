@@ -24,6 +24,7 @@ enum class SHADER_PROGRAM_IDS {
 	WALL,
 	AI,
 	FONT,
+	TILE,
 	TOTAL
 }; constexpr int shaderProgramCount = (int)SHADER_PROGRAM_IDS::TOTAL;
 
