@@ -149,6 +149,12 @@ void CharacterMoveLeftState::on_player_key(int key, int, int action, int mod) {
 	CharacterMoveState::on_player_key(key, 0, action, mod);
 	Character* c = registry.characters.get(character);
 
+	if (action == GLFW_PRESS) {
+			if (key == GLFW_KEY_SPACE) {
+				WorldSystem::pause_flag = !WorldSystem::pause_flag;
+			return;
+			}
+	}
 	if (action == GLFW_RELEASE) {
 
 		if (key == GLFW_KEY_A) {
@@ -200,7 +206,12 @@ void CharacterMoveRightState::doChecks() {
 void CharacterMoveRightState::on_player_key(int key, int, int action, int mod) {
 	CharacterMoveState::on_player_key(key, 0, action, mod);
 	Character* c = registry.characters.get(character);
-	
+	if (action == GLFW_PRESS) {
+			if (key == GLFW_KEY_SPACE) {
+				WorldSystem::pause_flag = !WorldSystem::pause_flag;
+			return;
+			}
+	}
 	if (action == GLFW_RELEASE) {
 
 		if (key == GLFW_KEY_D) {
@@ -288,7 +299,6 @@ void CharacterAimState::on_mouse_move(glm::vec2 mouse_pos) {
 	weapon.aim_angle = atan2f(y, x);*/
 }
 void CharacterAimState::on_mouse_click(int button, int action, int mods) {
-	//!!!
 	if (WorldSystem::pause_flag){
 		return;
 	}
@@ -301,7 +311,6 @@ void CharacterAimState::on_mouse_click(int button, int action, int mods) {
 }
 
 void CharacterAimState::on_mouse_scroll(double xoffset, double yoffset) {
-	//!!!
 	if (WorldSystem::pause_flag){
 		return;
 	}
