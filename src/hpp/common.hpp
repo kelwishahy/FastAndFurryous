@@ -39,3 +39,4 @@ extern glm::vec2 screenResolution;
 glm::vec2 scaleToScreenResolution(glm::vec2 defaultScale);
 
 float naive_lerp(float a, float b, float t);
+glm::mat4 transform(glm::vec2 position, glm::vec2 scale, float depth, float angle);

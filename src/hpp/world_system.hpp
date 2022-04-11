@@ -46,7 +46,8 @@ public:
 
 	void play_startscreen();
 
-	void play_options(int newtimer, int newPlayers);
+// change option timer type
+	void play_options(float newtimer);
 
 	void play_levels();
 
@@ -61,13 +62,20 @@ public:
 	OrthographicCamera& getCamera() { return this->camera; }
 
 	TextManager& getTextManager() { return this->textManager; }
+	
+	Game level_one(float newtimer);
+	Game level_two(float newtimer);
+	Game level_three(float newtimer);
+	Game multiplayer(float newtimer);
 
-	Game level_one();
-	Game level_two();
-	Game level_three();
-	Game multiplayer();
+	vec2 set_pos(float posX, float posY);
+	vec2 set_scale(float scaleX, float scaleY);
+	Entity WorldSystem::cancel_button();
+
+	static bool pause_flag;
 
 private:
+	bool singlePlayer;
 	// restart level it was in the private 
 	void restart_game(Game level);
 

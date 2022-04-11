@@ -24,6 +24,7 @@ enum class SHADER_PROGRAM_IDS {
 	WALL,
 	AI,
 	FONT,
+	TILE,
 	TOTAL
 }; constexpr int shaderProgramCount = (int)SHADER_PROGRAM_IDS::TOTAL;
 
@@ -604,12 +605,9 @@ struct DebugComponent {
 	// Note, an empty struct has size 1
 };
 
+// change option timer type
 struct OptionTimer {
-	int timerC;
-};
-
-struct OptionPlayers {
-	int playersN;
+	float timerC = 1.f;
 };
 
 void remove_children(Entity e);

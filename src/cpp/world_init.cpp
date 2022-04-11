@@ -532,30 +532,19 @@ Entity createHealthCounter(Entity origin, int health, TextManager& textManager) 
 
 }
 
-Entity createTimerCounter(int timer, TextManager& textManager) {
+Entity createTimerCounter(float timer, TextManager& textManager) {
 
 	auto entity = Entity();
 
 	OptionTimer& timer0 = registry.timer.emplace(entity);
 
 	timer0.timerC = timer;
+	
+	int n = static_cast<int>(timer0.timerC);
 	//timer0.text = createText({ 1025.0f, 390.0f }, 2.0f, { 0.0f, 0.0f, 0.0f }, std::to_string(timer0.timerC));
-	createText(textManager, std::to_string(timer0.timerC), { 1060.0f, 390.0f }, 2.0f, { 0.0f, 0.0f, 0.0f });
+	createText(textManager, std::to_string(n), { 1060.0f, 390.0f }, 2.0f, { 0.0f, 0.0f, 0.0f });
 
 	return entity;
 
 }
 
-
-Entity createPlayersCounter(int newplayers, TextManager& textManager) {
-
-
-	auto entity = Entity();
-	OptionPlayers& players = registry.players.emplace(entity);
-	players.playersN = newplayers;
-
-	//createText({ 1045.0f, 615.0f }, 2.0f, { 0.0f, 0.0f, 0.0f }, std::to_string(players.playersN));
-	createText(textManager, std::to_string(players.playersN), { 1050.0f, 615.0f }, 2.0f, { 0.0f, 0.0f, 0.0f });
-	return entity;
-
-}

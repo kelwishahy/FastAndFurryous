@@ -5,6 +5,8 @@
 
 #include <iostream>
 
+#include "glm/ext/matrix_transform.hpp"
+
 bool glHasError() {
 	GLenum error = glGetError();
 
@@ -91,6 +93,13 @@ glm::vec2 scaleToScreenResolution(glm::vec2 defaultScale) {
     return { x, y };
 }
 
+glm::mat4 transform(glm::vec2 position, glm::vec2 scale, float depth, float angle) {
+    Transform transform;
+    transform.mat = glm::translate(transform.mat, glm::vec3(position, depth));
+    transform.mat = (angle != 0) ? glm::rotate(transform.mat, angle, glm::vec3(0.0f, 0.0f, 1.0f)) : transform.mat;
+    transform.mat = glm::scale(transform.mat, glm::vec3(scale, depth));
+    return transform.mat;
+}
 float naive_lerp(float a, float b, float t) {
     return a + t * (b - a);
 }

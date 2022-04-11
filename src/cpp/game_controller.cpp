@@ -45,7 +45,7 @@ void GameController::init(GLFWwindow* window, MapSystem::Map& map, OrthographicC
 	set_user_input_callbacks();
 
 	timePerTurnMs = game_data.getTimer();
-
+	
 	inAGame = true;
 	player_mode = PLAYER_MODE::MOVING;
 
@@ -357,11 +357,11 @@ void GameController::change_to_next_char_on_team() {
 // On key callback
 void GameController::on_player_key(int key, int, int action, int mod) {
 
-	
 	Character* c = registry.characters.get(curr_selected_char);
-	if (!c->state_machine.isAI()) {
-		c->state_machine.getCurrentState()->on_player_key(key, 0, action, mod);
-	}
+	// if (!c->state_machine.isAI()) {
+	// 	c->state_machine.getCurrentState()->on_player_key(key, 0, action, mod);
+	// }
+	c->state_machine.getCurrentState()->on_player_key(key, 0, action, mod);
 }
 
 void GameController::on_mouse_move(vec2 mouse_pos) {

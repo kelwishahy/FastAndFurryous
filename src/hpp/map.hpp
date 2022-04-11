@@ -14,6 +14,8 @@ public:
 		float getTileScale() { return this->tileScale; }
 		std::vector<std::vector<unsigned int>> getTileMap();
 		void build();
+		unsigned int getNumTiles() { return numTiles; }
+		std::vector<glm::mat4> transformations;
 	private:
 		MAPS name;
 		std::vector<std::vector<unsigned int>> tileMap;
@@ -21,6 +23,8 @@ public:
 		unsigned int mapWidth;
 		float tileScale;
 		void readMapFromFile();
+		unsigned int numTiles = 0;
+		unsigned int instanceVBO;
 	};
 	MapSystem(){};
 

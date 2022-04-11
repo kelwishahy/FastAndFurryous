@@ -28,7 +28,8 @@ class RenderSystem {
 		"texture",
 		"wall",
 		"ai",
-		"font"
+		"font",
+		"tile"
 	};
 
 	std::array<GLuint, shaderProgramCount> shaders; // OpenGL shader names
@@ -198,11 +199,6 @@ private:
 
 	// Load vertex data into the vertex buffers
 	void initRenderData();
-
-	// Apply matrix transformations
-	// position is generally motion.position
-	// scale is generally motion.scale
-	glm::mat4 transform(glm::vec2 position, glm::vec2 scale, float depth, float angle);
 
 	// The last step of the draw function
 	void renderToScreen(glm::mat4 transformationMatrix);
