@@ -25,6 +25,7 @@ enum class SHADER_PROGRAM_IDS {
 	AI,
 	FONT,
 	TILE,
+	PARTICLE,
 	TOTAL
 }; constexpr int shaderProgramCount = (int)SHADER_PROGRAM_IDS::TOTAL;
 
@@ -130,6 +131,7 @@ enum class GEOMETRY_BUFFER_IDS {
 	TEXTURED_QUAD,
 	WALL,
 	FONT,
+	CIRCLE,
 	TOTAL
 }; constexpr int geometryCount = (int)GEOMETRY_BUFFER_IDS::TOTAL;
 
@@ -491,6 +493,7 @@ struct Character {
 	CharacterDamageState* damage_state;
 	glm::vec3 team_color;
 	ANIMAL animal;
+	bool isDead = false;
 
 	void init() {
 		idle_state = new CharacterIdleState(character);
@@ -575,7 +578,7 @@ struct ColoredVertex {
 
 // Index and vertex buffers
 struct Mesh {
-	static bool loadMeshFromObj(std::string obj_path, std::vector<ColoredVertex>& out_vertices, std::vector<uint16_t>& out_vertex_indices, glm::vec2& out_size);
+	// static bool loadMeshFromObj(std::string obj_path, std::vector<ColoredVertex>& out_vertices, std::vector<uint16_t>& out_vertex_indices, glm::vec2& out_size);
 	glm::vec2 originalSize = { 1,1 };
 	std::vector<ColoredVertex> vertices;
 	std::vector<uint16_t> vertexIndices;

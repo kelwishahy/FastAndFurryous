@@ -534,6 +534,7 @@ void CharacterDeadState::enter() {
 	motion.velocity = vec2(.0f, .0f);
 	Character* c = registry.characters.get(character);
 	c->animate_dead();
+	c->isDead = true;
 }
 
 void CharacterDeadState::exit() {

@@ -16,7 +16,7 @@ void ParticleSystem::init() {
 
 void ParticleSystem::emit(int numParticles, vec2 position, vec2 velocity) {
 	std::random_device rseed;
-	std::uniform_int_distribution<int> dist(-1, 1);
+	std::uniform_real_distribution<float> dist(-1, 1);
 	std::mt19937 rng(rseed());
 	for (int i = 0; i < numParticles; i++) {
 		auto& particleEnt = registry.particles.entities[particleIndex];
