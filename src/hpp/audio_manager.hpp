@@ -13,7 +13,8 @@ enum SOUND_EFFECTS {
 	CAT_SCREAM,
 	DOG_BARK,
 	GUNSHOT,
-	WIN
+	WIN,
+	TURN_CHANGE
 };
 
 class AudioManager {
@@ -58,6 +59,9 @@ public:
 
 		Mix_Chunk* win = Mix_LoadWAV(audio_path("win.wav").c_str());
 		sound_effects.insert({ WIN, win });
+
+		Mix_Chunk* turn_change = Mix_LoadWAV(audio_path("turn_change.wav").c_str());
+		sound_effects.insert({ TURN_CHANGE, turn_change });
 
 		if (background_music == nullptr) {
 			fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n make sure the data directory is present",
