@@ -276,8 +276,12 @@ protected:
 
 };
 
-
 // Game components ------------------------------------------------------------
+struct Particle {
+	bool active = false;
+	float timer = 800;
+};
+
 struct Background {
 	float layer = -0.5;
 };

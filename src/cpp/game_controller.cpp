@@ -19,12 +19,15 @@ GameController::~GameController() {
 }
 
 //initialize stuff here
-void GameController::init(GLFWwindow* window, MapSystem::Map& map, OrthographicCamera& camera, TextManager& textManager, Game game) {
+void GameController::init(GLFWwindow* window, MapSystem::Map& map, OrthographicCamera& camera, TextManager& textManager, Game game, 
+	ParticleSystem& particleSystem) {
 	this->window = window;
 	this->gameMap = map;
 	this->camera = &camera;
 	this->textManager = textManager;
 	this->game_data = game;
+	this->particleSystem = &particleSystem;
+	this->particleSystem->init();
 	this->mousePosition = scaleToScreenResolution(defaultResolution/2.f);
 	this->mouseDeadzone = scaleToScreenResolution({ 250.f, 250.f }).x;
 	this->mouseTriggerArea = scaleToScreenResolution({ 300.f, 150.f });
@@ -64,9 +67,8 @@ void GameController::step(float elapsed_ms) {
 	//While a game is happening make sure the players are controlling from here
 	glfwSetWindowUserPointer(window, this);
 
-	//Pan camera based on mouse position
+	// Pan camera based on mouse position
 	moveCamera();
-	//Step the player state machines
 
 	for (Entity e : registry.entityTimers.entities) {
 		Timer& timer = registry.entityTimers.get(e);
@@ -78,6 +80,10 @@ void GameController::step(float elapsed_ms) {
 	/*printf("num grenades: %i ", (int)registry.grenades.components.size());
 	printf("num explosions: %i\n", (int)registry.explosions.components.size());*/
 
+	// Update particles
+	particleSystem->step(elapsed_ms);
+
+	//Step the player state machines
 	for (Character* chara : registry.characters.components) {
 		chara->state_machine.getCurrentState()->step(elapsed_ms);
 		for (int i = 0; i < teams[TURN_CODE::PLAYER1].size(); i++) {
@@ -272,6 +278,14 @@ void GameController::next_turn() {
 	
 }
 
+void bloodSplatter(Entity& projectile, Entity& character) {
+	// Spawn with random y velocity and constant x velocity
+	bool orientation = registry.animations.get(character).facingLeft;
+	float vel = 200.f;
+	vel = (orientation) ? -vel : vel;
+	
+}
+
 void GameController::handle_collisions() {
 	// Loop over all collisions detected by the physics system
 	auto& collisionsRegistry = registry.collisions;
@@ -283,6 +297,34 @@ void GameController::handle_collisions() {
 		if (registry.projectiles.has(entity)) {// Projectile hit terrain
 			Projectile& pj = registry.projectiles.get(entity);
 			if (registry.terrains.has(entity_other) && entity_other != pj.origin) {
+				registry.remove_all_components_of(entity);
+			} else if (entity_other != pj.origin) { // Projectile hit another player
+				// for (std::vector<Entity> vec : teams) {
+				// 	bool origin_isonteam = false;
+				// 	bool entity_other_isonteam = false;
+				// 	for (Entity e : vec) { //check for friendly fire, since std::find dosen't work
+				// 		if (e == pj.origin) 
+				// 			origin_isonteam = true;
+				// 		if (e == entity_other) 
+				// 			entity_other_isonteam = true;
+				// 	}
+				// 	if (origin_isonteam) {
+				// 		decreaseHealth(entity_other, registry.weapons.get(pj.origin).damage, curr_selected_char);
+				// 	}
+				// }
+
+				// Friendly fire is enabled
+				if (registry.health.has(entity_other)) {
+					decreaseHealth(entity_other, registry.weapons.get(pj.origin).damage, curr_selected_char);
+				}
+
+				// Blood splatter using particles
+				bool orientation = registry.animations.get(entity_other).facingLeft;
+				auto& position = registry.motions.get(entity_other).position;
+				vec2 vel = { 200.f, 200.f };
+				vel.x = (orientation) ? -vel.x : vel.x;
+				particleSystem->emit(10, position, vel);
+
 				registry.remove_all_components_of(entity);
 			}
 		}

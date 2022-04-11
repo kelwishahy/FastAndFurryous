@@ -10,6 +10,7 @@
 #include <glm/vec2.hpp>
 #include "orthographic_camera.hpp"
 #include "text_manager.hpp"
+#include "hpp/particle_system.hpp"
 
 // Container for all our entities and game logic. Individual rendering / update is
 // deferred to the relative update() methods
@@ -62,6 +63,8 @@ public:
 	OrthographicCamera& getCamera() { return this->camera; }
 
 	TextManager& getTextManager() { return this->textManager; }
+
+	ParticleSystem& getParticleSystem() { return this->particleSystem; }
 	
 	Game level_one(float newtimer);
 	Game level_two(float newtimer);
@@ -101,4 +104,6 @@ private:
 	TextManager textManager;
 
 	OrthographicCamera camera;
+
+	ParticleSystem particleSystem;
 };
