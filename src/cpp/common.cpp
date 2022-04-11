@@ -90,3 +90,7 @@ glm::vec2 scaleToScreenResolution(glm::vec2 defaultScale) {
     float y = (defaultScale.y / defaultResolution.y) * screenResolution.y;
     return { x, y };
 }
+
+float naive_lerp(float a, float b, float t) {
+    return a + t * (b - a);
+}

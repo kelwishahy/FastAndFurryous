@@ -37,3 +37,5 @@ extern glm::vec2 screenResolution;
 
 // scale to screen size
 glm::vec2 scaleToScreenResolution(glm::vec2 defaultScale);
+
+float naive_lerp(float a, float b, float t);

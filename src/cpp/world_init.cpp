@@ -120,7 +120,10 @@ Entity createCat(WEAPON_TYPES weapon, vec2 pos, int health, GLFWwindow* window) 
 
 	Animation& anim = registry.animations.emplace(entity);
 	anim.animation_states_constants.insert({ TEXTURE_IDS::CAT_FRONT_IDLE, CAT_IDLE_CONSTANTS});
-	anim.animation_states_constants.insert({ TEXTURE_IDS::CAT_SIDE_IDLE, CAT_SIDE_IDLE_CONSTANTS });
+	anim.animation_states_constants.insert({ TEXTURE_IDS::CAT_SIDE_IDLE_AK, CAT_SIDE_IDLE_CONSTANTS });
+	anim.animation_states_constants.insert({ TEXTURE_IDS::CAT_SIDE_IDLE_SG, CAT_SIDE_IDLE_CONSTANTS });
+	anim.animation_states_constants.insert({ TEXTURE_IDS::CAT_SIDE_IDLE_GL, CAT_SIDE_IDLE_CONSTANTS });
+	anim.animation_states_constants.insert({ TEXTURE_IDS::CAT_SIDE_IDLE_AWP, CAT_SIDE_IDLE_CONSTANTS });
 	anim.animation_states_constants.insert({ TEXTURE_IDS::CAT_WALK, CAT_WALK_CONSTANTS });
 	anim.animation_states_constants.insert({ TEXTURE_IDS::CAT_JUMP, CAT_JUMP_CONSTANTS });
 	anim.animation_states_constants.insert({ TEXTURE_IDS::CAT_HURT, CAT_HURT_CONSTANTS });
@@ -226,7 +229,10 @@ Entity createDog(WEAPON_TYPES weapon, vec2 pos, int health, GLFWwindow* window) 
 
 	Animation& anim = registry.animations.emplace(entity);
 	anim.animation_states_constants.insert({ TEXTURE_IDS::DOG_FRONT_IDLE, CAT_IDLE_CONSTANTS });
-	anim.animation_states_constants.insert({ TEXTURE_IDS::DOG_SIDE_IDLE, CAT_SIDE_IDLE_CONSTANTS });
+	anim.animation_states_constants.insert({ TEXTURE_IDS::DOG_SIDE_IDLE_AK, CAT_SIDE_IDLE_CONSTANTS });
+	anim.animation_states_constants.insert({ TEXTURE_IDS::DOG_SIDE_IDLE_SG, CAT_SIDE_IDLE_CONSTANTS });
+	anim.animation_states_constants.insert({ TEXTURE_IDS::DOG_SIDE_IDLE_GL, CAT_SIDE_IDLE_CONSTANTS });
+	anim.animation_states_constants.insert({ TEXTURE_IDS::DOG_SIDE_IDLE_AWP, CAT_SIDE_IDLE_CONSTANTS });
 	anim.animation_states_constants.insert({ TEXTURE_IDS::DOG_WALK, CAT_WALK_CONSTANTS });
 	anim.animation_states_constants.insert({ TEXTURE_IDS::DOG_JUMP, CAT_JUMP_CONSTANTS });
 	anim.animation_states_constants.insert({ TEXTURE_IDS::DOG_HURT, CAT_HURT_CONSTANTS });

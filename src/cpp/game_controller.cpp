@@ -104,6 +104,7 @@ void GameController::step(float elapsed_ms) {
 	ui.step(elapsed_ms);
 
 	handle_collisions();
+	check_out_of_screen_entities();
 
 	turnPosition = scaleToScreenResolution({ 2 * defaultResolution.x / 4.f + camera->getPosition().x,  30.0f });
 	auto& turnIndicatorText = registry.texts.get(turnIndicator);
@@ -290,6 +291,15 @@ void GameController::handle_collisions() {
 
 	// Remove all collisions from this simulation step
 	registry.collisions.clear();
+}
+
+void GameController::check_out_of_screen_entities() {
+	for (Entity e : registry.projectiles.entities) {
+		Motion motion = registry.motions.get(e);
+		if (motion.position.x < 0 || motion.position.y < 0 || motion.position.x > 9000 || motion.position.y > 9000) {
+			registry.remove_all_components_of(e);
+		} 
+	}
 }
 
 void GameController::change_selected_state(Entity e, bool state) {

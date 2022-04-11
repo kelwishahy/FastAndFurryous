@@ -29,7 +29,10 @@ enum class SHADER_PROGRAM_IDS {
 
 enum class TEXTURE_IDS {
 	//Cat textures
-	CAT_SIDE_IDLE,
+	CAT_SIDE_IDLE_AK,
+	CAT_SIDE_IDLE_SG,
+	CAT_SIDE_IDLE_GL,
+	CAT_SIDE_IDLE_AWP,
 	CAT_FRONT_IDLE,
 	CAT_WALK,
 	CAT_JUMP,
@@ -41,7 +44,10 @@ enum class TEXTURE_IDS {
 	CAT_HURT,
 	CAT_DEAD,
 	// Dog Textures
-	DOG_SIDE_IDLE,
+	DOG_SIDE_IDLE_AK,
+	DOG_SIDE_IDLE_SG,
+	DOG_SIDE_IDLE_GL,
+	DOG_SIDE_IDLE_AWP,
 	DOG_FRONT_BLINK,
 	DOG_SIDE_BLINK,
 	DOG_FRONT_IDLE,
@@ -300,6 +306,14 @@ struct Collider {
 
 };
 
+struct Timer {
+	float time;
+	float counter;
+	void reset_counter() {
+		time = counter;
+	}
+};
+
 struct Boxcollider : Collider {
 	std::vector<glm::vec2> vertices;
 	bool transformed_required = true;
@@ -334,7 +348,9 @@ struct WeaponBase {
 	float MAX_ANGLE;
 	float MIN_ANGLE;
 	float aim_angle;
-	float damage;
+	float min_damage;
+	float max_damage;
+	float max_dist;
 	WEAPON_TYPES type;
 };
 
@@ -347,7 +363,9 @@ struct Rifle : WeaponBase {
 		// pi/4
 		// aim_angle = 0.7854f;
 		aim_angle = MIN_ANGLE;
-		damage = 45;
+		max_damage = 45.f;
+		min_damage = 35.f;
+		max_dist = 600.f;
 		type = RIFLE;
 	}
 };
@@ -357,11 +375,13 @@ struct Awp : WeaponBase {
 		//a little less than pi/2
 		MAX_ANGLE = 0.9f;
 		//a little more than 0
-		MIN_ANGLE = 0.3f;
+		MIN_ANGLE = 5.5f;
 		// pi/4
 		// aim_angle = 0.7854f;
 		aim_angle = MIN_ANGLE;
-		damage = 80;
+		max_damage = 80.f;
+		min_damage = 70.f;
+		max_dist = 2000.f;
 		type = AWP;
 	}
 };
@@ -371,11 +391,13 @@ struct Shotgun : WeaponBase {
 		//a little less than pi/2
 		MAX_ANGLE = 1.2f;
 		//a little more than 0
-		MIN_ANGLE = 0.2f;
+		MIN_ANGLE = 5.5f;
 		// pi/4
 		// aim_angle = 0.7854f;
 		aim_angle = MIN_ANGLE;
-		damage = 5;
+		max_damage = 5.f;
+		min_damage = 1.f;
+		max_dist = 200.0f;
 		type = SHOTGUN;
 	}
 };

@@ -126,8 +126,8 @@ void ShootingSystem::shoot(Entity e) {
 		float yforce;
 
 		for (int i = 0; i < 8; i++) { //8 pellets are fired from shotgun
-			xforce = cosf(weapon.aim_angle) * (48.0f - (float)i);
-			yforce = -sinf(weapon.aim_angle) * (40.0f + (float)i);
+			xforce = cosf(weapon.aim_angle + 0.05f * (float)i) * 48.0f;
+			yforce = -sinf(weapon.aim_angle + 0.05f * (float)i) * 40.0f;
 			createProjectile(e, { xforce, yforce });
 		}
 
