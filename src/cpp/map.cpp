@@ -62,6 +62,8 @@ void MapSystem::Map::build() {
 		}
 	}
 
+	printf("Number of tiles in this map: %d\n", numTiles);
+
 	switch (name) {
 		case MAPS::INDUSTRIAL: {
 			for (int i = 0; i < IndustrialBackgroundLayers; i++) {
@@ -209,7 +211,7 @@ void MapSystem::Map::readMapFromFile() {
 		std::cerr << "Unable to open file\n" << std::endl;
 		assert(false);
 	}
-
+	int index = 0;
 	for (int y = 0; y < mapHeight; y++) {
 		tileMap.push_back({});
 		for (int x = 0; x < mapWidth; x++) {
@@ -218,8 +220,39 @@ void MapSystem::Map::readMapFromFile() {
 				cerr << "Unexpected end of file\n" << endl;
 				exit(1);
 			}
+
+			if (tileMap[y][x] != 0) {
+				numTiles++;
+
+				// Compute tile positions since they won't change
+				/* MATRIX TRANSFORMATIONS */
+				mat4 transformationMatrix = transform(
+					{ (0.5 + x) * tileScale, (0.5 + y) * tileScale },
+					{ tileScale, tileScale },
+					0.f, 0);
+				
+				transformations.push_back(transformationMatrix);
+			}
 		}
 	}
-
 	infile.close();
+
+	// Pass in tile transformation matrices
+	glGenBuffers(1, &instanceVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(mat4) * numTiles, transformations.data(), GL_STATIC_DRAW);
+	glHasError();
+
+	glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (void*)(sizeof(float) * 0));
+	glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (void*)(sizeof(float) * 4));
+	glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (void*)(sizeof(float) * 8));
+	glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(mat4), (void*)(sizeof(float) * 12));
+	glEnableVertexAttribArray(2);
+	glEnableVertexAttribArray(3);
+	glEnableVertexAttribArray(4);
+	glEnableVertexAttribArray(5);
+	glVertexAttribDivisor(2, 1);
+	glVertexAttribDivisor(3, 1);
+	glVertexAttribDivisor(4, 1);
+	glVertexAttribDivisor(5, 1);
 }
