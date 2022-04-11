@@ -27,6 +27,15 @@ void CharacterGroundedState::step(float elapsed_ms) {
 	CharacterState::step(elapsed_ms);
 }
 
+void CharacterGroundedState::on_player_key(int key, int, int action, int mod){
+	if (action == GLFW_PRESS) {
+		if (key == GLFW_KEY_SPACE) {
+			WorldSystem::pause_flag = !WorldSystem::pause_flag;
+			return;
+		}
+	}
+}
+
 void CharacterGroundedState::doChecks() {
 	CharacterState::doChecks();
 }
@@ -148,13 +157,7 @@ void CharacterMoveLeftState::doChecks() {
 void CharacterMoveLeftState::on_player_key(int key, int, int action, int mod) {
 	CharacterMoveState::on_player_key(key, 0, action, mod);
 	Character* c = registry.characters.get(character);
-
-	if (action == GLFW_PRESS) {
-			if (key == GLFW_KEY_SPACE) {
-				WorldSystem::pause_flag = !WorldSystem::pause_flag;
-			return;
-			}
-	}
+	CharacterGroundedState::on_player_key(key, 0, action, mod);
 	if (action == GLFW_RELEASE) {
 
 		if (key == GLFW_KEY_A) {
@@ -206,12 +209,7 @@ void CharacterMoveRightState::doChecks() {
 void CharacterMoveRightState::on_player_key(int key, int, int action, int mod) {
 	CharacterMoveState::on_player_key(key, 0, action, mod);
 	Character* c = registry.characters.get(character);
-	if (action == GLFW_PRESS) {
-			if (key == GLFW_KEY_SPACE) {
-				WorldSystem::pause_flag = !WorldSystem::pause_flag;
-			return;
-			}
-	}
+	CharacterGroundedState::on_player_key(key, 0, action, mod);
 	if (action == GLFW_RELEASE) {
 
 		if (key == GLFW_KEY_D) {
@@ -264,11 +262,7 @@ void CharacterAimState::doChecks() {
 
 void CharacterAimState::on_player_key(int key, int, int action, int mod) {
 	Character* chara = registry.characters.get(character);
-	if (action == GLFW_PRESS) {
-			if (key == GLFW_KEY_SPACE) {
-				WorldSystem::pause_flag = !WorldSystem::pause_flag;
-			return;
-			}}
+	CharacterGroundedState::on_player_key(key, 0, action, mod);
 	if (!chara->state_machine.isAI()) {
 		if (action == GLFW_PRESS) {
 
