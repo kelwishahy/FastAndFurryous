@@ -62,13 +62,14 @@ public:
 	OrthographicCamera& getCamera() { return this->camera; }
 
 	TextManager& getTextManager() { return this->textManager; }
-
-	Game level_one();
-	Game level_two();
-	Game level_three();
+	
+	Game level_one(float newtimer);
+	Game level_two(float newtimer);
+	Game level_three(float newtimer);
 	Game multiplayer(float newtimer);
 
 private:
+	bool singlePlayer;
 	// restart level it was in the private 
 	void restart_game(Game level);
 
