@@ -47,7 +47,7 @@ public:
 	void play_startscreen();
 
 // change option timer type
-	void play_options(float newtimer, int newPlayers);
+	void play_options(float newtimer);
 
 	void play_levels();
 
@@ -67,6 +67,12 @@ public:
 	Game level_two(float newtimer);
 	Game level_three(float newtimer);
 	Game multiplayer(float newtimer);
+
+	vec2 set_pos(float posX, float posY);
+	vec2 set_scale(float scaleX, float scaleY);
+	Entity WorldSystem::cancel_button();
+
+	static bool pause_flag;
 
 private:
 	bool singlePlayer;

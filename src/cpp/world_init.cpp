@@ -532,16 +532,3 @@ Entity createTimerCounter(float timer, TextManager& textManager) {
 
 }
 
-
-Entity createPlayersCounter(int newplayers, TextManager& textManager) {
-
-
-	auto entity = Entity();
-	OptionPlayers& players = registry.players.emplace(entity);
-	players.playersN = newplayers;
-
-	//createText({ 1045.0f, 615.0f }, 2.0f, { 0.0f, 0.0f, 0.0f }, std::to_string(players.playersN));
-	createText(textManager, std::to_string(players.playersN), { 1050.0f, 615.0f }, 2.0f, { 0.0f, 0.0f, 0.0f });
-	return entity;
-
-}
