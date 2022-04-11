@@ -113,7 +113,7 @@ public:
 	void on_mouse_click(int button, int action, int mods) override;
 	void on_mouse_scroll(double xoffset, double yoffset) override;
 
-	
+	float original_xscale;
 
 };
 

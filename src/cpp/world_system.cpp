@@ -430,7 +430,7 @@ Game WorldSystem::level_three() {
 
 Game WorldSystem::multiplayer() {
 	Game multiplayer;
-	multiplayer.addCat(AWP, PLAYER_1_TEAM, { screenResolution.x / 2 - 400, screenResolution.y - 800 }, 100);
+	multiplayer.addCat(RIFLE, PLAYER_1_TEAM, { screenResolution.x / 2 - 400, screenResolution.y - 800 }, 100);
 	multiplayer.addCat(SHOTGUN, PLAYER_1_TEAM, { screenResolution.x / 2 - 100, screenResolution.y - 400 }, 100);
 	multiplayer.addCat(AWP, PLAYER_1_TEAM, { screenResolution.x / 2 + 100, screenResolution.y - 800 }, 100);
 

@@ -233,14 +233,11 @@ void Cat::animate_dead() {
 void Cat::animate_aim() {
 
 	WeaponBase weapon = registry.weapons.get(this->character);
-	Motion& motion = registry.motions.get(this->character);
 	if (weapon.type == RIFLE) {
 		change_animation(this->character, TEXTURE_IDS::CAT_SIDE_IDLE_AK);
-		motion.scale.x = motion.scale.x * 2.5;
 	} else if (weapon.type == SHOTGUN) {
 		change_animation(this->character, TEXTURE_IDS::CAT_SIDE_IDLE_SG);
 	} else if (weapon.type == AWP) {
-		motion.scale.x = motion.scale.x * 2.5;
 		change_animation(this->character, TEXTURE_IDS::CAT_SIDE_IDLE_AWP);
 	}
 

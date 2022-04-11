@@ -309,14 +309,35 @@ CharacterAimState::CharacterAimState(Entity e) : CharacterGroundedState(e) {
 
 void CharacterAimState::enter() {
 	CharacterGroundedState::enter();
+	Motion& motion = registry.motions.get(character);
+	original_xscale = motion.scale.x;
+	motion.scale.x = motion.scale.x * 4;
 	Character* chara = registry.characters.get(character);
 	chara->animate_aim();
 	UISystem::show_crosshair(character);
+
+	//hide extra arm
+	ChildEntities& children = registry.parentEntities.get(character);
+	Entity arm = children.child_data_map.at(1);
+	for (Entity& e : registry.renderRequests.entities) {
+		if (arm == e) {
+			e.setDepth(-1.f);
+		}
+	}
 }
 
 void CharacterAimState::exit() {
 	CharacterGroundedState::exit();
+	Motion& motion = registry.motions.get(character);
+	motion.scale.x = original_xscale;
 	UISystem::hide_crosshair(character);
+	ChildEntities& children = registry.parentEntities.get(character);
+	Entity arm = children.child_data_map.at(1);
+	for (Entity& e : registry.renderRequests.entities) {
+		if (arm == e) {
+			e.setDepth(0.5f);
+		}
+	}
 }
 
 void CharacterAimState::step(float elapsed_ms) {
