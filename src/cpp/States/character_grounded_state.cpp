@@ -29,6 +29,11 @@ void CharacterGroundedState::step(float elapsed_ms) {
 
 void CharacterGroundedState::on_player_key(int key, int, int action, int mod){
 	if (action == GLFW_PRESS) {
+		if (key == GLFW_KEY_E) {
+			next_turn = true;
+		}
+	}
+	if (action == GLFW_PRESS) {
 		if (key == GLFW_KEY_SPACE) {
 			WorldSystem::pause_flag = !WorldSystem::pause_flag;
 			return;
