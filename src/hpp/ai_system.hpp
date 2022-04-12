@@ -16,9 +16,7 @@ public:
 private:
 	float jumpdelay;
 	float timer;
-	int direction;
-	std::vector<Entity> player1_team;
-	bool jumped;
+	std::vector<Entity> ai_team;
 	float aiTurnTime;
 	std::default_random_engine rng;
 	std::uniform_real_distribution<float> uniform_dist; // number between 0..1

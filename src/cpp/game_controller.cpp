@@ -53,7 +53,7 @@ void GameController::init(GLFWwindow* window, MapSystem::Map& map, OrthographicC
 	inAGame = true;
 	player_mode = PLAYER_MODE::MOVING;
 
-	ai.init(shooting_system, teams[TURN_CODE::PLAYER1]);
+	ai.init(shooting_system, teams[TURN_CODE::NPCAI]);
 
 	ui.init(textManager);
 
@@ -272,14 +272,17 @@ void GameController::next_turn() {
 		game_state.turn_number -= 1;
 		next_turn();
 	}
-	if (game_state.turn_possesion == TURN_CODE::NPCAI) {
-		change_curr_selected_char(selected_ai);
+	if (!teams[game_state.turn_possesion].empty()) {
+		change_curr_selected_char(teams[game_state.turn_possesion][0]);//supposed to be the first player on each team
 	}
-	else {
-		if (!teams[game_state.turn_possesion].empty()) {
-			change_curr_selected_char(teams[game_state.turn_possesion][0]);//supposed to be the first player on each team
-		}
-	}
+	//if (game_state.turn_possesion == TURN_CODE::NPCAI) {
+	//	change_to_next_char_on_team();
+	//}
+	//else {
+	//	if (!teams[game_state.turn_possesion].empty()) {
+	//		change_curr_selected_char(teams[game_state.turn_possesion][0]);//supposed to be the first player on each team
+	//	}
+	//}
 	
 	
 }
