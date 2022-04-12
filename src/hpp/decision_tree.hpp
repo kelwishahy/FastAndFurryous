@@ -14,18 +14,9 @@ enum TURN_CODE {
 
 
 struct Blackboard {
-	Entity* entity;
-	Motion* motion;
-	float velocity;
-	bool walking;
+	Character* c;
+	Entity selected_ai;
 	int turn;
-	float timer;
-	float lowerhp;
-	Entity* player;
-	float move_delay;
-	bool shot;
-	vec2 prev_pos;
-	bool attack;
 };
 
 static Blackboard* blackboard;
@@ -79,146 +70,30 @@ class IsAITurn : public Node {
 	}
 };
 
-class DidTimeEnd : public Node {
-	bool run() override {
-		return (blackboard->timer <= 0);
-	}
-};
 
-class IsMoving : public Node {
-	bool run() override {
-		return (blackboard->motion->velocity.x != 0);
-	}
-};
-
-class IsMovingLeft : public Node {
-	bool run() override {
-		return (blackboard->motion->velocity.x < 0);
-	}
-};
-
-class IsMovingRight : public Node {
-	bool run() override {
-		return (blackboard->motion->velocity.x > 0);
-	}
-};
-
-class IsHurt : public Node {
-	bool run() override {
-		return (blackboard->timer > 0 && blackboard->timer < 5.f);
-	}
-};
-
-class HpLower : public Node {
-	bool run() override {
-		return (blackboard->attack);
-	}
-};
-
-class Shot : public Node {
-	bool run() override {
-		return blackboard->shot;
-	}
-
-};
 
 // TASKS
-class Charge : public Node {
-	bool run() override {
-		Motion& player_motion = registry.motions.get(*blackboard->player);
 
-		if (abs(blackboard->motion->position.x - player_motion.position.x) > 100.f) {
-			if (blackboard->motion->position.x < player_motion.position.x) {
-				blackboard->motion->velocity.x = blackboard->velocity;
-			}
-			else {
-				blackboard->motion->velocity.x = -blackboard->velocity;
-			}
-		}
-		
-		return (blackboard->motion->velocity.x < 0 || blackboard->motion->velocity.x > 0);
-	}
-};
-
-class RunAway : public Node {
-	bool run() override {
-		Motion& player_motion = registry.motions.get(*blackboard->player);
-		if (blackboard->motion->position.x < player_motion.position.x) {
-			blackboard->motion->velocity.x = -blackboard->velocity;
-		}
-		else {
-			blackboard->motion->velocity.x = blackboard->velocity;
-		}
-
-		return (blackboard->motion->velocity.x < 0 || blackboard->motion->velocity.x > 0);
-	}
-};
-class Move : public Node {
-	bool run() override {
-		Motion& player_motion = registry.motions.get(*blackboard->player);
-		/*if (blackboard->shot) {
-			blackboard->motion->velocity.x = 0;
-			return true;
-		}*/
-
-		//float angle = atan2(blackboard->motion->position.y - player_motion.position.y, blackboard->motion->position.x - player_motion.position.x);
-		if (blackboard->attack) {
-
-			blackboard->motion->velocity.x = (blackboard->motion->position.x - player_motion.position.x)/100;
-		}
-		else {
-
-			blackboard->motion->velocity.x = (blackboard->motion->position.x - player_motion.position.x) / 100;
-		}
-		return true;
-	}
-
-};
 
 class MoveLeft : public Node {
 	bool run() override {
-		blackboard->motion->velocity.x = -blackboard->velocity;
-		return (blackboard->motion->velocity.x < 0);
+		blackboard->c->state_machine.changeState(blackboard->c->move_left_state);
+		return true;
 	}
 };
 
 class MoveRight : public Node {
 	bool run() override {
-		blackboard->motion->velocity.x = blackboard->velocity;
-		return (blackboard->motion->velocity.x > 0);
-	}
-};
-
-class SwitchDirection : public Node {
-	bool run() override {
-		blackboard->motion->velocity.x *= -1.f;
-		return (blackboard->motion->velocity.x != 0);
-	}
-};
-
-class Shoot : public Node {
-	bool run() override {
-		
-		Motion& player_motion = registry.motions.get(*blackboard->player);
-
-		blackboard->motion->velocity.x = 0;
-		blackboard->motion->velocity.y = -2.5;
-		float angle = atan2(blackboard->motion->position.y - player_motion.position.y, blackboard->motion->position.x - player_motion.position.x);
-		ShootingSystem::aimDown(*blackboard->entity, angle);
-		ShootingSystem::shoot(*blackboard->entity);
-		blackboard->shot = true;
-	
+		blackboard->c->state_machine.changeState(blackboard->c->move_right_state);
 		return true;
-		
 	}
 };
+
 
 class EndTurn : public Node {
 	bool run() override {
-		blackboard->motion->velocity.x = 0.f;
-		blackboard->motion->velocity.y = 350.f;
+		blackboard->c->state_machine.changeState(blackboard->c->idle_state);
 		blackboard->turn = TURN_CODE::PLAYER1;
-		blackboard->shot = false;
 		return true;
 	}
 };
