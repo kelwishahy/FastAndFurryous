@@ -145,7 +145,7 @@ void CharacterDamageState::step(float elapsed_ms) {
 			WeaponBase weap = registry.weapons.get(pj.origin);
 			float travel_dist_normalized = length(registry.motions.get(entity).position - registry.motions.get(pj.origin).position) / weap.max_dist;
 			float dmg = naive_lerp(weap.max_damage, weap.min_damage, travel_dist_normalized);
-			decreaseHealth(character, (int)dmg);
+			decreaseHealth(character, -(int)dmg);
 			if (registry.health.get(character).hp == 0) {
 				chara->state_machine.changeState(chara->dead_state);
 			}
