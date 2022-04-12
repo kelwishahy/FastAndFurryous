@@ -1,5 +1,7 @@
 #pragma once
-#include "components.hpp"
+#include <vector>
+#include "glm/fwd.hpp"
+#include "glm/vec2.hpp"
 
 class ParticleSystem {
 public:
@@ -8,7 +10,7 @@ public:
 	void init();
 	void emit(int numParticles, glm::vec2 position, glm::vec2 velocity);
 	void step(float elapsed_ms);
-	void deactivate(Particle& particle, int index);
+	void deactivate(int index);
 	std::vector<glm::mat4> transformations;
 	int getNumActive() { return this->numActive; }
 private:

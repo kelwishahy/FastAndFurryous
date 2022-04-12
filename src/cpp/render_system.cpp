@@ -404,58 +404,7 @@ void RenderSystem::drawText(TextManager& textManager, Entity e) {
 }
 
 void RenderSystem::drawParticles(int numParticles) {
-	
 	vec3 colour = { 1.f, 0.f, 0.f };
-	// for (Entity particleEnt : registry.particles.entities) {
-	// 	auto& motion = registry.motions.get(particleEnt);
-	// 	auto& particle = registry.particles.get(particleEnt);
-	// 	
-	// 	if (!particle.active)
-	// 		continue;
-	// 	
-	// 	const GLuint vbo = vertexBuffers[(GLuint)GEOMETRY_BUFFER_IDS::CIRCLE];
-	// 	const GLuint ibo = indexBuffers[(GLuint)GEOMETRY_BUFFER_IDS::CIRCLE];
-	// 	
-	// 	// Bind buffers
-	// 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	// 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-	// 	glHasError();
-	// 	
-	// 	// set shaders
-	// 	const GLuint shaderProgram = shaders[(GLuint)SHADER_PROGRAM_IDS::PARTICLE];
-	// 	glUseProgram(shaderProgram);
-	// 	glHasError();
-	// 	
-	// 	// Pass in shader inputs (position)
-	// 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(ColoredVertex), (void*)0);
-	// 	glEnableVertexAttribArray(0);
-	// 	glHasError();
-	// 	
-	// 	// set uniforms
-	// 	auto proj = camera->getViewProjectionMatrix(); // Passing in the camera's viewProjectionMatrix
-	// 	GLuint projection_loc = glGetUniformLocation(shaderProgram, "projection");
-	// 	glUniformMatrix4fv(projection_loc, 1, GL_FALSE, (float*)&proj);
-	// 	glHasError();
-	// 	
-	// 	/* MATRIX TRANSFORMATIONS */
-	// 	mat4 transformationMatrix = transform(
-	// 		motion.position,
-	// 		scaleToScreenResolution({ 10.f, 10.f }),
-	// 		1.f, 0);
-	// 	
-	// 	GLuint transform_loc = glGetUniformLocation(shaderProgram, "transform");
-	// 	glUniformMatrix4fv(transform_loc, 1, GL_FALSE, (float*)&transformationMatrix);
-	// 	
-	// 	vec3 colour = { 1.f, 0.f, 0.f };
-	// 	GLuint colour_loc = glGetUniformLocation(shaderProgram, "colour");
-	// 	glUniform3fv(colour_loc, 1, (float*)&colour);
-	// 	
-	// 	GLint size = 0;
-	// 	glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
-	// 	glHasError();
-	// 	const GLsizei numIndices = size / sizeof(uint16_t);
-	// 	glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_SHORT, nullptr);
-	// }
 
 	// Bind buffers and pass in position
 	const GLuint vbo = vertexBuffers[(GLuint)GEOMETRY_BUFFER_IDS::CIRCLE];

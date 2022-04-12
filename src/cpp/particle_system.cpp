@@ -79,7 +79,7 @@ void ParticleSystem::step(float elapsed_ms) {
 	
 		// Particle has reached end of life
 		if (particle.timer <= 0) {
-			deactivate(particle, i);
+			deactivate(i);
 			particleIndex = i; // This is now a free particle
 		}
 	}
@@ -89,7 +89,9 @@ void ParticleSystem::step(float elapsed_ms) {
 	transformations.clear();
 }
 
-void ParticleSystem::deactivate(Particle& particle, int index) {
+void ParticleSystem::deactivate(int index) {
+	auto& particleEnt = registry.particles.entities[index];
+	auto& particle = registry.particles.get(particleEnt);
 	particle.active = false;
 	particle.timer = 1000; // reset timer
 	numActive--;

@@ -40,7 +40,6 @@ public:
 	ComponentContainer<Grenade> grenades;
 	ComponentContainer<Timer> entityTimers;
 	ComponentContainer<Explosion> explosions;
-	ComponentContainer<OptionPlayers> players;
 	ComponentContainer<Particle> particles;
 
 	ECSRegistry() {
@@ -73,7 +72,6 @@ public:
 		registry_list.push_back(&timer);
 		registry_list.push_back(&entityTimers);
 		registry_list.push_back(&explosions);
-		registry_list.push_back(&players);
 		registry_list.push_back(&particles);
 	}
 

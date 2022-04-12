@@ -17,7 +17,6 @@ public:
 	void on_mouse_click(int button, int action, int mods) override {}
 
 	void handle_explosion_collision();
-
 };
 
 class CharacterIdleState : public CharacterGroundedState {
@@ -36,7 +35,6 @@ public:
 	void on_mouse_click(int button, int action, int mods) override;
 
 	void handle_bullet_collisions();
-
 };
 
 class CharacterDamageState: public CharacterGroundedState {
@@ -67,7 +65,6 @@ public:
 	void on_mouse_click(int button, int action, int mods) override;
 
 	float speed = 90.0f;
-
 };
 
 class CharacterMoveLeftState : public CharacterMoveState {

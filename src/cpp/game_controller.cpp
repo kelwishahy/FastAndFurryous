@@ -77,8 +77,6 @@ void GameController::step(float elapsed_ms) {
 			registry.remove_all_components_of(e);
 		}
 	}
-	/*printf("num grenades: %i ", (int)registry.grenades.components.size());
-	printf("num explosions: %i\n", (int)registry.explosions.components.size());*/
 
 	// Update particles
 	particleSystem->step(elapsed_ms);
@@ -86,6 +84,7 @@ void GameController::step(float elapsed_ms) {
 	//Step the player state machines
 	for (Character* chara : registry.characters.components) {
 		chara->state_machine.getCurrentState()->step(elapsed_ms);
+
 		for (int i = 0; i < teams[TURN_CODE::PLAYER1].size(); i++) {
 			auto e = teams[TURN_CODE::PLAYER1][i];
 			if (registry.health.get(e).hp == 0) {
@@ -182,7 +181,6 @@ void GameController::moveCamera() {
 
 
 void GameController::decrementTurnTime(float elapsed_ms) {
-	// registry.remove_all_components_of(timeIndicator);
 	uint timePerTurnSec = uint(timePerTurnMs / 1000);
 	if (timePerTurnMs <= 0) {
 		Character* c = registry.characters.get(curr_selected_char);
@@ -223,7 +221,7 @@ void GameController::init_player_teams() {
 		Entity e = character.animal == ANIMAL::CAT ? createCat(character.weapon, character.starting_pos, character.health, this->window) : createDog(character.weapon, character.starting_pos, character.health, this->window);
 
 		Character* chara = registry.characters.get(e);
-		chara->init();
+		chara->init(particleSystem);
 		if (character.alignment == AI_TEAM || character.alignment == NPC_AI_TEAM) {
 			chara->state_machine.setAI(true);
 		}
@@ -278,14 +276,6 @@ void GameController::next_turn() {
 	
 }
 
-void bloodSplatter(Entity& projectile, Entity& character) {
-	// Spawn with random y velocity and constant x velocity
-	bool orientation = registry.animations.get(character).facingLeft;
-	float vel = 200.f;
-	vel = (orientation) ? -vel : vel;
-	
-}
-
 void GameController::handle_collisions() {
 	// Loop over all collisions detected by the physics system
 	auto& collisionsRegistry = registry.collisions;
@@ -298,34 +288,6 @@ void GameController::handle_collisions() {
 			Projectile& pj = registry.projectiles.get(entity);
 			if (registry.terrains.has(entity_other) && entity_other != pj.origin) {
 				registry.remove_all_components_of(entity);
-			} else if (entity_other != pj.origin) { // Projectile hit another player
-				// for (std::vector<Entity> vec : teams) {
-				// 	bool origin_isonteam = false;
-				// 	bool entity_other_isonteam = false;
-				// 	for (Entity e : vec) { //check for friendly fire, since std::find dosen't work
-				// 		if (e == pj.origin) 
-				// 			origin_isonteam = true;
-				// 		if (e == entity_other) 
-				// 			entity_other_isonteam = true;
-				// 	}
-				// 	if (origin_isonteam) {
-				// 		decreaseHealth(entity_other, registry.weapons.get(pj.origin).damage, curr_selected_char);
-				// 	}
-				// }
-
-				// Friendly fire is enabled
-				if (registry.health.has(entity_other)) {
-					decreaseHealth(entity_other, registry.weapons.get(pj.origin).damage, curr_selected_char);
-				}
-
-				// Blood splatter using particles
-				auto& charPosition = registry.motions.get(entity_other).position;
-				auto& projectilePosition = registry.motions.get(entity).position;
-				vec2 vel = { 200.f, 180.f };
-				vel.x = (projectilePosition.x < charPosition.x) ? vel.x : -vel.x;
-				particleSystem->emit(100, charPosition, vel);
-
-				registry.remove_all_components_of(entity);
 			}
 		}
 
@@ -337,7 +299,6 @@ void GameController::handle_collisions() {
 			if (rb.collision_normal.y == -1) {
 				motion.velocity.y = 0;
 			}
-
 		}
 	}
 
