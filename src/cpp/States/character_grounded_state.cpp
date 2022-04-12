@@ -491,7 +491,7 @@ void CharacterShootingState::handleGrenadeBounce() { //abusing the statemachines
 					pj.bounce_cooldown = pj.COOLDOWN;
 				}
 				if (pj.bounces < 0) {
-					createExplosion(200.f, motion.position + vec2{0, -100});
+					createExplosion(275.f, motion.position + vec2{0, -100});
 					registry.remove_all_components_of(entity);
 					registry.grenades.remove(entity); //????? WHY ??????? WHY DOES THE REGISTRY NEED THIS
 				} else {
