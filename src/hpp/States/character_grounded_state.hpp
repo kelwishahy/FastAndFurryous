@@ -127,7 +127,10 @@ public:
 	void step(float elapsed_ms) override;
 	void doChecks() override;
 
+	void handleGrenadeBounce();
+
 	bool has_shot = false;
+	float original_xscale;
 };
 
 class CharacterDeadState : public CharacterGroundedState {

@@ -239,6 +239,8 @@ void Cat::animate_aim() {
 		change_animation(this->character, TEXTURE_IDS::CAT_SIDE_IDLE_SG);
 	} else if (weapon.type == AWP) {
 		change_animation(this->character, TEXTURE_IDS::CAT_SIDE_IDLE_AWP);
+	} else if (weapon.type == LAUNCHER) {
+		change_animation(this->character, TEXTURE_IDS::CAT_SIDE_IDLE_GL);
 	}
 
 	for (Entity rig : registry.animations.entities) {
@@ -350,6 +352,9 @@ void Dog::animate_aim() {
 	}
 	else if (weapon.type == AWP) {
 		change_animation(this->character, TEXTURE_IDS::DOG_SIDE_IDLE_AWP);
+	}
+	else if (weapon.type == LAUNCHER) {
+		change_animation(this->character, TEXTURE_IDS::DOG_SIDE_IDLE_GL);
 	}
 	for (Entity rig : registry.animations.entities) {
 		Animation& extra = registry.animations.get(rig);

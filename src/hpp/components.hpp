@@ -121,6 +121,7 @@ enum class TEXTURE_IDS {
 
 	FOREST,
 	SPACE,
+	EXPLOSION,
 	TOTAL
 }; constexpr int textureCount = (int)TEXTURE_IDS::TOTAL;
 
@@ -146,6 +147,7 @@ enum WEAPON_TYPES {
 	RIFLE = 0,
 	SHOTGUN = 1,
 	AWP = 2,
+	LAUNCHER = 3,
 	TOTAL //For no weaponed 
 }; constexpr int weaponCount = (int)WEAPON_TYPES::TOTAL;
 
@@ -315,6 +317,11 @@ struct Timer {
 	}
 };
 
+struct Explosion
+{
+	float damage = 37.0f;
+};
+
 struct Boxcollider : Collider {
 	std::vector<glm::vec2> vertices;
 	bool transformed_required = true;
@@ -339,6 +346,7 @@ struct Rigidbody {
 	bool gravity_affected = true;
 	glm::vec2 collision_normal;
 	glm::vec2 force_accumulator;
+	float inertia = 0;
 };
 
 struct RayCast {
@@ -403,13 +411,30 @@ struct Shotgun : WeaponBase {
 	}
 };
 
+struct Launcher: WeaponBase {
+	Launcher() : WeaponBase() {
+		MAX_ANGLE = 1.2f;
+		//a little more than 0
+		MIN_ANGLE = 5.5f;
+		// pi/4
+		// aim_angle = 0.7854f;
+		aim_angle = MIN_ANGLE;
+		max_damage = 0.f;
+		min_damage = 0.f;
+		max_dist = 0.0f;
+		type = LAUNCHER;
+	}
+};
+
 struct Projectile {
 	Entity origin;
-	/*glm::vec4 trajectoryAx;
-	glm::vec4 trajectoryAy;
-	float delta_time = 0;*/
-	//float hit_radius;
-	//glm::vec2 end_tangent;
+};
+
+struct Grenade {
+	Entity origin;
+	int bounces = 3;
+	float bounce_cooldown = 100.0f;
+	float COOLDOWN = 100.0f;
 };
 
 // Stucture to store collision information

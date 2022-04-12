@@ -120,7 +120,8 @@ class RenderSystem {
 		
 
 		"forest/forest.png",
-		"space/space.png"
+		"space/space.png",
+		"explosion.png"
 	};
 
 	std::array<GLuint, textureCount> textures; // OpenGL texture names

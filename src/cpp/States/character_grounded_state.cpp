@@ -7,6 +7,9 @@
 #include "hpp/Game_Mechanics/shooting_system.hpp"
 #include <hpp/world_system.hpp>
 
+#include "hpp/physics_system.hpp"
+#include "hpp/world_init.hpp"
+
 #pragma region
 //Super class 
 CharacterGroundedState::CharacterGroundedState(Entity e) : CharacterState(e) {
@@ -95,19 +98,14 @@ void CharacterIdleState::handle_bullet_collisions() {
 		if (registry.projectiles.has(entity)) {// Projectile hit terrain
 			Projectile& pj = registry.projectiles.get(entity);
 			if (entity_other == character && character != pj.origin) { // Projectile hit another player
-			 // for (std::vector<Entity> vec : teams) {
-			 // 	bool origin_isonteam = false;
-			 // 	bool entity_other_isonteam = false;
-			 // 	for (Entity e : vec) { //check for friendly fire, since std::find dosen't work
-			 // 		if (e == pj.origin) 
-			 // 			origin_isonteam = true;
-			 // 		if (e == entity_other) 
-			 // 			entity_other_isonteam = true;
-			 // 	}
-			 // 	if (origin_isonteam) {
-			 // 		decreaseHealth(entity_other, registry.weapons.get(pj.origin).damage, curr_selected_char);
-			 // 	}
-			 // }
+				Character* c = registry.characters.get(character);
+				c->state_machine.changeState(c->damage_state);
+			}
+		}
+
+		if (registry.explosions.has(entity)) {
+			Explosion explosion = registry.explosions.get(entity); //you can hit yourself with an explosion
+			if (entity_other == character) {
 				Character* c = registry.characters.get(character);
 				c->state_machine.changeState(c->damage_state);
 			}
@@ -154,6 +152,15 @@ void CharacterDamageState::step(float elapsed_ms) {
 			registry.characters.get(character)->play_hurt_sfx();
 			hurt_timer = 1500.0f;
 			registry.remove_all_components_of(entity);
+		} else if (registry.explosions.has(entity) && entity_other == character) {
+			Explosion explosion = registry.explosions.get(entity);
+			decreaseHealth(character, (int)explosion.damage);
+			if (registry.health.get(character).hp == 0) {
+				chara->state_machine.changeState(chara->dead_state);
+			}
+			registry.characters.get(character)->play_hurt_sfx();
+			hurt_timer = 1500.0f;
+			registry.boxColliders.remove(entity);
 		}
 	}
 	if (hurt_timer <= 0.0f) {
@@ -428,21 +435,65 @@ void CharacterShootingState::enter() {
 	CharacterGroundedState::enter();
 	ShootingSystem::shoot(character);
 	has_shot = true;
+	Motion& motion = registry.motions.get(character);
+	original_xscale = motion.scale.x;
+	motion.scale.x = motion.scale.x * 4;
 }
 
 void CharacterShootingState::exit() {
 	CharacterGroundedState::exit();
+	Motion& motion = registry.motions.get(character);
+	motion.scale.x = original_xscale;
 }
 
 void CharacterShootingState::step(float elapsed_ms) {
 	CharacterGroundedState::step(elapsed_ms);
+	for (Grenade& pj : registry.grenades.components) {
+		pj.bounce_cooldown -= elapsed_ms;
+	}
+	handleGrenadeBounce();
 }
 
 void CharacterShootingState::doChecks() {
 	CharacterGroundedState::doChecks();
 	if (has_shot) {
-		if (registry.projectiles.components.empty()) {
+		if (registry.projectiles.components.empty() && registry.grenades.components.empty() && registry.explosions.components.empty()) {
 			next_turn = true;
+		}
+	}
+}
+
+void CharacterShootingState::handleGrenadeBounce() { //abusing the statemachines a little bit
+	auto& collisionsRegistry = registry.collisions;
+	for (uint i = 0; i < collisionsRegistry.components.size(); i++) {
+		// The entity and its collider
+		Entity entity = collisionsRegistry.entities[i];
+		Entity entity_other = collisionsRegistry.components[i].other;
+
+		if (registry.grenades.has(entity)) {
+			Motion& motion = registry.motions.get(entity);
+			Grenade& pj = registry.grenades.get(entity);
+			if (registry.terrains.has(entity_other) && entity_other != pj.origin) { // Projectile hit terrain
+				if (pj.bounce_cooldown <= 0.0f) {
+					pj.bounces -= 1;
+					pj.bounce_cooldown = pj.COOLDOWN;
+				}
+				if (pj.bounces < 0) {
+					createExplosion(200.f, motion.position + vec2{0, -100});
+					registry.remove_all_components_of(entity);
+				} else {
+					Rigidbody& rb = registry.rigidBodies.get(entity);
+					if ((int)rb.collision_normal.x == -1) {
+						PhysicsSystem::applyForce(entity, {-30 * pj.bounces, 0});
+					} else if ((int)rb.collision_normal.x == 1) {
+						PhysicsSystem::applyForce(entity, { 30 * pj.bounces, 0 });
+					} else if ((int)rb.collision_normal.y == -1) {
+						PhysicsSystem::applyForce(entity, { 0, -30 * pj.bounces });
+					} else if ((int)rb.collision_normal.y == 1) {
+						PhysicsSystem::applyForce(entity, { 0, 30 * pj.bounces });
+					}
+				}
+			}
 		}
 	}
 }

@@ -68,6 +68,14 @@ void GameController::step(float elapsed_ms) {
 	moveCamera();
 	//Step the player state machines
 
+	for (Entity e : registry.entityTimers.entities) {
+		Timer& timer = registry.entityTimers.get(e);
+		timer.counter -= elapsed_ms;
+		if (timer.counter < 0) {
+			registry.remove_all_components_of(e);
+		}
+	}
+
 	for (Character* chara : registry.characters.components) {
 		chara->state_machine.getCurrentState()->step(elapsed_ms);
 		for (int i = 0; i < teams[TURN_CODE::PLAYER1].size(); i++) {

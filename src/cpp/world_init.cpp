@@ -116,6 +116,8 @@ Entity createCat(WEAPON_TYPES weapon, vec2 pos, int health, GLFWwindow* window) 
 		registry.weapons.insert(entity, Shotgun());
 	} else if (weapon == AWP) {
 		registry.weapons.insert(entity, Awp());
+	} else if (weapon == LAUNCHER) {
+		registry.weapons.insert(entity, Launcher());
 	}
 
 	Animation& anim = registry.animations.emplace(entity);
@@ -231,6 +233,9 @@ Entity createDog(WEAPON_TYPES weapon, vec2 pos, int health, GLFWwindow* window) 
 	}
 	else if (weapon == AWP) {
 		registry.weapons.insert(entity, Awp());
+	}
+	else if (weapon == LAUNCHER) {
+		registry.weapons.insert(entity, Launcher());
 	}
 
 	Animation& anim = registry.animations.emplace(entity);
@@ -546,5 +551,75 @@ Entity createTimerCounter(float timer, TextManager& textManager) {
 
 	return entity;
 
+}
+
+Entity createGrenade(Entity originE, vec2 force) {
+
+	const auto entity = Entity();
+
+	// Setting initial motion values
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = registry.motions.get(originE).position;
+	motion.angle = 0.f;
+	motion.velocity = { 0.f, 0.f };
+	float scale = ceil((10.f / defaultResolution.x) * screenResolution.x);
+	motion.scale = { scale, scale };
+
+	Boxcollider& bc = registry.boxColliders.emplace(entity);
+	calculateBoxVerticesAndSetTriangles(motion.position, motion.scale, bc);
+	bc.transformed_required = true;
+
+	//Using wall textures for now
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_IDS::TOTAL,
+			SHADER_PROGRAM_IDS::WALL,
+			GEOMETRY_BUFFER_IDS::QUAD });
+
+	Grenade& projectile = registry.grenades.emplace(entity);
+	projectile.origin = originE;
+
+	Rigidbody& rb = registry.rigidBodies.emplace(entity);
+	rb.type = KINEMATIC;
+	rb.inertia = 1;
+
+	PhysicsSystem::applyForce(entity, force);
+
+
+	return entity;
+}
+
+Entity createExplosion(float radius, vec2 position) {
+
+	const auto entity = Entity();
+
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = position;
+	motion.angle = 0.f;
+	motion.velocity = { 0.f, 0.f };
+	float scale = ceil((10.f / defaultResolution.x) * screenResolution.x);
+	motion.scale = { radius, radius };
+
+	Boxcollider& bc = registry.boxColliders.emplace(entity);
+	calculateBoxVerticesAndSetTriangles(motion.position, motion.scale, bc);
+	bc.transformed_required = true;
+
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_IDS::EXPLOSION,
+			SHADER_PROGRAM_IDS::ANIMATION,
+			GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
+
+	Animation& anim = registry.animations.emplace(entity);
+	anim.animation_states_constants.insert({ TEXTURE_IDS::EXPLOSION, EXPLOSION_CONSTANTS });
+	anim.anim_state = TEXTURE_IDS::EXPLOSION;
+
+	Timer& timer = registry.entityTimers.emplace(entity);
+	timer.time = 1000.f;
+	timer.counter = 900.f;
+
+	registry.explosions.emplace(entity);
+
+	return entity;
 }
 

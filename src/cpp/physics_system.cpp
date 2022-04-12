@@ -74,15 +74,6 @@ void project_vertices(std::vector<vec2> box_vertices, vec2 axis, OUT float& min,
 
 }
 
-void move_back_entity(vec2* position, Rigidbody& rb, Boxcollider& collider, vec2 normal, float depth) {
-	vec2 oldpos = *position;
-	*position += normal * depth;
-	collider.deltaPos = *position - oldpos;
-	collider.transformed_required = true;
-	rb.collision_depth = depth;
-	rb.collision_normal = normal;
-}
-
 //Used to correctly orient the normals on a given edge of a box
 vec2 find_arithmetic_mean(std::vector<vec2> vertices) {
 	
@@ -221,17 +212,25 @@ void PhysicsSystem::checkForCollisions() {
 			float depth = 9999999;
 			if (box_collision(collider_i, collider_j, normal, depth)) {
 				//If its a rigid body collision resolve right away
+				//if (registry.rigidBodies.has(entity_i)) { //More ugly stuff
+				//	Rigidbody& entity_i_rb = registry.rigidBodies.get(entity_i);
+				//	entity_i_rb.collision_normal = normal;
+				//}
+				//if (registry.rigidBodies.has(entity_j)) { //Ugly stuff on my part
+				//	Rigidbody& entity_j_rb = registry.rigidBodies.get(entity_j);
+				//	entity_j_rb.collision_normal = -normal;
+				//}
 				if (registry.rigidBodies.has(entity_i) && registry.rigidBodies.has(entity_j)) {
 					Rigidbody& entity_i_rb = registry.rigidBodies.get(entity_i);
 					Rigidbody& entity_j_rb = registry.rigidBodies.get(entity_j);
-					if (entity_i_rb.type == NORMAL && entity_j_rb.type == STATIC) {
+					if (entity_i_rb.type == NORMAL && entity_j_rb.type == STATIC || entity_i_rb.type == KINEMATIC && entity_j_rb.type == STATIC) {
 						moveBackEntity(entity_i, normal, depth);
 					}
 					else if (entity_i_rb.type == NORMAL && entity_j_rb.type == NORMAL) {
 						moveBackEntity(entity_i, normal, depth/2);
 						moveBackEntity(entity_j, -normal, depth/2);
 					}
-					else if (entity_i_rb.type == STATIC && entity_j_rb.type == NORMAL) {
+					else if (entity_i_rb.type == STATIC && entity_j_rb.type == NORMAL || entity_i_rb.type == STATIC && entity_j_rb.type == KINEMATIC) {
 						moveBackEntity(entity_j, -normal, depth);
 					}
 					transformBoxColliders();

@@ -140,6 +140,12 @@ void ShootingSystem::shoot(Entity e) {
 		Rigidbody& rb = registry.rigidBodies.get(bullet);
 		rb.gravity_affected = false;
 		audio.play_sfx(SOUND_EFFECTS::GUNSHOT);
+	} else if (weapon.type == LAUNCHER) {
+		float xforce = cosf(weapon.aim_angle) * 25.0f;
+		float yforce = -sinf(weapon.aim_angle) * 20.0f;
+
+		Entity grenade = createGrenade(e, { xforce, yforce });
+		audio.play_sfx(SOUND_EFFECTS::GUNSHOT);
 	}
 
 
