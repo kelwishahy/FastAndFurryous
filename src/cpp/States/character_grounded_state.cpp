@@ -43,6 +43,23 @@ void CharacterGroundedState::on_player_key(int key, int, int action, int mod){
 void CharacterGroundedState::doChecks() {
 	CharacterState::doChecks();
 }
+
+void CharacterGroundedState::handle_explosion_collision() {
+	auto& collisionsRegistry = registry.collisions;
+	for (uint i = 0; i < collisionsRegistry.components.size(); i++) {
+		// The entity and its collider
+		Entity entity = collisionsRegistry.entities[i];
+		Entity entity_other = collisionsRegistry.components[i].other;
+
+		if (registry.explosions.has(entity)) {
+			Explosion explosion = registry.explosions.get(entity); //you can hit yourself with an explosion
+			if (entity_other == character) {
+				Character* c = registry.characters.get(character);
+				c->state_machine.changeState(c->damage_state);
+			}
+		}
+	}
+}
 #pragma endregion Super-CharacterGroundedState
 
 #pragma region
@@ -67,6 +84,7 @@ void CharacterIdleState::exit() {
 void CharacterIdleState::step(float elapsed_ms) {
 	CharacterGroundedState::step(elapsed_ms);
 	handle_bullet_collisions();
+	handle_explosion_collision();
 	Character* chara = registry.characters.get(character);
 	if (chara->state_machine.isSelected()) {
 		chara->state_machine.changeState(chara->aim_state);
@@ -98,14 +116,6 @@ void CharacterIdleState::handle_bullet_collisions() {
 		if (registry.projectiles.has(entity)) {// Projectile hit terrain
 			Projectile& pj = registry.projectiles.get(entity);
 			if (entity_other == character && character != pj.origin) { // Projectile hit another player
-				Character* c = registry.characters.get(character);
-				c->state_machine.changeState(c->damage_state);
-			}
-		}
-
-		if (registry.explosions.has(entity)) {
-			Explosion explosion = registry.explosions.get(entity); //you can hit yourself with an explosion
-			if (entity_other == character) {
 				Character* c = registry.characters.get(character);
 				c->state_machine.changeState(c->damage_state);
 			}
@@ -160,6 +170,7 @@ void CharacterDamageState::step(float elapsed_ms) {
 			}
 			registry.characters.get(character)->play_hurt_sfx();
 			hurt_timer = 1500.0f;
+			next_turn = true;                             //only affects if it explosion hits itself
 			registry.boxColliders.remove(entity);
 		}
 	}
@@ -452,6 +463,7 @@ void CharacterShootingState::step(float elapsed_ms) {
 		pj.bounce_cooldown -= elapsed_ms;
 	}
 	handleGrenadeBounce();
+	handle_explosion_collision();
 }
 
 void CharacterShootingState::doChecks() {
@@ -495,9 +507,9 @@ void CharacterShootingState::handleGrenadeBounce() { //abusing the statemachines
 					} else if ((int)rb.collision_normal.x == 1) {
 						PhysicsSystem::applyForce(entity, { 30 * pj.bounces, 0 });
 					} else if ((int)rb.collision_normal.y == -1) {
-						PhysicsSystem::applyForce(entity, { 0, -30 * pj.bounces });
+						PhysicsSystem::applyForce(entity, { 0, -20 * pj.bounces });
 					} else if ((int)rb.collision_normal.y == 1) {
-						PhysicsSystem::applyForce(entity, { 0, 30 * pj.bounces });
+						PhysicsSystem::applyForce(entity, { 0, 20 * pj.bounces });
 					}
 				}
 			}

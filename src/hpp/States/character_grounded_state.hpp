@@ -16,6 +16,8 @@ public:
 	void on_mouse_move(glm::vec2 mouse_pos) override {}
 	void on_mouse_click(int button, int action, int mods) override {}
 
+	void handle_explosion_collision();
+
 };
 
 class CharacterIdleState : public CharacterGroundedState {
