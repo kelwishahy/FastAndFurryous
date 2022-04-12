@@ -16,7 +16,10 @@ enum TURN_CODE {
 struct Blackboard {
 	Character* c;
 	Entity selected_ai;
+	float timer;
 	int turn;
+	int ai_index;
+	bool done_move;
 };
 
 static Blackboard* blackboard;
@@ -70,6 +73,11 @@ class IsAITurn : public Node {
 	}
 };
 
+class DidTimeEnd : public Node {
+	bool run() override {
+		return blackboard->done_move;
+	}
+};
 
 
 // TASKS
@@ -93,7 +101,15 @@ class MoveRight : public Node {
 class EndTurn : public Node {
 	bool run() override {
 		blackboard->c->state_machine.changeState(blackboard->c->idle_state);
-		blackboard->turn = TURN_CODE::PLAYER1;
+		return true;
+	}
+};
+
+class Shoot : public Node {
+	bool run() override {
+		//blackboard->c->state_machine.changeState(blackboard->c->shooting_state);
+		ShootingSystem::shoot(blackboard->selected_ai);
+		blackboard->c->state_machine.getCurrentState()->next_turn = true;
 		return true;
 	}
 };

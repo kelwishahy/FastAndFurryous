@@ -10,12 +10,11 @@ public:
 	void step(float elapsed_ms, int turn, Entity *selected_ai, Entity last_player);
 	void init(ShootingSystem& shootingSystem, std::vector<Entity> team);
 	double calculateDistance(vec2 v1, vec2 v2);
-	void decideAction();
-	void checkJump();
+	void change_to_next_ai();
+	void decrementTimer(float elapsed_ms);
 
 private:
 	float jumpdelay;
-	float timer;
 	std::vector<Entity> ai_team;
 	float aiTurnTime;
 	std::default_random_engine rng;
