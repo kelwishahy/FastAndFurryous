@@ -232,7 +232,17 @@ void Cat::animate_dead() {
 
 void Cat::animate_aim() {
 
-	change_animation(this->character, TEXTURE_IDS::CAT_SIDE_IDLE);
+	WeaponBase weapon = registry.weapons.get(this->character);
+	if (weapon.type == RIFLE) {
+		change_animation(this->character, TEXTURE_IDS::CAT_SIDE_IDLE_AK);
+	} else if (weapon.type == SHOTGUN) {
+		change_animation(this->character, TEXTURE_IDS::CAT_SIDE_IDLE_SG);
+	} else if (weapon.type == AWP) {
+		change_animation(this->character, TEXTURE_IDS::CAT_SIDE_IDLE_AWP);
+	} else if (weapon.type == LAUNCHER) {
+		change_animation(this->character, TEXTURE_IDS::CAT_SIDE_IDLE_GL);
+	}
+
 	for (Entity rig : registry.animations.entities) {
 		Animation& extra = registry.animations.get(rig);
 		if (extra.name == "cat_head") {
@@ -333,7 +343,19 @@ void Dog::animate_dead() {
 
 void Dog::animate_aim() {
 
-	change_animation(this->character, TEXTURE_IDS::DOG_SIDE_IDLE);
+	WeaponBase weapon = registry.weapons.get(this->character);
+	if (weapon.type == RIFLE) {
+		change_animation(this->character, TEXTURE_IDS::DOG_SIDE_IDLE_AK);
+	}
+	else if (weapon.type == SHOTGUN) {
+		change_animation(this->character, TEXTURE_IDS::DOG_SIDE_IDLE_SG);
+	}
+	else if (weapon.type == AWP) {
+		change_animation(this->character, TEXTURE_IDS::DOG_SIDE_IDLE_AWP);
+	}
+	else if (weapon.type == LAUNCHER) {
+		change_animation(this->character, TEXTURE_IDS::DOG_SIDE_IDLE_GL);
+	}
 	for (Entity rig : registry.animations.entities) {
 		Animation& extra = registry.animations.get(rig);
 		if (extra.name == "dog_head") {

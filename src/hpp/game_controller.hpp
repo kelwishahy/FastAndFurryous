@@ -88,6 +88,8 @@ private:
 
 	void handle_collisions();
 
+	void check_out_of_screen_entities();
+
 	void decrementTurnTime(float elapsed_ms);
 
 	std::vector<std::vector<Entity>> teams;

@@ -37,7 +37,10 @@ class RenderSystem {
 	// Textures
 	const std::array<std::string, textureCount> texturePaths = {
 		//Cat sprites
-		"cat_side_idle.png",
+		"cat_side_idle_AK.png",
+		"cat_side_idle_SG.png",
+		"cat_side_idle_GL.png",
+		"cat_side_idle_AWP.png",
 		"cat_front_idle.png",
 		"cat_walk.png",
 		"cat_jump.png",
@@ -49,7 +52,10 @@ class RenderSystem {
 		"cat_hurt.png",
 		"cat_dead.png",
 		// Dog Sprites
-		"dog_side_idle.png",
+		"dog_side_idle_AK.png",
+		"dog_side_idle_SG.png",
+		"dog_side_idle_GL.png",
+		"dog_side_idle_AWP.png",
 		"dog_front_blink.png",
 		"dog_side_blink.png",
 		"dog_front_idle.png",
@@ -114,7 +120,8 @@ class RenderSystem {
 		
 
 		"forest/forest.png",
-		"space/space.png"
+		"space/space.png",
+		"explosion.png"
 	};
 
 	std::array<GLuint, textureCount> textures; // OpenGL texture names

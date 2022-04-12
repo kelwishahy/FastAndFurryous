@@ -100,3 +100,6 @@ glm::mat4 transform(glm::vec2 position, glm::vec2 scale, float depth, float angl
     transform.mat = glm::scale(transform.mat, glm::vec3(scale, depth));
     return transform.mat;
 }
+float naive_lerp(float a, float b, float t) {
+    return a + t * (b - a);
+}

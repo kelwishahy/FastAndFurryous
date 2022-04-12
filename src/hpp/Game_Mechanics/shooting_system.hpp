@@ -38,6 +38,8 @@ private:
 
 	static float constexpr pi = 3.14159f;
 	static float constexpr pio2 = 1.57079f;
+	static float constexpr threepio2 = 4.71238f;
+	static float constexpr twopi = 6.28318f;
 
 	void calculate_trajectory(Entity e);
 
