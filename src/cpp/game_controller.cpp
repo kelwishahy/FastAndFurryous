@@ -321,9 +321,9 @@ void GameController::handle_collisions() {
 				// Blood splatter using particles
 				auto& charPosition = registry.motions.get(entity_other).position;
 				auto& projectilePosition = registry.motions.get(entity).position;
-				vec2 vel = { 200.f, 200.f };
+				vec2 vel = { 200.f, 180.f };
 				vel.x = (projectilePosition.x < charPosition.x) ? vel.x : -vel.x;
-				particleSystem->emit(10, charPosition, vel);
+				particleSystem->emit(100, charPosition, vel);
 
 				registry.remove_all_components_of(entity);
 			}

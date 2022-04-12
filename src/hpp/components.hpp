@@ -281,7 +281,7 @@ protected:
 // Game components ------------------------------------------------------------
 struct Particle {
 	bool active = false;
-	float timer = 800;
+	float timer = 1000;
 };
 
 struct Background {

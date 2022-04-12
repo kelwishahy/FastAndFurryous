@@ -181,7 +181,7 @@ public:
 
 	void setTileMap(const MapSystem::Map& gameMap) { this->gameMap = gameMap; }
 
-	void drawParticles();
+	void drawParticles(int numParticles);
 	Mesh& getMesh(GEOMETRY_BUFFER_IDS id) { return meshes[(int)id]; };
 
 private:
