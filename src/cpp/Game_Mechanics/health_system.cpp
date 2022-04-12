@@ -4,7 +4,6 @@
 void decreaseHealth(Entity entity, int amount) {
 	auto& health = registry.health.get(entity);
 	health.hp = (health.hp - amount >= 0) ? health.hp - amount : 0;
-	
 	health.hurt = true;
 }
 

@@ -45,6 +45,9 @@ void WorldSystem::init(GLFWwindow* window) {
 	this->textManager = TextManager();
 	textManager.initFonts();
 
+	this->particleSystem = ParticleSystem();
+	printf("2. Particle entities is %d\n", (int)registry.particles.entities.size());
+
 	init_main_menu();
 	audio.play_music(MUSIC_LIST::IN_GAME_BACKGROUND);
 
@@ -68,7 +71,7 @@ void WorldSystem::restart_game(Game level) {
 		registry.remove_all_components_of(registry.motions.entities.back());
 
 	//Initialize current game
-	current_game.init(window, mapSystem.getMap(level.getBackGround()), camera, textManager, level);
+	current_game.init(window, mapSystem.getMap(level.getBackGround()), camera, textManager, level, particleSystem);
 }
 
 void WorldSystem::handle_collisions() {

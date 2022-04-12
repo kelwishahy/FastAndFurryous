@@ -11,8 +11,8 @@
 
 #include <hpp/States/character_grounded_state.hpp>
 
+#include "particle_system.hpp"
 #include "States/character_airborne_states.hpp"
-
 
 ////////////////////////////////////////////////////////////////////////////////
 // Component IDs
@@ -25,6 +25,7 @@ enum class SHADER_PROGRAM_IDS {
 	AI,
 	FONT,
 	TILE,
+	PARTICLE,
 	TOTAL
 }; constexpr int shaderProgramCount = (int)SHADER_PROGRAM_IDS::TOTAL;
 
@@ -130,6 +131,7 @@ enum class GEOMETRY_BUFFER_IDS {
 	TEXTURED_QUAD,
 	WALL,
 	FONT,
+	CIRCLE,
 	TOTAL
 }; constexpr int geometryCount = (int)GEOMETRY_BUFFER_IDS::TOTAL;
 
@@ -263,7 +265,6 @@ public:
 		is_jumping = isJumping;
 	}
 
-
 protected:
 	CharacterState* curr_state;
 	bool selected = false;
@@ -276,8 +277,12 @@ protected:
 
 };
 
-
 // Game components ------------------------------------------------------------
+struct Particle {
+	bool active = false;
+	float timer = 1000;
+};
+
 struct Background {
 	float layer = -0.5;
 };
@@ -472,78 +477,6 @@ struct UIElement {
 	UI_ELEMENT element_type;
 };
 
-struct Character {
-	Entity character;
-	CharacterStateMachine state_machine;
-	CharacterIdleState* idle_state;
-	CharacterMoveLeftState* move_left_state;
-	CharacterMoveRightState* move_right_state;
-	CharacterAimState* aim_state;
-	CharacterShootingState* shooting_state;
-	CharacterAirborneState* airborne_state;
-	CharacterAirborneMoveLeftState* airborne_move_left;
-	CharacterAirborneMoveRightState* airborne_move_right;
-	CharacterDeadState* dead_state;
-	CharacterDamageState* damage_state;
-	glm::vec3 team_color;
-	ANIMAL animal;
-
-	void init() {
-		idle_state = new CharacterIdleState(character);
-		move_left_state = new CharacterMoveLeftState(character);
-		move_right_state = new CharacterMoveRightState(character);
-		aim_state = new CharacterAimState(character);
-		shooting_state = new CharacterShootingState(character);
-		airborne_move_left = new CharacterAirborneMoveLeftState(character);
-		airborne_move_right = new CharacterAirborneMoveRightState(character);
-		airborne_state = new CharacterAirborneState(character);
-		dead_state = new CharacterDeadState(character);
-		damage_state = new CharacterDamageState(character);
-
-		state_machine = CharacterStateMachine();
-		state_machine.init(idle_state);
-	}
-
-	virtual void animate_walk() = 0;
-	virtual void animate_idle() = 0;
-	virtual void animate_jump() = 0;
-	virtual void animate_hurt() = 0;
-	virtual void animate_dead() = 0;
-	virtual void animate_aim() = 0;
-
-	virtual void play_hurt_sfx() = 0;
-};
-
-struct Cat : Character {
-	Cat() : Character() {
-		team_color = glm::vec3{ 0.862f, 0.525f, 0.517f };
-		animal = ANIMAL::CAT;
-	}
-	void animate_walk() override;
-	void animate_idle() override;
-	void animate_jump() override;
-	void animate_hurt() override;
-	void animate_dead() override;
-	void animate_aim() override;
-
-	void play_hurt_sfx() override;
-};
-
-struct Dog : Character {
-	Dog() : Character() {
-		team_color = glm::vec3{ 0.039, 0.454, 1 };
-		animal = ANIMAL::DOG;
-	}
-	void animate_walk() override;
-	void animate_idle() override;
-	void animate_jump() override;
-	void animate_hurt() override;
-	void animate_dead() override;
-	void animate_aim() override;
-
-	void play_hurt_sfx() override;
-};
-
 struct HealthBox {
 	Entity parent;
 	Entity text;
@@ -571,7 +504,7 @@ struct ColoredVertex {
 
 // Index and vertex buffers
 struct Mesh {
-	static bool loadMeshFromObj(std::string obj_path, std::vector<ColoredVertex>& out_vertices, std::vector<uint16_t>& out_vertex_indices, glm::vec2& out_size);
+	// static bool loadMeshFromObj(std::string obj_path, std::vector<ColoredVertex>& out_vertices, std::vector<uint16_t>& out_vertex_indices, glm::vec2& out_size);
 	glm::vec2 originalSize = { 1,1 };
 	std::vector<ColoredVertex> vertices;
 	std::vector<uint16_t> vertexIndices;
@@ -641,3 +574,77 @@ void change_animation(Entity e, TEXTURE_IDS tex_id);
 bool check_if_part_of_parent(Entity e, Entity child);
 bool check_if_cat(Entity e);
 
+struct Character {
+	Entity character;
+	CharacterStateMachine state_machine;
+	CharacterIdleState* idle_state;
+	CharacterMoveLeftState* move_left_state;
+	CharacterMoveRightState* move_right_state;
+	CharacterAimState* aim_state;
+	CharacterShootingState* shooting_state;
+	CharacterAirborneState* airborne_state;
+	CharacterAirborneMoveLeftState* airborne_move_left;
+	CharacterAirborneMoveRightState* airborne_move_right;
+	CharacterDeadState* dead_state;
+	CharacterDamageState* damage_state;
+	glm::vec3 team_color;
+	ANIMAL animal;
+	bool isDead = false;
+	ParticleSystem* particleSystem;
+
+	void init(ParticleSystem* particleSystem) {
+		idle_state = new CharacterIdleState(character);
+		move_left_state = new CharacterMoveLeftState(character);
+		move_right_state = new CharacterMoveRightState(character);
+		aim_state = new CharacterAimState(character);
+		shooting_state = new CharacterShootingState(character);
+		airborne_move_left = new CharacterAirborneMoveLeftState(character);
+		airborne_move_right = new CharacterAirborneMoveRightState(character);
+		airborne_state = new CharacterAirborneState(character);
+		dead_state = new CharacterDeadState(character);
+		damage_state = new CharacterDamageState(character);
+
+		state_machine = CharacterStateMachine();
+		state_machine.init(idle_state);
+		this->particleSystem = particleSystem;
+	}
+
+	virtual void animate_walk() = 0;
+	virtual void animate_idle() = 0;
+	virtual void animate_jump() = 0;
+	virtual void animate_hurt() = 0;
+	virtual void animate_dead() = 0;
+	virtual void animate_aim() = 0;
+
+	virtual void play_hurt_sfx() = 0;
+};
+
+struct Cat : Character {
+	Cat() : Character() {
+		team_color = glm::vec3{ 0.862f, 0.525f, 0.517f };
+		animal = ANIMAL::CAT;
+	}
+	void animate_walk() override;
+	void animate_idle() override;
+	void animate_jump() override;
+	void animate_hurt() override;
+	void animate_dead() override;
+	void animate_aim() override;
+
+	void play_hurt_sfx() override;
+};
+
+struct Dog : Character {
+	Dog() : Character() {
+		team_color = glm::vec3{ 0.039, 0.454, 1 };
+		animal = ANIMAL::DOG;
+	}
+	void animate_walk() override;
+	void animate_idle() override;
+	void animate_jump() override;
+	void animate_hurt() override;
+	void animate_dead() override;
+	void animate_aim() override;
+
+	void play_hurt_sfx() override;
+};

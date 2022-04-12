@@ -16,6 +16,7 @@
 #include "text_manager.hpp"
 #include "GLFW/glfw3.h"
 #include "game_system.hpp"
+#include "particle_system.hpp"
 
 class GameController
 {
@@ -25,7 +26,8 @@ public:
 	// Releases all associated resources
 	~GameController();
 
-	void init(GLFWwindow* window, MapSystem::Map& map, OrthographicCamera& camera, TextManager& textManager, Game game_data);
+	void init(GLFWwindow* window, MapSystem::Map& map, OrthographicCamera& camera, TextManager& textManager, Game game_data, 
+		ParticleSystem& particleSystem);
 
 	// Steps the game ahead by ms milliseconds
 	void step(float elapsed_ms);
@@ -61,10 +63,13 @@ public:
 	Entity& getSelectedCharacter() { return curr_selected_char; }
 
 private:
-	OrthographicCamera* camera{};
+	OrthographicCamera* camera;
 	MapSystem::Map gameMap;
 	TextManager textManager;
 	Game game_data;
+	ParticleSystem* particleSystem;
+	// add option timer
+	// OptionTimer timer;
 
 	glm::vec2 mousePosition{};
 	float mouseDeadzone{};

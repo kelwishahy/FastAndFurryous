@@ -5,7 +5,6 @@
 #include "hpp/tiny_ecs.hpp"
 #include "hpp/common.hpp"
 
-
 class CharacterState {
 
 public:
@@ -40,5 +39,4 @@ public:
 	bool next_turn;
 	int A_key_state = -1;
 	int D_key_state = -1;
-
 };

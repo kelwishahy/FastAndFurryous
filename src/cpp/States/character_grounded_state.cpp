@@ -161,6 +161,14 @@ void CharacterDamageState::step(float elapsed_ms) {
 			}
 			registry.characters.get(character)->play_hurt_sfx();
 			hurt_timer = 1500.0f;
+
+			// Blood splatter using particles
+			auto& charPosition = registry.motions.get(entity_other).position;
+			auto& projectilePosition = registry.motions.get(entity).position;
+			vec2 vel = { 200.f, 180.f };
+			vel.x = (projectilePosition.x < charPosition.x) ? vel.x : -vel.x;
+			chara->particleSystem->emit(100, charPosition, vel);
+
 			registry.remove_all_components_of(entity);
 		} else if (registry.explosions.has(entity) && entity_other == character) {
 			Explosion explosion = registry.explosions.get(entity);
@@ -534,6 +542,7 @@ void CharacterDeadState::enter() {
 	motion.velocity = vec2(.0f, .0f);
 	Character* c = registry.characters.get(character);
 	c->animate_dead();
+	c->isDead = true;
 }
 
 void CharacterDeadState::exit() {

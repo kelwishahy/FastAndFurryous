@@ -203,6 +203,11 @@ void PhysicsSystem::checkForCollisions() {
 			// If this is a tile-tile collision, skip
 			if (registry.terrains.has(entity_i) && registry.terrains.has(entity_j)) continue;
 
+			// Don't do anything if the character is dead
+			if (registry.characters.has(entity_i) && registry.characters.get(entity_i)->isDead ||
+				registry.characters.has(entity_j) && registry.characters.get(entity_j)->isDead)
+				continue;
+
 			Boxcollider& collider_j = box_collider_container.components[j];
 
 			Motion* motion_j = &registry.motions.get(entity_j);
@@ -253,6 +258,11 @@ void PhysicsSystem :: applyMotions(float elapsed_ms) {
 	{
 		Motion& motion = motion_registry.components[i];
 		Entity entity = motion_registry.entities[i];
+
+		// Don't do anything if the character is dead
+		if (registry.characters.has(entity) && registry.characters.get(entity)->isDead)
+			continue;
+
 		float step_seconds = elapsed_ms / 1000.f;
 		if (registry.rigidBodies.has(entity)) {
 			Rigidbody& rb = registry.rigidBodies.get(entity);
@@ -308,10 +318,6 @@ void PhysicsSystem::fixed_update() {
 
 	// Check for collisions between all moving entities
 	checkForCollisions();
-
-	// you may need the following quantities to compute wall positions
-	(float)renderer->getScreenWidth(); (float)renderer->getScreenHeight();
-
 }
 
 //translation is the distance to be moved
@@ -324,6 +330,10 @@ void PhysicsSystem::translatePos(Entity e, vec2 translation) {
 		motion.position += translation;
 		collider.deltaPos = motion.position - oldpos;
 		collider.transformed_required = true;
+	} else if (registry.particles.has(e)) {
+		Motion& motion = registry.motions.get(e);
+		motion.position += translation;
+		motion.velocity.y += 2.6f;
 	}
 }
 
@@ -347,6 +357,9 @@ void  PhysicsSystem::applyForce(Entity e, glm::vec2 force) {
 void PhysicsSystem::transformChildedEntities() {
 
 	for (Entity e : registry.parentEntities.entities) {
+		// Don't do anything if the character is dead
+		if (registry.characters.has(e) && registry.characters.get(e)->isDead)
+			continue;
 
 		ChildEntities children = registry.parentEntities.get(e);
 

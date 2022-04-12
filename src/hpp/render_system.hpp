@@ -29,7 +29,8 @@ class RenderSystem {
 		"wall",
 		"ai",
 		"font",
-		"tile"
+		"tile",
+		"particle"
 	};
 
 	std::array<GLuint, shaderProgramCount> shaders; // OpenGL shader names
@@ -131,6 +132,8 @@ class RenderSystem {
 	std::array<GLuint, geometryCount> vertexBuffers;
 	std::array<GLuint, geometryCount> indexBuffers;
 
+	std::array<Mesh, geometryCount> meshes;
+
 	// CAT IDLE
 	const int CAT_IDLE_FRAMES = 9;
 	const GLfloat CAT_IDLE_FRAME_WIDTH = 0.111f;
@@ -177,6 +180,9 @@ public:
 	int getScreenHeight() { return this->screenHeight; }
 
 	void setTileMap(const MapSystem::Map& gameMap) { this->gameMap = gameMap; }
+
+	void drawParticles(int numParticles);
+	Mesh& getMesh(GEOMETRY_BUFFER_IDS id) { return meshes[(int)id]; };
 
 private:
 	AnimationSystem animation_system;

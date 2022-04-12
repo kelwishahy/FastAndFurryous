@@ -622,4 +622,3 @@ Entity createExplosion(float radius, vec2 position) {
 
 	return entity;
 }
-

@@ -19,12 +19,15 @@ GameController::~GameController() {
 }
 
 //initialize stuff here
-void GameController::init(GLFWwindow* window, MapSystem::Map& map, OrthographicCamera& camera, TextManager& textManager, Game game) {
+void GameController::init(GLFWwindow* window, MapSystem::Map& map, OrthographicCamera& camera, TextManager& textManager, Game game, 
+	ParticleSystem& particleSystem) {
 	this->window = window;
 	this->gameMap = map;
 	this->camera = &camera;
 	this->textManager = textManager;
 	this->game_data = game;
+	this->particleSystem = &particleSystem;
+	this->particleSystem->init();
 	this->mousePosition = scaleToScreenResolution(defaultResolution/2.f);
 	this->mouseDeadzone = scaleToScreenResolution({ 250.f, 250.f }).x;
 	this->mouseTriggerArea = scaleToScreenResolution({ 300.f, 150.f });
@@ -64,9 +67,8 @@ void GameController::step(float elapsed_ms) {
 	//While a game is happening make sure the players are controlling from here
 	glfwSetWindowUserPointer(window, this);
 
-	//Pan camera based on mouse position
+	// Pan camera based on mouse position
 	moveCamera();
-	//Step the player state machines
 
 	for (Entity e : registry.entityTimers.entities) {
 		Timer& timer = registry.entityTimers.get(e);
@@ -75,11 +77,14 @@ void GameController::step(float elapsed_ms) {
 			registry.remove_all_components_of(e);
 		}
 	}
-	/*printf("num grenades: %i ", (int)registry.grenades.components.size());
-	printf("num explosions: %i\n", (int)registry.explosions.components.size());*/
 
+	// Update particles
+	particleSystem->step(elapsed_ms);
+
+	//Step the player state machines
 	for (Character* chara : registry.characters.components) {
 		chara->state_machine.getCurrentState()->step(elapsed_ms);
+
 		for (int i = 0; i < teams[TURN_CODE::PLAYER1].size(); i++) {
 			auto e = teams[TURN_CODE::PLAYER1][i];
 			if (registry.health.get(e).hp == 0) {
@@ -176,7 +181,6 @@ void GameController::moveCamera() {
 
 
 void GameController::decrementTurnTime(float elapsed_ms) {
-	// registry.remove_all_components_of(timeIndicator);
 	uint timePerTurnSec = uint(timePerTurnMs / 1000);
 	if (timePerTurnMs <= 0) {
 		Character* c = registry.characters.get(curr_selected_char);
@@ -217,7 +221,7 @@ void GameController::init_player_teams() {
 		Entity e = character.animal == ANIMAL::CAT ? createCat(character.weapon, character.starting_pos, character.health, this->window) : createDog(character.weapon, character.starting_pos, character.health, this->window);
 
 		Character* chara = registry.characters.get(e);
-		chara->init();
+		chara->init(particleSystem);
 		if (character.alignment == AI_TEAM || character.alignment == NPC_AI_TEAM) {
 			chara->state_machine.setAI(true);
 		}
@@ -295,7 +299,6 @@ void GameController::handle_collisions() {
 			if (rb.collision_normal.y == -1) {
 				motion.velocity.y = 0;
 			}
-
 		}
 	}
 
