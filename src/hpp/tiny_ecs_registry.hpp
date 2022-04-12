@@ -37,7 +37,6 @@ public:
 	ComponentContainer<HealthBox> healthboxes;
 	ComponentContainer<Selected> selected;
 	ComponentContainer<OptionTimer> timer;
-	ComponentContainer<OptionPlayers> players;
 
 
 	ECSRegistry() {
@@ -68,7 +67,6 @@ public:
 		registry_list.push_back(&uiElements);
 		registry_list.push_back(&weapons);
 		registry_list.push_back(&timer);
-		registry_list.push_back(&players);
 	}
 
 	void clear_all_components() {

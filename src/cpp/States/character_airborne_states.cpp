@@ -3,6 +3,7 @@
 
 #include "GLFW/glfw3.h"
 #include "hpp/tiny_ecs_registry.hpp"
+#include "hpp/world_system.hpp"
 
 CharacterAirborneState::CharacterAirborneState(Entity e) : CharacterState(e) {
 	
@@ -48,7 +49,12 @@ void CharacterAirborneState::doChecks() {
 
 void CharacterAirborneState::on_player_key(int key, int, int action, int mod) {
 	Character* c = registry.characters.get(character);
+	
 	if (action == GLFW_PRESS) {
+		if (key == GLFW_KEY_SPACE) {
+				WorldSystem::pause_flag = !WorldSystem::pause_flag;
+			return;
+		}
 		if (key == GLFW_KEY_D) {
 			c->state_machine.changeState(c->airborne_move_right);
 		}
@@ -81,6 +87,12 @@ void CharacterAirborneMoveRightState::doChecks() {
 
 void CharacterAirborneMoveRightState::on_player_key(int key, int, int action, int mod) {
 	Motion& motion = registry.motions.get(character);
+	if (action == GLFW_PRESS) {
+			if (key == GLFW_KEY_SPACE) {
+				WorldSystem::pause_flag = !WorldSystem::pause_flag;
+			return;
+			}
+	}
 	if (action == GLFW_RELEASE) {
 		if (key == GLFW_KEY_D) {
 			motion.velocity.x = 0.0f;
@@ -118,6 +130,12 @@ void CharacterAirborneMoveLeftState::doChecks() {
 
 void CharacterAirborneMoveLeftState::on_player_key(int key, int, int action, int mod) {
 	Motion& motion = registry.motions.get(character);
+	if (action == GLFW_PRESS) {
+			if (key == GLFW_KEY_SPACE) {
+			WorldSystem::pause_flag = !WorldSystem::pause_flag;
+			return;
+			}
+	}
 	if (action == GLFW_RELEASE) {
 		if (key == GLFW_KEY_A) {
 			motion.velocity.x = 0.0f;
