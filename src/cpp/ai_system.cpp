@@ -13,8 +13,13 @@ void AISystem::step(float elapsed_ms, int turn, Entity *selected_ai, Entity last
 	if (ai_team.size() < 1) {
 		return;
 	}
+	if (blackboard->turn == TURN_CODE::PLAYER1) {
+		//blackboard->shot = false
+		blackboard->timer = 3000.f;
+	}
 	if (blackboard->turn == TURN_CODE::NPCAI) {
-		decideAction();
+		change_to_next_ai();
+		decrementTimer(elapsed_ms);
 		//*selected_ai = blackboard->selected_ai;
 		//if ((calculateDistance(blackboard->prev_pos, blackboard->motion->position) > 200)) {
 		//	blackboard->motion->velocity.x = 0.f;
@@ -28,8 +33,9 @@ void AISystem::step(float elapsed_ms, int turn, Entity *selected_ai, Entity last
 		//}
 	}
 	//checkJump();
-
-	decisionTree->traverse();
+	if (!blackboard->c->state_machine.getCurrentState()->next_turn) {
+		decisionTree->traverse();
+	}
 }
 
 //initialize stuff here
@@ -37,9 +43,9 @@ void AISystem::init(ShootingSystem& shootingSystem, std::vector<Entity> team) {
 	this->shootingSystem = shootingSystem;
 	this->gunshot = gunshot;
 	ai_team = team;
-	aiTurnTime = 5000.f;
 	// Decision tree
 	blackboard = new Blackboard;
+	blackboard->timer = 3000.f;
 
 	if (ai_team.size() < 1) {
 		return;
@@ -48,43 +54,43 @@ void AISystem::init(ShootingSystem& shootingSystem, std::vector<Entity> team) {
 	blackboard->selected_ai = ai_team[0];
 	Character *character = registry.characters.get(ai_team[0]);
 	blackboard->c = character;
+	blackboard->ai_index = 0;
 	decisionTree = new IsAITurn;
 
 	auto endTurn = new EndTurn;
 	auto moveRight = new MoveRight;
 	auto moveLeft = new MoveLeft;
-
+	auto timeEnd = new DidTimeEnd;
+	auto shoot = new Shoot;
 	// Build the tree
 	decisionTree->addFalseConditionNode(endTurn); // If not ai turn, skip
-	decisionTree->addTrueConditionNode(moveRight); // If ai turn, check if moving
+	decisionTree->addTrueConditionNode(timeEnd); // If ai turn, check if moving timer has ended
+
+	timeEnd->addFalseConditionNode(moveRight);
+	timeEnd->addTrueConditionNode(shoot);
 }
 
 double AISystem::calculateDistance(vec2 v1, vec2 v2) {
 	return sqrt(pow(v1.x - v2.x, 2) + pow(v1.y - v2.y, 2));
 }
 
-void AISystem::decideAction()
+void AISystem::change_to_next_ai()
 {
-
 	// change the selected ai to move 
-	for (int i = 0; i < ai_team.size(); i++) {
-		if (blackboard->selected_ai == ai_team[i]) {
-			if (i + 1 == ai_team.size()) {
-				blackboard->selected_ai = ai_team[0];
-			}
-			else {
-				blackboard->selected_ai = ai_team[i + 1];
-			}
-		}
-	}
-
+	blackboard->selected_ai = ai_team[blackboard->ai_index];
+	blackboard->done_move = false;
+	//blackboard->timer = 3000.f;
 	//*blackboard->c = &registry.characters.get(ai_team[0]);
 	// position where the ai ended its turn
 }
 
-void AISystem::checkJump()
+void AISystem::decrementTimer(float elapsed_ms)
 {
+	blackboard->timer -= elapsed_ms;
 
+	if (blackboard->timer <= 0.f) {
+		blackboard->done_move = true;
+	}
 }
 
 
