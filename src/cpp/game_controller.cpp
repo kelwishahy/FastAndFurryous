@@ -75,6 +75,8 @@ void GameController::step(float elapsed_ms) {
 			registry.remove_all_components_of(e);
 		}
 	}
+	/*printf("num grenades: %i ", (int)registry.grenades.components.size());
+	printf("num explosions: %i\n", (int)registry.explosions.components.size());*/
 
 	for (Character* chara : registry.characters.components) {
 		chara->state_machine.getCurrentState()->step(elapsed_ms);

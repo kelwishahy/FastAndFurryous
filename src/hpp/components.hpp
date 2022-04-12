@@ -371,10 +371,10 @@ struct Rifle : WeaponBase {
 		MIN_ANGLE = 5.5f;
 		// pi/4
 		// aim_angle = 0.7854f;
-		aim_angle = MIN_ANGLE;
+		aim_angle = 0.4f;
 		max_damage = 45.f;
 		min_damage = 35.f;
-		max_dist = 600.f;
+		max_dist = 1000.f;
 		type = RIFLE;
 	}
 };
@@ -387,10 +387,10 @@ struct Awp : WeaponBase {
 		MIN_ANGLE = 5.5f;
 		// pi/4
 		// aim_angle = 0.7854f;
-		aim_angle = MIN_ANGLE;
+		aim_angle = 0.4f;
 		max_damage = 80.f;
 		min_damage = 70.f;
-		max_dist = 2000.f;
+		max_dist = 3000.f;
 		type = AWP;
 	}
 };
@@ -403,10 +403,10 @@ struct Shotgun : WeaponBase {
 		MIN_ANGLE = 5.5f;
 		// pi/4
 		// aim_angle = 0.7854f;
-		aim_angle = MIN_ANGLE;
-		max_damage = 5.f;
-		min_damage = 1.f;
-		max_dist = 200.0f;
+		aim_angle = 0.4f;
+		max_damage = 6.f;
+		min_damage = 2.f;
+		max_dist = 400.0f;
 		type = SHOTGUN;
 	}
 };
@@ -418,7 +418,7 @@ struct Launcher: WeaponBase {
 		MIN_ANGLE = 5.5f;
 		// pi/4
 		// aim_angle = 0.7854f;
-		aim_angle = MIN_ANGLE;
+		aim_angle = 0.4f;
 		max_damage = 0.f;
 		min_damage = 0.f;
 		max_dist = 0.0f;

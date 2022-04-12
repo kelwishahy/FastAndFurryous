@@ -143,9 +143,9 @@ void CharacterDamageState::step(float elapsed_ms) {
 		if (registry.projectiles.has(entity) && entity_other == character) {
 			Projectile& pj = registry.projectiles.get(entity);
 			WeaponBase weap = registry.weapons.get(pj.origin);
-			float travel_dist_normalized = length(registry.motions.get(entity).position - registry.motions.get(pj.origin).position) / weap.max_dist;
-			float dmg = naive_lerp(weap.max_damage, weap.min_damage, travel_dist_normalized);
-			decreaseHealth(character, -(int)dmg);
+			float travel_dist_normalized = min(length(registry.motions.get(entity).position - registry.motions.get(pj.origin).position) / weap.max_dist, 0.9f);
+			float dmg = naive_lerp(weap.min_damage, weap.max_damage, (1-travel_dist_normalized));
+			decreaseHealth(character, (int)dmg);
 			if (registry.health.get(character).hp == 0) {
 				chara->state_machine.changeState(chara->dead_state);
 			}
@@ -481,8 +481,15 @@ void CharacterShootingState::handleGrenadeBounce() { //abusing the statemachines
 				if (pj.bounces < 0) {
 					createExplosion(200.f, motion.position + vec2{0, -100});
 					registry.remove_all_components_of(entity);
+					registry.grenades.remove(entity); //????? WHY ??????? WHY DOES THE REGISTRY NEED THIS
 				} else {
 					Rigidbody& rb = registry.rigidBodies.get(entity);
+					//PhysicsSystem::applyForce(entity, vec2{ (int)rb.collision_normal.x * 30 * pj.bounces, (int)rb.collision_normal.y * 30 * pj.bounces });
+					if (motion.velocity.x > 0) {
+						PhysicsSystem::applyForce(entity, vec2{ -7,0 });
+					} else {
+						PhysicsSystem::applyForce(entity, vec2{ 7,0 });
+					}
 					if ((int)rb.collision_normal.x == -1) {
 						PhysicsSystem::applyForce(entity, {-30 * pj.bounces, 0});
 					} else if ((int)rb.collision_normal.x == 1) {
