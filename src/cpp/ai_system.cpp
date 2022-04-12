@@ -16,6 +16,10 @@ void AISystem::step(float elapsed_ms, int turn, Entity *selected_ai, Entity last
 	if (blackboard->turn == TURN_CODE::PLAYER1) {
 		//blackboard->shot = false
 		blackboard->timer = 3000.f;
+		bool randbool = rand() & 1;
+		blackboard->left = randbool;
+		printf("left is %i \n", blackboard->left);
+
 	}
 	if (blackboard->turn == TURN_CODE::NPCAI) {
 		change_to_next_ai();
@@ -62,12 +66,16 @@ void AISystem::init(ShootingSystem& shootingSystem, std::vector<Entity> team) {
 	auto moveLeft = new MoveLeft;
 	auto timeEnd = new DidTimeEnd;
 	auto shoot = new Shoot;
+	auto leftRight = new LeftorRight;
 	// Build the tree
 	decisionTree->addFalseConditionNode(endTurn); // If not ai turn, skip
 	decisionTree->addTrueConditionNode(timeEnd); // If ai turn, check if moving timer has ended
 
-	timeEnd->addFalseConditionNode(moveRight);
+	timeEnd->addFalseConditionNode(leftRight);
 	timeEnd->addTrueConditionNode(shoot);
+
+	leftRight->addFalseConditionNode(moveLeft);
+	leftRight->addTrueConditionNode(moveRight);
 }
 
 double AISystem::calculateDistance(vec2 v1, vec2 v2) {
@@ -77,8 +85,14 @@ double AISystem::calculateDistance(vec2 v1, vec2 v2) {
 void AISystem::change_to_next_ai()
 {
 	// change the selected ai to move 
+	if (blackboard->ai_index == ai_team.size()) {
+		blackboard->ai_index = 0;
+	}
 	blackboard->selected_ai = ai_team[blackboard->ai_index];
+	Character* character = registry.characters.get(ai_team[blackboard->ai_index]);
+	blackboard->c = character;
 	blackboard->done_move = false;
+	
 	//blackboard->timer = 3000.f;
 	//*blackboard->c = &registry.characters.get(ai_team[0]);
 	// position where the ai ended its turn

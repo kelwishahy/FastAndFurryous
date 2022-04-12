@@ -20,6 +20,7 @@ struct Blackboard {
 	int turn;
 	int ai_index;
 	bool done_move;
+	bool left;
 };
 
 static Blackboard* blackboard;
@@ -79,6 +80,12 @@ class DidTimeEnd : public Node {
 	}
 };
 
+class LeftorRight : public Node {
+	bool run() override {
+		return blackboard->left;
+	}
+
+};
 
 // TASKS
 
@@ -110,6 +117,8 @@ class Shoot : public Node {
 		//blackboard->c->state_machine.changeState(blackboard->c->shooting_state);
 		ShootingSystem::shoot(blackboard->selected_ai);
 		blackboard->c->state_machine.getCurrentState()->next_turn = true;
+		blackboard->ai_index++;
+
 		return true;
 	}
 };
