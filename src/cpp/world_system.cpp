@@ -152,7 +152,7 @@ void WorldSystem::check_for_button_presses() {
 
 			
 			else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTON2) {
-				
+
 				remove_components();
 				singlePlayer = false;
 				play_select();
@@ -167,7 +167,7 @@ void WorldSystem::check_for_button_presses() {
 				break;
 			}
 			
-			else if ((registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONC)) {
+			else if ((registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONC) || (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTOND)) {
 				remove_components();
 				// change option timer type
 				play_options(20.0f);
@@ -244,7 +244,6 @@ void WorldSystem::check_for_button_presses() {
 				remove_components();
 				play_levels();
 				break;
-				
 			}
 
 			else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONCANCEL) {
@@ -315,12 +314,12 @@ void WorldSystem::play_tutorial() {
 void WorldSystem::play_select() {
 	createMenu(MENU_TYPES::SELECT, 0.75);
 
-	vec2 pos_cat = set_pos(240.f,920.f);
-	vec2 scale = set_scale(224.f,87.f);
+	vec2 pos_cat = { (defaultResolution.x / 4.f) / defaultResolution.x * screenResolution.x, (defaultResolution.y / 2.0) / defaultResolution.y * screenResolution.y };
+	vec2 scale = set_scale(500.f,500.f);
 	createButton(pos_cat, scale,TEXTURE_IDS::BUTTONC);
 	
-	// vec2 pos_dog = { (3.1f * defaultResolution.x / 4.f) / defaultResolution.x * screenResolution.x, (defaultResolution.y / 2.0) / defaultResolution.y * screenResolution.y };
-	// createButton(pos_dog, scale,TEXTURE_IDS::BUTTOND);
+	vec2 pos_dog = { (3.1f * defaultResolution.x / 4.f) / defaultResolution.x * screenResolution.x, (defaultResolution.y / 2.0) / defaultResolution.y * screenResolution.y };
+	createButton(pos_dog, scale,TEXTURE_IDS::BUTTOND);
 
 	cancel_button();
 }
@@ -502,7 +501,7 @@ vec2 WorldSystem::set_scale(float scaleX, float scaleY){
 }
 
 Entity WorldSystem::cancel_button(){
-	vec2 pos6 = set_pos(1700.f, 930.f);
+	vec2 pos6 = set_pos(1700.f, 920.f);
 	vec2 scale6 = set_scale(224.f,87.f);
 	return createButton(pos6, scale6, TEXTURE_IDS::BUTTONCANCEL);
 }
