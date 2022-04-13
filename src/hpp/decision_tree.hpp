@@ -181,9 +181,8 @@ class Shoot : public Node {
 		/*if (!blackboard->friendly) {
 			ShootingSystem::shoot(blackboard->selected_ai);
 		}*/
+		blackboard->ai_index += 1;
 		blackboard->c->state_machine.getCurrentState()->next_turn = true;
-		blackboard->ai_index++;
-
 		return true;
 	}
 };

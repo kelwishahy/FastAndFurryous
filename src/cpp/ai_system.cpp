@@ -7,10 +7,11 @@
 using namespace glm;
 ;
 
-void AISystem::step(float elapsed_ms, int turn, Entity *selected_ai, Entity last_player) {
+void AISystem::step(float elapsed_ms, int turn, Entity *selected_ai, Entity last_player, std::vector<Entity> team) {
 
 	blackboard->turn = turn;
 	blackboard->player = &last_player;
+	this->ai_team = team;
 	if (ai_team.size() < 1) {
 		return;
 	}
@@ -21,15 +22,14 @@ void AISystem::step(float elapsed_ms, int turn, Entity *selected_ai, Entity last
 	}
 
 	if (blackboard->turn == TURN_CODE::NPCAI) {
-		change_to_next_ai(selected_ai);
 		decrementTimer(elapsed_ms);
-		//allyNearby();
-		//handle_collisions();
+		
 	}
 	//checkJump();
 
 	if (!blackboard->c->state_machine.getCurrentState()->next_turn) {
 		decisionTree->traverse();
+		change_to_next_ai(selected_ai);
 	}
 }
 
@@ -80,7 +80,8 @@ double AISystem::calculateDistance(vec2 v1, vec2 v2) {
 void AISystem::change_to_next_ai(Entity *selected_ai)
 {
 	// change the selected ai to move 
-	if (blackboard->ai_index == ai_team.size()) {
+	//blackboard->ai_index+=1;
+	if (blackboard->ai_index >= (int)ai_team.size()) {
 		blackboard->ai_index = 0;
 	}
 	blackboard->selected_ai = ai_team[blackboard->ai_index];
@@ -92,7 +93,7 @@ void AISystem::change_to_next_ai(Entity *selected_ai)
 	//Motion& motion = registry.motions.get(blackboard->selected_ai);
 	//blackboard->motion = &motion;
 
-	*selected_ai = blackboard->selected_ai;
+	*selected_ai = ai_team[blackboard->ai_index];
 
 }
 

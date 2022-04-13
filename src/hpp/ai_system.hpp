@@ -7,7 +7,7 @@
 class AISystem
 {
 public:
-	void step(float elapsed_ms, int turn, Entity *selected_ai, Entity last_player);
+	void step(float elapsed_ms, int turn, Entity *selected_ai, Entity last_player, std::vector<Entity> team);
 	void init(ShootingSystem& shootingSystem, std::vector<Entity> team);
 	double calculateDistance(vec2 v1, vec2 v2);
 	void change_to_next_ai(Entity *selected_ai);

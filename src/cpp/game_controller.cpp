@@ -51,12 +51,9 @@ void GameController::init(GLFWwindow* window, MapSystem::Map& map, OrthographicC
 	
 	inAGame = true;
 	player_mode = PLAYER_MODE::MOVING;
-	printf("0\n");
 
 	if (teams[TURN_CODE::NPCAI].size() > 0) {
-		printf("1\n");
 		ai.init(shooting_system, teams[TURN_CODE::NPCAI]);
-		printf("2\n");
 
 		selected_ai = teams[TURN_CODE::NPCAI][0];
 	}
@@ -168,7 +165,7 @@ void GameController::step(float elapsed_ms) {
 
 	if (teams[TURN_CODE::NPCAI].size() > 0) {
 		int i = rand() % teams[TURN_CODE::PLAYER1].size();
-		ai.step(elapsed_ms, game_state.turn_possesion, &selected_ai, teams[TURN_CODE::PLAYER1][i]);
+		ai.step(elapsed_ms, game_state.turn_possesion, &selected_ai, teams[TURN_CODE::PLAYER1][i], teams[TURN_CODE::NPCAI]);
 	}
 
 	// if (game_state.turn_possesion == TURN_CODE::NPCAI) next_turn();
