@@ -88,6 +88,7 @@ void GameController::step(float elapsed_ms) {
 	for (Character* chara : registry.characters.components) {
 		chara->state_machine.getCurrentState()->step(elapsed_ms);
 
+
 		for (int i = 0; i < teams[TURN_CODE::PLAYER1].size(); i++) {
 			auto e = teams[TURN_CODE::PLAYER1][i];
 			if (registry.health.get(e).hp == 0) {
@@ -107,6 +108,14 @@ void GameController::step(float elapsed_ms) {
 			if (registry.health.get(e).hp == 0) {
 				teams[TURN_CODE::NPCAI].erase(teams[TURN_CODE::NPCAI].begin() + i);
 			}
+		}
+
+		std::string formatdmg = chara->state_machine.getCurrentState()->stringtoformat;
+		if (!formatdmg.empty()) {
+			Motion motion = registry.motions.get(chara->character);
+			Entity dmgtext = createText(textManager, formatdmg, { motion.position.x, motion.position.y - 180.f}, 0.8f, { 1,0,0, });
+			Timer& text_time = registry.entityTimers.emplace(dmgtext);
+			text_time.counter = 1000.f;
 		}
 		if (chara->state_machine.getCurrentState()->next_turn) {
 			chara->state_machine.getCurrentState()->next_turn = false;
@@ -187,10 +196,10 @@ void GameController::moveCamera() {
 
 void GameController::decrementTurnTime(float elapsed_ms) {
 	uint timePerTurnSec = uint(timePerTurnMs / 1000);
-	change_to_next_char_on_team();
 	if (timePerTurnMs <= 0) {
 		Character* c = registry.characters.get(curr_selected_char);
 		c->state_machine.changeState(c->idle_state);
+		change_to_next_char_on_team();
 		next_turn();
 		timePerTurnMs = game_data.getTimer();
 	} else {

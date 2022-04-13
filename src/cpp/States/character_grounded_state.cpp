@@ -143,6 +143,7 @@ void CharacterDamageState::enter() {
 
 void CharacterDamageState::exit() {
 	CharacterGroundedState::exit();
+	stringtoformat.clear();
 }
 
 void CharacterDamageState::step(float elapsed_ms) {
@@ -160,6 +161,7 @@ void CharacterDamageState::step(float elapsed_ms) {
 			WeaponBase weap = registry.weapons.get(pj.origin);
 			float travel_dist_normalized = min(length(registry.motions.get(entity).position - registry.motions.get(pj.origin).position) / weap.max_dist, 0.9f);
 			float dmg = naive_lerp(weap.min_damage, weap.max_damage, (1-travel_dist_normalized));
+			stringtoformat = std::to_string((int)dmg);
 			decreaseHealth(character, (int)dmg);
 			Motion& motion = registry.motions.get(character);
 			//Entity damage_taken = createText(std::to_string(dmg), { motion.position.x, motion.position.y - 200.f }, 1.f, { 0.917, 0.262, 0.776 });
@@ -179,6 +181,7 @@ void CharacterDamageState::step(float elapsed_ms) {
 			registry.remove_all_components_of(entity);
 		} else if (registry.explosions.has(entity) && entity_other == character) {
 			Explosion explosion = registry.explosions.get(entity);
+			stringtoformat = std::to_string((int)explosion.damage);
 			decreaseHealth(character, (int)explosion.damage);
 			if (registry.health.get(character).hp == 0) {
 				chara->state_machine.changeState(chara->dead_state);
