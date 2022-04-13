@@ -1,22 +1,17 @@
 # Fast and Furryous
 
-## Milestone 3: Fully Playable Game
+## Milestone 4: Final Game
 
 ### Playability
-- Gameplay
-  - File: `src/cpp/game_controller.cpp`
-  - Function: `GameController::step()`
-  - Relavant Line Numbers: `63 - 146`
-
-- Two-player gamemode
+- Tutorial level
   - File: `src/cpp/world_system.cpp`
-  - Function: `WorldSystem::multiplayer()`
-  - Relavant Line Numbers: `431 - 443`
+  - Function: `WorldSystem::tutorial_level()`
+  - Relavant Line Numbers: `515 - 525`
 
-- On-screen text
-  - File: `src/cpp/world_init.cpp`
-  - Function: `createText()`
-  - Relavant Line Numbers: `413 - 450`
+- Implemented different weapons
+  - File: `src/cpp/shooting_system.cpp`
+  - Function: `ShootingSystem::shoot()`
+  - Relavant Line Numbers: `111 - 149`
 
 - Crosshair angle indicators:
   - File: `src/cpp/world_init.cpp`
@@ -39,6 +34,18 @@ The following functions were optimized for better performance and memory managem
   - Relavant Line Numbers: `88 - 92`
     
 ### Creative Component
+
+- Added bouncing physics
+  - File: `src/cpp/character_grounded_state.cpp`
+  - Function: `handleGrenadeBounce()`
+  - Relavant Line Numbers: `516 - 550`
+
+- Added Explosion with effects
+  - File: `src/cpp/world_init.cpp`
+  - Function: `createExplosion()`
+  - Relavant Line Numbers: `592 - 624`
+
+
 - Camera that is controlled with mouse input
   - File: `src/cpp/game_controller.cpp`
   - Function: `GameController::moveCamera()`
