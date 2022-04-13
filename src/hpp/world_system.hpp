@@ -52,6 +52,8 @@ public:
 
 	void play_levels();
 
+	void multiplayer_play_levels(float newtimer);
+
 	void remove_components();
 
 	glm::vec2 mouse_pos;
