@@ -251,10 +251,8 @@ void GameController::init_player_teams() {
 		} else if (character.alignment == TEAM::PLAYER_2_TEAM) {
 			player2_team.push_back(e);
 		} else if (character.alignment == TEAM::NPC_AI_TEAM) {
-			registry.ais.emplace(e);
 			npcai_team.push_back(e);
 		} else {
-			registry.ais.emplace(e);
 			ai_team.push_back(e);
 		}
 	}

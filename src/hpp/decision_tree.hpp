@@ -170,7 +170,7 @@ class RunAway : public Node {
 
 class EndTurn : public Node {
 	bool run() override {
-		blackboard->c->state_machine.changeState(blackboard->c->idle_state);
+		//blackboard->c->state_machine.changeState(blackboard->c->idle_state);
 		return true;
 	}
 };
