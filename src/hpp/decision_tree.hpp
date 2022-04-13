@@ -16,11 +16,15 @@ enum TURN_CODE {
 struct Blackboard {
 	Character* c;
 	Entity selected_ai;
+	Motion* motion;
+	Entity* player;
 	float timer;
 	int turn;
 	int ai_index;
 	bool done_move;
 	bool left;
+	bool jump;
+	bool friendly = false;
 };
 
 static Blackboard* blackboard;
@@ -87,6 +91,18 @@ class LeftorRight : public Node {
 
 };
 
+class CheckShoot : public Node {
+	bool run() override {
+		
+	}
+
+};
+
+class HpLower : public Node {
+	bool run() override {
+		return (registry.health.get(blackboard->selected_ai).hp < 50);
+	}
+};
 // TASKS
 
 
@@ -104,6 +120,63 @@ class MoveRight : public Node {
 	}
 };
 
+class Charge : public Node {
+	bool run() override {
+		Motion& player_motion = registry.motions.get(*blackboard->player);
+
+		if (abs(blackboard->motion->position.x - player_motion.position.x) > 50.f) {
+			if (blackboard->motion->position.x < player_motion.position.x) {
+				if (blackboard->jump) {
+					blackboard->c->state_machine.changeState(blackboard->c->airborne_move_right);
+					blackboard->jump = false;
+				}
+				else {
+					blackboard->c->state_machine.changeState(blackboard->c->move_right_state);
+				}
+			}
+			else {
+				if (blackboard->jump) {
+					blackboard->c->state_machine.changeState(blackboard->c->airborne_move_left);
+					blackboard->jump = false;
+
+				}
+				else {
+					blackboard->c->state_machine.changeState(blackboard->c->move_left_state);
+				}
+			}
+		}
+
+		return true;
+	}
+};
+
+class RunAway : public Node {
+	bool run() override {
+		Motion& player_motion = registry.motions.get(*blackboard->player);
+		if (blackboard->motion->position.x < player_motion.position.x) {
+			if (blackboard->jump) {
+				blackboard->c->state_machine.changeState(blackboard->c->airborne_move_left);
+				blackboard->jump = false;
+
+			}
+			else {
+				blackboard->c->state_machine.changeState(blackboard->c->move_left_state);
+			}
+		}
+		else {
+			if (blackboard->jump) {
+				blackboard->c->state_machine.changeState(blackboard->c->airborne_move_right);
+				blackboard->jump = false;
+
+			}
+			else {
+				blackboard->c->state_machine.changeState(blackboard->c->move_right_state);
+			}
+		}
+
+		return true;
+	}
+};
 
 class EndTurn : public Node {
 	bool run() override {
@@ -115,7 +188,9 @@ class EndTurn : public Node {
 class Shoot : public Node {
 	bool run() override {
 		//blackboard->c->state_machine.changeState(blackboard->c->shooting_state);
-		ShootingSystem::shoot(blackboard->selected_ai);
+		if (!blackboard->friendly) {
+			ShootingSystem::shoot(blackboard->selected_ai);
+		}
 		blackboard->c->state_machine.getCurrentState()->next_turn = true;
 		blackboard->ai_index++;
 

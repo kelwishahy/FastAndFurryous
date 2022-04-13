@@ -276,7 +276,7 @@ void GameController::next_turn() {
 		change_curr_selected_char(teams[game_state.turn_possesion][0]);//supposed to be the first player on each team
 	}
 	//if (game_state.turn_possesion == TURN_CODE::NPCAI) {
-	//	change_to_next_char_on_team();
+	//	change_selected_state
 	//}
 	//else {
 	//	if (!teams[game_state.turn_possesion].empty()) {
