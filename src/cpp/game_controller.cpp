@@ -124,10 +124,10 @@ void GameController::step(float elapsed_ms) {
 					game_state.p2_team_curr_player = 0;
 				}
 			}
-			else if (game_state.turn_possesion == TURN_CODE::NPCAI) {
-				game_state.npcai_team_curr_player += 1;
-				if (game_state.npcai_team_curr_player >= (int)teams[game_state.turn_possesion].size()) {
-					game_state.npcai_team_curr_player = 0;
+			else if (game_state.turn_possesion == TURN_CODE::AI) {
+				game_state.npc_team_curr_player += 1;
+				if (game_state.npc_team_curr_player >= (int)teams[game_state.turn_possesion].size()) {
+					game_state.npc_team_curr_player = 0;
 				}
 			}
 			next_turn();
@@ -286,7 +286,12 @@ void GameController::next_turn() {
 	else if (teams[game_state.turn_possesion].empty()) {
 		game_state.turn_number -= 1;
 		next_turn();
-	} else {
+	}
+	if (game_state.turn_possesion == TURN_CODE::NPCAI) {
+		change_curr_selected_char(selected_ai);
+		audio.play_sfx(TURN_CHANGE);
+	}
+	else {
 		if (!teams[game_state.turn_possesion].empty()) {
 			if (!game_data.tutorial) {
 				audio.play_sfx(TURN_CHANGE);
@@ -296,13 +301,13 @@ void GameController::next_turn() {
 			}
 			else {
 				if (game_state.turn_possesion == TURN_CODE::PLAYER1) {
-					change_curr_selected_char(teams[game_state.turn_possesion][game_state.p1_team_curr_player]);
+					change_curr_selected_char(teams[game_state.turn_possesion][game_state.p1_team_curr_player]);//supposed to be the first player on each team
 				}
 				else if (game_state.turn_possesion == TURN_CODE::PLAYER2) {
-					change_curr_selected_char(teams[game_state.turn_possesion][game_state.p2_team_curr_player]);
+					change_curr_selected_char(teams[game_state.turn_possesion][game_state.p2_team_curr_player]);//supposed to be the first player on each team
 				}
-				else if (game_state.turn_possesion == TURN_CODE::NPCAI) {
-					change_curr_selected_char(teams[game_state.turn_possesion][game_state.npcai_team_curr_player]);
+				else if (game_state.turn_possesion == TURN_CODE::AI) {
+					change_curr_selected_char(teams[game_state.turn_possesion][game_state.npc_team_curr_player]);//supposed to be the first player on each team
 				}
 			}
 		}

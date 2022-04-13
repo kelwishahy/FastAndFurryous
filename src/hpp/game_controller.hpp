@@ -58,7 +58,7 @@ public:
 		int p1_team_curr_player = 0;
 		int p2_team_curr_player = 0;
 		int npc_team_curr_player = 0;
-		int npcai_team_curr_player = 0;
+		int npcai_team_curr_layer = 0;
 	};
 
 	TURN_CODE getTurnCode() { return (TURN_CODE)this->game_state.turn_possesion; }
