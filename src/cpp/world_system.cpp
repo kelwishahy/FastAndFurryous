@@ -45,6 +45,9 @@ void WorldSystem::init(GLFWwindow* window) {
 	this->textManager = TextManager();
 	textManager.initFonts();
 
+	this->particleSystem = ParticleSystem();
+	printf("2. Particle entities is %d\n", (int)registry.particles.entities.size());
+
 	init_main_menu();
 	audio.play_music(MUSIC_LIST::IN_GAME_BACKGROUND);
 
@@ -68,7 +71,7 @@ void WorldSystem::restart_game(Game level) {
 		registry.remove_all_components_of(registry.motions.entities.back());
 
 	//Initialize current game
-	current_game.init(window, mapSystem.getMap(level.getBackGround()), camera, textManager, level);
+	current_game.init(window, mapSystem.getMap(level.getBackGround()), camera, textManager, level, particleSystem);
 }
 
 void WorldSystem::handle_collisions() {
@@ -152,7 +155,7 @@ void WorldSystem::check_for_button_presses() {
 
 			
 			else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTON2) {
-
+				
 				remove_components();
 				singlePlayer = false;
 				play_select();
@@ -167,7 +170,7 @@ void WorldSystem::check_for_button_presses() {
 				break;
 			}
 			
-			else if ((registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONC) || (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTOND)) {
+			else if ((registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONC)) {
 				remove_components();
 				// change option timer type
 				play_options(20.0f);
@@ -249,6 +252,7 @@ void WorldSystem::check_for_button_presses() {
 				remove_components();
 				multiplayer_play_levels(newtimer);
 				break;
+				
 			}
 
 			else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONCANCEL) {
@@ -319,12 +323,12 @@ void WorldSystem::play_tutorial() {
 void WorldSystem::play_select() {
 	createMenu(MENU_TYPES::SELECT, 0.75);
 
-	vec2 pos_cat = { (defaultResolution.x / 4.f) / defaultResolution.x * screenResolution.x, (defaultResolution.y / 2.0) / defaultResolution.y * screenResolution.y };
-	vec2 scale = set_scale(500.f,500.f);
+	vec2 pos_cat = set_pos(240.f,920.f);
+	vec2 scale = set_scale(224.f,87.f);
 	createButton(pos_cat, scale,TEXTURE_IDS::BUTTONC);
 	
-	vec2 pos_dog = { (3.1f * defaultResolution.x / 4.f) / defaultResolution.x * screenResolution.x, (defaultResolution.y / 2.0) / defaultResolution.y * screenResolution.y };
-	createButton(pos_dog, scale,TEXTURE_IDS::BUTTOND);
+	// vec2 pos_dog = { (3.1f * defaultResolution.x / 4.f) / defaultResolution.x * screenResolution.x, (defaultResolution.y / 2.0) / defaultResolution.y * screenResolution.y };
+	// createButton(pos_dog, scale,TEXTURE_IDS::BUTTOND);
 
 	cancel_button();
 }
@@ -415,7 +419,7 @@ void WorldSystem::multiplayer_play_levels(float newtimer) {
 
 Game WorldSystem::level_one(float newTimer) {
 	Game level_one;
-	level_one.addCat(RIFLE, PLAYER_1_TEAM, { screenResolution.x / 2 - 400, screenResolution.y - 800 }, 100);
+	level_one.addCat(SHOTGUN, PLAYER_1_TEAM, { screenResolution.x / 2 - 400, screenResolution.y - 800 }, 100);
 	level_one.addCat(RIFLE, PLAYER_1_TEAM, { screenResolution.x / 2 - 100, screenResolution.y - 400 }, 100);
 	level_one.addCat(RIFLE, PLAYER_1_TEAM, { screenResolution.x / 2 + 100, screenResolution.y - 800 }, 100);
 
@@ -457,7 +461,7 @@ Game WorldSystem::level_two(float newTimer) {
 Game WorldSystem::level_three(float newTimer) {
 
 	Game level_one;
-	level_one.addCat(RIFLE, PLAYER_1_TEAM, { screenResolution.x / 2 - 400, screenResolution.y - 800 }, 100);
+	level_one.addCat(LAUNCHER, PLAYER_1_TEAM, { screenResolution.x / 2 - 400, screenResolution.y - 800 }, 100);
 	level_one.addCat(RIFLE, PLAYER_1_TEAM, { screenResolution.x / 2 - 100, screenResolution.y - 400 }, 100);
 	level_one.addCat(RIFLE, PLAYER_1_TEAM, { screenResolution.x / 2 + 100, screenResolution.y - 800 }, 100);
 
@@ -467,7 +471,7 @@ Game WorldSystem::level_three(float newTimer) {
 		level_one.addDog(RIFLE, NPC_AI_TEAM, { screenResolution.x + 600, screenResolution.y - 400 }, 100);
 	}
 	else {
-		level_one.addDog(RIFLE, PLAYER_2_TEAM, { screenResolution.x - 200, screenResolution.y - 800 }, 100);
+		level_one.addDog(LAUNCHER, PLAYER_2_TEAM, { screenResolution.x - 200, screenResolution.y - 800 }, 100);
 		level_one.addDog(RIFLE, PLAYER_2_TEAM, { screenResolution.x + 400, screenResolution.y - 1000 }, 100);
 		level_one.addDog(RIFLE, PLAYER_2_TEAM, { screenResolution.x + 600, screenResolution.y - 400 }, 100);
 	}
@@ -479,9 +483,9 @@ Game WorldSystem::level_three(float newTimer) {
 
 Game WorldSystem::multiplayer(float newtimer) {
 	Game multiplayer;
-	multiplayer.addCat(RIFLE, PLAYER_1_TEAM, { screenResolution.x / 2 - 400, screenResolution.y - 800 }, 100);
-	multiplayer.addCat(RIFLE, PLAYER_1_TEAM, { screenResolution.x / 2 - 100, screenResolution.y - 400 }, 100);
-	multiplayer.addCat(RIFLE, PLAYER_1_TEAM, { screenResolution.x / 2 + 100, screenResolution.y - 800 }, 100);
+	multiplayer.addCat(LAUNCHER, PLAYER_1_TEAM, { screenResolution.x / 2 - 400, screenResolution.y - 800 }, 100);
+	multiplayer.addCat(SHOTGUN, PLAYER_1_TEAM, { screenResolution.x / 2 - 100, screenResolution.y - 400 }, 100);
+	multiplayer.addCat(AWP, PLAYER_1_TEAM, { screenResolution.x / 2 + 100, screenResolution.y - 800 }, 100);
 
 	multiplayer.addDog(RIFLE, PLAYER_2_TEAM, { screenResolution.x - 200, screenResolution.y - 800 }, 100);
 	multiplayer.addDog(RIFLE, PLAYER_2_TEAM, { screenResolution.x + 400, screenResolution.y - 1000 }, 100);
@@ -525,7 +529,7 @@ vec2 WorldSystem::set_scale(float scaleX, float scaleY){
 }
 
 Entity WorldSystem::cancel_button(){
-	vec2 pos6 = set_pos(1700.f, 920.f);
+	vec2 pos6 = set_pos(1700.f, 930.f);
 	vec2 scale6 = set_scale(224.f,87.f);
 	return createButton(pos6, scale6, TEXTURE_IDS::BUTTONCANCEL);
 }

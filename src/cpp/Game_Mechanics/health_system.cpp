@@ -1,11 +1,9 @@
 #include <hpp/Game_Mechanics/health_system.hpp>
 #include <hpp/tiny_ecs_registry.hpp>
 
-void decreaseHealth(Entity entity, int amount, Entity hurtEntity) {
+void decreaseHealth(Entity entity, int amount) {
 	auto& health = registry.health.get(entity);
 	health.hp = (health.hp - amount >= 0) ? health.hp - amount : 0;
-	registry.characters.get(entity)->play_hurt_sfx();
-	
 	health.hurt = true;
 }
 

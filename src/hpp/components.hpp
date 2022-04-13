@@ -11,8 +11,8 @@
 
 #include <hpp/States/character_grounded_state.hpp>
 
+#include "particle_system.hpp"
 #include "States/character_airborne_states.hpp"
-
 
 ////////////////////////////////////////////////////////////////////////////////
 // Component IDs
@@ -25,12 +25,16 @@ enum class SHADER_PROGRAM_IDS {
 	AI,
 	FONT,
 	TILE,
+	PARTICLE,
 	TOTAL
 }; constexpr int shaderProgramCount = (int)SHADER_PROGRAM_IDS::TOTAL;
 
 enum class TEXTURE_IDS {
 	//Cat textures
-	CAT_SIDE_IDLE,
+	CAT_SIDE_IDLE_AK,
+	CAT_SIDE_IDLE_SG,
+	CAT_SIDE_IDLE_GL,
+	CAT_SIDE_IDLE_AWP,
 	CAT_FRONT_IDLE,
 	CAT_WALK,
 	CAT_JUMP,
@@ -42,7 +46,10 @@ enum class TEXTURE_IDS {
 	CAT_HURT,
 	CAT_DEAD,
 	// Dog Textures
-	DOG_SIDE_IDLE,
+	DOG_SIDE_IDLE_AK,
+	DOG_SIDE_IDLE_SG,
+	DOG_SIDE_IDLE_GL,
+	DOG_SIDE_IDLE_AWP,
 	DOG_FRONT_BLINK,
 	DOG_SIDE_BLINK,
 	DOG_FRONT_IDLE,
@@ -115,6 +122,7 @@ enum class TEXTURE_IDS {
 
 	FOREST,
 	SPACE,
+	EXPLOSION,
 	TOTAL
 }; constexpr int textureCount = (int)TEXTURE_IDS::TOTAL;
 
@@ -123,6 +131,7 @@ enum class GEOMETRY_BUFFER_IDS {
 	TEXTURED_QUAD,
 	WALL,
 	FONT,
+	CIRCLE,
 	TOTAL
 }; constexpr int geometryCount = (int)GEOMETRY_BUFFER_IDS::TOTAL;
 
@@ -139,6 +148,8 @@ enum RB_TYPES {
 enum WEAPON_TYPES {
 	RIFLE = 0,
 	SHOTGUN = 1,
+	AWP = 2,
+	LAUNCHER = 3,
 	TOTAL //For no weaponed 
 }; constexpr int weaponCount = (int)WEAPON_TYPES::TOTAL;
 
@@ -254,7 +265,6 @@ public:
 		is_jumping = isJumping;
 	}
 
-
 protected:
 	CharacterState* curr_state;
 	bool selected = false;
@@ -267,8 +277,12 @@ protected:
 
 };
 
-
 // Game components ------------------------------------------------------------
+struct Particle {
+	bool active = false;
+	float timer = 1000;
+};
+
 struct Background {
 	float layer = -0.5;
 };
@@ -300,6 +314,19 @@ struct Collider {
 
 };
 
+struct Timer {
+	float time;
+	float counter;
+	void reset_counter() {
+		time = counter;
+	}
+};
+
+struct Explosion
+{
+	float damage = 37.0f;
+};
+
 struct Boxcollider : Collider {
 	std::vector<glm::vec2> vertices;
 	bool transformed_required = true;
@@ -321,8 +348,10 @@ struct Rigidbody {
 	enum RB_TYPES type = NORMAL;
 	float mass = 1;
 	float collision_depth;
+	bool gravity_affected = true;
 	glm::vec2 collision_normal;
 	glm::vec2 force_accumulator;
+	float inertia = 0;
 };
 
 struct RayCast {
@@ -333,10 +362,9 @@ struct WeaponBase {
 	float MAX_ANGLE;
 	float MIN_ANGLE;
 	float aim_angle;
-	float distance;
-	float area;
-	//float aim_loc_x;
-	float damage;
+	float min_damage;
+	float max_damage;
+	float max_dist;
 	WEAPON_TYPES type;
 };
 
@@ -345,30 +373,73 @@ struct Rifle : WeaponBase {
 		//a little less than pi/2
 		MAX_ANGLE = 1.2f;
 		//a little more than 0
-		MIN_ANGLE = 0.2f;
+		MIN_ANGLE = 5.5f;
 		// pi/4
 		// aim_angle = 0.7854f;
-		aim_angle = MIN_ANGLE;
-		//distance the gun can shoot
-		distance = 500.0f;
-		//"radius" around distance
-		area = 200.0f;
-		damage = 45;
+		aim_angle = 0.4f;
+		max_damage = 45.f;
+		min_damage = 35.f;
+		max_dist = 1000.f;
 		type = RIFLE;
 	}
 };
 
-struct Shotgun : WeaponBase {
+struct Awp : WeaponBase {
+	Awp() : WeaponBase() {
+		//a little less than pi/2
+		MAX_ANGLE = 0.9f;
+		//a little more than 0
+		MIN_ANGLE = 5.5f;
+		// pi/4
+		// aim_angle = 0.7854f;
+		aim_angle = 0.4f;
+		max_damage = 80.f;
+		min_damage = 70.f;
+		max_dist = 3000.f;
+		type = AWP;
+	}
+};
 
+struct Shotgun : WeaponBase {
+	Shotgun() : WeaponBase() {
+		//a little less than pi/2
+		MAX_ANGLE = 1.2f;
+		//a little more than 0
+		MIN_ANGLE = 5.5f;
+		// pi/4
+		// aim_angle = 0.7854f;
+		aim_angle = 0.4f;
+		max_damage = 6.f;
+		min_damage = 2.f;
+		max_dist = 400.0f;
+		type = SHOTGUN;
+	}
+};
+
+struct Launcher: WeaponBase {
+	Launcher() : WeaponBase() {
+		MAX_ANGLE = 1.2f;
+		//a little more than 0
+		MIN_ANGLE = 5.5f;
+		// pi/4
+		// aim_angle = 0.7854f;
+		aim_angle = 0.4f;
+		max_damage = 0.f;
+		min_damage = 0.f;
+		max_dist = 0.0f;
+		type = LAUNCHER;
+	}
 };
 
 struct Projectile {
 	Entity origin;
-	/*glm::vec4 trajectoryAx;
-	glm::vec4 trajectoryAy;
-	float delta_time = 0;*/
-	//float hit_radius;
-	//glm::vec2 end_tangent;
+};
+
+struct Grenade {
+	Entity origin;
+	int bounces = 3;
+	float bounce_cooldown = 100.0f;
+	float COOLDOWN = 100.0f;
 };
 
 // Stucture to store collision information
@@ -406,76 +477,6 @@ struct UIElement {
 	UI_ELEMENT element_type;
 };
 
-struct Character {
-	Entity character;
-	CharacterStateMachine state_machine;
-	CharacterIdleState* idle_state;
-	CharacterMoveLeftState* move_left_state;
-	CharacterMoveRightState* move_right_state;
-	CharacterAimState* aim_state;
-	CharacterShootingState* shooting_state;
-	CharacterAirborneState* airborne_state;
-	CharacterAirborneMoveLeftState* airborne_move_left;
-	CharacterAirborneMoveRightState* airborne_move_right;
-	CharacterDeadState* dead_state;
-	glm::vec3 team_color;
-	ANIMAL animal;
-
-	void init() {
-		idle_state = new CharacterIdleState(character);
-		move_left_state = new CharacterMoveLeftState(character);
-		move_right_state = new CharacterMoveRightState(character);
-		aim_state = new CharacterAimState(character);
-		shooting_state = new CharacterShootingState(character);
-		airborne_move_left = new CharacterAirborneMoveLeftState(character);
-		airborne_move_right = new CharacterAirborneMoveRightState(character);
-		airborne_state = new CharacterAirborneState(character);
-		dead_state = new CharacterDeadState(character);
-
-		state_machine = CharacterStateMachine();
-		state_machine.init(idle_state);
-	}
-
-	virtual void animate_walk() = 0;
-	virtual void animate_idle() = 0;
-	virtual void animate_jump() = 0;
-	virtual void animate_hurt() = 0;
-	virtual void animate_dead() = 0;
-	virtual void animate_aim() = 0;
-
-	virtual void play_hurt_sfx() = 0;
-};
-
-struct Cat : Character {
-	Cat() : Character() {
-		team_color = glm::vec3{ 0.862f, 0.525f, 0.517f };
-		animal = ANIMAL::CAT;
-	}
-	void animate_walk() override;
-	void animate_idle() override;
-	void animate_jump() override;
-	void animate_hurt() override;
-	void animate_dead() override;
-	void animate_aim() override;
-
-	void play_hurt_sfx() override;
-};
-
-struct Dog : Character {
-	Dog() : Character() {
-		team_color = glm::vec3{ 0.039, 0.454, 1 };
-		animal = ANIMAL::DOG;
-	}
-	void animate_walk() override;
-	void animate_idle() override;
-	void animate_jump() override;
-	void animate_hurt() override;
-	void animate_dead() override;
-	void animate_aim() override;
-
-	void play_hurt_sfx() override;
-};
-
 struct HealthBox {
 	Entity parent;
 	Entity text;
@@ -503,7 +504,7 @@ struct ColoredVertex {
 
 // Index and vertex buffers
 struct Mesh {
-	static bool loadMeshFromObj(std::string obj_path, std::vector<ColoredVertex>& out_vertices, std::vector<uint16_t>& out_vertex_indices, glm::vec2& out_size);
+	// static bool loadMeshFromObj(std::string obj_path, std::vector<ColoredVertex>& out_vertices, std::vector<uint16_t>& out_vertex_indices, glm::vec2& out_size);
 	glm::vec2 originalSize = { 1,1 };
 	std::vector<ColoredVertex> vertices;
 	std::vector<uint16_t> vertexIndices;
@@ -573,3 +574,77 @@ void change_animation(Entity e, TEXTURE_IDS tex_id);
 bool check_if_part_of_parent(Entity e, Entity child);
 bool check_if_cat(Entity e);
 
+struct Character {
+	Entity character;
+	CharacterStateMachine state_machine;
+	CharacterIdleState* idle_state;
+	CharacterMoveLeftState* move_left_state;
+	CharacterMoveRightState* move_right_state;
+	CharacterAimState* aim_state;
+	CharacterShootingState* shooting_state;
+	CharacterAirborneState* airborne_state;
+	CharacterAirborneMoveLeftState* airborne_move_left;
+	CharacterAirborneMoveRightState* airborne_move_right;
+	CharacterDeadState* dead_state;
+	CharacterDamageState* damage_state;
+	glm::vec3 team_color;
+	ANIMAL animal;
+	bool isDead = false;
+	ParticleSystem* particleSystem;
+
+	void init(ParticleSystem* particleSystem) {
+		idle_state = new CharacterIdleState(character);
+		move_left_state = new CharacterMoveLeftState(character);
+		move_right_state = new CharacterMoveRightState(character);
+		aim_state = new CharacterAimState(character);
+		shooting_state = new CharacterShootingState(character);
+		airborne_move_left = new CharacterAirborneMoveLeftState(character);
+		airborne_move_right = new CharacterAirborneMoveRightState(character);
+		airborne_state = new CharacterAirborneState(character);
+		dead_state = new CharacterDeadState(character);
+		damage_state = new CharacterDamageState(character);
+
+		state_machine = CharacterStateMachine();
+		state_machine.init(idle_state);
+		this->particleSystem = particleSystem;
+	}
+
+	virtual void animate_walk() = 0;
+	virtual void animate_idle() = 0;
+	virtual void animate_jump() = 0;
+	virtual void animate_hurt() = 0;
+	virtual void animate_dead() = 0;
+	virtual void animate_aim() = 0;
+
+	virtual void play_hurt_sfx() = 0;
+};
+
+struct Cat : Character {
+	Cat() : Character() {
+		team_color = glm::vec3{ 0.862f, 0.525f, 0.517f };
+		animal = ANIMAL::CAT;
+	}
+	void animate_walk() override;
+	void animate_idle() override;
+	void animate_jump() override;
+	void animate_hurt() override;
+	void animate_dead() override;
+	void animate_aim() override;
+
+	void play_hurt_sfx() override;
+};
+
+struct Dog : Character {
+	Dog() : Character() {
+		team_color = glm::vec3{ 0.039, 0.454, 1 };
+		animal = ANIMAL::DOG;
+	}
+	void animate_walk() override;
+	void animate_idle() override;
+	void animate_jump() override;
+	void animate_hurt() override;
+	void animate_dead() override;
+	void animate_aim() override;
+
+	void play_hurt_sfx() override;
+};

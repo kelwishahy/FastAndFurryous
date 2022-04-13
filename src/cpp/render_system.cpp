@@ -24,6 +24,7 @@ void RenderSystem::draw(float elapsed_ms, WorldSystem& world) {
 	// Draw the map
 	if (world.getCurrentGame().inAGame) {
 		drawTiles();
+		drawParticles(world.getParticleSystem().getNumActive());
 	}
 
 	// Sort all the RenderRequests by depth
@@ -402,6 +403,49 @@ void RenderSystem::drawText(TextManager& textManager, Entity e) {
 	renderToScreen(transform(scaleToScreenResolution(m.position), scaleToScreenResolution(m.scale), 1.0f, 0));
 }
 
+void RenderSystem::drawParticles(int numParticles) {
+	vec3 colour = { 1.f, 0.f, 0.f };
+
+	// Bind buffers and pass in position
+	const GLuint vbo = vertexBuffers[(GLuint)GEOMETRY_BUFFER_IDS::CIRCLE];
+	const GLuint ibo = indexBuffers[(GLuint)GEOMETRY_BUFFER_IDS::CIRCLE];
+
+	// Bind buffers
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+	glHasError();
+
+	// set shaders
+	const GLuint shaderProgram = shaders[(GLuint)SHADER_PROGRAM_IDS::PARTICLE];
+	glUseProgram(shaderProgram);
+	glHasError();
+
+	// Pass in shader inputs (position)
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(ColoredVertex), (void*)0);
+	glEnableVertexAttribArray(0);
+	glHasError();
+
+	// Pass in uniforms
+	auto proj = camera->getViewProjectionMatrix(); // Passing in the camera's viewProjectionMatrix
+	GLuint projection_loc = glGetUniformLocation(shaderProgram, "projection");
+	glUniformMatrix4fv(projection_loc, 1, GL_FALSE, (float*)&proj);
+	glHasError();
+
+	GLuint colour_loc = glGetUniformLocation(shaderProgram, "colour");
+	glUniform3fv(colour_loc, 1, (float*)&colour);
+	glHasError();
+
+	// Draw
+	GLint size = 0;
+	glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
+	glHasError();
+	const GLsizei numIndices = size / sizeof(uint16_t);
+
+	// Draw all the particles at once
+	glDrawElementsInstanced(GL_TRIANGLES, numIndices, GL_UNSIGNED_SHORT, nullptr, numParticles);
+}
+
+
 /*
  * INITIALIZATION FUNCTIONS
  */
@@ -505,4 +549,34 @@ void RenderSystem::initRenderData() {
 
 	bindVBOandIBO(GEOMETRY_BUFFER_IDS::QUAD, quad, quadIndices);
 	bindVBOandIBO(GEOMETRY_BUFFER_IDS::TEXTURED_QUAD, texturedQuad, quadIndices);
+
+	/*
+	 * Initialize the circle mesh
+	 */
+	std::vector<ColoredVertex> circleVertices;
+	std::vector<uint16_t> circleIndices;
+	constexpr float z = -0.1f;
+	constexpr int NUM_TRIANGLES = 62;
+
+	for (int i = 0; i < NUM_TRIANGLES; i++) {
+		const float t = float(i) * M_PI * 2.f / float(NUM_TRIANGLES - 1);
+		circleVertices.push_back({});
+		circleVertices.back().position = { 0.5 * cos(t), 0.5 * sin(t), z };
+		circleVertices.back().color = { 0.8, 0.8, 0.8 };
+	}
+
+	circleVertices.push_back({});
+	circleVertices.back().position = { 0, 0, 0 };
+	circleVertices.back().color = { 1, 1, 1 };
+
+	for (int i = 0; i < NUM_TRIANGLES; i++) {
+		circleIndices.push_back((uint16_t)i);
+		circleIndices.push_back((uint16_t)((i + 1) % NUM_TRIANGLES));
+		circleIndices.push_back((uint16_t)NUM_TRIANGLES);
+	}
+
+	int geom_index = (int)GEOMETRY_BUFFER_IDS::CIRCLE;
+	meshes[geom_index].vertices = circleVertices;
+	meshes[geom_index].vertexIndices = circleIndices;
+	bindVBOandIBO(GEOMETRY_BUFFER_IDS::CIRCLE, meshes[geom_index].vertices, meshes[geom_index].vertexIndices);
 }

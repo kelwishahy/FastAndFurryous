@@ -20,12 +20,15 @@ GameController::~GameController() {
 }
 
 //initialize stuff here
-void GameController::init(GLFWwindow* window, MapSystem::Map& map, OrthographicCamera& camera, TextManager& textManager, Game game) {
+void GameController::init(GLFWwindow* window, MapSystem::Map& map, OrthographicCamera& camera, TextManager& textManager, Game game, 
+	ParticleSystem& particleSystem) {
 	this->window = window;
 	this->gameMap = map;
 	this->camera = &camera;
 	this->textManager = textManager;
 	this->game_data = game;
+	this->particleSystem = &particleSystem;
+	this->particleSystem->init();
 	this->mousePosition = scaleToScreenResolution(defaultResolution/2.f);
 	this->mouseDeadzone = scaleToScreenResolution({ 250.f, 250.f }).x;
 	this->mouseTriggerArea = scaleToScreenResolution({ 300.f, 150.f });
@@ -65,15 +68,48 @@ void GameController::step(float elapsed_ms) {
 	//While a game is happening make sure the players are controlling from here
 	glfwSetWindowUserPointer(window, this);
 
-	//Pan camera based on mouse position
+	// Pan camera based on mouse position
 	moveCamera();
-	//Step the player state machines
 
+	for (Entity e : registry.entityTimers.entities) {
+		Timer& timer = registry.entityTimers.get(e);
+		timer.counter -= elapsed_ms;
+		if (timer.counter < 0) {
+			registry.remove_all_components_of(e);
+		}
+	}
+
+	// Update particles
+	particleSystem->step(elapsed_ms);
+
+	//Step the player state machines
 	for (Character* chara : registry.characters.components) {
 		chara->state_machine.getCurrentState()->step(elapsed_ms);
+
+		for (int i = 0; i < teams[TURN_CODE::PLAYER1].size(); i++) {
+			auto e = teams[TURN_CODE::PLAYER1][i];
+			if (registry.health.get(e).hp == 0) {
+				teams[TURN_CODE::PLAYER1].erase(teams[TURN_CODE::PLAYER1].begin() + i);
+			}
+		}
+
+		for (int i = 0; i < teams[TURN_CODE::PLAYER2].size(); i++) {
+			const auto e = teams[TURN_CODE::PLAYER2][i];
+			if (registry.health.get(e).hp == 0) {
+				teams[TURN_CODE::PLAYER2].erase(teams[TURN_CODE::PLAYER2].begin() + i);
+			}
+		}
+
+		for (int i = 0; i < teams[TURN_CODE::NPCAI].size(); i++) {
+			const auto e = teams[TURN_CODE::NPCAI][i];
+			if (registry.health.get(e).hp == 0) {
+				teams[TURN_CODE::NPCAI].erase(teams[TURN_CODE::NPCAI].begin() + i);
+			}
+		}
 		if (chara->state_machine.getCurrentState()->next_turn) {
 			chara->state_machine.getCurrentState()->next_turn = false;
 			chara->state_machine.changeState(chara->idle_state);
+
 			next_turn();
 			chara->state_machine.getCurrentState()->set_A_key_state(glfwGetKey(window, GLFW_KEY_A));
 			chara->state_machine.getCurrentState()->set_D_key_state(glfwGetKey(window, GLFW_KEY_D));
@@ -84,6 +120,7 @@ void GameController::step(float elapsed_ms) {
 	ui.step(elapsed_ms);
 
 	handle_collisions();
+	check_out_of_screen_entities();
 
 	turnPosition = scaleToScreenResolution({ 2 * defaultResolution.x / 4.f + camera->getPosition().x,  30.0f });
 	auto& turnIndicatorText = registry.texts.get(turnIndicator);
@@ -108,50 +145,9 @@ void GameController::step(float elapsed_ms) {
 		turnIndicatorText.text = "COMPUTER'S TURN";
 		turnIndicatorPosition = turnPosition;
 		turnIndicatorPosition.x = turnIndicatorPosition.x - turnIndicatorText.scale.x / 2.f;
-		turnIndicatorText.color = blueColor;
-
-
+		turnIndicatorText.color = darkGreenColor;
 	}
 
-	for (Entity e : teams[game_state.turn_possesion]) {
-		shooting_system.setAimLoc(e);
-	}
-
-	for (int i = 0; i < teams[TURN_CODE::PLAYER1].size(); i++) {
-		auto e = teams[TURN_CODE::PLAYER1][i];
-		if (registry.health.get(e).hp == 0) {
-			teams[TURN_CODE::PLAYER1].erase(teams[TURN_CODE::PLAYER1].begin() + i);
-			remove_children(e);
-			registry.animations.remove(e);
-			registry.rigidBodies.remove(e);
-			Character* chara = registry.characters.get(e);
-			chara->state_machine.changeState(chara->dead_state);
-		}
-	}
-
-	for (int i = 0; i < teams[TURN_CODE::PLAYER2].size(); i++) {
-		const auto e = teams[TURN_CODE::PLAYER2][i];
-		if (registry.health.get(e).hp == 0) {
-			teams[TURN_CODE::PLAYER2].erase(teams[TURN_CODE::PLAYER2].begin() + i);
-			remove_children(e);
-			registry.animations.remove(e);
-			registry.rigidBodies.remove(e);
-			Character* chara = registry.characters.get(e);
-			chara->state_machine.changeState(chara->dead_state);
-		}
-	}
-
-	for (int i = 0; i < teams[TURN_CODE::NPCAI].size(); i++) {
-		const auto e = teams[TURN_CODE::NPCAI][i];
-		if (registry.health.get(e).hp == 0) {
-			teams[TURN_CODE::NPCAI].erase(teams[TURN_CODE::NPCAI].begin() + i);
-			remove_children(e);
-			registry.animations.remove(e);
-			//registry.rigidBodies.remove(e);
-			Character* chara = registry.characters.get(e);
-			chara->state_machine.changeState(chara->dead_state);
-		}
-	}
 	if (teams[TURN_CODE::NPCAI].size() > 0) {
 		int i = rand() % teams[TURN_CODE::PLAYER1].size();
 		ai.step(elapsed_ms, game_state.turn_possesion, &selected_ai, teams[TURN_CODE::PLAYER1][i]);
@@ -188,7 +184,6 @@ void GameController::moveCamera() {
 
 
 void GameController::decrementTurnTime(float elapsed_ms) {
-	// registry.remove_all_components_of(timeIndicator);
 	uint timePerTurnSec = uint(timePerTurnMs / 1000);
 	if (timePerTurnMs <= 0) {
 		Character* c = registry.characters.get(curr_selected_char);
@@ -229,7 +224,7 @@ void GameController::init_player_teams() {
 		Entity e = character.animal == ANIMAL::CAT ? createCat(character.weapon, character.starting_pos, character.health, this->window) : createDog(character.weapon, character.starting_pos, character.health, this->window);
 
 		Character* chara = registry.characters.get(e);
-		chara->init();
+		chara->init(particleSystem);
 		if (character.alignment == AI_TEAM || character.alignment == NPC_AI_TEAM) {
 			chara->state_machine.setAI(true);
 		}
@@ -297,26 +292,9 @@ void GameController::handle_collisions() {
 			Projectile& pj = registry.projectiles.get(entity);
 			if (registry.terrains.has(entity_other) && entity_other != pj.origin) {
 				registry.remove_all_components_of(entity);
-			} else if (entity_other != pj.origin) { // Projectile hit another player
-				// for (std::vector<Entity> vec : teams) {
-				// 	bool origin_isonteam = false;
-				// 	bool entity_other_isonteam = false;
-				// 	for (Entity e : vec) { //check for friendly fire, since std::find dosen't work
-				// 		if (e == pj.origin) 
-				// 			origin_isonteam = true;
-				// 		if (e == entity_other) 
-				// 			entity_other_isonteam = true;
-				// 	}
-				// 	if (origin_isonteam) {
-				// 		decreaseHealth(entity_other, registry.weapons.get(pj.origin).damage, curr_selected_char);
-				// 	}
-				// }
-
-				// Friendly fire is enabled
-				decreaseHealth(entity_other, registry.weapons.get(pj.origin).damage, curr_selected_char);
-				registry.remove_all_components_of(entity);
 			}
 		}
+
 
 		if (registry.motions.has(entity) && registry.rigidBodies.has(entity) && registry.terrains.has(entity_other)) {
 			Rigidbody& rb = registry.rigidBodies.get(entity);
@@ -325,12 +303,20 @@ void GameController::handle_collisions() {
 			if (rb.collision_normal.y == -1) {
 				motion.velocity.y = 0;
 			}
-
 		}
 	}
 
 	// Remove all collisions from this simulation step
 	registry.collisions.clear();
+}
+
+void GameController::check_out_of_screen_entities() {
+	for (Entity e : registry.projectiles.entities) {
+		Motion motion = registry.motions.get(e);
+		if (motion.position.x < 0 || motion.position.y < 0 || motion.position.x > 9000 || motion.position.y > 9000) {
+			registry.remove_all_components_of(e);
+		} 
+	}
 }
 
 void GameController::change_selected_state(Entity e, bool state) {

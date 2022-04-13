@@ -29,7 +29,8 @@ class RenderSystem {
 		"wall",
 		"ai",
 		"font",
-		"tile"
+		"tile",
+		"particle"
 	};
 
 	std::array<GLuint, shaderProgramCount> shaders; // OpenGL shader names
@@ -37,7 +38,10 @@ class RenderSystem {
 	// Textures
 	const std::array<std::string, textureCount> texturePaths = {
 		//Cat sprites
-		"cat_side_idle.png",
+		"cat_side_idle_AK.png",
+		"cat_side_idle_SG.png",
+		"cat_side_idle_GL.png",
+		"cat_side_idle_AWP.png",
 		"cat_front_idle.png",
 		"cat_walk.png",
 		"cat_jump.png",
@@ -49,7 +53,10 @@ class RenderSystem {
 		"cat_hurt.png",
 		"cat_dead.png",
 		// Dog Sprites
-		"dog_side_idle.png",
+		"dog_side_idle_AK.png",
+		"dog_side_idle_SG.png",
+		"dog_side_idle_GL.png",
+		"dog_side_idle_AWP.png",
 		"dog_front_blink.png",
 		"dog_side_blink.png",
 		"dog_front_idle.png",
@@ -114,7 +121,8 @@ class RenderSystem {
 		
 
 		"forest/forest.png",
-		"space/space.png"
+		"space/space.png",
+		"explosion.png"
 	};
 
 	std::array<GLuint, textureCount> textures; // OpenGL texture names
@@ -123,6 +131,8 @@ class RenderSystem {
 	// Vertex and index buffers
 	std::array<GLuint, geometryCount> vertexBuffers;
 	std::array<GLuint, geometryCount> indexBuffers;
+
+	std::array<Mesh, geometryCount> meshes;
 
 	// CAT IDLE
 	const int CAT_IDLE_FRAMES = 9;
@@ -170,6 +180,9 @@ public:
 	int getScreenHeight() { return this->screenHeight; }
 
 	void setTileMap(const MapSystem::Map& gameMap) { this->gameMap = gameMap; }
+
+	void drawParticles(int numParticles);
+	Mesh& getMesh(GEOMETRY_BUFFER_IDS id) { return meshes[(int)id]; };
 
 private:
 	AnimationSystem animation_system;

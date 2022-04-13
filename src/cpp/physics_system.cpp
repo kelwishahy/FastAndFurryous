@@ -74,15 +74,6 @@ void project_vertices(std::vector<vec2> box_vertices, vec2 axis, OUT float& min,
 
 }
 
-void move_back_entity(vec2* position, Rigidbody& rb, Boxcollider& collider, vec2 normal, float depth) {
-	vec2 oldpos = *position;
-	*position += normal * depth;
-	collider.deltaPos = *position - oldpos;
-	collider.transformed_required = true;
-	rb.collision_depth = depth;
-	rb.collision_normal = normal;
-}
-
 //Used to correctly orient the normals on a given edge of a box
 vec2 find_arithmetic_mean(std::vector<vec2> vertices) {
 	
@@ -212,6 +203,11 @@ void PhysicsSystem::checkForCollisions() {
 			// If this is a tile-tile collision, skip
 			if (registry.terrains.has(entity_i) && registry.terrains.has(entity_j)) continue;
 
+			// Don't do anything if the character is dead
+			if (registry.characters.has(entity_i) && registry.characters.get(entity_i)->isDead ||
+				registry.characters.has(entity_j) && registry.characters.get(entity_j)->isDead)
+				continue;
+
 			Boxcollider& collider_j = box_collider_container.components[j];
 
 			Motion* motion_j = &registry.motions.get(entity_j);
@@ -221,17 +217,25 @@ void PhysicsSystem::checkForCollisions() {
 			float depth = 9999999;
 			if (box_collision(collider_i, collider_j, normal, depth)) {
 				//If its a rigid body collision resolve right away
+				//if (registry.rigidBodies.has(entity_i)) { //More ugly stuff
+				//	Rigidbody& entity_i_rb = registry.rigidBodies.get(entity_i);
+				//	entity_i_rb.collision_normal = normal;
+				//}
+				//if (registry.rigidBodies.has(entity_j)) { //Ugly stuff on my part
+				//	Rigidbody& entity_j_rb = registry.rigidBodies.get(entity_j);
+				//	entity_j_rb.collision_normal = -normal;
+				//}
 				if (registry.rigidBodies.has(entity_i) && registry.rigidBodies.has(entity_j)) {
 					Rigidbody& entity_i_rb = registry.rigidBodies.get(entity_i);
 					Rigidbody& entity_j_rb = registry.rigidBodies.get(entity_j);
-					if (entity_i_rb.type == NORMAL && entity_j_rb.type == STATIC) {
+					if (entity_i_rb.type == NORMAL && entity_j_rb.type == STATIC || entity_i_rb.type == KINEMATIC && entity_j_rb.type == STATIC) {
 						moveBackEntity(entity_i, normal, depth);
 					}
 					else if (entity_i_rb.type == NORMAL && entity_j_rb.type == NORMAL) {
 						moveBackEntity(entity_i, normal, depth/2);
 						moveBackEntity(entity_j, -normal, depth/2);
 					}
-					else if (entity_i_rb.type == STATIC && entity_j_rb.type == NORMAL) {
+					else if (entity_i_rb.type == STATIC && entity_j_rb.type == NORMAL || entity_i_rb.type == STATIC && entity_j_rb.type == KINEMATIC) {
 						moveBackEntity(entity_j, -normal, depth);
 					}
 					transformBoxColliders();
@@ -254,6 +258,11 @@ void PhysicsSystem :: applyMotions(float elapsed_ms) {
 	{
 		Motion& motion = motion_registry.components[i];
 		Entity entity = motion_registry.entities[i];
+
+		// Don't do anything if the character is dead
+		if (registry.characters.has(entity) && registry.characters.get(entity)->isDead)
+			continue;
+
 		float step_seconds = elapsed_ms / 1000.f;
 		if (registry.rigidBodies.has(entity)) {
 			Rigidbody& rb = registry.rigidBodies.get(entity);
@@ -262,7 +271,9 @@ void PhysicsSystem :: applyMotions(float elapsed_ms) {
 				if (rb.type == KINEMATIC) {
 					//we are applying gravity forces here
 
-					applyForce(entity, GRAVITY_FORCE);
+					if (rb.gravity_affected) {
+						applyForce(entity, GRAVITY_FORCE);
+					}
 					//sum of Forces + inv(mass) + deltaTime
 					motion.velocity = rb.force_accumulator * (1.0f / rb.mass) * elapsed_ms;
 				}
@@ -307,10 +318,6 @@ void PhysicsSystem::fixed_update() {
 
 	// Check for collisions between all moving entities
 	checkForCollisions();
-
-	// you may need the following quantities to compute wall positions
-	(float)renderer->getScreenWidth(); (float)renderer->getScreenHeight();
-
 }
 
 //translation is the distance to be moved
@@ -323,6 +330,10 @@ void PhysicsSystem::translatePos(Entity e, vec2 translation) {
 		motion.position += translation;
 		collider.deltaPos = motion.position - oldpos;
 		collider.transformed_required = true;
+	} else if (registry.particles.has(e)) {
+		Motion& motion = registry.motions.get(e);
+		motion.position += translation;
+		motion.velocity.y += 2.6f;
 	}
 }
 
@@ -346,6 +357,9 @@ void  PhysicsSystem::applyForce(Entity e, glm::vec2 force) {
 void PhysicsSystem::transformChildedEntities() {
 
 	for (Entity e : registry.parentEntities.entities) {
+		// Don't do anything if the character is dead
+		if (registry.characters.has(e) && registry.characters.get(e)->isDead)
+			continue;
 
 		ChildEntities children = registry.parentEntities.get(e);
 

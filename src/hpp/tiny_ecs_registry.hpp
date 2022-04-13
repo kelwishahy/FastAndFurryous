@@ -37,7 +37,10 @@ public:
 	ComponentContainer<HealthBox> healthboxes;
 	ComponentContainer<Selected> selected;
 	ComponentContainer<OptionTimer> timer;
-
+	ComponentContainer<Grenade> grenades;
+	ComponentContainer<Timer> entityTimers;
+	ComponentContainer<Explosion> explosions;
+	ComponentContainer<Particle> particles;
 
 	ECSRegistry() {
 		registry_list.push_back(&ais);
@@ -67,6 +70,9 @@ public:
 		registry_list.push_back(&uiElements);
 		registry_list.push_back(&weapons);
 		registry_list.push_back(&timer);
+		registry_list.push_back(&entityTimers);
+		registry_list.push_back(&explosions);
+		registry_list.push_back(&particles);
 	}
 
 	void clear_all_components() {
