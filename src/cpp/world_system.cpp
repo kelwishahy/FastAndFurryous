@@ -255,9 +255,14 @@ void WorldSystem::check_for_button_presses() {
 			// 	break;
 			// }
 
-			if (tex == TEXTURE_IDS::BUTTONGAME) {
+			else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONGAME) {
+				float newtimer = 12.f;
+				for (Entity e : registry.timer.entities) {
+					OptionTimer timer = registry.timer.get(e);
+					newtimer = timer.timerC;
+				}
 				remove_components();
-				play_levels();
+				multiplayer_play_levels(newtimer);
 				break;
 				
 			}
@@ -390,8 +395,25 @@ void WorldSystem::play_options(float newtimer) {
 
 }
 
-
 void WorldSystem::play_levels() {
+	createMenu(MENU_TYPES::LEVELS, 0.75);
+
+	vec2 pos1 = set_pos(1400.f, 400.f);
+	vec2 scale = set_scale(100.f, 100.f);
+	createButton(pos1, scale, TEXTURE_IDS::BUTTONL1);
+
+	vec2 pos2 = set_pos(1000.f, 400.f);
+	createButton(pos2, scale, TEXTURE_IDS::BUTTONL2);
+
+	vec2 pos3 = set_pos(600.f, 400.f);
+	createButton(pos3, scale, TEXTURE_IDS::BUTTONL3);
+
+	cancel_button();
+
+}
+
+
+void WorldSystem::multiplayer_play_levels(float newtimer) {
 	createMenu(MENU_TYPES::LEVELS, 0.75);
 
 	vec2 pos1 = set_pos(1400.f, 400.f);
@@ -405,6 +427,8 @@ void WorldSystem::play_levels() {
 	createButton(pos3, scale,TEXTURE_IDS::BUTTONL3);
 
 	cancel_button();
+
+	createTimerCounter(newtimer, textManager);
 
 }
 

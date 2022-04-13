@@ -2,6 +2,7 @@
 #include <hpp/map.hpp>
 #include <hpp/world_init.hpp>
 #include <fstream>
+#include <sstream>
 #include <../ext/project_path.hpp>
 #include "hpp/common.hpp"
 #include "hpp/tiny_ecs_registry.hpp"
@@ -23,13 +24,9 @@ MapSystem::Map::Map(MAPS name) {
 }
 
 void MapSystem::Map::build() {
-	this->mapHeight = 18;
-	this->mapWidth = 213;
-	// this->tileScale = ceil((defaultResolution.x / 30.f) / defaultResolution.x * screenResolution.x);
 	this->tileScale = ceil(scaleToScreenResolution({ (defaultResolution.x / 30.f), (defaultResolution.x / 30.f) }).x);
-	printf("Tiles are %fx%f for map %d\n", tileScale, tileScale, (int)this->name);
-
 	readMapFromFile();
+	printf("Tiles are %fx%f for map %d\n", tileScale, tileScale, (int)this->name);
 
 	// Iterate through rows
 	for (int y = mapHeight - 1; y >= 0; y--) {
@@ -212,38 +209,60 @@ void MapSystem::Map::readMapFromFile() {
 		}
 	}
 
-	ifstream infile;
-	infile.open(std::string(PROJECT_SOURCE_DIR) + "assets/maps/" + fileName);
+	fstream f;
+	int i = 0, j = 0, n = 0;
+	string line;
+	f.open(std::string(PROJECT_SOURCE_DIR) + "assets/maps/" + fileName, ios::in);
 
-	if (!infile) {
-		std::cerr << "Unable to open file\n" << std::endl;
-		assert(false);
-	}
-	int index = 0;
-	for (int y = 0; y < mapHeight; y++) {
+	for (;;) {
+		std::getline(f, line);
+		if (!f) {  // test eof after read
+			break; 
+		}
 		tileMap.push_back({});
-		for (int x = 0; x < mapWidth; x++) {
-			tileMap[y].push_back({});
-			if (!(infile >> tileMap[y][x])) {
-				cerr << "Unexpected end of file\n" << endl;
-				exit(1);
-			}
+		std::istringstream fline(line);
+		j = 0;
 
-			if (tileMap[y][x] != 0) {
+		for (;;) {
+			int val;
+			fline >> val;
+			if (!fline) break;
+			tileMap[i].push_back(val);
+
+			if (tileMap[i][j] != 0) {
 				numTiles++;
-
+	
 				// Compute tile positions since they won't change
 				/* MATRIX TRANSFORMATIONS */
 				mat4 transformationMatrix = transform(
-					{ (0.5 + x) * tileScale, (0.5 + y) * tileScale },
+					{ (0.5 + j) * tileScale, (0.5 + i) * tileScale },
 					{ tileScale, tileScale },
 					0.f, 0);
 				
 				transformations.push_back(transformationMatrix);
 			}
+
+
+			j++;
+		}
+
+		i++;
+		if (n == 0) n = j;
+		else if (n != j) {
+			cerr << "Error line " << i << " - " << j << " values instead of " << n << endl;
 		}
 	}
-	infile.close();
+
+	if (i != n) {
+		cerr << "Error " << i << " lines instead of " << n << endl;
+	}
+
+	this->mapWidth = j;
+	this->mapHeight = i;
+
+	printf("Map is %dx%d\n", i, j);
+
+	f.close();
 
 	// Pass in tile transformation matrices
 	glGenBuffers(1, &instanceVBO);

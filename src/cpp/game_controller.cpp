@@ -7,6 +7,7 @@
 #include <glm/vec2.hpp>	
 #include <hpp/tiny_ecs_registry.hpp>
 #include <hpp/components.hpp>
+#include <hpp/audio_manager.hpp>
 
 
 
@@ -138,10 +139,12 @@ void GameController::step(float elapsed_ms) {
 		turnIndicatorText.text = "PLAYER 2'S TURN";
 		turnIndicatorPosition = turnPosition;
 		turnIndicatorPosition.x = turnIndicatorPosition.x - turnIndicatorText.scale.x / 2.f;
+		turnIndicatorText.color = blueColor;
 	} else if (game_state.turn_possesion == AI) {
 		turnIndicatorText.text = "COMPUTER'S TURN";
 		turnIndicatorPosition = turnPosition;
 		turnIndicatorPosition.x = turnIndicatorPosition.x - turnIndicatorText.scale.x / 2.f;
+		turnIndicatorText.color = blueColor;
 	} else if (game_state.turn_possesion == NPCAI) {
 		turnIndicatorText.text = "COMPUTER'S TURN";
 		turnIndicatorPosition = turnPosition;
@@ -165,7 +168,7 @@ void GameController::moveCamera() {
 	auto leftDist = abs(mousePos - camera->getPosition().x);
 
 	if (mousePosition.y > mouseDeadzone) {
-		if (camera->getCameraRight().x < 2 * screenResolution.x) {
+		if (camera->getCameraRight().x < gameMap.getMapWidth() * gameMap.getTileScale()) {
 			if (rightDist < mouseTriggerArea.x && rightDist > mouseTriggerArea.y) {
 				camera->setPosition(camera->getPosition() + vec3(3.f, 0.f, 0.f));
 			} else if (rightDist < mouseTriggerArea.y) {
@@ -256,6 +259,7 @@ void GameController::next_turn() {
 	//Turn order will ALWAYS be PLAYER1 -> PLAYER2 -> ENEMY_AI -> (not implemented) AI
 	//IF THERE IS NO ONE ON A TEAM, THE GAME CONTROLLER WILL MOVE ON TO THE NEXT TURN
 
+	audio.play_sfx(TURN_CHANGE);
 	game_state.turn_possesion += 1;
 	game_state.turn_number += 1;
 	timePerTurnMs = game_data.getTimer();
