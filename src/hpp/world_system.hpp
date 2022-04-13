@@ -87,6 +87,8 @@ private:
 
 	void init_main_menu();
 
+	WEAPON_TYPES generate_random_weapon();
+
 	Entity player_cat;
 	float current_speed;
 

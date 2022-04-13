@@ -562,3 +562,9 @@ Entity WorldSystem::cancel_button(){
 	return createButton(pos6, scale6, TEXTURE_IDS::BUTTONCANCEL);
 }
 
+WEAPON_TYPES WorldSystem::generate_random_weapon() {
+	std::srand(std::time(NULL));
+	WEAPON_TYPES weapon =(WEAPON_TYPES)(std::rand() % 4);
+	return weapon;
+}
+

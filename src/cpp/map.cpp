@@ -192,11 +192,11 @@ void MapSystem::Map::readMapFromFile() {
 			fileName = "map1.txt";
 			break;
 		}
-		case MAPS::FOREST: {
+		case MAPS::MIAMI: {
 			fileName = "map2.txt";
 			break;
 		}
-		case MAPS::SPACE: {
+		case MAPS::CYBERPUNK: {
 			fileName = "map3.txt";
 			break;
 		}
