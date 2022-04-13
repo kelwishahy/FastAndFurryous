@@ -444,4 +444,6 @@ void GameController::createTutorialText() {
 	createText(textManager, "SHOTGUNS shoot many pellets", scaleToScreenResolution({ 3400.0f, 300.0f }), scale, { 0.835, 0.352, 0.203 });
 	createText(textManager, "SNIPERS shoot straight", scaleToScreenResolution({ 3400.0f, 400.0f }), scale, { 0.317, 0.533, 0.286 });
 	createText(textManager, "GRENADE LAUNCHERS bounce and explode", scaleToScreenResolution({ 3400.0f, 500.0f }), scale, {0.466, 0.545, 0.454});
+
+	createText(textManager, "Thats it!", scaleToScreenResolution({ 3900.0f, 500.0f }), scale, { 0.333, 0.168, 0.650 });
 }
