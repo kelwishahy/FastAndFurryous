@@ -51,9 +51,16 @@ void GameController::init(GLFWwindow* window, MapSystem::Map& map, OrthographicC
 	
 	inAGame = true;
 	player_mode = PLAYER_MODE::MOVING;
+	printf("0\n");
 
-	ai.init(shooting_system, teams[TURN_CODE::NPCAI]);
+	if (teams[TURN_CODE::NPCAI].size() > 0) {
+		printf("1\n");
+		ai.init(shooting_system, teams[TURN_CODE::NPCAI]);
+		printf("2\n");
 
+		selected_ai = teams[TURN_CODE::NPCAI][0];
+	}
+	
 	ui.init(textManager);
 
 	if (game_data.tutorial) {
@@ -245,12 +252,12 @@ void GameController::init_player_teams() {
 			player1_team.push_back(e);
 		} else if (character.alignment == TEAM::PLAYER_2_TEAM) {
 			player2_team.push_back(e);
-		} else if (character.alignment == TEAM::AI_TEAM) {
-			registry.ais.emplace(e);
-			ai_team.push_back(e);
-		} else {
+		} else if (character.alignment == TEAM::NPC_AI_TEAM) {
 			registry.ais.emplace(e);
 			npcai_team.push_back(e);
+		} else {
+			registry.ais.emplace(e);
+			ai_team.push_back(e);
 		}
 	}
 
@@ -301,14 +308,6 @@ void GameController::next_turn() {
 			}
 		}
 	}
-	//if (game_state.turn_possesion == TURN_CODE::NPCAI) {
-	//	change_selected_state
-	//}
-	//else {
-	//	if (!teams[game_state.turn_possesion].empty()) {
-	//		change_curr_selected_char(teams[game_state.turn_possesion][0]);//supposed to be the first player on each team
-	//	}
-	//}
 	
 	
 }
