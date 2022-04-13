@@ -20,8 +20,8 @@ GameController::~GameController() {
 }
 
 //initialize stuff here
-void GameController::init(GLFWwindow* window, MapSystem::Map& map, OrthographicCamera& camera, TextManager& textManager, Game game, 
-	ParticleSystem& particleSystem) {
+void GameController::init(GLFWwindow* window, MapSystem::Map& map, OrthographicCamera& camera, TextManager& textManager, Game game,
+                          ParticleSystem& particleSystem) {
 	this->window = window;
 	this->gameMap = map;
 	this->camera = &camera;
@@ -75,6 +75,9 @@ void GameController::init(GLFWwindow* window, MapSystem::Map& map, OrthographicC
 void GameController::step(float elapsed_ms) {
 	//While a game is happening make sure the players are controlling from here
 	glfwSetWindowUserPointer(window, this);
+
+	if (gameOver) return;
+
 	// Pan camera based on mouse position
 	moveCamera();
 
@@ -134,6 +137,18 @@ void GameController::step(float elapsed_ms) {
 			chara->state_machine.getCurrentState()->set_D_key_state(glfwGetKey(window, GLFW_KEY_D));
 		}
 	}
+
+	// Check if the game is over
+	float centerScreen = camera->getCameraRight().x - camera->getPosition().x;
+	vec2 winPos = scaleToScreenResolution({ centerScreen, 1080.f / 2 });
+	if (teams[playingTeams[0]].size() < 1 && teams[playingTeams[1]].size() >= 1) {
+		gameOver = true;
+		createText(textManager, playingTeamNames[1] + " Wins!", winPos, turnIndicatorScale, redColor);
+	} else if (teams[playingTeams[0]].size() >= 1 && teams[playingTeams[1]].size() < 1) {
+		gameOver = true;
+		createText(textManager, playingTeamNames[0] + " Wins!", winPos, turnIndicatorScale, redColor);
+	}
+
 
 	shooting_system.step(elapsed_ms);
 	ui.step(elapsed_ms);
@@ -269,6 +284,23 @@ void GameController::init_player_teams() {
 	teams.push_back(npcai_team);
 	curr_selected_char = player1_team[0];
 	change_curr_selected_char(player1_team[0]);
+
+	if (player1_team.size() > 0) {
+		playingTeams.push_back(TURN_CODE::PLAYER1);
+		playingTeamNames.push_back("Player 1");
+	} 
+	if (player2_team.size() > 0) {
+		playingTeams.push_back(TURN_CODE::PLAYER2);
+		playingTeamNames.push_back("Player 2");
+	} 
+	if (ai_team.size() > 0) {
+		playingTeams.push_back(TURN_CODE::AI);
+		playingTeamNames.push_back("Computer");
+	}
+	 if (npcai_team.size() > 0) {
+		playingTeams.push_back(TURN_CODE::NPCAI);
+		playingTeamNames.push_back("Computer");
+	}
 }
 
 void GameController::next_turn() {

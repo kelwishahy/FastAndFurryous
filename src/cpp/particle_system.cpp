@@ -44,7 +44,7 @@ void ParticleSystem::emit(int numParticles, vec2 position, vec2 velocity) {
 		auto& motion = registry.motions.get(particleEnt);
 
 		// Increment particle index
-		particleIndex = (particleIndex < MAX_PARTICLES - 1) ? particleIndex + 1 : 0;
+		particleIndex = ++particleIndex % MAX_PARTICLES;
 
 		// Something went wrong, this particle is still in use
 		if (particle.active) {

@@ -26,8 +26,8 @@ public:
 	// Releases all associated resources
 	~GameController();
 
-	void init(GLFWwindow* window, MapSystem::Map& map, OrthographicCamera& camera, TextManager& textManager, Game game_data, 
-		ParticleSystem& particleSystem);
+	void init(GLFWwindow* window, MapSystem::Map& map, OrthographicCamera& camera, TextManager& textManager, Game game_data,
+	          ParticleSystem& particleSystem);
 
 	// Steps the game ahead by ms milliseconds
 	void step(float elapsed_ms);
@@ -37,6 +37,7 @@ public:
 
 	bool inAGame;
 	bool quit = false;
+	bool gameOver = false;
 
 	GLFWwindow* window{};
 
@@ -51,6 +52,9 @@ public:
 		NPCAI,
 		END
 	};
+
+	std::vector<GameController::TURN_CODE> playingTeams;
+	std::vector<std::string> playingTeamNames;
 
 	struct GameState {
 		float timer = 0;

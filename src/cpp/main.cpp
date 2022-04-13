@@ -37,11 +37,6 @@ START:
 
 	while (!glfwWindowShouldClose(window)) { // TO-DO: Make this loop condition depend on the world state, like in assignment template
 
-		if (world.quit) {
-			registry.clear_all_components();
-			goto START;
-		}
-
 		if (WorldSystem::pause_flag){
 			glfwPollEvents();
 			time = Clock::now();
@@ -60,6 +55,11 @@ START:
 
 		renderer.draw(elapsed_ms, world);
 		glfwSwapBuffers(window);}
+
+		if (world.quit) {
+			registry.clear_all_components();
+			goto START;
+		}
 	}
 
 	return EXIT_SUCCESS;
