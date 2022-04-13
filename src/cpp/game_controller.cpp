@@ -91,21 +91,21 @@ void GameController::step(float elapsed_ms) {
 
 		for (int i = 0; i < teams[TURN_CODE::PLAYER1].size(); i++) {
 			auto e = teams[TURN_CODE::PLAYER1][i];
-			if (registry.health.get(e).hp == 0) {
+			if (registry.health.get(e).hp <= 0) {
 				teams[TURN_CODE::PLAYER1].erase(teams[TURN_CODE::PLAYER1].begin() + i);
 			}
 		}
 
 		for (int i = 0; i < teams[TURN_CODE::PLAYER2].size(); i++) {
 			const auto e = teams[TURN_CODE::PLAYER2][i];
-			if (registry.health.get(e).hp == 0) {
+			if (registry.health.get(e).hp <= 0) {
 				teams[TURN_CODE::PLAYER2].erase(teams[TURN_CODE::PLAYER2].begin() + i);
 			}
 		}
 
 		for (int i = 0; i < teams[TURN_CODE::NPCAI].size(); i++) {
 			const auto e = teams[TURN_CODE::NPCAI][i];
-			if (registry.health.get(e).hp == 0) {
+			if (registry.health.get(e).hp <= 0) {
 				teams[TURN_CODE::NPCAI].erase(teams[TURN_CODE::NPCAI].begin() + i);
 			}
 		}
@@ -293,10 +293,20 @@ void GameController::next_turn() {
 			}
 			else {
 				if (game_state.turn_possesion == TURN_CODE::PLAYER1) {
-					change_curr_selected_char(teams[game_state.turn_possesion][game_state.p1_team_curr_player]);//supposed to be the first player on each team
+					if (game_state.p1_team_curr_player >= (int)teams[game_state.turn_possesion].size()) {
+						change_curr_selected_char(teams[game_state.turn_possesion][0]);
+					}
+					else {
+						change_curr_selected_char(teams[game_state.turn_possesion][game_state.p1_team_curr_player]);
+					}
 				}
 				else if (game_state.turn_possesion == TURN_CODE::PLAYER2) {
-					change_curr_selected_char(teams[game_state.turn_possesion][game_state.p2_team_curr_player]);//supposed to be the first player on each team
+					if (game_state.p2_team_curr_player >= (int)teams[game_state.turn_possesion].size()) {
+						change_curr_selected_char(teams[game_state.turn_possesion][0]);
+					}
+					else {
+						change_curr_selected_char(teams[game_state.turn_possesion][game_state.p2_team_curr_player]);
+					}
 				}
 			}
 		}
