@@ -16,13 +16,12 @@ enum TURN_CODE {
 struct Blackboard {
 	Character* c;
 	Entity selected_ai;
-	Motion* motion;
+	//Motion* motion;
 	Entity* player;
 	float timer;
 	int turn;
 	int ai_index;
 	bool done_move;
-	bool left;
 	bool jump;
 	bool friendly = false;
 };
@@ -84,13 +83,6 @@ class DidTimeEnd : public Node {
 	}
 };
 
-class LeftorRight : public Node {
-	bool run() override {
-		return blackboard->left;
-	}
-
-};
-
 class CheckShoot : public Node {
 	bool run() override {
 		
@@ -124,25 +116,23 @@ class Charge : public Node {
 	bool run() override {
 		Motion& player_motion = registry.motions.get(*blackboard->player);
 
-		if (abs(blackboard->motion->position.x - player_motion.position.x) > 50.f) {
-			if (blackboard->motion->position.x < player_motion.position.x) {
-				if (blackboard->jump) {
-					blackboard->c->state_machine.changeState(blackboard->c->airborne_move_right);
-					blackboard->jump = false;
-				}
-				else {
-					blackboard->c->state_machine.changeState(blackboard->c->move_right_state);
-				}
+		if (player_motion.position.x > screenResolution.x) {
+			if (blackboard->jump) {
+				blackboard->c->state_machine.changeState(blackboard->c->airborne_move_right);
+				blackboard->jump = false;
 			}
 			else {
-				if (blackboard->jump) {
-					blackboard->c->state_machine.changeState(blackboard->c->airborne_move_left);
-					blackboard->jump = false;
+				blackboard->c->state_machine.changeState(blackboard->c->move_right_state);
+			}
+		}
+		else {
+			if (blackboard->jump) {
+				blackboard->c->state_machine.changeState(blackboard->c->airborne_move_left);
+				blackboard->jump = false;
 
-				}
-				else {
-					blackboard->c->state_machine.changeState(blackboard->c->move_left_state);
-				}
+			}
+			else {
+				blackboard->c->state_machine.changeState(blackboard->c->move_left_state);
 			}
 		}
 
@@ -153,7 +143,7 @@ class Charge : public Node {
 class RunAway : public Node {
 	bool run() override {
 		Motion& player_motion = registry.motions.get(*blackboard->player);
-		if (blackboard->motion->position.x < player_motion.position.x) {
+		if (player_motion.position.x > screenResolution.x) {
 			if (blackboard->jump) {
 				blackboard->c->state_machine.changeState(blackboard->c->airborne_move_left);
 				blackboard->jump = false;
@@ -187,10 +177,10 @@ class EndTurn : public Node {
 
 class Shoot : public Node {
 	bool run() override {
-		//blackboard->c->state_machine.changeState(blackboard->c->shooting_state);
-		if (!blackboard->friendly) {
+		blackboard->c->state_machine.changeState(blackboard->c->shooting_state);
+		/*if (!blackboard->friendly) {
 			ShootingSystem::shoot(blackboard->selected_ai);
-		}
+		}*/
 		blackboard->c->state_machine.getCurrentState()->next_turn = true;
 		blackboard->ai_index++;
 

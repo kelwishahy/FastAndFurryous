@@ -16,15 +16,14 @@ void AISystem::step(float elapsed_ms, int turn, Entity *selected_ai, Entity last
 	}
 	if (blackboard->turn == TURN_CODE::PLAYER1) {
 		//blackboard->shot = false
-		blackboard->timer = 4000.f;
+		blackboard->timer = 3000.f;
 		checkJump();
-
 	}
 
 	if (blackboard->turn == TURN_CODE::NPCAI) {
-		change_to_next_ai();
+		change_to_next_ai(selected_ai);
 		decrementTimer(elapsed_ms);
-		allyNearby();
+		//allyNearby();
 		//handle_collisions();
 	}
 	//checkJump();
@@ -59,7 +58,6 @@ void AISystem::init(ShootingSystem& shootingSystem, std::vector<Entity> team) {
 	auto moveLeft = new MoveLeft;
 	auto timeEnd = new DidTimeEnd;
 	auto shoot = new Shoot;
-	auto leftRight = new LeftorRight;
 
 	auto hpLower = new HpLower;
 	auto charge = new Charge;
@@ -79,7 +77,7 @@ double AISystem::calculateDistance(vec2 v1, vec2 v2) {
 	return sqrt(pow(v1.x - v2.x, 2) + pow(v1.y - v2.y, 2));
 }
 
-void AISystem::change_to_next_ai()
+void AISystem::change_to_next_ai(Entity *selected_ai)
 {
 	// change the selected ai to move 
 	if (blackboard->ai_index == ai_team.size()) {
@@ -91,8 +89,11 @@ void AISystem::change_to_next_ai()
 	blackboard->done_move = false;
 	//blackboard->jump = false;
 	blackboard->friendly = false;
-	Motion& motion = registry.motions.get(blackboard->selected_ai);
-	blackboard->motion = &motion;
+	//Motion& motion = registry.motions.get(blackboard->selected_ai);
+	//blackboard->motion = &motion;
+
+	*selected_ai = blackboard->selected_ai;
+
 }
 
 void AISystem::decrementTimer(float elapsed_ms)
@@ -124,44 +125,43 @@ void AISystem::handle_collisions() {
 	}
 }
 
-void AISystem::allyNearby() {
-	WeaponBase& weapon = registry.weapons.get(blackboard->selected_ai);
-	Motion& motion = *blackboard->motion;
-	//SHOOT_ORIENTATION orientation = (registry.animations.get(blackboard->selected_ai).facingLeft) ? SHOOT_ORIENTATION::LEFT : SHOOT_ORIENTATION::RIGHT;
-
-	float x_end;
-	float x_begin;
-	//right facing
-	if (!registry.animations.get(blackboard->selected_ai).facingLeft) {
-		x_end = motion.position.x + 100.f;
-		//x_begin = motion.position.x + weapon.distance - weapon.area;
-		
-		for (Entity entity : ai_team) {
-			Motion& other_motion = registry.motions.get(entity);
-			if (blackboard->selected_ai == entity) {
-				continue;
-			}
-			if (x_end > other_motion.position.x) {
-				blackboard->friendly = true;
-			}
-		}
-	}
-	//left facing
-	else {
-		x_end = motion.position.x - 100.f;
-		//x_begin = motion.position.x - weapon.distance + weapon.area;
-		for (Entity entity : ai_team) {
-			if (blackboard->selected_ai == entity) {
-				continue;
-			}
-			Motion& other_motion = registry.motions.get(entity);
-
-			if (x_end < other_motion.position.x) {
-				blackboard->friendly = true;
-			}
-		}
-	}
-
-}
+//void AISystem::allyNearby() {
+//	WeaponBase& weapon = registry.weapons.get(blackboard->selected_ai);
+//	Motion& motion = *blackboard->motion;
+//
+//	float x_end;
+//	//right facing
+//	if (!registry.animations.get(blackboard->selected_ai).facingLeft) {
+//		x_end = motion.position.x + 100.f;
+//		//x_begin = motion.position.x + weapon.distance - weapon.area;
+//		
+//		for (Entity entity : ai_team) {
+//			Motion& other_motion = registry.motions.get(entity);
+//			if (blackboard->selected_ai == entity) {
+//				continue;
+//			}
+//			if (x_end > other_motion.position.x) {
+//				blackboard->friendly = true;
+//				break;
+//			}
+//		}
+//	}
+//	//left facing
+//	else {
+//		x_end = motion.position.x - 100.f;
+//		//x_begin = motion.position.x - weapon.distance + weapon.area;
+//		for (Entity entity : ai_team) {
+//			if (blackboard->selected_ai == entity) {
+//				continue;
+//			}
+//			Motion& other_motion = registry.motions.get(entity);
+//
+//			if (x_end < other_motion.position.x) {
+//				blackboard->friendly = true;
+//			}
+//		}
+//	}
+//
+//}
 
 

@@ -10,7 +10,7 @@ public:
 	void step(float elapsed_ms, int turn, Entity *selected_ai, Entity last_player);
 	void init(ShootingSystem& shootingSystem, std::vector<Entity> team);
 	double calculateDistance(vec2 v1, vec2 v2);
-	void change_to_next_ai();
+	void change_to_next_ai(Entity *selected_ai);
 	void decrementTimer(float elapsed_ms);
 	void checkJump();
 	void allyNearby();
