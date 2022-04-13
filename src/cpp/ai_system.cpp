@@ -10,33 +10,25 @@ using namespace glm;
 void AISystem::step(float elapsed_ms, int turn, Entity *selected_ai, Entity last_player) {
 
 	blackboard->turn = turn;
+	blackboard->player = &last_player;
 	if (ai_team.size() < 1) {
 		return;
 	}
 	if (blackboard->turn == TURN_CODE::PLAYER1) {
 		//blackboard->shot = false
-		blackboard->timer = 3000.f;
-		bool randbool = rand() & 1;
-		blackboard->left = randbool;
-		printf("left is %i \n", blackboard->left);
+		blackboard->timer = 4000.f;
+		checkJump();
 
 	}
+
 	if (blackboard->turn == TURN_CODE::NPCAI) {
 		change_to_next_ai();
 		decrementTimer(elapsed_ms);
-		//*selected_ai = blackboard->selected_ai;
-		//if ((calculateDistance(blackboard->prev_pos, blackboard->motion->position) > 200)) {
-		//	blackboard->motion->velocity.x = 0.f;
-		//	blackboard->motion->velocity.y = 350.f;
-		//	if (blackboard->shot) {
-		//		ShootingSystem::shoot(*blackboard->entity);
-		//	}
-		//	//blackboard->shot = true;
-		//	//blackboard->shootingSystem->shoot(*blackboard->entity);
-		//	blackboard->turn = TURN_CODE::PLAYER1;
-		//}
+		allyNearby();
+		//handle_collisions();
 	}
 	//checkJump();
+
 	if (!blackboard->c->state_machine.getCurrentState()->next_turn) {
 		decisionTree->traverse();
 	}
@@ -47,6 +39,7 @@ void AISystem::init(ShootingSystem& shootingSystem, std::vector<Entity> team) {
 	this->shootingSystem = shootingSystem;
 	this->gunshot = gunshot;
 	ai_team = team;
+
 	// Decision tree
 	blackboard = new Blackboard;
 	blackboard->timer = 3000.f;
@@ -67,15 +60,19 @@ void AISystem::init(ShootingSystem& shootingSystem, std::vector<Entity> team) {
 	auto timeEnd = new DidTimeEnd;
 	auto shoot = new Shoot;
 	auto leftRight = new LeftorRight;
+
+	auto hpLower = new HpLower;
+	auto charge = new Charge;
+	auto runaway = new RunAway;
 	// Build the tree
 	decisionTree->addFalseConditionNode(endTurn); // If not ai turn, skip
 	decisionTree->addTrueConditionNode(timeEnd); // If ai turn, check if moving timer has ended
 
-	timeEnd->addFalseConditionNode(leftRight);
+	timeEnd->addFalseConditionNode(hpLower);
 	timeEnd->addTrueConditionNode(shoot);
 
-	leftRight->addFalseConditionNode(moveLeft);
-	leftRight->addTrueConditionNode(moveRight);
+	hpLower->addFalseConditionNode(charge);
+	hpLower->addTrueConditionNode(runaway);
 }
 
 double AISystem::calculateDistance(vec2 v1, vec2 v2) {
@@ -92,10 +89,10 @@ void AISystem::change_to_next_ai()
 	Character* character = registry.characters.get(ai_team[blackboard->ai_index]);
 	blackboard->c = character;
 	blackboard->done_move = false;
-	
-	//blackboard->timer = 3000.f;
-	//*blackboard->c = &registry.characters.get(ai_team[0]);
-	// position where the ai ended its turn
+	//blackboard->jump = false;
+	blackboard->friendly = false;
+	Motion& motion = registry.motions.get(blackboard->selected_ai);
+	blackboard->motion = &motion;
 }
 
 void AISystem::decrementTimer(float elapsed_ms)
@@ -105,6 +102,66 @@ void AISystem::decrementTimer(float elapsed_ms)
 	if (blackboard->timer <= 0.f) {
 		blackboard->done_move = true;
 	}
+}
+
+void AISystem::checkJump() {
+	bool randbool = rand() & 1;
+	blackboard->jump = randbool;
+}
+
+void AISystem::handle_collisions() {
+	auto& collisionsRegistry = registry.collisions;
+	for (uint i = 0; i < collisionsRegistry.components.size(); i++) {
+		// The entity and its collider
+		Entity entity = collisionsRegistry.entities[i];
+		Entity entity_other = collisionsRegistry.components[i].other;
+
+		if (registry.ais.has(entity)) {
+			if (registry.ais.has(entity_other)) {
+				blackboard->jump = true;
+			}
+		}
+	}
+}
+
+void AISystem::allyNearby() {
+	WeaponBase& weapon = registry.weapons.get(blackboard->selected_ai);
+	Motion& motion = *blackboard->motion;
+	//SHOOT_ORIENTATION orientation = (registry.animations.get(blackboard->selected_ai).facingLeft) ? SHOOT_ORIENTATION::LEFT : SHOOT_ORIENTATION::RIGHT;
+
+	float x_end;
+	float x_begin;
+	//right facing
+	if (!registry.animations.get(blackboard->selected_ai).facingLeft) {
+		x_end = motion.position.x + 100.f;
+		//x_begin = motion.position.x + weapon.distance - weapon.area;
+		
+		for (Entity entity : ai_team) {
+			Motion& other_motion = registry.motions.get(entity);
+			if (blackboard->selected_ai == entity) {
+				continue;
+			}
+			if (x_end > other_motion.position.x) {
+				blackboard->friendly = true;
+			}
+		}
+	}
+	//left facing
+	else {
+		x_end = motion.position.x - 100.f;
+		//x_begin = motion.position.x - weapon.distance + weapon.area;
+		for (Entity entity : ai_team) {
+			if (blackboard->selected_ai == entity) {
+				continue;
+			}
+			Motion& other_motion = registry.motions.get(entity);
+
+			if (x_end < other_motion.position.x) {
+				blackboard->friendly = true;
+			}
+		}
+	}
+
 }
 
 

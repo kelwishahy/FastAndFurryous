@@ -12,6 +12,9 @@ public:
 	double calculateDistance(vec2 v1, vec2 v2);
 	void change_to_next_ai();
 	void decrementTimer(float elapsed_ms);
+	void checkJump();
+	void allyNearby();
+	void handle_collisions();
 
 private:
 	float jumpdelay;

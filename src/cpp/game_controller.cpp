@@ -302,7 +302,7 @@ void GameController::next_turn() {
 		}
 	}
 	//if (game_state.turn_possesion == TURN_CODE::NPCAI) {
-	//	change_to_next_char_on_team();
+	//	change_selected_state
 	//}
 	//else {
 	//	if (!teams[game_state.turn_possesion].empty()) {
