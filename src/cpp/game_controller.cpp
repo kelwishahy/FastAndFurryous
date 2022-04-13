@@ -164,7 +164,7 @@ void GameController::moveCamera() {
 	auto leftDist = abs(mousePos - camera->getPosition().x);
 
 	if (mousePosition.y > mouseDeadzone) {
-		if (camera->getCameraRight().x < 2 * screenResolution.x) {
+		if (camera->getCameraRight().x < gameMap.getMapWidth() * gameMap.getTileScale()) {
 			if (rightDist < mouseTriggerArea.x && rightDist > mouseTriggerArea.y) {
 				camera->setPosition(camera->getPosition() + vec3(3.f, 0.f, 0.f));
 			} else if (rightDist < mouseTriggerArea.y) {
