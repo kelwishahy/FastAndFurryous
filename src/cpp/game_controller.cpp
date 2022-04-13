@@ -305,9 +305,6 @@ void GameController::next_turn() {
 				else if (game_state.turn_possesion == TURN_CODE::PLAYER2) {
 					change_curr_selected_char(teams[game_state.turn_possesion][game_state.p2_team_curr_player]);//supposed to be the first player on each team
 				}
-				else if (game_state.turn_possesion == TURN_CODE::AI) {
-					change_curr_selected_char(teams[game_state.turn_possesion][game_state.npc_team_curr_player]);//supposed to be the first player on each team
-				}
 			}
 		}
 	}
@@ -417,10 +414,12 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 }
 
 void GameController::on_mouse_move(vec2 mouse_pos) {
-	this->mousePosition = mouse_pos;
-	Character* c = registry.characters.get(curr_selected_char);
-	if (!c->state_machine.isAI()) {
-		c->state_machine.getCurrentState()->on_mouse_move(mouse_pos);
+	if (inAGame) {
+		this->mousePosition = mouse_pos;
+		Character* c = registry.characters.get(curr_selected_char);
+		if (!c->state_machine.isAI()) {
+			c->state_machine.getCurrentState()->on_mouse_move(mouse_pos);
+		}
 	}
 }
 //
