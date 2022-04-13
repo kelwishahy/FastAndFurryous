@@ -326,6 +326,7 @@ struct Timer {
 
 struct Explosion
 {
+	Entity origin;
 	float damage = 37.0f;
 };
 

@@ -185,7 +185,6 @@ void CharacterDamageState::step(float elapsed_ms) {
 			}
 			registry.characters.get(character)->play_hurt_sfx();
 			hurt_timer = 1500.0f;
-			next_turn = true;                             //only affects if it explosion hits itself
 			registry.boxColliders.remove(entity);
 		}
 	}
@@ -490,6 +489,27 @@ void CharacterShootingState::doChecks() {
 	}
 }
 
+void CharacterShootingState::handle_explosion_collision() {
+	auto& collisionsRegistry = registry.collisions;
+	for (uint i = 0; i < collisionsRegistry.components.size(); i++) {
+		// The entity and its collider
+		Entity entity = collisionsRegistry.entities[i];
+		Entity entity_other = collisionsRegistry.components[i].other;
+
+		if (registry.explosions.has(entity)) {
+			Explosion explosion = registry.explosions.get(entity); //you can hit yourself with an explosion
+			if (entity_other == character) {
+				Character* c = registry.characters.get(character);
+				c->state_machine.changeState(c->damage_state);
+				if (explosion.origin == character) {
+					next_turn = true;
+				}
+			}
+		}
+	}
+}
+
+
 void CharacterShootingState::handleGrenadeBounce() { //abusing the statemachines a little bit
 	auto& collisionsRegistry = registry.collisions;
 	for (uint i = 0; i < collisionsRegistry.components.size(); i++) {
@@ -506,7 +526,7 @@ void CharacterShootingState::handleGrenadeBounce() { //abusing the statemachines
 					pj.bounce_cooldown = pj.COOLDOWN;
 				}
 				if (pj.bounces < 0) {
-					createExplosion(275.f, motion.position + vec2{0, -100});
+					createExplosion(275.f, motion.position + vec2{0, -100}, pj.origin);
 					registry.remove_all_components_of(entity);
 					registry.grenades.remove(entity); //????? WHY ??????? WHY DOES THE REGISTRY NEED THIS
 				} else {

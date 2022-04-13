@@ -589,7 +589,7 @@ Entity createGrenade(Entity originE, vec2 force) {
 	return entity;
 }
 
-Entity createExplosion(float radius, vec2 position) {
+Entity createExplosion(float radius, vec2 position, Entity origin) {
 
 	const auto entity = Entity();
 
@@ -618,7 +618,8 @@ Entity createExplosion(float radius, vec2 position) {
 	timer.time = 1000.f;
 	timer.counter = 900.f;
 
-	registry.explosions.emplace(entity);
+	Explosion& explode = registry.explosions.emplace(entity);
+	explode.origin = origin;
 
 	return entity;
 }

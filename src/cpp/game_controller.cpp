@@ -35,7 +35,6 @@ void GameController::init(GLFWwindow* window, MapSystem::Map& map, OrthographicC
 
 
 	//Init game metadata
-	game_state.turn_number += 1;
 	game_state.turn_possesion = TURN_CODE::PLAYER1;
 
 	//Building the stage via json
@@ -71,7 +70,6 @@ void GameController::init(GLFWwindow* window, MapSystem::Map& map, OrthographicC
 void GameController::step(float elapsed_ms) {
 	//While a game is happening make sure the players are controlling from here
 	glfwSetWindowUserPointer(window, this);
-
 	// Pan camera based on mouse position
 	moveCamera();
 
@@ -113,7 +111,24 @@ void GameController::step(float elapsed_ms) {
 		if (chara->state_machine.getCurrentState()->next_turn) {
 			chara->state_machine.getCurrentState()->next_turn = false;
 			chara->state_machine.changeState(chara->idle_state);
-
+			if (game_state.turn_possesion == TURN_CODE::PLAYER1) {
+				game_state.p1_team_curr_player += 1;
+				if (game_state.p1_team_curr_player >= (int)teams[game_state.turn_possesion].size()) {
+					game_state.p1_team_curr_player = 0;
+				}
+			}
+			else if (game_state.turn_possesion == TURN_CODE::PLAYER2) {
+				game_state.p2_team_curr_player += 1;
+				if (game_state.p2_team_curr_player >= (int)teams[game_state.turn_possesion].size()) {
+					game_state.p2_team_curr_player = 0;
+				}
+			}
+			else if (game_state.turn_possesion == TURN_CODE::AI) {
+				game_state.npc_team_curr_player += 1;
+				if (game_state.npc_team_curr_player >= (int)teams[game_state.turn_possesion].size()) {
+					game_state.npc_team_curr_player = 0;
+				}
+			}
 			next_turn();
 			chara->state_machine.getCurrentState()->set_A_key_state(glfwGetKey(window, GLFW_KEY_A));
 			chara->state_machine.getCurrentState()->set_D_key_state(glfwGetKey(window, GLFW_KEY_D));
@@ -259,7 +274,6 @@ void GameController::next_turn() {
 	//Turn order will ALWAYS be PLAYER1 -> PLAYER2 -> ENEMY_AI -> (not implemented) AI
 	//IF THERE IS NO ONE ON A TEAM, THE GAME CONTROLLER WILL MOVE ON TO THE NEXT TURN
 
-	audio.play_sfx(TURN_CHANGE);
 	game_state.turn_possesion += 1;
 	game_state.turn_number += 1;
 	timePerTurnMs = game_data.getTimer();
@@ -274,10 +288,27 @@ void GameController::next_turn() {
 	}
 	if (game_state.turn_possesion == TURN_CODE::NPCAI) {
 		change_curr_selected_char(selected_ai);
+		audio.play_sfx(TURN_CHANGE);
 	}
 	else {
 		if (!teams[game_state.turn_possesion].empty()) {
-			change_curr_selected_char(teams[game_state.turn_possesion][0]);//supposed to be the first player on each team
+			if (!game_data.tutorial) {
+				audio.play_sfx(TURN_CHANGE);
+			}
+			if (game_data.tutorial) {
+				change_curr_selected_char(teams[game_state.turn_possesion][0]);
+			}
+			else {
+				if (game_state.turn_possesion == TURN_CODE::PLAYER1) {
+					change_curr_selected_char(teams[game_state.turn_possesion][game_state.p1_team_curr_player]);//supposed to be the first player on each team
+				}
+				else if (game_state.turn_possesion == TURN_CODE::PLAYER2) {
+					change_curr_selected_char(teams[game_state.turn_possesion][game_state.p2_team_curr_player]);//supposed to be the first player on each team
+				}
+				else if (game_state.turn_possesion == TURN_CODE::AI) {
+					change_curr_selected_char(teams[game_state.turn_possesion][game_state.npc_team_curr_player]);//supposed to be the first player on each team
+				}
+			}
 		}
 	}
 	
