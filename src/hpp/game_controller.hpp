@@ -36,6 +36,7 @@ public:
 	bool is_over()const;
 
 	bool inAGame;
+	bool quit;
 
 	GLFWwindow* window{};
 
@@ -72,8 +73,7 @@ private:
 	TextManager textManager;
 	Game game_data;
 	ParticleSystem* particleSystem;
-	// add option timer
-	// OptionTimer timer;
+	Entity quitButton;
 
 	glm::vec2 mousePosition{};
 	float mouseDeadzone{};

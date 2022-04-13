@@ -65,6 +65,11 @@ void GameController::init(GLFWwindow* window, MapSystem::Map& map, OrthographicC
 
 	timerScale = scaleToScreenResolution({ 1.5f, 1.5f }).x;
 	timeIndicator = createText(textManager, "", scaleToScreenResolution({ 2 * defaultResolution.x / 4.f + this->camera->getPosition().x, 110.0f }), timerScale, { 0.172f, 0.929f, 0.286f });
+
+	//Quit button
+	vec2 pos = scaleToScreenResolution({this->camera->getCameraRight().x - 100.f, 20.f});
+	vec2 scale = scaleToScreenResolution(vec2(200.f, 40.f));
+	quitButton = createButton(pos, scale, TEXTURE_IDS::BUTTON4);
 }
 
 void GameController::step(float elapsed_ms) {
@@ -72,6 +77,9 @@ void GameController::step(float elapsed_ms) {
 	glfwSetWindowUserPointer(window, this);
 	// Pan camera based on mouse position
 	moveCamera();
+
+	auto& quitButtonPos = registry.motions.get(quitButton).position;
+	quitButtonPos = scaleToScreenResolution({ this->camera->getCameraRight().x - 100.f, 20.f });
 
 	for (Entity e : registry.entityTimers.entities) {
 		Timer& timer = registry.entityTimers.get(e);
@@ -423,13 +431,16 @@ void GameController::on_mouse_move(vec2 mouse_pos) {
 //
 void GameController::on_mouse_click(int button, int action, int mods) {
 
+	Clickable qButton = registry.buttons.get(quitButton);
+	if (mousePosition.x > qButton.vertecies[0].x && mousePosition.x < qButton.vertecies[1].x && mousePosition.y > qButton.vertecies[0].y && mousePosition.y < qButton.vertecies[3].y) {
+		quit = true;
+		inAGame = false;
+		return;
+	}
+
 	Character* c = registry.characters.get(curr_selected_char);
 	if (!c->state_machine.isAI()) {
 		c->state_machine.getCurrentState()->on_mouse_click(button, action, mods);
-	}
-
-	if (action == GLFW_PRESS) {
-		printf("In A Game");
 	}
 }
 

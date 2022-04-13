@@ -215,45 +215,6 @@ void WorldSystem::check_for_button_presses() {
 
 				break;
 			}
-			// else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONLB) {
-
-			// 	float newtimer;
-			// 	for (Entity e : registry.timer.entities) {
-			// 		OptionTimer timer = registry.timer.get(e);
-			// 		newtimer = timer.timerC;
-			// 	}
-
-			// 	int newplayers;
-			// 	for (Entity e : registry.players.entities) {
-			// 		OptionPlayers players = registry.players.get(e);
-			// 		newplayers = decreasePlayers(e, 1);
-			// 	}
-
-			// 	remove_components();
-			// 	play_options(newtimer, newplayers);
-
-			// 	break;
-			// }
-
-			// else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONRB) {
-
-			// 	float newtimer;
-			// 	for (Entity e : registry.timer.entities) {
-			// 		OptionTimer timer = registry.timer.get(e);
-			// 		newtimer = timer.timerC;
-			// 	}
-
-			// 	int newplayers;
-			// 	for (Entity e : registry.players.entities) {
-			// 		OptionPlayers players = registry.players.get(e);
-			// 		newplayers = increasePlayers(e, 1);
-			// 	}
-
-			// 	remove_components();
-
-			// 	play_options(newtimer, newplayers);
-			// 	break;
-			// }
 
 			else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONGAME) {
 				float newtimer = 12.f;
@@ -428,8 +389,9 @@ void WorldSystem::multiplayer_play_levels(float newtimer) {
 
 	cancel_button();
 
-	createTimerCounter(newtimer, textManager);
-
+	auto entity = Entity();
+	OptionTimer& timer0 = registry.timer.emplace(entity);
+	timer0.timerC = newtimer;
 }
 
 Game WorldSystem::level_one(float newTimer) {
