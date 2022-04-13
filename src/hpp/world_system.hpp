@@ -70,6 +70,7 @@ public:
 	Game level_two(float newtimer);
 	Game level_three(float newtimer);
 	Game multiplayer(float newtimer);
+	Game tutorial_level();
 
 	vec2 set_pos(float posX, float posY);
 	vec2 set_scale(float scaleX, float scaleY);

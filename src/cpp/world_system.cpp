@@ -104,6 +104,9 @@ void WorldSystem::init_main_menu() {
 
 	vec2 pos4 = {(defaultResolution.x - 480.f) / defaultResolution.x * screenResolution.x, (700.f / defaultResolution.y) * screenResolution.y };
 	createButton(pos4, scale,TEXTURE_IDS::BUTTON4);
+
+	vec2 pos5 = { (defaultResolution.x - 480.f) / defaultResolution.x * screenResolution.x, (800.f / defaultResolution.y) * screenResolution.y };
+	createButton(pos5, scale, TEXTURE_IDS::BUTTON5);
 }
 
 // Should the game be over ?
@@ -132,21 +135,22 @@ void WorldSystem::check_for_button_presses() {
 	for (Entity e : registry.buttons.entities) {
 		Clickable button = registry.buttons.get(e);
 		if (mouse_pos.x > button.vertecies[0].x && mouse_pos.x < button.vertecies[1].x && mouse_pos.y > button.vertecies[0].y && mouse_pos.y < button.vertecies[3].y) {
+			TEXTURE_IDS tex = registry.renderRequests.get(e).texture;
 
-			if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTON1) {
+			if (tex == TEXTURE_IDS::BUTTON1) {
 				remove_components();
 				singlePlayer = true;
 				play_levels();
 				break;
 			}
 
-			else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTON3) {
+			if (tex == TEXTURE_IDS::BUTTON3) {
 				remove_components();
 				play_tutorial();
 				break;
 			}
 			
-			else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTON4) {
+			if (tex == TEXTURE_IDS::BUTTON4) {
 
 				remove_components();
 				glfwSetWindowShouldClose(this->window, true);
@@ -154,15 +158,23 @@ void WorldSystem::check_for_button_presses() {
 			}
 
 			
-			else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTON2) {
+			if (tex == TEXTURE_IDS::BUTTON2) {
 				
 				remove_components();
 				singlePlayer = false;
 				play_select();
 				break;
 			}
+
+			if (tex == TEXTURE_IDS::BUTTON5) {
+
+				remove_components();
+				audio.stop_music();
+				restart_game(tutorial_level());// audio.stop_music();
+				break;
+			}
 		
-			else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::HOWTOMOVE) {
+			if (tex == TEXTURE_IDS::HOWTOMOVE) {
 
 				remove_components();
 				play_startscreen();
@@ -170,14 +182,14 @@ void WorldSystem::check_for_button_presses() {
 				break;
 			}
 			
-			else if ((registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONC)) {
+			if (tex == TEXTURE_IDS::BUTTONC) {
 				remove_components();
 				// change option timer type
 				play_options(20.0f);
 				break;
 			}
 			
-			else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONLA) {
+			if (tex == TEXTURE_IDS::BUTTONLA) {
 
 				float newtimer;
 				for (Entity e : registry.timer.entities) {
@@ -190,7 +202,7 @@ void WorldSystem::check_for_button_presses() {
 
 				break;
 			}
-			else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONRA) {
+			if (tex == TEXTURE_IDS::BUTTONRA) {
 
 				float newtimer;
 				for (Entity e : registry.timer.entities) {
@@ -243,21 +255,21 @@ void WorldSystem::check_for_button_presses() {
 			// 	break;
 			// }
 
-			else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONGAME) {
+			if (tex == TEXTURE_IDS::BUTTONGAME) {
 				remove_components();
 				play_levels();
 				break;
 				
 			}
 
-			else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONCANCEL) {
+			if (tex == TEXTURE_IDS::BUTTONCANCEL) {
 				remove_components();
 				// change option timer type
 				play_startscreen();
 
 				break;
 			}
-			else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONL1) {
+			if (tex == TEXTURE_IDS::BUTTONL1) {
 				float newtimer = 12.f;
 				for (Entity e : registry.timer.entities) {
 					OptionTimer timer = registry.timer.get(e);
@@ -269,7 +281,7 @@ void WorldSystem::check_for_button_presses() {
 				break;
 			}
 
-			else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONL2) {
+			if (tex == TEXTURE_IDS::BUTTONL2) {
 				float newtimer = 12.f;
 				for (Entity e : registry.timer.entities) {
 					OptionTimer timer = registry.timer.get(e);
@@ -281,7 +293,7 @@ void WorldSystem::check_for_button_presses() {
 				break;
 			}
 
-			else if (registry.renderRequests.get(e).texture == TEXTURE_IDS::BUTTONL3) {
+			if (tex == TEXTURE_IDS::BUTTONL3) {
 				float newtimer = 12.f;
 				for (Entity e : registry.timer.entities) {
 					OptionTimer timer = registry.timer.get(e);
@@ -343,6 +355,9 @@ void WorldSystem::play_startscreen() {
 
 	vec2 pos4 = {(defaultResolution.x - 480.f) / defaultResolution.x * screenResolution.x, (700.f / defaultResolution.y) * screenResolution.y };
 	createButton(pos4, scale,TEXTURE_IDS::BUTTON4);
+
+	vec2 pos5 = { (defaultResolution.x - 480.f) / defaultResolution.x * screenResolution.x, (800.f / defaultResolution.y) * screenResolution.y };
+	createButton(pos5, scale, TEXTURE_IDS::BUTTON5);
 
 }
 
@@ -471,6 +486,19 @@ Game WorldSystem::multiplayer(float newtimer) {
 	multiplayer.setTimer(newtimer * 1000.f);
 
 	return multiplayer;
+}
+
+Game WorldSystem::tutorial_level() {
+	Game tutorial;
+	tutorial.addCat(RIFLE, PLAYER_1_TEAM, { screenResolution.x / 2 - 400, screenResolution.y - 800 }, 100);
+	tutorial.addDog(RIFLE, PLAYER_1_TEAM, scaleToScreenResolution({ 3400.0f, 400.0f }), 999);
+
+	// set time to option timer
+	tutorial.setBackGround(MAPS::TUTORIAL);
+	tutorial.setTimer(600000.f); //10 mins
+	tutorial.tutorial = true;
+
+	return tutorial;
 }
 
 void WorldSystem::remove_components() {

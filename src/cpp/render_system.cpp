@@ -7,7 +7,6 @@
 #include <hpp/tiny_ecs_registry.hpp>
 #include "glm/ext.hpp"
 #include <iostream>
-#include "hpp/ai_system.hpp"
 
 using namespace glm;
 vec2 screenResolution;

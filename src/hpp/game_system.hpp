@@ -32,6 +32,8 @@ public:
 
 	std::vector<Character> getCharacters();
 
+	bool tutorial = false;
+
 	
 private:
 

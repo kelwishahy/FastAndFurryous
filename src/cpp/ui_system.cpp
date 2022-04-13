@@ -1,4 +1,6 @@
 #include "hpp/ui_system.hpp"
+
+#include "hpp/tiny_ecs_registry.hpp"
 #include "hpp/world_init.hpp"
 
 UISystem::UISystem() {

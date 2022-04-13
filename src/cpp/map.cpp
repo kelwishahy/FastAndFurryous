@@ -24,7 +24,7 @@ MapSystem::Map::Map(MAPS name) {
 
 void MapSystem::Map::build() {
 	this->mapHeight = 18;
-	this->mapWidth = 60;
+	this->mapWidth = 213;
 	// this->tileScale = ceil((defaultResolution.x / 30.f) / defaultResolution.x * screenResolution.x);
 	this->tileScale = ceil(scaleToScreenResolution({ (defaultResolution.x / 30.f), (defaultResolution.x / 30.f) }).x);
 	printf("Tiles are %fx%f for map %d\n", tileScale, tileScale, (int)this->name);
@@ -178,6 +178,10 @@ void MapSystem::Map::build() {
 					GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
 			break;
 		}
+	case MAPS::TUTORIAL: {
+
+		break;
+	}
 		default: {
 		}
 	}
@@ -197,6 +201,10 @@ void MapSystem::Map::readMapFromFile() {
 		}
 		case MAPS::SPACE: {
 			fileName = "map3.txt";
+			break;
+		}
+	case MAPS::TUTORIAL: {
+			fileName = "tutorial.txt";
 			break;
 		}
 		default: {
