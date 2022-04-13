@@ -78,6 +78,7 @@ enum class TEXTURE_IDS {
 	BUTTON2,
 	BUTTON3,
 	BUTTON4,
+	BUTTON5,
 	// Select Menu Buttons
 	BUTTONC,
 	BUTTOND,
@@ -186,6 +187,7 @@ enum class MAPS {
 	CITY,
 	CYBERPUNK,
 	MIAMI,
+	TUTORIAL,
 	TOTAL
 }; constexpr int mapCount = (int)MAPS::TOTAL;
 

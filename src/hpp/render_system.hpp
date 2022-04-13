@@ -82,6 +82,7 @@ class RenderSystem {
 		"button2.jpg",
 		"button3.jpg",
 		"button4.jpg",
+		"tutorial_main.png",
 		"select_cat.jpg",
 		"select_dog.jpg",
 		"tutorial_bg.jpg",

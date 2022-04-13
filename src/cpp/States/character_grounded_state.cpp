@@ -161,6 +161,8 @@ void CharacterDamageState::step(float elapsed_ms) {
 			float travel_dist_normalized = min(length(registry.motions.get(entity).position - registry.motions.get(pj.origin).position) / weap.max_dist, 0.9f);
 			float dmg = naive_lerp(weap.min_damage, weap.max_damage, (1-travel_dist_normalized));
 			decreaseHealth(character, (int)dmg);
+			Motion& motion = registry.motions.get(character);
+			//Entity damage_taken = createText(std::to_string(dmg), { motion.position.x, motion.position.y - 200.f }, 1.f, { 0.917, 0.262, 0.776 });
 			if (registry.health.get(character).hp == 0) {
 				chara->state_machine.changeState(chara->dead_state);
 			}

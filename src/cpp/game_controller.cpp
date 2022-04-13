@@ -57,6 +57,10 @@ void GameController::init(GLFWwindow* window, MapSystem::Map& map, OrthographicC
 
 	ui.init(textManager);
 
+	if (game_data.tutorial) {
+		createTutorialText();
+	}
+
 	turnIndicatorScale = scaleToScreenResolution({ 2.0f, 2.f }).x;
 	turnIndicator = createText(textManager, "", turnPosition, turnIndicatorScale, redColor);
 
@@ -417,4 +421,29 @@ void GameController::set_user_input_callbacks() {
 	glfwSetMouseButtonCallback(this->window, mouse_input);
 	auto mouse_scroll = [](GLFWwindow* wnd, double _0, double _1) { ((GameController*)glfwGetWindowUserPointer(wnd))->on_mouse_scroll(_0, _1); };
 	glfwSetScrollCallback(this->window, mouse_scroll);
+}
+
+
+void GameController::createTutorialText() {
+	vec3 color1 = { 0.913, 0.623, 0.854 };
+	vec3 color2 = { 1, 0.352, 0.019 };
+	float scale = 1.f;
+	createText(textManager, "Use A to move LEFT", scaleToScreenResolution({ 300.0f, 300.0f }), scale, color1);
+	createText(textManager, "Use D to move RIGHT", scaleToScreenResolution({ 300.0f, 400.0f }), scale, color1);
+	createText(textManager, "Use W to move JUMP", scaleToScreenResolution({ 1000.0f, 400.0f }), scale, color1);
+	createText(textManager, "Pan camera by moving MOUSE ", scaleToScreenResolution({ 1600.0f, 300.0f }), scale, color1);
+
+	createText(textManager, "reduce the enemy hp to 0", scaleToScreenResolution({ 2300.0f, 250.0f }), scale, color2);
+	createText(textManager, "stand still to aim", scaleToScreenResolution({ 2300.0f, 300.0f }), scale, color2);
+	createText(textManager, "use the scroll wheel", scaleToScreenResolution({ 2300.0f, 350.0f }), scale, color2);
+	createText(textManager, "use the LEFT MOUSE BUTTON to shoot", scaleToScreenResolution({ 2300.0f, 400.0f }), scale, color2);
+
+	createText(textManager, "distance matters!", scaleToScreenResolution({ 2700.0f, 300.0f }), scale, { 0.917, 0.262, 0.360 });
+
+	createText(textManager, "RIFLES are consistent", scaleToScreenResolution({ 3400.0f, 200.0f }), scale, { 0.733, 0.525, 0.243 });
+	createText(textManager, "SHOTGUNS shoot many pellets", scaleToScreenResolution({ 3400.0f, 300.0f }), scale, { 0.835, 0.352, 0.203 });
+	createText(textManager, "SNIPERS shoot straight", scaleToScreenResolution({ 3400.0f, 400.0f }), scale, { 0.317, 0.533, 0.286 });
+	createText(textManager, "GRENADE LAUNCHERS bounce and explode", scaleToScreenResolution({ 3400.0f, 500.0f }), scale, {0.466, 0.545, 0.454});
+
+	createText(textManager, "Thats it!", scaleToScreenResolution({ 3900.0f, 500.0f }), scale, { 0.333, 0.168, 0.650 });
 }

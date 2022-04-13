@@ -103,6 +103,7 @@ private:
 	void change_curr_selected_char(Entity e);
 	void change_to_next_char_on_team();
 	
+	void createTutorialText();
 
 	enum class PLAYER_MODE {
 		MOVING,

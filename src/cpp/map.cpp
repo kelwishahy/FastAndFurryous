@@ -175,6 +175,10 @@ void MapSystem::Map::build() {
 					GEOMETRY_BUFFER_IDS::TEXTURED_QUAD });
 			break;
 		}
+	case MAPS::TUTORIAL: {
+
+		break;
+	}
 		default: {
 		}
 	}
@@ -194,6 +198,10 @@ void MapSystem::Map::readMapFromFile() {
 		}
 		case MAPS::SPACE: {
 			fileName = "map3.txt";
+			break;
+		}
+	case MAPS::TUTORIAL: {
+			fileName = "tutorial.txt";
 			break;
 		}
 		default: {
