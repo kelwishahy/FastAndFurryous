@@ -16,7 +16,7 @@ public:
 	void on_mouse_move(glm::vec2 mouse_pos) override {}
 	void on_mouse_click(int button, int action, int mods) override {}
 
-	void handle_explosion_collision();
+	virtual void handle_explosion_collision();
 };
 
 class CharacterIdleState : public CharacterGroundedState {
@@ -127,6 +127,7 @@ public:
 	void doChecks() override;
 
 	void handleGrenadeBounce();
+	void handle_explosion_collision() override;
 
 	bool has_shot = false;
 	float original_xscale;

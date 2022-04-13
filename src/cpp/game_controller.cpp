@@ -35,7 +35,6 @@ void GameController::init(GLFWwindow* window, MapSystem::Map& map, OrthographicC
 
 
 	//Init game metadata
-	game_state.turn_number += 1;
 	game_state.turn_possesion = TURN_CODE::PLAYER1;
 
 	//Building the stage via json
@@ -71,7 +70,6 @@ void GameController::init(GLFWwindow* window, MapSystem::Map& map, OrthographicC
 void GameController::step(float elapsed_ms) {
 	//While a game is happening make sure the players are controlling from here
 	glfwSetWindowUserPointer(window, this);
-
 	// Pan camera based on mouse position
 	moveCamera();
 
@@ -89,6 +87,7 @@ void GameController::step(float elapsed_ms) {
 	//Step the player state machines
 	for (Character* chara : registry.characters.components) {
 		chara->state_machine.getCurrentState()->step(elapsed_ms);
+
 
 		for (int i = 0; i < teams[TURN_CODE::PLAYER1].size(); i++) {
 			auto e = teams[TURN_CODE::PLAYER1][i];
@@ -110,10 +109,18 @@ void GameController::step(float elapsed_ms) {
 				teams[TURN_CODE::NPCAI].erase(teams[TURN_CODE::NPCAI].begin() + i);
 			}
 		}
+
+		std::string formatdmg = chara->state_machine.getCurrentState()->stringtoformat;
+		if (!formatdmg.empty()) {
+			Motion motion = registry.motions.get(chara->character);
+			Entity dmgtext = createText(textManager, formatdmg, { motion.position.x, motion.position.y - 180.f}, 0.8f, { 1,0,0, });
+			Timer& text_time = registry.entityTimers.emplace(dmgtext);
+			text_time.counter = 1000.f;
+		}
 		if (chara->state_machine.getCurrentState()->next_turn) {
 			chara->state_machine.getCurrentState()->next_turn = false;
 			chara->state_machine.changeState(chara->idle_state);
-
+			change_to_next_char_on_team();
 			next_turn();
 			chara->state_machine.getCurrentState()->set_A_key_state(glfwGetKey(window, GLFW_KEY_A));
 			chara->state_machine.getCurrentState()->set_D_key_state(glfwGetKey(window, GLFW_KEY_D));
@@ -192,6 +199,7 @@ void GameController::decrementTurnTime(float elapsed_ms) {
 	if (timePerTurnMs <= 0) {
 		Character* c = registry.characters.get(curr_selected_char);
 		c->state_machine.changeState(c->idle_state);
+		change_to_next_char_on_team();
 		next_turn();
 		timePerTurnMs = game_data.getTimer();
 	} else {
@@ -259,7 +267,6 @@ void GameController::next_turn() {
 	//Turn order will ALWAYS be PLAYER1 -> PLAYER2 -> ENEMY_AI -> (not implemented) AI
 	//IF THERE IS NO ONE ON A TEAM, THE GAME CONTROLLER WILL MOVE ON TO THE NEXT TURN
 
-	audio.play_sfx(TURN_CHANGE);
 	game_state.turn_possesion += 1;
 	game_state.turn_number += 1;
 	timePerTurnMs = game_data.getTimer();
@@ -274,10 +281,24 @@ void GameController::next_turn() {
 	}
 	if (game_state.turn_possesion == TURN_CODE::NPCAI) {
 		change_curr_selected_char(selected_ai);
+		audio.play_sfx(TURN_CHANGE);
 	}
 	else {
 		if (!teams[game_state.turn_possesion].empty()) {
-			change_curr_selected_char(teams[game_state.turn_possesion][0]);//supposed to be the first player on each team
+			if (!game_data.tutorial) {
+				audio.play_sfx(TURN_CHANGE);
+			}
+			if (game_data.tutorial) {
+				change_curr_selected_char(teams[game_state.turn_possesion][0]);
+			}
+			else {
+				if (game_state.turn_possesion == TURN_CODE::PLAYER1) {
+					change_curr_selected_char(teams[game_state.turn_possesion][game_state.p1_team_curr_player]);//supposed to be the first player on each team
+				}
+				else if (game_state.turn_possesion == TURN_CODE::PLAYER2) {
+					change_curr_selected_char(teams[game_state.turn_possesion][game_state.p2_team_curr_player]);//supposed to be the first player on each team
+				}
+			}
 		}
 	}
 	
@@ -359,17 +380,22 @@ void GameController::change_curr_selected_char(Entity e) {
 }
 void GameController::change_to_next_char_on_team() {
 
-	//so scuffed lmao
-	bool next_char = false;
-
-	for (int i = 0; i < teams[game_state.turn_possesion].size(); i++) {
-		if (teams[game_state.turn_possesion][i] == curr_selected_char) {
-			if (i + 1 == teams[game_state.turn_possesion].size()) {
-				change_curr_selected_char(teams[game_state.turn_possesion][0]);
-				break;
-			}
-			change_curr_selected_char(teams[game_state.turn_possesion][i + 1]);
-			break;
+	if (game_state.turn_possesion == TURN_CODE::PLAYER1) {
+		game_state.p1_team_curr_player += 1;
+		if (game_state.p1_team_curr_player >= (int)teams[game_state.turn_possesion].size()) {
+			game_state.p1_team_curr_player = 0;
+		}
+	}
+	else if (game_state.turn_possesion == TURN_CODE::PLAYER2) {
+		game_state.p2_team_curr_player += 1;
+		if (game_state.p2_team_curr_player >= (int)teams[game_state.turn_possesion].size()) {
+			game_state.p2_team_curr_player = 0;
+		}
+	}
+	else if (game_state.turn_possesion == TURN_CODE::NPCAI) {
+		game_state.npcai_team_curr_player += 1;
+		if (game_state.npcai_team_curr_player >= (int)teams[game_state.turn_possesion].size()) {
+			game_state.npcai_team_curr_player = 0;
 		}
 	}
 
@@ -386,10 +412,12 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 }
 
 void GameController::on_mouse_move(vec2 mouse_pos) {
-	this->mousePosition = mouse_pos;
-	Character* c = registry.characters.get(curr_selected_char);
-	if (!c->state_machine.isAI()) {
-		c->state_machine.getCurrentState()->on_mouse_move(mouse_pos);
+	if (inAGame) {
+		this->mousePosition = mouse_pos;
+		Character* c = registry.characters.get(curr_selected_char);
+		if (!c->state_machine.isAI()) {
+			c->state_machine.getCurrentState()->on_mouse_move(mouse_pos);
+		}
 	}
 }
 //

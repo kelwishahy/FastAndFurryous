@@ -37,4 +37,4 @@ Entity createTimerCounter(float newtimer, TextManager& textManager);
 
 Entity createGrenade(Entity originE, glm::vec2 force);
 
-Entity createExplosion(float radius, vec2 position);
+Entity createExplosion(float radius, vec2 position, Entity origin);
