@@ -36,7 +36,7 @@ public:
 	bool is_over()const;
 
 	bool inAGame;
-	bool quit;
+	bool quit = false;
 
 	GLFWwindow* window{};
 

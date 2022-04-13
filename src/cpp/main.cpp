@@ -14,17 +14,19 @@ using Clock = std::chrono::high_resolution_clock;
 bool WorldSystem::pause_flag = false;
 
 int main() {
+
 	std::cout << "Starting Fast and Furry-ous" << std::endl;
 
 	// Global systems
-	WorldSystem world;
-	PhysicsSystem physics;
 	RenderSystem renderer;
 
 	// Initialize game systems
 	renderer.init();
 	GLFWwindow* window = renderer.getWindow(); // Window is part of the renderer context
 
+START:
+	WorldSystem world;
+	PhysicsSystem physics;
 	physics.init(&renderer);
 	world.init(window);
 
@@ -32,9 +34,14 @@ int main() {
 
 	// Game loop
 	glfwSetWindowUserPointer(window, &world);
-	
 
 	while (!glfwWindowShouldClose(window)) { // TO-DO: Make this loop condition depend on the world state, like in assignment template
+
+		if (world.quit) {
+			registry.clear_all_components();
+			goto START;
+		}
+
 		if (WorldSystem::pause_flag){
 			glfwPollEvents();
 			time = Clock::now();
@@ -53,9 +60,6 @@ int main() {
 
 		renderer.draw(elapsed_ms, world);
 		glfwSwapBuffers(window);}
-		
-		
-		
 	}
 
 	return EXIT_SUCCESS;

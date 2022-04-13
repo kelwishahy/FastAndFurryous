@@ -79,7 +79,7 @@ public:
 	Entity WorldSystem::cancel_button();
 
 	static bool pause_flag;
-
+	bool quit;
 private:
 	bool singlePlayer;
 	// restart level it was in the private 

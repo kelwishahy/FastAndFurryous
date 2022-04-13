@@ -36,6 +36,7 @@ namespace {
 
 
 void WorldSystem::init(GLFWwindow* window) {
+	quit = false;
 	this->window = window;
 	this->camera = OrthographicCamera(0.f, screenResolution.x, screenResolution.y, 0.f);
 
@@ -60,6 +61,8 @@ void WorldSystem::init(GLFWwindow* window) {
 bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	if (current_game.inAGame) {
 		current_game.step(elapsed_ms_since_last_update);
+	} else if (current_game.quit == true) {
+		this->quit = true;
 	}
 
 	return true;
