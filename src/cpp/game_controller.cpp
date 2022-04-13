@@ -51,6 +51,7 @@ void GameController::init(GLFWwindow* window, MapSystem::Map& map, OrthographicC
 	
 	inAGame = true;
 	player_mode = PLAYER_MODE::MOVING;
+	printf("0\n");
 
 	if (teams[TURN_CODE::NPCAI].size() > 0) {
 		ai.init(shooting_system, teams[TURN_CODE::NPCAI]);

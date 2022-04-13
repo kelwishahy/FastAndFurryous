@@ -83,6 +83,7 @@ void AISystem::change_to_next_ai(Entity *selected_ai)
 	//blackboard->ai_index+=1;
 	if (blackboard->ai_index >= (int)ai_team.size()) {
 		blackboard->ai_index = 0;
+
 	}
 	blackboard->selected_ai = ai_team[blackboard->ai_index];
 	Character* character = registry.characters.get(ai_team[blackboard->ai_index]);
