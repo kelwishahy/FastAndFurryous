@@ -48,8 +48,7 @@ void GameController::init(GLFWwindow* window, MapSystem::Map& map, OrthographicC
 	set_user_input_callbacks();
 
 	timePerTurnMs = game_data.getTimer();
-	
-	inAGame = true;
+
 	player_mode = PLAYER_MODE::MOVING;
 
 	ai.init(shooting_system, teams[TURN_CODE::PLAYER1]);
@@ -65,6 +64,8 @@ void GameController::init(GLFWwindow* window, MapSystem::Map& map, OrthographicC
 
 	timerScale = scaleToScreenResolution({ 1.5f, 1.5f }).x;
 	timeIndicator = createText(textManager, "", scaleToScreenResolution({ 2 * defaultResolution.x / 4.f + this->camera->getPosition().x, 110.0f }), timerScale, { 0.172f, 0.929f, 0.286f });
+
+	inAGame = true;
 }
 
 void GameController::step(float elapsed_ms) {
@@ -417,10 +418,12 @@ void GameController::on_player_key(int key, int, int action, int mod) {
 }
 
 void GameController::on_mouse_move(vec2 mouse_pos) {
-	this->mousePosition = mouse_pos;
-	Character* c = registry.characters.get(curr_selected_char);
-	if (!c->state_machine.isAI()) {
-		c->state_machine.getCurrentState()->on_mouse_move(mouse_pos);
+	if (inAGame) {
+		this->mousePosition = mouse_pos;
+		Character* c = registry.characters.get(curr_selected_char);
+		if (!c->state_machine.isAI()) {
+			c->state_machine.getCurrentState()->on_mouse_move(mouse_pos);
+		}
 	}
 }
 //
